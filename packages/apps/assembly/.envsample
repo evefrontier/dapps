@@ -1,0 +1,18 @@
+# Which port should the dev service listen on? (defaults to port 3000)
+VITE_PORT=3000
+
+# ============================================================================
+# Required EVE Frontier Configuration
+# ============================================================================
+
+# EVE World package ID on Sui (required)
+# This is the deployed EVE Frontier smart contract package address
+VITE_EVE_WORLD_PACKAGE_ID="0x2be1876fb55dc89dc1f309fa6efc7bff680a2857f734b2dd0f58d968354ee17e"
+
+# ============================================================================
+# Optional Configuration
+# ============================================================================
+
+# Change the following to the preferred smart assembly
+# If defined, this will take priority over Smart Assembly IDs passed via URL query param
+VITE_OBJECT_ID="0x50c403cd61904deeed39a0b9e401dbdcf4e81dbb99dccb3590536e7fbd2ffe30"

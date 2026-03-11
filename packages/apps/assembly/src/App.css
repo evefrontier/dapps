@@ -1,0 +1,24 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+body,
+#root {
+  background-image: url("./assets/background.gif");
+  height: 100%;
+  font-family: "Favorit", monospace;
+  font-weight: 300;
+  user-select: none;
+}
+
+@layer base {
+}
+
+@layer components {
+}
+
+@layer utilities {
+  .empty-span-full:has(+ .Eve-Module:empty) {
+    @apply col-span-full;
+  }
+}

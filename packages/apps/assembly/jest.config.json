@@ -1,0 +1,13 @@
+{
+  "bail": 1,
+  "verbose": true,
+  "testPathIgnorePatterns": ["<rootDir>/tests/e2e/"],
+  "transform": {
+    "^.+\\.tsx?$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+  },
+  "moduleFileExtensions": ["js", "jsx", "ts", "tsx"],
+  "transformIgnorePatterns": ["node_modules/(?!(@babel/runtime)/)"]
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "./index.ts"
+  ],
+  "entryPointStrategy": "expand",
+  "out": "./docs/api",
+  "name": "@evefrontier/dapp-kit",
+  "readme": "./README.md",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "excludeExternals": true,
+  "categoryOrder": [
+    "Providers",
+    "Hooks",
+    "GraphQL",
+    "Types",
+    "Utilities",
+    "Wallet",
+    "Config",
+    "*"
+  ],
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": true
+  },
+  "sort": [
+    "source-order"
+  ],
+  "visibilityFilters": {
+    "protected": false,
+    "private": false,
+    "inherited": true,
+    "external": false
+  }
+}

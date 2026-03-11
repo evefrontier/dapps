@@ -1,0 +1,137 @@
+/* Base imports */
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+body,
+#root {
+  font-family: "Favorit", monospace;
+  font-size: 16px;
+  color: hsla(60, 68%, 94%, 0.6);
+  background-color: hsla(20, 65%, 5%, 1);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* ==========================================================================
+   Scrollbar Styles
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+  border: 1px solid hsla(60, 68%, 94%, 0.3);
+  height: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsla(60, 68%, 94%, 0.3);
+  padding: 1px;
+}
+
+/* ==========================================================================
+   Focus Styles
+   ========================================================================== */
+*::focus,
+*::focus-visible {
+  outline: none !important;
+}
+
+/* ==========================================================================
+   Tailwind Layers
+   ========================================================================== */
+@layer base {
+  svg {
+    @apply text-inherit fill-inherit;
+  }
+}
+
+@layer components {
+  /* Link Styles */
+  a {
+    @apply text-white tracking-wider;
+  }
+
+  a.active,
+  a::hover {
+    @apply underline;
+  }
+
+  /* Entity About Component */
+  .Entity-About > div {
+    @apply flex justify-between;
+  }
+
+  .Entity-About > div > span:first-of-type {
+    @apply text-sm font-light;
+  }
+
+  .Entity-About > div > span:last-of-type {
+    @apply text-sm font-semibold;
+  }
+
+  /* Border Container */
+  div.Border-Container {
+    @apply border border-neutral-20 p-2;
+  }
+}
+
+@layer utilities {
+  /* Active State */
+  .active {
+    @apply font-bold underline;
+  }
+
+  /* Title Styles */
+  .Title {
+    @apply capitalize font-disket text-neutral text-sm;
+  }
+
+  /* Header Styles */
+  #header div {
+    @apply flex whitespace-nowrap text-neutral text-sm;
+  }
+
+  #header div.header-text {
+    @apply p-2 border border-neutral-30 font-disket font-normal capitalize tracking-wide leading-4;
+  }
+
+  /* Menu Dropdown */
+  #menu-dropdown {
+    @apply top-full w-full p-0 z-50 bg-crude-60 blur-bg border border-neutral-30;
+  }
+
+  .menu-dropdown-item {
+    @apply p-2 blur-bg font-favorit !text-neutral-60 font-light;
+  }
+
+  .menu-dropdown-item:hover {
+    @apply bg-neutral-5 !text-neutral;
+  }
+
+  /* Layout Utilities */
+  .Absolute-Center {
+    @apply absolute mx-auto left-0 right-0;
+  }
+
+  /* Background Effects */
+  .blur-bg {
+    @apply bg-crude-60;
+    backdrop-filter: blur(32px);
+  }
+
+  .blur-bg-sm {
+    @apply bg-crude-80;
+    backdrop-filter: blur(1.5px);
+  }
+
+  .blur-bg-alert {
+    background-color: hsla(238, 91%, 11%, 0.8);
+    backdrop-filter: blur(1.5px);
+  }
+}

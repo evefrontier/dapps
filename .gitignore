@@ -1,0 +1,36 @@
+node_modules
+.DS_Store
+.npmrc
+
+build_outputs
+
+# Ignores lerna debug
+lerna-debug.log
+
+# Ignores compiled TypeScript files
+packages/**/**/*.map
+packages/**/**/*.js
+packages/**/**/**/*.mjs
+
+# Ignores generated documentation
+packages/**/**/docs/**
+
+# Ignores E2E test videos
+/packages/**/tests/e2e/videos
+/packages/**/tests/e2e/screenshots
+
+# Ignores .env
+packages/**/.env
+
+# Include config.js and npmrc in check-in
+!packages/**/**/*.config.js
+!packages/**/**/**/*.config.mjs
+
+# Include test config files in check-in
+!packages/**/**/tests/**/*.js
+
+.nx/cache
+.idea
+
+# Ignore these copied files for npm publish
+.qodo
