@@ -7,8 +7,9 @@ import {
 } from "./types";
 
 /**
- * Vault Context Type
- * @category Types */
+ * Vault context: account, connection state, and connect/disconnect handlers.
+ * @category Types
+ */
 export interface VaultContextType {
   currentAccount: WalletAccount | null;
   walletAddress: string | undefined;
@@ -24,8 +25,9 @@ export enum SupportedWallets {
 }
 
 /**
- * Smart Object Context Type
- * @category Types */
+ * Smart object context: assembly, owner, loading, error, and refetch.
+ * @category Types
+ */
 export interface SmartObjectContextType {
   tenant: string;
   assembly: AssemblyType<Assemblies> | null;

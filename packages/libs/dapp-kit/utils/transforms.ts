@@ -21,7 +21,7 @@ import { getObjectWithJson } from "../graphql";
 /**
  * Transform CharacterInfo to DetailedSmartCharacterResponse
  *
- * @category Utilities
+ * @category Utilities - Transforms
  */
 export function transformToCharacter(
   characterInfo: CharacterInfo,
@@ -57,7 +57,7 @@ export interface TransformOptions {
  * @param moveObject - The Move object data from GraphQL
  * @param options - Optional transform options including character info
  *
- * @category Utilities
+ * @category Utilities - Transforms
  */
 export async function transformToAssembly(
   objectId: string,

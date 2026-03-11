@@ -1,13 +1,9 @@
 import { describe, expect, it } from "vitest";
-import {
-  resolveTenantFromSearch,
-  resolveDatahubHost,
-  datahubUrls,
-} from "../datahub";
-import { DEFAULT_TENANT } from "../constants";
+import { resolveTenantFromSearch, resolveDatahubHost } from "../datahub";
+import { DATAHUB_BY_TENANT, DEFAULT_TENANT } from "../constants";
 import { QueryParams } from "../../types";
 
-const DEFAULT_HOST = datahubUrls[DEFAULT_TENANT as keyof typeof datahubUrls];
+const DEFAULT_HOST = DATAHUB_BY_TENANT[DEFAULT_TENANT];
 
 describe("resolveTenantFromSearch (tenant resolution)", () => {
   it("returns DEFAULT_TENANT when search is empty", () => {
@@ -44,9 +40,9 @@ describe("resolveDatahubHost (host fallback)", () => {
   });
 
   it("returns known host for valid tenant keys", () => {
-    expect(resolveDatahubHost("stillness")).toBe(datahubUrls.stillness);
-    expect(resolveDatahubHost("nebula")).toBe(datahubUrls.nebula);
-    expect(resolveDatahubHost("utopia")).toBe(datahubUrls.utopia);
-    expect(resolveDatahubHost("testevenet")).toBe(datahubUrls.testevenet);
+    expect(resolveDatahubHost("stillness")).toBe(DATAHUB_BY_TENANT.stillness);
+    expect(resolveDatahubHost("nebula")).toBe(DATAHUB_BY_TENANT.nebula);
+    expect(resolveDatahubHost("utopia")).toBe(DATAHUB_BY_TENANT.utopia);
+    expect(resolveDatahubHost("testevenet")).toBe(DATAHUB_BY_TENANT.testevenet);
   });
 });

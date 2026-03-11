@@ -1,5 +1,11 @@
 # @evefrontier/dapp-kit
 
+## 0.1.6
+
+### Patch Changes
+
+- add datahub tenant switching
+
 ## 0.1.5
 
 ### Patch Changes

@@ -10,7 +10,7 @@
  * Query for fetching a specific object by address with BCS-encoded contents
  * Use this for low-level object access with raw BCS data
  *
- * @category GraphQL
+ * @category GraphQL Queries
  */
 export const GET_OBJECT_BY_ADDRESS = `
   query GetObjectByAddress($address: SuiAddress!) {
@@ -31,11 +31,9 @@ export const GET_OBJECT_BY_ADDRESS = `
 `;
 
 /**
- * Query for fetching a specific assembly by ID with JSON-decoded contents
- * Retrieves the assembly contents and dynamic fields from the EVE Frontier world package
- * Use this for higher-level object access with parsed JSON data
+ * Object by address with JSON contents and dynamic fields (nodes).
  *
- * @category GraphQL
+ * @category GraphQL Queries
  */
 export const GET_OBJECT_WITH_DYNAMIC_FIELDS = `
   query GetObjectWithDynamicFields($objectId: SuiAddress!) {
@@ -66,11 +64,9 @@ export const GET_OBJECT_WITH_DYNAMIC_FIELDS = `
 `;
 
 /**
- * Query for fetching a specific assembly by ID with JSON-decoded contents
- * Retrieves the assembly contents and dynamic fields from the EVE Frontier world package
- * Use this for higher-level object access with parsed JSON data
+ * Assembly object with owner/character extract and character-owned objects (e.g. inventory).
  *
- * @category GraphQL
+ * @category GraphQL Queries
  */
 export const GET_OBJECT_DYNAMICFIELD_CHARACTER_WITH_JSON = `
 query GetObjectOwnerCharacterOwnerAndInventory(
@@ -168,7 +164,7 @@ query GetObjectOwnerCharacterOwnerAndInventory(
  * Useful for finding related objects (e.g., getting a character's assemblies)
  * Returns BCS-encoded data only
  *
- * @category GraphQL
+ * @category GraphQL Queries
  */
 export const GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE = `
   query GetObjectOwnerAndOwnedObjectByType($object: SuiAddress!, $owned_object_type: String) {
@@ -204,7 +200,7 @@ export const GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE = `
  * Query to get an object's owner and their owned objects of a specific type
  * Returns both BCS and JSON-decoded data for easier consumption
  *
- * @category GraphQL
+ * @category GraphQL Queries
  */
 export const GET_OBJECT_OWNER_AND_OWNED_OBJECTS_WITH_JSON = `
   query GetObjectOwnerAndOwnedObjectWithJson($object: SuiAddress!, $owned_object_type: String) {
@@ -242,7 +238,7 @@ export const GET_OBJECT_OWNER_AND_OWNED_OBJECTS_WITH_JSON = `
  * Query to get full object details with JSON contents
  * Used to fetch character details after getting the character ID from OwnerCap
  *
- * @category GraphQL
+ * @category GraphQL Queries
  */
 export const GET_OBJECT_WITH_JSON = `
   query GetObjectWithJson($address: SuiAddress!) {
@@ -267,7 +263,7 @@ export const GET_OBJECT_WITH_JSON = `
  * Query to get all objects of a specific type owned by an address
  * Returns object addresses only (lightweight)
  *
- * @category GraphQL
+ * @category GraphQL Queries
  */
 export const GET_OWNED_OBJECTS_BY_TYPE = `
   query GetOwnedObjectsByType($owner: SuiAddress!, $object_type: String) {
@@ -289,7 +285,7 @@ export const GET_OWNED_OBJECTS_BY_TYPE = `
  * Query for fetching objects owned by an address filtered by package
  * Returns full object data with dynamic fields
  *
- * @category GraphQL
+ * @category GraphQL Queries
  */
 export const GET_OWNED_OBJECTS_BY_PACKAGE = `
   query GetOwnedObjectsByPackage($owner: SuiAddress!, $packageId: SuiAddress!) {
@@ -336,7 +332,7 @@ export const GET_OWNED_OBJECTS_BY_PACKAGE = `
  * Query to get all characters owned by a wallet
  * Returns the characters owned by the wallet
  *
- * @category GraphQL
+ * @category GraphQL Queries
  */
 export const GET_WALLET_CHARACTERS = `
   query GetWalletCharacters($owner: SuiAddress!, $characterPlayerProfileType: String!) {
@@ -376,7 +372,7 @@ export const GET_WALLET_CHARACTERS = `
  * Query to get character owned by a wallet and objects owned by the character
  * Returns the character and objects owned by the character
  *
- * @category GraphQL
+ * @category GraphQL Queries
  */
 export const GET_CHARACTER_AND_OWNED_OBJECTS = `
 query GetCharacterAndOwnedObjects($owner: SuiAddress!, $characterPlayerProfileType: String!) {
@@ -440,7 +436,7 @@ query GetCharacterAndOwnedObjects($owner: SuiAddress!, $characterPlayerProfileTy
  * Query to get a singleton object by its type
  * Returns the first object of the specified type (useful for global/singleton objects)
  *
- * @category GraphQL
+ * @category GraphQL Queries
  */
 export const GET_SINGLETON_OBJECT_BY_TYPE = `
   query GetSingletonObjectByType($object_type: String) {
@@ -460,7 +456,7 @@ export const GET_SINGLETON_OBJECT_BY_TYPE = `
 /**
  * Query to get a singleton config object by its type
  *
- * @category GraphQL
+ * @category GraphQL Queries
  */
 export const GET_SINGLETON_CONFIG_OBJECT_BY_TYPE = `
   query GetSingletonConfigObjectByType($object_type: String!, $table_name: String!) {
@@ -504,7 +500,7 @@ export const GET_SINGLETON_CONFIG_OBJECT_BY_TYPE = `
  * Query to get all objects of a specific type (global search)
  * Use with caution - may return many results
  *
- * @category GraphQL
+ * @category GraphQL Queries
  */
 export const GET_OBJECTS_BY_TYPE = `
   query GetObjectsByType($object_type: String, $first: Int, $after: String) {

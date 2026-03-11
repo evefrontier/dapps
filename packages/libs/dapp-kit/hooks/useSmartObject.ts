@@ -10,7 +10,7 @@ import { SmartObjectContextType } from "../types";
  * The assembly ID is determined from URL query parameters (`?itemId=` and `?tenant=`)
  * or environment variables as a Sui object ID (`VITE_OBJECT_ID`).
  *
- * @category Hooks
+ * @category Hooks - Smart Object
  * @returns Object containing assembly state and methods:
  *   - `assembly` - The transformed assembly data (or null if not loaded)
  *   - `character` - The owner character information (or null)

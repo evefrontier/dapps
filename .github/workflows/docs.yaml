@@ -1,11 +1,8 @@
 name: Documentation
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'packages/libs/dapp-kit/**'
-      - '.github/workflows/docs.yaml'
+  release:
+    types: [published]
   pull_request:
     branches: [main]
     paths:
@@ -54,7 +51,7 @@ jobs:
 
   deploy-docs:
     needs: build-docs
-    if: github.event_name == 'push'  # Only deploy on push
+    if: github.event_name == 'release'  # Only deploy on release
     runs-on: ubuntu-latest
     permissions:
       pages: write

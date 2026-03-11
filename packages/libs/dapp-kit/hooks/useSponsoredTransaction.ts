@@ -133,7 +133,7 @@ function resolveAssemblyId(
 /**
  * Error union type for {@link useSponsoredTransaction} mutation failures.
  *
- * @category Hooks
+ * @category Hooks - Sponsored Transaction
  */
 export type UseSponsoredTransactionError =
   | WalletSponsoredTransactionNotSupportedError
@@ -146,14 +146,14 @@ export type UseSponsoredTransactionError =
  * Arguments passed to {@link useSponsoredTransaction} mutate/mutateAsync.
  * With assembly object (id and type derived).
  *
- * @category Hooks
+ * @category Hooks - Sponsored Transaction
  */
 export type UseSponsoredTransactionArgs = SponsoredTransactionArgs;
 
 /**
  * React Query mutation options for {@link useSponsoredTransaction}.
  *
- * @category Hooks
+ * @category Hooks - Sponsored Transaction
  */
 export type UseSponsoredTransactionMutationOptions = Omit<
   UseMutationOptions<
@@ -191,7 +191,7 @@ export type UseSponsoredTransactionMutationOptions = Omit<
  * - `effects` (optional) – Transaction effects, BCS encoded.
  * - `rawEffects` (optional) – Raw effects bytes.
  *
- * @category Hooks
+ * @category Hooks - Sponsored Transaction
  * @param options - React Query mutation options (optional)
  * @returns React Query mutation result with:
  *   - `mutate(args, options?)` - Trigger transaction (fire-and-forget)
