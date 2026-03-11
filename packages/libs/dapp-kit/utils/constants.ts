@@ -164,22 +164,22 @@ export interface TenantConfig {
 export const TENANT_CONFIG: Record<TenantId, TenantConfig> = {
   nebula: {
     packageId:
-      "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9",
+      "0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1",
     datahubHost: "world-api-nebula.test.evefrontier.tech",
   },
   testevenet: {
     packageId:
-      "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9",
+      "0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1",
     datahubHost: "world-api-testevenet.test.evefrontier.tech",
   },
   utopia: {
     packageId:
-      "0xf0446b93345c1118f21239d7ac58fb82d005219b2016e100f074e4d17162a465",
+      "0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75",
     datahubHost: "world-api-utopia.uat.pub.evefrontier.com",
   },
   stillness: {
     packageId:
-      "0x2a66a89b5a735738ffa4423ac024d23571326163f324f9051557617319e59d60",
+      "0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c",
     datahubHost: "world-api-stillness.live.tech.evefrontier.com",
   },
 };
