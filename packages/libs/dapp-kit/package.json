@@ -1,6 +1,6 @@
 {
   "name": "@evefrontier/dapp-kit",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "React SDK for EVE Frontier dApps on Sui",
   "main": "index.ts",
   "author": "",
