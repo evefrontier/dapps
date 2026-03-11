@@ -52,7 +52,7 @@ function parseConfig(
  * caches the result, and returns the map of type_id -> energy usage.
  * Subsequent calls return the cached map.
  *
- * @category Utilities
+ * @category Utilities - Config
  */
 export async function getEnergyConfig(): Promise<Record<number, number>> {
   if (energyConfigCache) {
@@ -88,7 +88,7 @@ export async function getEnergyConfig(): Promise<Record<number, number>> {
  * caches the result, and returns the map of type_id -> fuel efficiency.
  * Subsequent calls return the cached map.
  *
- * @category Utilities
+ * @category Utilities - Config
  */
 export async function getFuelEfficiencyConfig(): Promise<
   Record<number, number>
@@ -127,7 +127,7 @@ export async function getFuelEfficiencyConfig(): Promise<
  *
  * @param typeId - In-game type ID (e.g. from rawData.type_id)
  * @returns Energy usage (e.g. energy_constant), or 0 if not found or not yet loaded
- * @category Utilities
+ * @category Utilities - Config
  */
 export async function getEnergyUsageForType(typeId: number): Promise<number> {
   const config = await getEnergyConfig();
@@ -141,7 +141,7 @@ export async function getEnergyUsageForType(typeId: number): Promise<number> {
  *
  * @param typeId - In-game type ID (e.g. from rawData.type_id)
  * @returns Fuel efficiency (e.g. fuel_efficiency), or 0 if not found or not yet loaded
- * @category Utilities
+ * @category Utilities - Config
  */
 export async function getFuelEfficiencyForType(
   typeId: number,

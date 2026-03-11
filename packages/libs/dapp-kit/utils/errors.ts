@@ -6,7 +6,7 @@ export type ErrorType = {
   message: string;
 };
 
-/** @category Utilities */
+/** @category Utilities - Error helpers */
 export const ERRORS: Record<number | string, ErrorType> = {
   1001: {
     code: 1001,
@@ -144,7 +144,7 @@ export const ERROR_MESSAGES: Record<number, string> = Object.fromEntries(
     .map(([key, value]) => [Number(key), value.message]),
 );
 
-/** @category Utilities */
+/** @category Utilities - Error helpers */
 export const parseErrorFromMessage = (
   errorMessage: string,
 ): {

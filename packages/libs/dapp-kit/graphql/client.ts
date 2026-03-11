@@ -45,7 +45,7 @@ import {
  * This is the low-level function used by all other GraphQL helper functions.
  * Use this when you need to execute custom queries not covered by the helper functions.
  *
- * @category GraphQL
+ * @category GraphQL Client
  * @typeParam T - The expected response data type
  * @param query - The GraphQL query string
  * @param variables - Variables to pass to the query
@@ -97,7 +97,7 @@ export async function executeGraphQLQuery<T = unknown>(
  * Use this for low-level object access when you need raw BCS data.
  * For JSON-decoded data, use {@link getObjectWithJson} instead.
  *
- * @category GraphQL
+ * @category GraphQL Client
  * @param address - The Sui object address (0x...)
  * @returns Promise resolving to object with BCS contents
  *
@@ -121,7 +121,7 @@ export async function getObjectByAddress(address: string) {
  * which is useful for assemblies that store data in dynamic fields
  * (e.g., inventory items, configuration).
  *
- * @category GraphQL
+ * @category GraphQL Client
  * @param objectId - The Sui object ID
  * @returns Promise resolving to object with dynamic fields
  *
@@ -147,7 +147,7 @@ export async function getObjectWithDynamicFields(objectId: string) {
  * This is the most common way to fetch object data when you need
  * to read the object's fields as JavaScript objects.
  *
- * @category GraphQL
+ * @category GraphQL Client
  * @param address - The Sui object address
  * @returns Promise resolving to object with JSON contents
  *
@@ -170,7 +170,7 @@ export async function getObjectWithJson(address: string) {
  * Useful for traversing ownership chains, e.g., finding all assemblies
  * owned by a specific character.
  *
- * @category GraphQL
+ * @category GraphQL Client
  * @param objectAddress - The Sui object address to query owner of
  * @param ownedObjectType - Optional type filter for owned objects
  * @returns Promise resolving to owner info and owned objects (BCS format)
@@ -203,7 +203,7 @@ export async function getObjectOwnerAndOwnedObjectsByType(
  * Similar to {@link getObjectOwnerAndOwnedObjectsByType} but returns
  * JSON-decoded contents for easier consumption.
  *
- * @category GraphQL
+ * @category GraphQL Client
  * @param objectAddress - The Sui object address
  * @param ownedObjectType - Optional type filter for owned objects
  * @returns Promise resolving to owner info and owned objects (JSON format)
@@ -227,7 +227,7 @@ export async function getObjectOwnerAndOwnedObjectsWithJson(
  * This is a specialized query for EVE Frontier assemblies that
  * follows the owner_cap_id to resolve the owning character.
  *
- * @category GraphQL
+ * @category GraphQL Client
  * @param objectAddress - The assembly object address
  * @returns Promise resolving to assembly and character data
  * @internal
@@ -248,7 +248,7 @@ export async function getObjectAndCharacterOwner(objectAddress: string) {
  * Returns only object addresses (lightweight). Use this when you need
  * to find objects and will fetch their details separately.
  *
- * @category GraphQL
+ * @category GraphQL Client
  * @param owner - The owner's Sui address
  * @param objectType - Optional Move type filter (e.g., "0xpkg::module::Type")
  * @returns Promise resolving to list of owned object addresses
@@ -281,7 +281,7 @@ export async function getOwnedObjectsByType(
  * Returns full object data with dynamic fields. Use this when you need
  * all objects from a specific package (e.g., all EVE Frontier objects).
  *
- * @category GraphQL
+ * @category GraphQL Client
  * @param owner - The owner's Sui address
  * @param packageId - The Move package ID to filter by
  * @returns Promise resolving to full object data including dynamic fields
@@ -312,7 +312,7 @@ export async function getOwnedObjectsByPackage(
  * Get all characters owned by a wallet
  * Returns the most recent character owned by the wallet
  *
- * @category GraphQL
+ * @category GraphQL Client
  */
 export async function getWalletCharacters(wallet: string) {
   return executeGraphQLQuery<GetWalletCharactersResponse>(
@@ -328,7 +328,7 @@ export async function getWalletCharacters(wallet: string) {
  * Get all characters owned by a wallet
  * Returns the characters owned by the wallet
  *
- * @category GraphQL
+ * @category GraphQL Client
  */
 export async function getCharacterAndOwnedObjects(wallet: string) {
   return executeGraphQLQuery<GetCharacterAndOwnedObjectsResponse>(
@@ -346,7 +346,7 @@ export async function getCharacterAndOwnedObjects(wallet: string) {
  * Useful for global/singleton objects where there's only one instance
  * of a particular type on-chain.
  *
- * @category GraphQL
+ * @category GraphQL Client
  * @param objectType - The full Move type string
  * @returns Promise resolving to the singleton object address
  *
@@ -372,7 +372,7 @@ export async function getSingletonObjectByType(objectType: string) {
  * a table of key/value entries via dynamic fields. Returns the first object's full
  * response including contents.extract...addressAt.dynamicFields.nodes.
  *
- * @category GraphQL
+ * @category GraphQL Client
  * @param objectType - The full Move type string (e.g. from getEnergyConfigType())
  * @param tableName - The table path for extract (e.g. "assembly_energy", "fuel_efficiency")
  * @returns Promise resolving to the GraphQL response with objects.nodes[0] and dynamicFields.nodes
@@ -402,7 +402,7 @@ export async function getSingletonConfigObjectByType(
  * Use with caution as this may return many results. Supports cursor-based
  * pagination for iterating through large result sets.
  *
- * @category GraphQL
+ * @category GraphQL Client
  * @param objectType - The full Move type string
  * @param options - Pagination options
  * @param options.first - Number of results per page (default: 50)
@@ -442,7 +442,7 @@ export async function getObjectsByType(
  * It fetches the assembly's Move object data, dynamic fields, and
  * resolves the owner character through the ownership chain.
  *
- * @category GraphQL
+ * @category GraphQL Client
  * @param assemblyId - The assembly's Sui object ID
  * @returns Promise resolving to:
  *   - `moveObject` - The assembly's Move object data with JSON contents and dynamic fields

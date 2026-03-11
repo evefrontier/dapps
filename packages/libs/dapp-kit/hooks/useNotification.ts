@@ -9,7 +9,7 @@ import { NotificationContextType } from "../types";
  * and info messages to users. Commonly used after transaction completions
  * or to display important status updates.
  *
- * @category Hooks
+ * @category Hooks - Notification
  * @returns Object containing notification state and methods:
  *   - `notify` - Function to trigger a notification
  *   - `notification` - Current notification state object with:

@@ -15,7 +15,7 @@ import { ONE_M3 } from "./constants";
  * Shortens long addresses to show only the beginning and end characters
  * with ellipsis in the middle.
  *
- * @category Utilities
+ * @category Utilities - Formatting
  * @param string - The address or hex string to abbreviate
  * @param precision - Number of characters to show on each end (default: 5)
  * @param expanded - If true, returns the full string without abbreviation
@@ -45,7 +45,7 @@ export const abbreviateAddress = (
  * Compares the assembly's owner address with the provided account address
  * to determine ownership.
  *
- * @category Utilities
+ * @category Utilities - Assembly
  * @param assembly - The assembly object to check ownership of
  * @param account - The account address to check against
  * @returns True if the account owns the assembly, false otherwise
@@ -71,7 +71,7 @@ export const isOwner = (
 /**
  * Generate a Suiscan transaction URL for a given transaction hash.
  *
- * @category Utilities
+ * @category Utilities - Assembly
  * @param suiChain - The Sui chain identifier (e.g., "sui:testnet", "sui:mainnet")
  * @param txHash - The transaction digest hash
  * @returns Full Suiscan URL to view the transaction
@@ -88,19 +88,20 @@ export const getTxUrl = (suiChain: SuiChain, txHash: string): string => {
   return `https://suiscan.xyz/${network}/tx/${txHash}`;
 };
 
+/** Strips protocol (e.g. https://) from a URL and returns the rest. @category Utilities - Formatting */
 export const parseURL = (string: string): string => {
   if (string.includes("://")) {
-    // Remove 'http' or 'https'
     return string.split("://")[1];
-  } else {
-    return string;
   }
+  return string;
 };
 
+/** Copies the given string to the clipboard. @category Utilities - Formatting */
 export const clickToCopy = (string: string) => {
   return navigator.clipboard.writeText(string);
 };
 
+/** Returns elements that appear in both arrays. @category Utilities - Formatting */
 export const getCommonItems = (array1: any[], array2: any[]) => {
   const commonItems: any[] = [];
   const set: Set<any> = new Set([]);
@@ -116,19 +117,24 @@ export const getCommonItems = (array1: any[], array2: any[]) => {
   return commonItems;
 };
 
+/** Removes trailing zeros after the last significant decimal. @category Utilities - Formatting */
 export const removeTrailingZeros = (number: string) => {
   return number.replace(/(\.\d*?[1-9])0+$|\.0*$/, "$1");
 };
 
+/** Returns the env value or fallback if empty. @category Utilities - Config */
 export const getEnv = (env: string, fallback: string): string => {
   if (!env) return fallback;
   return env;
 };
 
-/** Calculates the volume in M3
- * @param quantity - The unit quantity of the item
+/**
+ * Volume in m³ from unit quantity and volume per unit (wei, 10^18).
+ * @param quantity - Unit quantity of the item
  * @param volume - Volume per unit in wei (10^18)
- * @returns volume in m3 */
+ * @returns Volume in m³
+ * @category Utilities - Formatting
+ */
 export const getVolumeM3 = (quantity: bigint, volume: bigint): number => {
   const totalVolume = Number(quantity) * Number(volume);
   return totalVolume;
@@ -139,7 +145,7 @@ export const getVolumeM3 = (quantity: bigint, volume: bigint): number => {
  *
  * Converts from the on-chain representation (wei-like, 10^18) to m³.
  *
- * @category Utilities
+ * @category Utilities - Formatting
  * @param quantity - The raw volume value as string or bigint
  * @returns Volume in cubic meters
  *
@@ -155,7 +161,7 @@ export const formatM3 = (quantity: string | bigint): number => {
 /**
  * Get the dApp URL for an assembly, ensuring it has a protocol prefix.
  *
- * @category Utilities
+ * @category Utilities - Assembly
  * @param assembly - The assembly object
  * @returns The full dApp URL with https:// prefix if needed
  *
@@ -184,7 +190,7 @@ export const getDappUrl = (assembly: AssemblyType<Assemblies>): string => {
 /**
  * Check if two addresses match.
  *
- * @category Utilities
+ * @category Utilities - Assembly
  * @param address1 - First address to compare
  * @param address2 - Second address to compare
  * @returns True if addresses match, false otherwise
@@ -202,7 +208,7 @@ export const findOwnerByAddress = (
  *
  * Use this to narrow the type of an assembly for type-safe property access.
  *
- * @category Utilities
+ * @category Utilities - Assembly
  * @param assembly - The assembly to check
  * @param assemblyType - The expected assembly type
  * @returns True if assembly matches the specified type
@@ -232,7 +238,7 @@ export const assertAssemblyType = (
  *
  * Displays the duration in days, hours, minutes, and seconds as appropriate.
  *
- * @category Utilities
+ * @category Utilities - Formatting
  * @param seconds - Duration in seconds
  * @returns Formatted duration string (e.g., "02d 05h 30m 15s")
  *

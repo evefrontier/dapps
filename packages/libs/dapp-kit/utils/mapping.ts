@@ -7,7 +7,7 @@ import { getSingletonObjectByType } from "../graphql/client";
 /**
  * Convert raw status variant string to State enum
  *
- * @category Utilities
+ * @category Utilities - Mapping
  */
 export function parseStatus(statusVariant: string | undefined): State {
   if (!statusVariant) return State.NULL;
@@ -33,7 +33,7 @@ export function parseStatus(statusVariant: string | undefined): State {
  * @param typeRepr - The Move object type tag
  * @returns The assembly type as an enum
  *
- * @category Utilities
+ * @category Utilities - Mapping
  */
 export function getAssemblyType(typeRepr: string): Assemblies {
   if (typeRepr.includes("::storage_unit::StorageUnit")) {
@@ -68,7 +68,7 @@ let objectRegistryAddress: string | null = null;
  * Fetches the AssemblyRegistry singleton address from the chain
  * Caches the result to avoid repeated queries
  *
- * @category Utilities
+ * @category Utilities - Mapping
  */
 export async function getRegistryAddress(): Promise<string> {
   if (objectRegistryAddress) {
@@ -92,7 +92,7 @@ export async function getRegistryAddress(): Promise<string> {
  * @param itemId - The in-game item ID
  * @returns The derived Sui object ID
  *
- * @category Utilities
+ * @category Utilities - Mapping
  */
 export async function getObjectId(
   itemId: string,

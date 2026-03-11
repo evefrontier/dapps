@@ -33,7 +33,7 @@ function isSuiGraphqlNetwork(value: string): value is SuiGraphqlNetwork {
  * Unknown values fall back to testnet to avoid returning undefined.
  * @param env - Network identifier (testnet, devnet, mainnet). Defaults to testnet.
  * @returns The GraphQL endpoint URL
- * @category Utilities
+ * @category Utilities - Config
  */
 export function getSuiGraphqlEndpoint(
   env: string = DEFAULT_GRAPHQL_NETWORK,
@@ -46,52 +46,32 @@ export function getSuiGraphqlEndpoint(
  * Get the EVE World package ID from environment.
  * @returns The package ID (0x-prefixed address)
  * @throws {Error} If VITE_EVE_WORLD_PACKAGE_ID is not set
- * @category Utilities
+ * @category Utilities - Config
  */
 export const getEveWorldPackageId = (): string =>
   getEnvVar("VITE_EVE_WORLD_PACKAGE_ID");
 
-/**
- * Get the Character OwnerCap type string (derived from package ID).
- * @returns The fully qualified type string for Character OwnerCap
- * @category Utilities
- */
+/** Type string for Character OwnerCap from the EVE World package. @category Utilities - Config */
 export const getCharacterOwnerCapType = (): string => {
   const pkg = getEveWorldPackageId();
   return `${pkg}::access::OwnerCap<${pkg}::character::Character>`;
 };
 
-/**
- * Get the Character PlayerProfile type string (derived from package ID).
- * @returns The fully qualified type string for Character PlayerProfile
- * @category Utilities
- */
+/** Type string for Character PlayerProfile from the EVE World package. @category Utilities - Config */
 export const getCharacterPlayerProfileType = (): string => {
   const pkg = getEveWorldPackageId();
   return `${pkg}::character::PlayerProfile`;
 };
 
-/**
- * Get the ObjectRegistry type string (derived from package ID).
- * @returns The fully qualified type string for ObjectRegistry
- * @category Utilities
- */
+/** Type string for ObjectRegistry from the EVE World package. @category Utilities - Config */
 export const getObjectRegistryType = (): string =>
   `${getEveWorldPackageId()}::object_registry::ObjectRegistry`;
 
-/**
- * Get the EnergyConfig type string (derived from package ID).
- * @returns The fully qualified type string for Energy Config
- * @category Utilities
- */
+/** Type string for EnergyConfig from the EVE World package. @category Utilities - Config */
 export const getEnergyConfigType = (): string =>
   `${getEveWorldPackageId()}::energy::EnergyConfig`;
 
-/**
- * Get the Fuel Efficiency Config type string (derived from package ID).
- * @returns The fully qualified type string for Fuel Efficiency Config
- * @category Utilities
- */
+/** Type string for FuelConfig from the EVE World package. @category Utilities - Config */
 export const getFuelEfficiencyConfigType = (): string =>
   `${getEveWorldPackageId()}::fuel::FuelConfig`;
 
@@ -167,3 +147,79 @@ export const EXCLUDED_TYPEIDS = [
  *  @category Constants
  */
 export const ONE_M3 = 1000000000000000000;
+
+export type TenantId = "utopia" | "stillness" | "testevenet" | "nebula";
+
+/** Per-tenant config: EVE token package ID (Sui) and Datahub API host. v0.0.18
+ * @category Constants
+ */
+export interface TenantConfig {
+  packageId: string;
+  datahubHost: string;
+}
+
+/** Single source of truth for the four tenants (package ID + datahub host).
+ * @category Constants
+ */
+export const TENANT_CONFIG: Record<TenantId, TenantConfig> = {
+  nebula: {
+    packageId:
+      "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9",
+    datahubHost: "world-api-nebula.test.evefrontier.tech",
+  },
+  testevenet: {
+    packageId:
+      "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9",
+    datahubHost: "world-api-testevenet.test.evefrontier.tech",
+  },
+  utopia: {
+    packageId:
+      "0xf0446b93345c1118f21239d7ac58fb82d005219b2016e100f074e4d17162a465",
+    datahubHost: "world-api-utopia.uat.pub.evefrontier.com",
+  },
+  stillness: {
+    packageId:
+      "0x2a66a89b5a735738ffa4423ac024d23571326163f324f9051557617319e59d60",
+    datahubHost: "world-api-stillness.live.tech.evefrontier.com",
+  },
+};
+
+/** EVE token package ID per tenant (derived from TENANT_CONFIG).
+ * @category Constants
+ */
+export const EVE_PACKAGE_ID_BY_TENANT = Object.fromEntries(
+  (Object.entries(TENANT_CONFIG) as [TenantId, TenantConfig][]).map(
+    ([id, config]) => [id, config.packageId],
+  ),
+) as Record<TenantId, string>;
+
+/** Datahub API host per tenant (derived from TENANT_CONFIG).
+ * @category Constants
+ */
+export const DATAHUB_BY_TENANT = Object.fromEntries(
+  (Object.entries(TENANT_CONFIG) as [TenantId, TenantConfig][]).map(
+    ([id, config]) => [id, config.datahubHost],
+  ),
+) as Record<TenantId, string>;
+
+/** @category Constants */
+const EVE_COIN_TYPE_SUFFIX = "::EVE::EVE";
+
+/**
+ * Returns the EVE token coin type for the given tenant.
+ * Format: `{packageId}::EVE::EVE` (Sui Move type used by RPC/GraphQL).
+ * @param tenantId - The tenant identifier (e.g., "utopia", "stillness")
+ * @returns The fully qualified EVE coin type string
+ *
+ * @category Utilities - Config
+ */
+export function getEveCoinType(tenantId: TenantId): string {
+  return `${EVE_PACKAGE_ID_BY_TENANT[tenantId]}${EVE_COIN_TYPE_SUFFIX}`;
+}
+
+/** Known EVE coin types (one per tenant) for strict matching.
+ *  @category Constants
+ */
+export const KNOWN_EVE_COIN_TYPES = new Set(
+  (Object.keys(EVE_PACKAGE_ID_BY_TENANT) as TenantId[]).map(getEveCoinType),
+);

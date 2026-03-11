@@ -9,7 +9,7 @@ import { VaultContextType } from "../types";
  * and methods to connect/disconnect wallets. Automatically detects EVE Vault
  * wallet availability.
  *
- * @category Hooks
+ * @category Hooks - Connection
  * @returns Object containing wallet state and connection methods:
  *   - `currentAccount` - The currently connected wallet account (or null)
  *   - `walletAddress` - The connected wallet's address string

@@ -1,12 +1,5 @@
-import { DEFAULT_TENANT } from "./constants";
+import { DATAHUB_BY_TENANT, DEFAULT_TENANT } from "./constants";
 import { DatahubGameInfo, QueryParams } from "../types";
-
-export const datahubUrls = {
-  stillness: "world-api-stillness.live.tech.evefrontier.com",
-  utopia: "world-api-utopia.uat.pub.evefrontier.com",
-  nebula: "world-api-nebula.test.evefrontier.tech",
-  testevenet: "world-api-testevenet.test.evefrontier.tech",
-};
 
 /**
  * Resolves tenant from a URL search string (e.g. window.location.search).
@@ -26,8 +19,8 @@ export function resolveTenantFromSearch(search: string): string {
  */
 export function resolveDatahubHost(tenant: string): string {
   return (
-    datahubUrls[tenant as keyof typeof datahubUrls] ??
-    datahubUrls[DEFAULT_TENANT as keyof typeof datahubUrls]
+    DATAHUB_BY_TENANT[tenant as keyof typeof DATAHUB_BY_TENANT] ??
+    DATAHUB_BY_TENANT[DEFAULT_TENANT]
   );
 }
 
@@ -40,7 +33,7 @@ export function resolveDatahubHost(tenant: string): string {
  *
  * Resolves tenant from the window.location.search param.
  *
- * @category Utilities
+ * @category Utilities - Config
  * @param typeId - The numeric type ID (from on-chain type_id field)
  * @returns Promise resolving to the type's game info
  *

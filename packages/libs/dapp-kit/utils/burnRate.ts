@@ -18,7 +18,7 @@ export interface AdjustedBurnRate {
  * @param rawBurnTimeMs - Milliseconds to burn one unit at 100% efficiency. If non-finite or negative, treated as 0 so both returned fields are finite and consistent.
  * @param efficiencyPercent - Efficiency as percentage on a 0–100 scale (e.g. 90 for 90%). Values outside [0, 100] are treated as invalid; when null/undefined, not finite, ≤0, or >100, raw is used as-is for burn time.
  * @returns { burnTimePerUnitMs, unitsPerHour }
- * @category Utilities
+ * @category Utilities - Formatting
  */
 export function getAdjustedBurnRate(
   rawBurnTimeMs: number,
