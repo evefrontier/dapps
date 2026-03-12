@@ -7,8 +7,6 @@ import {
   AssemblyType,
 } from "../types";
 
-import { ONE_M3 } from "./constants";
-
 /**
  * Abbreviate a Sui address or hex string for display.
  *
@@ -141,21 +139,19 @@ export const getVolumeM3 = (quantity: bigint, volume: bigint): number => {
 };
 
 /**
- * Format a raw volume value to cubic meters (m³).
- *
- * Converts from the on-chain representation (wei-like, 10^18) to m³.
+ * Format from cubic millimeters (mm³) to cubic meters (m³).
  *
  * @category Utilities - Formatting
- * @param quantity - The raw volume value as string or bigint
+ * @param quantity - The raw volume value as string or bigint in cubic millimeters (mm³)
  * @returns Volume in cubic meters
  *
  * @example
  * ```typescript
- * const m3 = formatM3(BigInt("1000000000000000000")); // 1.0 m³
+ * const m3 = formatM3(BigInt("1000")); // 1.0 m³
  * ```
  */
 export const formatM3 = (quantity: string | bigint): number => {
-  return Number(quantity) / ONE_M3;
+  return Number(quantity) / 1000;
 };
 
 /**

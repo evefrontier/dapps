@@ -143,11 +143,6 @@ export const EXCLUDED_TYPEIDS = [
   TYPEIDS.REFUGE,
 ];
 
-/** Volume - from wei units to m3.
- *  @category Constants
- */
-export const ONE_M3 = 1000000000000000000;
-
 export type TenantId = "utopia" | "stillness" | "testevenet" | "nebula";
 
 /** Per-tenant config: EVE token package ID (Sui) and Datahub API host. v0.0.18

@@ -108,7 +108,7 @@ const InventoryView = React.memo(
 
             <EveLinearBar
               nominator={formatM3(usedCap ?? BigInt(0))}
-              denominator={formatM3(storageCap ?? BigInt(0))}
+              denominator={formatM3(storageCap)}
               label={`m3`}
             />
           </div>
