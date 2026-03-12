@@ -1,5 +1,11 @@
 # @evefrontier/dapp-kit
 
+## 0.1.7
+
+### Patch Changes
+
+- add eve pkg ids
+
 ## 0.1.6
 
 ### Patch Changes
