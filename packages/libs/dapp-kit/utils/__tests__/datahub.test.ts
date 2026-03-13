@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { resolveTenantFromSearch, resolveDatahubHost } from "../datahub";
-import { DATAHUB_BY_TENANT, DEFAULT_TENANT } from "../constants";
+import { DATAHUB_BY_TENANT, DEFAULT_TENANT, TenantId } from "../constants";
 import { QueryParams } from "../../types";
 
 const DEFAULT_HOST = DATAHUB_BY_TENANT[DEFAULT_TENANT];
@@ -19,16 +19,18 @@ describe("resolveTenantFromSearch (tenant resolution)", () => {
   });
 
   it("trims tenant value (surrounding spaces)", () => {
-    expect(resolveTenantFromSearch("?tenant=  stillness  ")).toBe("stillness");
-    expect(resolveTenantFromSearch("?tenant=nebula  ")).toBe("nebula");
+    expect(resolveTenantFromSearch("?tenant=  stillness  ")).toBe(
+      TenantId.STILLNESS,
+    );
+    expect(resolveTenantFromSearch("?tenant=nebula  ")).toBe(TenantId.NEBULA);
   });
 
   it("returns trimmed known tenant from param", () => {
     expect(resolveTenantFromSearch(`?${QueryParams.TENANT}=nebula`)).toBe(
-      "nebula",
+      TenantId.NEBULA,
     );
     expect(resolveTenantFromSearch(`?${QueryParams.TENANT}=utopia`)).toBe(
-      "utopia",
+      TenantId.UTOPIA,
     );
   });
 });
@@ -40,9 +42,13 @@ describe("resolveDatahubHost (host fallback)", () => {
   });
 
   it("returns known host for valid tenant keys", () => {
-    expect(resolveDatahubHost("stillness")).toBe(DATAHUB_BY_TENANT.stillness);
-    expect(resolveDatahubHost("nebula")).toBe(DATAHUB_BY_TENANT.nebula);
-    expect(resolveDatahubHost("utopia")).toBe(DATAHUB_BY_TENANT.utopia);
-    expect(resolveDatahubHost("testevenet")).toBe(DATAHUB_BY_TENANT.testevenet);
+    expect(resolveDatahubHost(TenantId.STILLNESS)).toBe(
+      DATAHUB_BY_TENANT.stillness,
+    );
+    expect(resolveDatahubHost(TenantId.NEBULA)).toBe(DATAHUB_BY_TENANT.nebula);
+    expect(resolveDatahubHost(TenantId.UTOPIA)).toBe(DATAHUB_BY_TENANT.utopia);
+    expect(resolveDatahubHost(TenantId.TESTEVENET)).toBe(
+      DATAHUB_BY_TENANT.testevenet,
+    );
   });
 });

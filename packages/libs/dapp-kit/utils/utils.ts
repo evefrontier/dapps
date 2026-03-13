@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SuiChain } from "@mysten/wallet-standard";
 import {
   Assemblies,
@@ -6,8 +5,6 @@ import {
   SmartAssemblyResponse,
   AssemblyType,
 } from "../types";
-
-import { ONE_M3 } from "./constants";
 
 /**
  * Abbreviate a Sui address or hex string for display.
@@ -129,9 +126,9 @@ export const getEnv = (env: string, fallback: string): string => {
 };
 
 /**
- * Volume in m³ from unit quantity and volume per unit (wei, 10^18).
+ * Volume in m³ from unit quantity and volume per unit (litres, 10^3).
  * @param quantity - Unit quantity of the item
- * @param volume - Volume per unit in wei (10^18)
+ * @param volume - Volume per unit in litres (10^3)
  * @returns Volume in m³
  * @category Utilities - Formatting
  */
@@ -141,21 +138,19 @@ export const getVolumeM3 = (quantity: bigint, volume: bigint): number => {
 };
 
 /**
- * Format a raw volume value to cubic meters (m³).
- *
- * Converts from the on-chain representation (wei-like, 10^18) to m³.
+ * Format from cubic decimeters/litres (dm³\l) to cubic meters (m³).
  *
  * @category Utilities - Formatting
- * @param quantity - The raw volume value as string or bigint
+ * @param quantity - The raw volume value as string or bigint in cubic decimeters/litres (dm³/l)
  * @returns Volume in cubic meters
  *
  * @example
  * ```typescript
- * const m3 = formatM3(BigInt("1000000000000000000")); // 1.0 m³
+ * const m3 = formatM3(BigInt("1000")); // 1.0 m³
  * ```
  */
 export const formatM3 = (quantity: string | bigint): number => {
-  return Number(quantity) / ONE_M3;
+  return Number(quantity) / 1000;
 };
 
 /**
