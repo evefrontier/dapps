@@ -32,7 +32,7 @@ const Actions = React.memo(
     setIsEditing: (isEditing: boolean) => void;
     isOnline: boolean;
   }) => {
-    const { assembly } = useSmartObject();
+    const { assembly, refetch } = useSmartObject();
     const { currentAccount } = useConnection();
     const { notify } = useNotification();
     const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction();
@@ -106,6 +106,9 @@ const Actions = React.memo(
               notify({
                 type: Severity.Success,
                 txHash: result.digest,
+                onSuccess: async () => {
+                  await refetch();
+                },
               });
             }
           })

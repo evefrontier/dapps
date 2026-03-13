@@ -16,7 +16,7 @@ import { SmartObjectContextType } from "../types";
  *   - `character` - The owner character information (or null)
  *   - `loading` - Boolean indicating if data is being fetched
  *   - `error` - Error message string (or null)
- *   - `refetch` - Function to manually refresh assembly data
+ *   - `refetch` - Function to manually refresh assembly data with retries
  * @throws {Error} If used outside of `EveFrontierProvider`
  *
  * @example Basic usage

@@ -36,7 +36,7 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
   const [isEdited, setIsEdited] = useState<boolean>(false);
 
   const { notify } = useNotification();
-  const { assembly } = useSmartObject();
+  const { assembly, refetch } = useSmartObject();
 
   const urlValueRef = useRef(assembly?.dappURL ?? "");
   const nameValueRef = useRef(assembly?.name ?? "");
@@ -69,10 +69,14 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
         url: urlValueRef.current as string,
       },
     })
-      .then((result) => {
+      .then(async (result) => {
         notify({
           type: Severity.Success,
           txHash: result.digest,
+          onSuccess: async () => {
+            await refetch();
+            handleClose();
+          },
         });
         handleClose();
       })

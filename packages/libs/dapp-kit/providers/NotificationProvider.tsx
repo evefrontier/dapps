@@ -9,6 +9,7 @@ export const NotificationContext = createContext<NotificationContextType>({
   notification: {
     message: "",
     txHash: "",
+    onSuccess: () => {},
     severity: Severity.Success,
     handleClose: () => {},
     isOpen: false,
@@ -81,6 +82,7 @@ const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const notification: NotificationState = {
     message,
     txHash,
+    onSuccess: () => {},
     severity,
     handleClose,
     isOpen,
