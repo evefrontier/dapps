@@ -54,30 +54,30 @@ describe("isOwner", () => {
   });
 
   it("returns false when account is 0x", () => {
-    expect(
-      isOwner({ character: { address: "0xabc" } } as any, "0x"),
-    ).toBe(false);
+    expect(isOwner({ character: { address: "0xabc" } } as any, "0x")).toBe(
+      false,
+    );
   });
 
   it("returns true when character address matches account", () => {
-    expect(
-      isOwner({ character: { address: "0xabc" } } as any, "0xabc"),
-    ).toBe(true);
-    expect(
-      isOwner({ character: { address: "0xdef" } } as any, "0xdef"),
-    ).toBe(true);
+    expect(isOwner({ character: { address: "0xabc" } } as any, "0xabc")).toBe(
+      true,
+    );
+    expect(isOwner({ character: { address: "0xdef" } } as any, "0xdef")).toBe(
+      true,
+    );
   });
 
   it("returns false when character address does not match account", () => {
-    expect(
-      isOwner({ character: { address: "0xabc" } } as any, "0xdef"),
-    ).toBe(false);
+    expect(isOwner({ character: { address: "0xabc" } } as any, "0xdef")).toBe(
+      false,
+    );
   });
 
   it("treats undefined account as empty string (no match unless address is empty)", () => {
-    expect(
-      isOwner({ character: { address: "0xabc" } } as any, undefined),
-    ).toBe(false);
+    expect(isOwner({ character: { address: "0xabc" } } as any, undefined)).toBe(
+      false,
+    );
   });
 });
 
@@ -182,7 +182,7 @@ describe("getVolumeM3", () => {
 
 describe("formatM3", () => {
   it("converts litres (1000) to 1 m³", () => {
-    expect(formatM3(1000)).toBe(1);
+    expect(formatM3("1000")).toBe(1);
     expect(formatM3(BigInt("1000"))).toBe(1);
   });
 
@@ -199,12 +199,12 @@ describe("getDappUrl", () => {
   });
 
   it("returns dappURL as-is when it has protocol", () => {
-    expect(
-      getDappUrl({ dappURL: "https://example.com" } as any),
-    ).toBe("https://example.com");
-    expect(
-      getDappUrl({ dappURL: "http://foo.bar" } as any),
-    ).toBe("http://foo.bar");
+    expect(getDappUrl({ dappURL: "https://example.com" } as any)).toBe(
+      "https://example.com",
+    );
+    expect(getDappUrl({ dappURL: "http://foo.bar" } as any)).toBe(
+      "http://foo.bar",
+    );
   });
 
   it("adds https:// when dappURL has no protocol", () => {
