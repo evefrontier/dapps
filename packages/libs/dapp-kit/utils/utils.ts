@@ -172,10 +172,10 @@ export const formatM3 = (quantity: string | bigint): number => {
 export const getDappUrl = (assembly: AssemblyType<Assemblies>): string => {
   if (!assembly?.dappURL) return "";
 
-  const pattern = /^((http|https|ftp):\/\/)/;
-
-  let url = assembly.dappURL;
-  if (!pattern.test(url)) {
+  let url = assembly.dappURL.trim();
+  const hasProtocol = /^((http|https|ftp):\/\/)/i.test(url);
+  if (!hasProtocol) {
+    if (!url.toLowerCase().startsWith("www.")) url = "www." + url;
     url = "https://" + url;
   }
 

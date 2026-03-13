@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, RefObject } from "react";
 
 import {
   useSmartObject,
@@ -45,7 +45,7 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
   const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction();
 
   const handleEdit = (
-    refString: React.MutableRefObject<string | number>,
+    refString: RefObject<string | number>,
     eventString: string | number | null,
   ): void => {
     if (eventString == null || !assembly) return;
@@ -60,7 +60,7 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
   const handleSave = async () => {
     if (!assembly) return;
 
-    const result = await sendSponsoredTransaction({
+    await sendSponsoredTransaction({
       txAction: SponsoredTransactionActions.UPDATE_METADATA,
       assembly: assembly,
       metadata: {
