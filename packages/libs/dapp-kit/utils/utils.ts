@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SuiChain } from "@mysten/wallet-standard";
 import {
   Assemblies,
