@@ -18,6 +18,7 @@ import {
   SponsoredTransactionArgs,
 } from "../wallet";
 import { Assemblies, QueryParams, SponsoredTransactionActions } from "../types";
+import { TenantId } from "../utils";
 
 /** Wallet-like shape from dApp Kit (UiWallet or connection store). */
 type ResolvableWallet = {
@@ -183,7 +184,7 @@ export type UseSponsoredTransactionMutationOptions = Omit<
  * - `txAction` (required) – The sponsored action to run (e.g. BRING_ONLINE, BRING_OFFLINE).
  * - `chain` (required) – Sui chain id, e.g. `"sui:testnet"` or `"sui:mainnet"`.
  * - `assembly` (required) – Full assembly object (`AssemblyType<Assemblies>`). Must include `type` and `item_id` (number). If `item_id` is missing or invalid, the hook falls back to the URL query param `itemId` (parsed as a non-negative integer). Fails with {@link AssemblyIdRequiredError} if neither source provides a valid id.
- * - `tenant` (optional) – Tenant ID. When omitted, the hook resolves it from the URL query param (e.g. `tenant`) with fallback to `"testevenet"`. Pass explicitly to override.
+ * - `tenant` (optional) – Tenant ID. When omitted, the hook resolves it from the URL query param (e.g. `tenant`) with fallback to `TenantId.TESTEVENET`. Pass explicitly to override.
  * - `account` (optional) – Signer address. If omitted, the currently connected wallet account is used.
  *
  * **Output** (on success, in `data` or resolved from `mutateAsync`):
@@ -366,7 +367,7 @@ export function useSponsoredTransaction({
         );
       }
 
-      const tenant = (args.tenant ?? queryTenant ?? "testevenet").trim();
+      const tenant = (args.tenant ?? queryTenant ?? TenantId.TESTEVENET).trim();
       if (!tenant) {
         throw new Error(
           "Tenant could not be resolved; pass tenant or set the tenant query param",

@@ -127,9 +127,9 @@ export const getEnv = (env: string, fallback: string): string => {
 };
 
 /**
- * Volume in m³ from unit quantity and volume per unit (wei, 10^18).
+ * Volume in m³ from unit quantity and volume per unit (litres, 10^3).
  * @param quantity - Unit quantity of the item
- * @param volume - Volume per unit in wei (10^18)
+ * @param volume - Volume per unit in litres (10^3)
  * @returns Volume in m³
  * @category Utilities - Formatting
  */
@@ -139,10 +139,10 @@ export const getVolumeM3 = (quantity: bigint, volume: bigint): number => {
 };
 
 /**
- * Format from cubic millimeters (mm³) to cubic meters (m³).
+ * Format from cubic decimeters/litres (dm³\l) to cubic meters (m³).
  *
  * @category Utilities - Formatting
- * @param quantity - The raw volume value as string or bigint in cubic millimeters (mm³)
+ * @param quantity - The raw volume value as string or bigint in cubic decimeters/litres (dm³/l)
  * @returns Volume in cubic meters
  *
  * @example

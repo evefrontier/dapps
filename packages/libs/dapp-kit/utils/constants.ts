@@ -84,10 +84,20 @@ export const getFuelEfficiencyConfigType = (): string =>
  */
 export const DEFAULT_GRAPHQL_NETWORK: SuiGraphqlNetwork = "testnet";
 
+/** Tenant IDs.
+ *  @category Constants
+ */
+export enum TenantId {
+  UTOPIA = "utopia",
+  STILLNESS = "stillness",
+  TESTEVENET = "testevenet",
+  NEBULA = "nebula",
+}
+
 /** Tenant when not provided via URL ?tenant= (e.g. dev/default chain).
  *  @category Constants
  */
-export const DEFAULT_TENANT = "stillness";
+export const DEFAULT_TENANT = TenantId.STILLNESS;
 
 /** Allowed Sui network identifiers for GraphQL endpoint selection.
  *  @category Constants
@@ -142,13 +152,6 @@ export const EXCLUDED_TYPEIDS = [
   TYPEIDS.PORTABLE_STORAGE,
   TYPEIDS.REFUGE,
 ];
-
-export enum TenantId {
-  UTOPIA = "utopia",
-  STILLNESS = "stillness",
-  TESTEVENET = "testevenet",
-  NEBULA = "nebula",
-}
 
 /** Per-tenant config: EVE token package ID (Sui) and Datahub API host. v0.0.18
  * @category Constants
@@ -218,7 +221,7 @@ const EVE_COIN_TYPE_SUFFIX = "::EVE::EVE";
 /**
  * Returns the EVE token coin type for the given tenant.
  * Format: `{packageId}::EVE::EVE` (Sui Move type used by RPC/GraphQL).
- * @param tenantId - The tenant identifier (e.g., "utopia", "stillness")
+ * @param tenantId - The tenant identifier (e.g., TenantId.UTOPIA, TenantId.STILLNESS)
  * @returns The fully qualified EVE coin type string
  *
  * @category Utilities - Config
