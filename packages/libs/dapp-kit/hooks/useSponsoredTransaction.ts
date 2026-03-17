@@ -128,6 +128,31 @@ function resolveAssemblyId(
 }
 
 // ============================================================================
+// Retry helpers (502 Bad Gateway)
+// ============================================================================
+
+const DEFAULT_MAX_RETRIES = 2;
+const DEFAULT_RETRY_DELAY_MS = 1500;
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Returns true if the error indicates a 502 (or similar transient server error)
+ * where retrying the same payload is safe.
+ */
+function isRetryableSponsorError(error: unknown): boolean {
+  if (error instanceof Error) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes("502") || msg.includes("bad gateway")) return true;
+  }
+  const withResponse = error as { response?: { status?: number } };
+  if (withResponse?.response?.status === 502) return true;
+  return false;
+}
+
+// ============================================================================
 // Hook Types
 // ============================================================================
 
@@ -176,6 +201,9 @@ export type UseSponsoredTransactionMutationOptions = Omit<
  * by the EVE Frontier backend service, eliminating the need for users to have SUI
  * tokens for gas. The wallet must support the `evefrontier:sponsoredTransaction` feature
  * (currently only EVE Vault).
+ *
+ * Transient server errors (e.g. 502 Bad Gateway) are retried automatically with the same
+ * payload a limited number of times with a delay between attempts.
  *
  * The hook automatically uses the currently connected wallet and account (unless overridden)
  * and handles wallet feature detection and validation.
@@ -393,7 +421,20 @@ export function useSponsoredTransaction({
 
       console.log("Sponsored Transaction Payload:", payload);
 
-      return await signSponsoredTransaction(payload);
+      let lastError: unknown;
+      const maxAttempts = DEFAULT_MAX_RETRIES + 1;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          return await signSponsoredTransaction(payload);
+        } catch (e) {
+          lastError = e;
+          const canRetry =
+            attempt < maxAttempts && isRetryableSponsorError(e);
+          if (!canRetry) throw e;
+          await delay(DEFAULT_RETRY_DELAY_MS);
+        }
+      }
+      throw lastError;
     },
     ...mutationOptions,
   });
