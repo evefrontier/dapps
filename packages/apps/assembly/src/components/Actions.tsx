@@ -100,16 +100,14 @@ const Actions = React.memo(
           assembly,
           sendSponsoredTransaction,
         })
-          .then((result) => {
+          .then(async (result) => {
             console.log("bringOnline result", result);
             if (result?.digest) {
               notify({
                 type: Severity.Success,
                 txHash: result.digest,
-                onSuccess: async () => {
-                  await refetch();
-                },
               });
+              await refetch();
             }
           })
           .catch((error) => {

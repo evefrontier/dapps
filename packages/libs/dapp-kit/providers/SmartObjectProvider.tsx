@@ -264,12 +264,14 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
     await fetchObjectData(input, true);
   }, [selectedObjectId, selectedTenant, isObjectIdDirect, fetchObjectData]);
 
-  // Refetch with retries after a mutation (e.g. metadata save) so the indexer can catch up.
+  // Refetch with retries after a mutation (e.g. metadata save)
+  // so the indexer can catch up.
   const handleRefetchWithRetries = useCallback(async () => {
     await handleRefetch();
-    setTimeout(() => {
-      void handleRefetch();
-    }, 1500);
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 1500);
+    });
+    await handleRefetch();
   }, [handleRefetch]);
 
   return (

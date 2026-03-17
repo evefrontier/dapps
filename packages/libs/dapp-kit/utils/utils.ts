@@ -175,7 +175,6 @@ export const getDappUrl = (assembly: AssemblyType<Assemblies>): string => {
   let url = assembly.dappURL.trim();
   const hasProtocol = /^((http|https|ftp):\/\/)/i.test(url);
   if (!hasProtocol) {
-    if (!url.toLowerCase().startsWith("www.")) url = "www." + url;
     url = "https://" + url;
   }
 
