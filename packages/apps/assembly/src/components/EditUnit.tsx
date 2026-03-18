@@ -59,17 +59,19 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
    **/
   const handleSave = async () => {
     if (!assembly) return;
+    try {
+      const result = await sendSponsoredTransaction({
+        txAction: SponsoredTransactionActions.UPDATE_METADATA,
+        assembly: assembly,
+        metadata: {
+          name: nameValueRef.current as string,
+          description: descriptionValueRef.current as string,
+          url: urlValueRef.current as string,
+        },
+      });
 
-    await sendSponsoredTransaction({
-      txAction: SponsoredTransactionActions.UPDATE_METADATA,
-      assembly: assembly,
-      metadata: {
-        name: nameValueRef.current as string,
-        description: descriptionValueRef.current as string,
-        url: urlValueRef.current as string,
-      },
-    })
-      .then(async (result) => {
+      console.log("update metadata result", result);
+      if (result?.digest) {
         notify({
           type: Severity.Success,
           txHash: result.digest,
@@ -78,14 +80,13 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
             handleClose();
           },
         });
-        handleClose();
-      })
-      .catch((error) => {
-        notify({
-          type: Severity.Error,
-          message: error.message,
-        });
+      }
+    } catch (error) {
+      notify({
+        type: Severity.Error,
+        message: `Failed to edit: ${error instanceof Error ? error.message : "Unknown error"}`,
       });
+    }
   };
 
   return (
