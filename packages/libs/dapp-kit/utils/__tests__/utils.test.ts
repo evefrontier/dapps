@@ -207,12 +207,12 @@ describe("getDappUrl", () => {
     );
   });
 
-  it("adds www. and https:// when dappURL has no protocol (bare hostname)", () => {
+  it("adds https:// when dappURL has no protocol (bare hostname)", () => {
     expect(getDappUrl({ dappURL: "example.com" } as any)).toBe(
-      "https://www.example.com",
+      "https://example.com",
     );
     expect(getDappUrl({ dappURL: "google.com" } as any)).toBe(
-      "https://www.google.com",
+      "https://google.com",
     );
   });
 
@@ -222,9 +222,9 @@ describe("getDappUrl", () => {
     );
   });
 
-  it("adds www. and https:// for bare hostname with path", () => {
+  it("adds https:// for bare hostname with path", () => {
     expect(getDappUrl({ dappURL: "example.com/path" } as any)).toBe(
-      "https://www.example.com/path",
+      "https://example.com/path",
     );
   });
 });
