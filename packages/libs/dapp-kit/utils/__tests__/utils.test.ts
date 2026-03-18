@@ -207,9 +207,24 @@ describe("getDappUrl", () => {
     );
   });
 
-  it("adds https:// when dappURL has no protocol", () => {
+  it("adds https:// when dappURL has no protocol (bare hostname)", () => {
     expect(getDappUrl({ dappURL: "example.com" } as any)).toBe(
       "https://example.com",
+    );
+    expect(getDappUrl({ dappURL: "google.com" } as any)).toBe(
+      "https://google.com",
+    );
+  });
+
+  it("adds https:// only when dappURL already starts with www.", () => {
+    expect(getDappUrl({ dappURL: "www.foo.com" } as any)).toBe(
+      "https://www.foo.com",
+    );
+  });
+
+  it("adds https:// for bare hostname with path", () => {
+    expect(getDappUrl({ dappURL: "example.com/path" } as any)).toBe(
+      "https://example.com/path",
     );
   });
 });

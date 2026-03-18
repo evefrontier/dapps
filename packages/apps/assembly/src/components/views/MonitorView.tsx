@@ -45,7 +45,7 @@ type TimeRemaining = {
 const MILLISECONDS_TO_SECONDS = 1000;
 
 const MonitorView = React.memo(() => {
-  const { assembly, tenant } = useSmartObject();
+  const { assembly, refetch } = useSmartObject();
 
   const [fuel, setFuel] = useState<DatahubGameInfo | null>(null);
   const [frozenTimeRemaining, setFrozenTimeRemaining] = useState<number | null>(
@@ -254,10 +254,12 @@ const MonitorView = React.memo(() => {
       // Freeze the current time remaining when stopping
       setFrozenTimeRemaining(timeRemaining);
       await bringOffline({ assembly, sendSponsoredTransaction });
+      await refetch();
     } else {
       // Unfreeze the time when bringing online
       setFrozenTimeRemaining(null);
       await bringOnline({ assembly, sendSponsoredTransaction });
+      await refetch();
     }
   };
 

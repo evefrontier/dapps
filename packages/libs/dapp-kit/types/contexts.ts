@@ -37,13 +37,21 @@ export interface SmartObjectContextType {
   refetch: () => Promise<void>;
 }
 
+export interface NotifySuccess {
+  type: Severity.Success;
+  txHash?: string;
+  message?: string;
+  onSuccess?: () => void;
+}
+
+export interface NotifyOther {
+  type: Severity.Error | Severity.Warning | Severity.Info;
+  message?: string;
+}
+
 /** @category Types */
 export interface NotificationContextType {
-  notify: (notification: {
-    type: Severity;
-    txHash?: string;
-    message?: string;
-  }) => void;
+  notify: (notification: NotifySuccess | NotifyOther) => void;
   notification: NotificationState;
   handleClose: () => void;
 }
@@ -52,6 +60,7 @@ export interface NotificationContextType {
 export interface NotificationState {
   message: string;
   txHash: string;
+  onSuccess: () => void;
   severity: Severity;
   handleClose: () => void;
   isOpen: boolean;

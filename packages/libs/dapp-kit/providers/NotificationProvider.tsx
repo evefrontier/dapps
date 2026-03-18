@@ -9,6 +9,7 @@ export const NotificationContext = createContext<NotificationContextType>({
   notification: {
     message: "",
     txHash: "",
+    onSuccess: () => {},
     severity: Severity.Success,
     handleClose: () => {},
     isOpen: false,
@@ -26,23 +27,33 @@ const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [message, setMessage] = useState<string>("");
   const [severity, setSeverity] = useState<Severity>(Severity.Info);
   const [txHash, setTxHash] = useState<string>("");
+  const [onSuccess, setOnSuccess] = useState<NotificationState["onSuccess"]>(
+    () => () => {},
+  );
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
-  }, []);
+    if (severity === Severity.Success) {
+      onSuccess();
+    }
+    setOnSuccess(() => () => {});
+  }, [onSuccess, severity]);
 
   const notify = useCallback(
     ({
       type,
       message,
       txHash,
+      onSuccess,
     }: {
       type: Severity;
       message?: string;
       txHash?: string;
+      onSuccess?: () => void;
     }) => {
       setSeverity(type);
       setIsOpen(true);
+      setOnSuccess(() => onSuccess ?? (() => {}));
 
       // If success with txHash, show success message with transaction hash
       if (type === Severity.Success && txHash) {
@@ -81,6 +92,7 @@ const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const notification: NotificationState = {
     message,
     txHash,
+    onSuccess,
     severity,
     handleClose,
     isOpen,

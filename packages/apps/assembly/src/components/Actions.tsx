@@ -32,7 +32,7 @@ const Actions = React.memo(
     setIsEditing: (isEditing: boolean) => void;
     isOnline: boolean;
   }) => {
-    const { assembly } = useSmartObject();
+    const { assembly, refetch } = useSmartObject();
     const { currentAccount } = useConnection();
     const { notify } = useNotification();
     const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction();
@@ -95,48 +95,45 @@ const Actions = React.memo(
 
     // If smart assembly is online, user is allowed to bring offline
     const handleAction = async (action: ActionTypes) => {
-      if (action === ActionTypes.BRING_ONLINE) {
-        await bringOnline({
-          assembly,
-          sendSponsoredTransaction,
-        })
-          .then((result) => {
-            console.log("bringOnline result", result);
-            if (result?.digest) {
-              notify({
-                type: Severity.Success,
-                txHash: result.digest,
-              });
-            }
-          })
-          .catch((error) => {
-            console.error("bringOnline error", error);
-            notify({
-              type: Severity.Error,
-              message: "Failed to bring online",
-            });
+      try {
+        if (action === ActionTypes.BRING_ONLINE) {
+          const result = await bringOnline({
+            assembly,
+            sendSponsoredTransaction,
           });
-      } else {
-        await bringOffline({
-          assembly,
-          sendSponsoredTransaction,
-        })
-          .then((result) => {
-            console.log("bringOffline result", result);
-            if (result?.digest) {
-              notify({
-                type: Severity.Success,
-                txHash: result.digest,
-              });
-            }
-          })
-          .catch((error) => {
-            console.error("bringOffline error", error);
+
+          console.log("bringOnline result", result);
+          if (result?.digest) {
             notify({
-              type: Severity.Error,
-              message: "Failed to bring offline",
+              type: Severity.Success,
+              txHash: result.digest,
+              onSuccess: async () => {
+                await refetch();
+              },
             });
+          }
+        } else {
+          const result = await bringOffline({
+            assembly,
+            sendSponsoredTransaction,
           });
+
+          console.log("bringOffline result", result);
+          if (result?.digest) {
+            notify({
+              type: Severity.Success,
+              txHash: result.digest,
+              onSuccess: async () => {
+                await refetch();
+              },
+            });
+          }
+        }
+      } catch (error) {
+        notify({
+          type: Severity.Error,
+          message: `Failed to bring ${action}: ${error instanceof Error ? error.message : "Unknown error"}`,
+        });
       }
     };
 

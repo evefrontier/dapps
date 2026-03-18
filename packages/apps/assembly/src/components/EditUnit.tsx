@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, RefObject } from "react";
 
 import {
   useSmartObject,
@@ -36,7 +36,7 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
   const [isEdited, setIsEdited] = useState<boolean>(false);
 
   const { notify } = useNotification();
-  const { assembly } = useSmartObject();
+  const { assembly, refetch } = useSmartObject();
 
   const urlValueRef = useRef(assembly?.dappURL ?? "");
   const nameValueRef = useRef(assembly?.name ?? "");
@@ -45,7 +45,7 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
   const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction();
 
   const handleEdit = (
-    refString: React.MutableRefObject<string | number>,
+    refString: RefObject<string | number>,
     eventString: string | number | null,
   ): void => {
     if (eventString == null || !assembly) return;
@@ -59,29 +59,34 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
    **/
   const handleSave = async () => {
     if (!assembly) return;
+    try {
+      const result = await sendSponsoredTransaction({
+        txAction: SponsoredTransactionActions.UPDATE_METADATA,
+        assembly: assembly,
+        metadata: {
+          name: nameValueRef.current as string,
+          description: descriptionValueRef.current as string,
+          url: urlValueRef.current as string,
+        },
+      });
 
-    const result = await sendSponsoredTransaction({
-      txAction: SponsoredTransactionActions.UPDATE_METADATA,
-      assembly: assembly,
-      metadata: {
-        name: nameValueRef.current as string,
-        description: descriptionValueRef.current as string,
-        url: urlValueRef.current as string,
-      },
-    })
-      .then((result) => {
+      console.log("update metadata result", result);
+      if (result?.digest) {
         notify({
           type: Severity.Success,
           txHash: result.digest,
+          onSuccess: async () => {
+            await refetch();
+            handleClose();
+          },
         });
-        handleClose();
-      })
-      .catch((error) => {
-        notify({
-          type: Severity.Error,
-          message: error.message,
-        });
+      }
+    } catch (error) {
+      notify({
+        type: Severity.Error,
+        message: `Failed to edit: ${error instanceof Error ? error.message : "Unknown error"}`,
       });
+    }
   };
 
   return (
