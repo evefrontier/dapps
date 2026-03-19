@@ -12,12 +12,16 @@ import {
   DatahubGameInfo,
   getFuelEfficiencyForType,
   getAdjustedBurnRate,
+  createLogger,
 } from "@evefrontier/dapp-kit";
 import { EveButton } from "@eveworld/ui-components";
 import { ButtonCorner } from "@eveworld/ui-components/assets";
 
 import { bringOffline } from "../../functions/bringOffline";
 import { bringOnline } from "../../functions/bringOnline";
+
+const log = createLogger();
+
 const FuelBar = ({ filled }: { filled: boolean }) => (
   <svg
     width="6.5"
@@ -231,7 +235,7 @@ const MonitorView = React.memo(() => {
   ]);
 
   if (!assembly || assembly.type !== Assemblies.NetworkNode) {
-    console.error("Cannot find NetworkNode");
+    log.error("Cannot find NetworkNode");
     return <div className="Eve-NetworkNode-Monitor" />;
   }
 

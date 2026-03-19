@@ -38,6 +38,9 @@ import {
   GET_OBJECT_WITH_JSON,
   GET_SINGLETON_CONFIG_OBJECT_BY_TYPE,
 } from "./queries";
+import { createLogger } from "../utils";
+
+const log = createLogger();
 
 /**
  * Execute a GraphQL query against the Sui blockchain endpoint.
@@ -491,7 +494,7 @@ export async function getAssemblyWithOwner(assemblyId: string): Promise<{
     const result = await getObjectAndCharacterOwner(assemblyId);
 
     if (!result.data?.object?.asMoveObject) {
-      console.warn("[DappKit] getAssemblyWithOwner: Assembly not found");
+      log.warn("[DappKit] getAssemblyWithOwner: Assembly not found");
       return {
         moveObject: null,
         assemblyOwner: null,
@@ -513,7 +516,7 @@ export async function getAssemblyWithOwner(assemblyId: string): Promise<{
         ?.asObject?.asMoveObject;
 
     if (!characterMoveObject?.contents?.json) {
-      console.warn("[DappKit] getAssemblyWithOwner: Character not found");
+      log.warn("[DappKit] getAssemblyWithOwner: Character not found");
       return {
         moveObject: result.data?.object?.asMoveObject,
         assemblyOwner: null,
@@ -525,7 +528,7 @@ export async function getAssemblyWithOwner(assemblyId: string): Promise<{
     const characterJson = characterMoveObject?.contents.json;
     characterInfo = parseCharacterFromJson(characterJson);
     if (!characterInfo) {
-      console.warn(
+      log.warn(
         "[DappKit] getAssemblyWithOwner: Could not extract character JSON from owner chain",
       );
     }
@@ -534,7 +537,7 @@ export async function getAssemblyWithOwner(assemblyId: string): Promise<{
       moveObject.contents.energySource?.asAddress?.asObject?.asMoveObject;
 
     if (!energySourceMoveObject?.contents?.json) {
-      console.warn("[DappKit] getAssemblyWithOwner: Energy source not found");
+      log.warn("[DappKit] getAssemblyWithOwner: Energy source not found");
     }
 
     const destinationGateMoveObject =
@@ -546,7 +549,7 @@ export async function getAssemblyWithOwner(assemblyId: string): Promise<{
       ?.json as unknown as RawSuiObjectData | null;
 
     if (!energySourceJson) {
-      console.warn(
+      log.warn(
         "[DappKit] getAssemblyWithOwner: Energy source not found. Object might be a network node.",
       );
     }
@@ -564,7 +567,7 @@ export async function getAssemblyWithOwner(assemblyId: string): Promise<{
       destinationGate: destinationGateJson ?? null,
     };
   } catch (error) {
-    console.error("[DappKit] getAssemblyWithOwner error:", error);
+    log.error("[DappKit] getAssemblyWithOwner error:", error);
     return {
       moveObject: null,
       assemblyOwner: null,

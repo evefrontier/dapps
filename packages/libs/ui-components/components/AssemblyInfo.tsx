@@ -7,9 +7,12 @@ import {
   DetailedSmartCharacterResponse,
   isOwner,
   CharacterInfo,
+  createLogger,
 } from "@evefrontier/dapp-kit";
 import EveScroll from "./EveScroll";
 import ClickToCopy from "./ClickToCopy";
+
+const log = createLogger();
 
 /**
  * Component that displays information about a smart assembly, including owner, asset ID, type ID, state, and chain.
@@ -38,7 +41,7 @@ const AssemblyInfo = React.memo(
 
     useEffect(() => {
       if (!isAssemblyOwner) {
-        console.warn(
+        log.warn(
           `[Dapp] AssemblyInfo: Not owner, connected to wallet %s which is ${userCharacter?.id == "0" ? "not a" : "a"} smart character`,
           userCharacter?.address,
         );

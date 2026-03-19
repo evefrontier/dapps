@@ -6,10 +6,7 @@ export {
   getRegistryAddress,
 } from "./mapping";
 export { getEnergyUsageForType, getFuelEfficiencyForType } from "./config";
-export {
-  getAdjustedBurnRate,
-  type AdjustedBurnRate,
-} from "./burnRate";
+export { getAdjustedBurnRate, type AdjustedBurnRate } from "./burnRate";
 export { parseCharacterFromJson } from "./character";
 export {
   getCharacterOwnedObjectsJson,
@@ -45,3 +42,6 @@ export * from "./constants";
 // Error handling
 export { ERRORS, ERROR_MESSAGES, parseErrorFromMessage } from "./errors";
 export type { ErrorType } from "./errors";
+
+// Logging
+export * from "./logger";

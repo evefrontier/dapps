@@ -1,9 +1,12 @@
 import {
   Assemblies,
   AssemblyType,
+  createLogger,
   SendSponsoredTransactionFn,
   SponsoredTransactionActions,
 } from "@evefrontier/dapp-kit";
+
+const log = createLogger();
 
 /** BRING OFFLINE SPONSORED TRANSACTION FUNCTION */
 export const bringOffline = async ({
@@ -16,16 +19,16 @@ export const bringOffline = async ({
   if (!assembly) return;
 
   {
-    console.log("bringOffline: sending sponsored transaction");
+    log.info("bringOffline: sending sponsored transaction");
     try {
       const result = await sendSponsoredTransaction({
         txAction: SponsoredTransactionActions.BRING_OFFLINE,
         assembly: assembly,
       });
-      console.log("sponsored transaction result", result);
+      log.info("sponsored transaction result", result);
       return result;
     } catch (error) {
-      console.error("sponsored transaction error", error);
+      log.error("sponsored transaction error", error);
       throw error;
     }
   }

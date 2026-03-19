@@ -1,5 +1,8 @@
 import { getCharacterAndOwnedObjects } from "../graphql/client";
 import type { GetCharacterAndOwnedObjectsResponse } from "../graphql/types";
+import { createLogger } from "./logger";
+
+const log = createLogger();
 
 /**
  * Extracts the JSON payloads from the first character's owned objects
@@ -38,9 +41,7 @@ export async function getCharacterOwnedObjects(
     (response) => {
       const data = response.data;
       if (!data) {
-        console.warn(
-          "[Dapp] No data returned from getCharacterAndOwnedObjects",
-        );
+        log.warn("[Dapp] No data returned from getCharacterAndOwnedObjects");
         return;
       }
       const ownedObjectsJson = getCharacterOwnedObjectsJson(data);

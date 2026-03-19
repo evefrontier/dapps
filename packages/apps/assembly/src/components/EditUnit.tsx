@@ -8,8 +8,11 @@ import {
   useSponsoredTransaction,
   SponsoredTransactionActions,
   Severity,
+  createLogger,
 } from "@evefrontier/dapp-kit";
 import { EveInput, EveButtonDuo, Divider } from "@eveworld/ui-components";
+
+const log = createLogger();
 
 /**
  * EditUnit component for handling editing of Smart Assembly properties.
@@ -70,7 +73,7 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
         },
       });
 
-      console.log("update metadata result", result);
+      log.info("update metadata result", result);
       if (result?.digest) {
         notify({
           type: Severity.Success,

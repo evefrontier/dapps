@@ -14,10 +14,6 @@ import RootView from "./components/views/RootView";
 import App from "./App";
 import { QueryClient } from "@tanstack/react-query";
 
-const configDefaults = {
-  ignoreNetworkEvents: false,
-};
-
 const darkTheme = createTheme({
   palette: {
     mode: "dark",

@@ -4,8 +4,10 @@ import {
   useWallets,
   useDAppKit,
 } from "@mysten/dapp-kit-react";
-import { STORAGE_KEYS } from "../utils";
+import { createLogger, STORAGE_KEYS } from "../utils";
 import { SupportedWallets, VaultContextType } from "../types";
+
+const log = createLogger();
 
 /** @category Providers */
 export const VaultContext = createContext<VaultContextType>({
@@ -47,23 +49,23 @@ const VaultProvider = ({ children }: { children: ReactNode }) => {
     const walletToConnect = eveVaultWallet || wallets[0];
 
     if (!walletToConnect) {
-      console.warn("No wallet available to connect");
+      log.warn("No wallet available to connect");
       return;
     }
 
     try {
       connectWallet({ wallet: walletToConnect });
-      console.log("[DappKit] Connected to wallet:", walletToConnect.name);
+      log.info("[DappKit] Connected to wallet:", walletToConnect.name);
       localStorage.setItem(STORAGE_KEYS.CONNECTED, "true");
     } catch (error) {
-      console.error("[DappKit] Failed to connect wallet:", error);
+      log.error("[DappKit] Failed to connect wallet:", error);
     }
   };
 
   const handleDisconnect = () => {
     disconnectWallet();
     localStorage.removeItem(STORAGE_KEYS.CONNECTED);
-    console.log("[DappKit] Wallet disconnected");
+    log.info("[DappKit] Wallet disconnected");
   };
 
   // Auto-reconnect if user was previously connected (only once)

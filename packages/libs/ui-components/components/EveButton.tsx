@@ -1,5 +1,9 @@
 import React, { ButtonHTMLAttributes, FC, useEffect, useState } from "react";
 import { ButtonWrap, ButtonCorner } from "../assets";
+import { createLogger } from "@evefrontier/dapp-kit";
+
+const log = createLogger();
+
 interface EveButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant: "primary" | "secondary" | "tertiary" | "ghost";
   cooldown?: number;
@@ -25,7 +29,7 @@ const EveButton: FC<EveButtonProps> = ({ children, ...props }) => {
         }, cooldown);
       }
     } catch (error) {
-      console.error("Error in button click handler:", error);
+      log.error("Error in button click handler:", error);
     }
   };
 
