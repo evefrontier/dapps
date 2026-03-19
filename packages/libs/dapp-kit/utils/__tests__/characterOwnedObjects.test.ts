@@ -191,7 +191,10 @@ describe("getCharacterOwnedObjects", () => {
     const result = await getCharacterOwnedObjects("0xwallet");
 
     expect(result).toBeUndefined();
-    expect(warnSpy).toHaveBeenCalledWith(
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    const [merged] = warnSpy.mock.calls[0] as [string];
+    expect(merged).toMatch(/characterOwnedObjects/);
+    expect(merged).toContain(
       "[Dapp] No data returned from getCharacterAndOwnedObjects",
     );
     warnSpy.mockRestore();

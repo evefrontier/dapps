@@ -27,34 +27,43 @@ const getProcessObject = (): GlobalProcess | undefined => {
   }
 };
 
-const getProcessEnv = (): Record<string, string | undefined> | undefined => {
-  return getProcessObject()?.env;
+/** Inputs for {@link resolveLogLevelFromEnv} (mirrors Vite `import.meta.env`). */
+export type ResolveLogLevelFromEnvOptions = {
+  /** `import.meta.env.VITE_LOG_LEVEL` — when set to a valid level, overrides mode. */
+  viteLogLevel?: string | undefined;
+  /** `import.meta.env.MODE` — `production` → `error`, `test` → `warn`, else `debug`. */
+  viteMode?: string | undefined;
 };
 
-const resolveEnvLogLevel = (): LogLevel => {
-  const processEnv = getProcessEnv();
+/**
+ * Resolves log level from `VITE_LOG_LEVEL` (if a valid level) and Vite `MODE`.
+ * Exported for unit tests; {@link createLogger} uses the snapshot at module load.
+ */
+export function resolveLogLevelFromEnv(
+  options: ResolveLogLevelFromEnvOptions,
+): LogLevel {
+  const { viteLogLevel, viteMode } = options;
 
-  const explicitLevel =
-    import.meta.env.VITE_LOG_LEVEL ??
-    processEnv?.EVE_VAULT_LOG_LEVEL ??
-    processEnv?.LOG_LEVEL ??
-    processEnv?.NODE_ENV;
-
-  if (isLogLevel(explicitLevel)) {
-    return explicitLevel;
+  if (isLogLevel(viteLogLevel)) {
+    return viteLogLevel.toLowerCase() as LogLevel;
   }
 
-  const envMode = processEnv?.NODE_ENV;
-
-  if (envMode === "production") {
+  if (viteMode === "production") {
     return "error";
   }
 
-  if (envMode === "test") {
+  if (viteMode === "test") {
     return "warn";
   }
 
   return "debug";
+}
+
+const resolveEnvLogLevel = (): LogLevel => {
+  return resolveLogLevelFromEnv({
+    viteLogLevel: import.meta.env.VITE_LOG_LEVEL as string | undefined,
+    viteMode: import.meta.env.MODE as string | undefined,
+  });
 };
 
 const normalizeSeparators = (path: string): string => {
@@ -250,10 +259,21 @@ export const createLogger = ({
         prefixParts.push(`(${locationLabel})`);
       }
 
-      const finalArgs =
-        prefixParts.length > 0
-          ? ([prefixParts.join(" "), ...args] as unknown[])
-          : args;
+      const prefix = prefixParts.length > 0 ? prefixParts.join(" ") : "";
+      const finalArgs: unknown[] = (() => {
+        if (!prefix) {
+          return args;
+        }
+        if (args.length === 0) {
+          return [prefix];
+        }
+        // Merge prefix into the first argument when it's a string so the first
+        // arg remains the console format string (e.g. "%s …" still works).
+        if (typeof args[0] === "string") {
+          return [`${prefix} ${args[0]}`, ...args.slice(1)];
+        }
+        return [prefix, ...args];
+      })();
 
       method.apply(console, finalArgs);
     };
