@@ -1,4 +1,4 @@
-/** Aligns with vite-plugin-svgr `include: "**/*.svg"` + named ReactComponent export */
+/** Aligns with vite-plugin-svgr (include all .svg) + named ReactComponent export. */
 declare module "*.svg" {
   import * as React from "react";
   export const ReactComponent: React.FunctionComponent<
