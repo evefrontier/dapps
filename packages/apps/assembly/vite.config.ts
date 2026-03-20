@@ -8,7 +8,13 @@ import path from "path";
 export default defineConfig({
   plugins: [
     react(),
-    svgr(),
+    svgr({
+      include: "**/*.svg",
+      svgrOptions: {
+        exportType: "named",
+        namedExport: "ReactComponent",
+      },
+    }),
     babel({
       babelConfig: {
         plugins: ["babel-plugin-react-compiler"],
