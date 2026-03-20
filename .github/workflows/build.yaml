@@ -1,0 +1,39 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - 'package.json'
+      - 'nx.json'
+      - 'tsconfig.json'
+      - '.github/workflows/build.yaml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          package_json_file: package.json
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: |
+          pnpm nx run-many -t build --verbose --nxBail=true
+          pnpm nx run assembly:ci:build --verbose --nxBail=true
+        env:
+          CI: true
