@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+set -e
+ROOT=$(git rev-parse --show-toplevel)
+cd "$ROOT"
+
+pnpm audit
+pnpm --filter @evefrontier/dapp-kit test:run

@@ -4,31 +4,40 @@
   "engines": {
     "node": ">=22"
   },
+  "scripts": {
+    "prepare": "husky"
+  },
   "devDependencies": {
     "@nrwl/eslint-plugin-nx": "^19.8.4",
     "@nx/eslint": "18.0.4",
     "@nx/vite": "18.0.4",
     "@nx/web": "18.0.4",
-    "@types/node": "^20.19.13",
-    "@vitest/ui": "^1.6.1",
+    "@types/node": "^20.19.37",
+    "@vitest/ui": "^4.1.0",
     "eslint": "~8.48.0",
+    "husky": "^9.1.7",
     "nx": "18.0.4",
-    "typescript": "^5.9.2",
-    "vite": "^5.4.20",
-    "vitest": "^1.6.1"
+    "typescript": "^5.9.3",
+    "vite": "^6.3.5",
+    "vitest": "^4.1.0"
   },
   "pnpm": {
     "auditConfig": {
       "ignoreCves": [
         "CVE-2024-53384"
       ]
+    },
+    "overrides": {
+      "minimatch@<9.0.7 ": ">=9.0.7",
+      "js-yaml@4.1.0": "4.1.1",
+      "flatted@3.4.0": "3.4.2"
     }
   },
   "files": [
     "index.js"
   ],
   "dependencies": {
-    "@changesets/cli": "^2.29.8",
+    "@changesets/cli": "^2.30.0",
     "dotenv": "^16.6.1"
   },
   "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c",
@@ -39,7 +48,7 @@
     "tmp@<=0.2.3": ">=0.2.4",
     "@eveworld/ui-components": "file:packages/libs/ui-components",
     "@evefrontier/dapp-kit": "file:packages/libs/dapp-kit",
-    "js-yaml": "^4.1.0"
+    "js-yaml": ">=4.1.1"
   },
   "workspaces": [
     "packages/**/*",
