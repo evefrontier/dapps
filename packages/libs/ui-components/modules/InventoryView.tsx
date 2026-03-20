@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import {
   AssemblyType,
@@ -25,6 +25,48 @@ const InventoryView = React.memo(
       Map<number, DatahubGameInfo>
     >(new Map());
 
+    const inventoryItems = useMemo((): InventoryItem[] | undefined => {
+      if (!assembly) return undefined;
+      const { mainInventory, ephemeralInventories } = assembly.storage;
+      const entityOwner = isOwner(assembly, currentAddress);
+      const playerInventory = ephemeralInventories.find((x) =>
+        findOwnerByAddress(x.ownerId, currentAddress),
+      );
+      // If owner, return persistent storage items
+      // If player, return own ephemeral storage items
+      return entityOwner
+        ? mainInventory?.items?.map((item: any) => item)
+        : playerInventory?.ephemeralInventoryItems?.map((item) => item);
+    }, [assembly, currentAddress]);
+
+    // Stable primitive: only changes when the set of type_ids changes.
+    const typeIdsKey = useMemo(() => {
+      if (!inventoryItems?.length) return "";
+      return [...new Set(inventoryItems.map((item) => item.type_id))]
+        .sort((a, b) => a - b)
+        .join(",");
+    }, [inventoryItems]);
+
+    // Batch fetch all unique type_ids in parallel when inventory contents change.
+    useEffect(() => {
+      if (!typeIdsKey) {
+        setItemDetailsMap(new Map());
+        return;
+      }
+      const uniqueTypeIds = typeIdsKey.split(",").map(Number);
+      let cancelled = false;
+      Promise.all(
+        uniqueTypeIds.map((typeId) =>
+          getDatahubGameInfo(typeId).then((info) => [typeId, info] as const),
+        ),
+      ).then((results) => {
+        if (!cancelled) setItemDetailsMap(new Map(results));
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [typeIdsKey]);
+
     if (!assembly) return <></>;
 
     const { mainInventory, ephemeralInventories } = assembly.storage;
@@ -35,41 +77,12 @@ const InventoryView = React.memo(
       findOwnerByAddress(x.ownerId, currentAddress),
     );
 
-    // If owner, return persistent storage items
-    // If player, return own ephemeral storage items
-    const inventoryItems = isEntityOwner
-      ? mainInventory?.items?.map((item: any) => {
-          return item;
-        })
-      : playerInventory?.ephemeralInventoryItems?.map((item) => {
-          return item;
-        });
-
     const storageCap = isEntityOwner
       ? mainInventory?.capacity
       : playerInventory?.storageCapacity || mainInventory?.capacity; // Fallback to main inventory capacity if player inventory is undefined
     const usedCap = isEntityOwner
       ? mainInventory?.usedCapacity
       : playerInventory?.usedCapacity;
-
-    // Batch fetch all unique type_ids in parallel
-    useEffect(() => {
-      if (!inventoryItems || inventoryItems.length === 0) return;
-
-      // Get unique type_ids
-      const uniqueTypeIds = [
-        ...new Set(inventoryItems.map((item: InventoryItem) => item.type_id)),
-      ];
-
-      // Fetch all in parallel (getDatahubGameInfo has internal caching)
-      Promise.all(
-        uniqueTypeIds.map((typeId) =>
-          getDatahubGameInfo(typeId).then((info) => [typeId, info] as const),
-        ),
-      ).then((results) => {
-        setItemDetailsMap(new Map(results));
-      });
-    }, [inventoryItems]);
 
     return (
       <>
