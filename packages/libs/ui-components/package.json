@@ -18,7 +18,7 @@
     "@emotion/styled": "^11.14.1",
     "@evefrontier/dapp-kit": "workspace:*",
     "@mui/material": "^7.3.9",
-    "@mysten/wallet-standard": "^0.19.9",
+    "@mysten/wallet-standard": "^0.20.1",
     "react": "^19.2.4",
     "react-router-dom": "^6.30.3"
   },
