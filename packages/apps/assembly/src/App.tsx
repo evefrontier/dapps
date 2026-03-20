@@ -7,11 +7,10 @@ import {
   useNotification,
   useConnection,
   useSmartObject,
-  DetailedSmartCharacterResponse,
   getWalletCharacters,
-  transformToCharacter,
   parseCharacterFromJson,
   CharacterInfo,
+  createLogger,
 } from "@evefrontier/dapp-kit";
 import {
   EveConnectWallet,
@@ -24,6 +23,8 @@ import SkeletonConnect from "./components/skeletons/SkeletonConnect";
 
 import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { useEffect, useState } from "react";
+
+const log = createLogger();
 
 /**
  * Main App component that handles different rendering states based on connection and client status.
@@ -46,7 +47,7 @@ const App = () => {
       getWalletCharacters(currentAccount?.address).then((response) => {
         const data = response.data;
         if (!data) {
-          console.warn("[Dapp] No data returned from getWalletCharacters");
+          log.warn("[Dapp] No data returned from getWalletCharacters");
           return;
         }
         const json =
@@ -110,9 +111,9 @@ const App = () => {
    */
 
   if (assembly?.id) {
-    console.log(`[Dapp] Assembly %s connected`, assembly?.id);
+    log.info(`[Dapp] Assembly %s connected`, assembly?.id);
   } else {
-    console.warn("[Dapp] No assembly ID connected");
+    log.warn("[Dapp] No assembly ID connected");
   }
 
   return (

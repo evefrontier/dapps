@@ -18,7 +18,9 @@ import {
   SponsoredTransactionArgs,
 } from "../wallet";
 import { Assemblies, QueryParams, SponsoredTransactionActions } from "../types";
-import { TenantId } from "../utils";
+import { createLogger, TenantId } from "../utils";
+
+const log = createLogger();
 
 /** Wallet-like shape from dApp Kit (UiWallet or connection store). */
 type ResolvableWallet = {
@@ -419,7 +421,7 @@ export function useSponsoredTransaction({
         tenant,
       };
 
-      console.log("Sponsored Transaction Payload:", payload);
+      log.info("Sponsored Transaction Payload:", payload);
 
       let lastError: unknown;
       const maxAttempts = DEFAULT_MAX_RETRIES + 1;
@@ -428,8 +430,7 @@ export function useSponsoredTransaction({
           return await signSponsoredTransaction(payload);
         } catch (e) {
           lastError = e;
-          const canRetry =
-            attempt < maxAttempts && isRetryableSponsorError(e);
+          const canRetry = attempt < maxAttempts && isRetryableSponsorError(e);
           if (!canRetry) throw e;
           await delay(DEFAULT_RETRY_DELAY_MS);
         }

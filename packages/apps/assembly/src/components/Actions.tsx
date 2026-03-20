@@ -11,11 +11,14 @@ import {
   useSponsoredTransaction,
   Severity,
   useNotification,
+  createLogger,
 } from "@evefrontier/dapp-kit";
 import { EveButton } from "@eveworld/ui-components";
 
 import { bringOffline } from "../functions/bringOffline";
 import { bringOnline } from "../functions/bringOnline";
+
+const log = createLogger();
 
 /**
  * Handles actions for a smart storage unit, such as editing unit details, bringing online/offline, and accessing dApp link.
@@ -102,7 +105,7 @@ const Actions = React.memo(
             sendSponsoredTransaction,
           });
 
-          console.log("bringOnline result", result);
+          log.info("bringOnline result", result);
           if (result?.digest) {
             notify({
               type: Severity.Success,
@@ -118,7 +121,7 @@ const Actions = React.memo(
             sendSponsoredTransaction,
           });
 
-          console.log("bringOffline result", result);
+          log.info("bringOffline result", result);
           if (result?.digest) {
             notify({
               type: Severity.Success,

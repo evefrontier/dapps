@@ -17,6 +17,9 @@ import { getAssemblyType, parseStatus } from "./mapping";
 import { getDatahubGameInfo } from "./datahub";
 import { getEnergyConfig, getEnergyUsageForType } from "./config";
 import { getObjectWithJson } from "../graphql";
+import { createLogger } from "./logger";
+
+const log = createLogger();
 
 /**
  * Transform CharacterInfo to DetailedSmartCharacterResponse
@@ -67,7 +70,7 @@ export async function transformToAssembly(
   const rawData = moveObject.contents?.json as unknown as RawSuiObjectData;
 
   if (!rawData) {
-    console.warn("[DappKit] transformToAssembly: No raw data found");
+    log.warn("[DappKit] transformToAssembly: No raw data found");
     return null;
   }
 

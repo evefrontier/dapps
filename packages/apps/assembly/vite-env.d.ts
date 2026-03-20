@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_OBJECT_ID?: string;
   /** Optional port for dev server */
   readonly VITE_PORT?: string;
+  /** Optional log level */
+  readonly VITE_LOG_LEVEL?: string;
 }
 
 interface ImportMeta {

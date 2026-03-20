@@ -17,6 +17,7 @@ import {
 import { DEFAULT_TENANT, POLLING_INTERVAL } from "../utils/constants";
 import { getAssemblyWithOwner, MoveObjectData } from "../graphql";
 import {
+  createLogger,
   getObjectId,
   transformToAssembly,
   transformToCharacter,
@@ -24,6 +25,8 @@ import {
 import { getDatahubGameInfo } from "../utils/datahub";
 import { useConnection } from "../hooks/useConnection";
 import { SmartObjectContextType } from "../types";
+
+const log = createLogger();
 
 /** Input for fetching object data: either itemId + tenant (derive object ID) or a Sui object ID directly.
  * @category Types
@@ -91,7 +94,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
         const objectId = hasItemId
           ? await getObjectId(input.itemId, input.selectedTenant)
           : input.objectId;
-        console.log(
+        log.info(
           "[DappKit] SmartObjectProvider: Fetching object:",
           hasItemId
             ? { itemId: input.itemId, selectedTenant: input.selectedTenant }
@@ -107,7 +110,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
         } = await getAssemblyWithOwner(objectId);
 
         if (!moveObject) {
-          console.warn(
+          log.warn(
             "[DappKit] SmartObjectProvider: Object not found or not a Move object",
           );
           setAssembly(null);
@@ -125,7 +128,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
 
         // Only update state if the data changed (optimization for polling)
         if (isInitialFetch || lastDataHashRef.current !== dataHash) {
-          console.log("[DappKit] SmartObjectProvider: Object data updated");
+          log.info("[DappKit] SmartObjectProvider: Object data updated");
           lastDataHashRef.current = dataHash;
 
           // Extract typeId from the raw JSON to fetch datahub info
@@ -139,7 +142,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
           try {
             datahubInfo = await getDatahubGameInfo(parseInt(typeId, 10));
           } catch (err) {
-            console.warn(
+            log.warn(
               "[DappKit] SmartObjectProvider: Failed to fetch datahub info:",
               err,
             );
@@ -169,7 +172,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
         }
         setError(null);
       } catch (err: unknown) {
-        console.error("[DappKit] SmartObjectProvider: Query error:", err);
+        log.error("[DappKit] SmartObjectProvider: Query error:", err);
         setError(err instanceof Error ? err.message : "Failed to fetch object");
       } finally {
         if (isInitialFetch) {
@@ -183,7 +186,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
   // Initialize the object ID (env or query params) and tenant (query params).
   // Tenant comes from URL ?tenant= with fallback DEFAULT_TENANT.
   useEffect(() => {
-    console.log("[DappKit] SmartObjectProvider: Checking for item ID");
+    log.info("[DappKit] SmartObjectProvider: Checking for item ID");
 
     const queryParams = new URLSearchParams(window.location.search);
     const queryTenant =
@@ -193,7 +196,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
     const envObjectId = import.meta.env.VITE_OBJECT_ID;
 
     if (envObjectId) {
-      console.log(
+      log.info(
         "[DappKit] SmartObjectProvider: Using Sui object ID from env:",
         envObjectId,
       );
@@ -211,7 +214,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
       setSelectedTenant(queryTenant);
       setIsObjectIdDirect(false);
     } else {
-      console.error("[DappKit] SmartObjectProvider: No object ID provided");
+      log.error("[DappKit] SmartObjectProvider: No object ID provided");
       setLoading(false);
     }
   }, []);
@@ -235,7 +238,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
       fetchObjectData(input, false);
     }, POLLING_INTERVAL);
 
-    console.log(
+    log.info(
       "[DappKit] SmartObjectProvider: Started polling for object:",
       selectedObjectId,
     );
@@ -244,7 +247,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
       if (pollingRef.current) {
         clearInterval(pollingRef.current);
         pollingRef.current = null;
-        console.log("[DappKit] SmartObjectProvider: Stopped polling");
+        log.info("[DappKit] SmartObjectProvider: Stopped polling");
       }
       lastDataHashRef.current = null;
     };
