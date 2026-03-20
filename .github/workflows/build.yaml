@@ -5,6 +5,11 @@ on:
     branches: [main]
     paths:
       - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - 'package.json'
+      - 'nx.json'
+      - 'tsconfig.json'
+      - '.github/workflows/build.yaml'
 
 jobs:
   build:
@@ -36,6 +41,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: pnpm nx run-many -t ci:build --verbose --nxBail=true
+        run: |
+          pnpm nx run-many -t build --verbose --nxBail=true
+          pnpm nx run assembly:ci:build --verbose --nxBail=true
         env:
           CI: true
