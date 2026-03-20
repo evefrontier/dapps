@@ -69,7 +69,7 @@ const InventoryView = React.memo(
       ).then((results) => {
         setItemDetailsMap(new Map(results));
       });
-    }, [inventoryItems]);
+    }, []);
 
     return (
       <>
