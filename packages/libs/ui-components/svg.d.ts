@@ -1,7 +1,4 @@
-/// <reference types="vite/client" />
-/// <reference types="vite-plugin-svgr/client" />
-
-/** Matches vite-plugin-svgr + svgrOptions { exportType: "named", namedExport: "ReactComponent" } */
+/** Aligns with vite-plugin-svgr `include: "**/*.svg"` + named ReactComponent export */
 declare module "*.svg" {
   import * as React from "react";
   export const ReactComponent: React.FunctionComponent<
