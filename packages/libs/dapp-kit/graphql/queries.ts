@@ -292,7 +292,7 @@ export const GET_OWNED_OBJECTS_BY_PACKAGE = `
     objects(
       filter: {
         owner: $owner
-        type: { package: $packageId }
+        type: $packageId
       }
     ) {
       nodes {
