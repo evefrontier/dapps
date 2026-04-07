@@ -1,5 +1,11 @@
 # @evefrontier/dapp-kit
 
+## 0.1.8
+
+### Patch Changes
+
+- update test server configs
+
 ## 0.1.7
 
 ### Patch Changes
