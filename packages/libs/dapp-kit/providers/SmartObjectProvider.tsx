@@ -69,7 +69,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const pollingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastDataHashRef = useRef<string | null>(null);
 
   const { isConnected } = useConnection();

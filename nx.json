@@ -1,17 +1,27 @@
 {
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["{workspaceRoot}/build_outputs/{projectRoot}/dist"],
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "{workspaceRoot}/build_outputs/{projectRoot}/dist"
+      ],
       "cache": true
     },
     "lint": {
-      "dependsOn": ["^lint"],
+      "dependsOn": [
+        "^lint"
+      ],
       "cache": true
     },
     "ci:build": {
-      "dependsOn": ["^build"],
-      "outputs": ["{workspaceRoot}/build_outputs/{projectRoot}/dist"],
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "{workspaceRoot}/build_outputs/{projectRoot}/dist"
+      ],
       "cache": true
     }
   },
@@ -35,9 +45,14 @@
     }
   ],
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
     "sharedGlobals": [],
-    "production": ["default"]
+    "production": [
+      "default"
+    ]
   },
   "projects": {
     "assembly": {
@@ -45,7 +60,9 @@
       "targets": {
         "ci:build": {
           "executor": "@nx/vite:build",
-          "outputs": ["{workspaceRoot}/build_outputs/assembly/dist"],
+          "outputs": [
+            "{workspaceRoot}/build_outputs/assembly/dist"
+          ],
           "options": {
             "outputPath": "build_outputs/assembly/dist",
             "mode": "production"
@@ -53,5 +70,6 @@
         }
       }
     }
-  }
+  },
+  "analytics": true
 }

@@ -29,7 +29,7 @@ packages/**/.env
 # Include test config files in check-in
 !packages/**/**/tests/**/*.js
 
-.nx/cache
+.nx/**
 .idea
 
 # Ignore these copied files for npm publish
