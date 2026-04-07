@@ -1,7 +1,69 @@
 /* Base imports */
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import "tailwindcss";
+
+@theme {
+  --font-favorit: "Favorit", monospace;
+  --font-disket: "Frontier Disket Mono", monospace;
+
+  --text-2xs: 0.625rem;
+  --text-sm: 0.875rem;
+  --text-sm--letter-spacing: -0.035rem;
+
+  --color-neutral: hsla(60, 68%, 94%, 1);
+  --color-neutral-90: hsla(60, 68%, 94%, 0.9);
+  --color-neutral-80: hsla(60, 68%, 94%, 0.8);
+  --color-neutral-70: hsla(60, 68%, 94%, 0.7);
+  --color-neutral-60: hsla(60, 68%, 94%, 0.6);
+  --color-neutral-50: hsla(60, 68%, 94%, 0.5);
+  --color-neutral-40: hsla(60, 68%, 94%, 0.4);
+  --color-neutral-30: hsla(60, 68%, 94%, 0.3);
+  --color-neutral-20: hsla(60, 68%, 94%, 0.2);
+  --color-neutral-10: hsla(60, 68%, 94%, 0.1);
+  --color-neutral-5: hsla(60, 68%, 94%, 0.05);
+
+  --color-martianred: hsla(17, 100%, 50%, 1);
+  --color-martianred-60: hsla(17, 100%, 50%, 0.6);
+  --color-martianred-50: hsla(17, 100%, 50%, 0.5);
+  --color-martianred-40: hsla(17, 100%, 50%, 0.4);
+  --color-martianred-30: hsla(17, 100%, 50%, 0.3);
+  --color-martianred-20: hsla(17, 100%, 50%, 0.2);
+  --color-martianred-10: hsla(17, 100%, 50%, 0.1);
+
+  --color-alert: hsla(232, 89%, 45%, 1);
+  --color-alert-80: hsla(232, 89%, 45%, 0.8);
+
+  --color-crude: hsla(0, 0%, 4%, 1);
+  --color-crude-80: hsla(0, 0%, 4%, 0.8);
+  --color-crude-60: hsla(0, 0%, 4%, 0.6);
+  --color-crude-50: hsla(0, 0%, 4%, 0.5);
+  --color-crude-2: hsla(223, 7%, 58%, 1);
+  --color-crude-3: hsla(222, 5%, 52%, 1);
+  --color-crude-5: hsla(0, 0%, 4%, 0.5);
+  --color-crude-7: hsla(225, 5%, 16%, 1);
+  --color-crude-9: hsla(210, 5%, 8%, 1);
+
+  --color-quantum: hsl(43, 100%, 59%);
+  --color-quantum-2: hsla(43, 100%, 59%, 70%);
+  --color-quantum-8: hsla(23, 95%, 40%, 0.8);
+  --color-quantum-btn: hsla(43, 100%, 59%, 30%);
+
+  --color-grayneutral: hsla(55, 9%, 51%, 1);
+}
+
+@utility blur-bg {
+  @apply bg-crude-60;
+  backdrop-filter: blur(32px);
+}
+
+@utility blur-bg-sm {
+  @apply bg-crude-80;
+  backdrop-filter: blur(1.5px);
+}
+
+@utility blur-bg-alert {
+  background-color: hsla(238, 91%, 11%, 0.8);
+  backdrop-filter: blur(1.5px);
+}
 
 /* ==========================================================================
    Base Styles
@@ -103,35 +165,19 @@ body,
 
   /* Menu Dropdown */
   #menu-dropdown {
-    @apply top-full w-full p-0 z-50 bg-crude-60 blur-bg border border-neutral-30;
+    @apply top-full w-full p-0 z-50 blur-bg border border-neutral-30;
   }
 
   .menu-dropdown-item {
-    @apply p-2 blur-bg font-favorit !text-neutral-60 font-light;
+    @apply p-2 blur-bg font-favorit text-neutral-60! font-light;
   }
 
   .menu-dropdown-item:hover {
-    @apply bg-neutral-5 !text-neutral;
+    @apply bg-neutral-5 text-neutral!;
   }
 
   /* Layout Utilities */
   .Absolute-Center {
     @apply absolute mx-auto left-0 right-0;
-  }
-
-  /* Background Effects */
-  .blur-bg {
-    @apply bg-crude-60;
-    backdrop-filter: blur(32px);
-  }
-
-  .blur-bg-sm {
-    @apply bg-crude-80;
-    backdrop-filter: blur(1.5px);
-  }
-
-  .blur-bg-alert {
-    background-color: hsla(238, 91%, 11%, 0.8);
-    backdrop-filter: blur(1.5px);
   }
 }
