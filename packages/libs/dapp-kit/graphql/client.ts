@@ -38,7 +38,7 @@ import {
   GET_OBJECT_WITH_JSON,
   GET_SINGLETON_CONFIG_OBJECT_BY_TYPE,
 } from "./queries";
-import { createLogger } from "../utils";
+import { createLogger } from "../utils/logger";
 
 const log = createLogger();
 
