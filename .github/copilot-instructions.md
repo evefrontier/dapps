@@ -257,7 +257,7 @@ VITE_EVE_WORLD_PACKAGE_ID=0x...
 VITE_OBJECT_ID=                      # Optional: override assembly Sui object ID from env
 ```
 
-**Tenant (query param):** The runtime resolves tenant from the URL query param `?tenant=` with a fallback (e.g. `"testevenet"`). Document and code should assume tenant comes from the URL (or explicit caller-provided value), not from env.
+**Tenant (query param):** The runtime resolves tenant from the URL query param `?tenant=` with a fallback (e.g. `"tauceti"`). Document and code should assume tenant comes from the URL (or explicit caller-provided value), not from env.
 
 **Review Checklist:**
 
@@ -353,7 +353,7 @@ describe("getObjectId", () => {
     });
 
     const { getObjectId } = await import("../mapping");
-    const result = await getObjectId("12345", "testevenet");
+    const result = await getObjectId("12345", "tauceti");
 
     expect(result).toBe("0x...");
   });

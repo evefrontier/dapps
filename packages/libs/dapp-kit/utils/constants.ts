@@ -164,7 +164,7 @@ export interface TenantConfig {
   datahubHost: string;
 }
 
-/** Single source of truth for the four tenants (package ID + datahub host).
+/** Single source of truth for the six tenants (package ID + datahub host).
  * Corresponds to world contracts v0.0.18
  * @category Constants
  */

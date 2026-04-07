@@ -298,7 +298,7 @@ describe("mapping utilities", () => {
     it("works with new SSUID", () => {
       const key = TenantItemIdBcs.serialize({
         item_id: 1000000012533,
-        tenant: "testevenet",
+        tenant: "tauceti",
       }).toBytes();
 
       const result = deriveObjectID(
@@ -308,7 +308,7 @@ describe("mapping utilities", () => {
       );
 
       expect(result).toBe(
-        "0x4c2d7222607d8d46bb6fe03a58e4488a79b598a6c2931d87f933d86dc0557233",
+        "0xd4e78bd8312d46b58ad8acb0a352c278384914c705fd90968bef5eb8c44cb667",
       );
     });
 
@@ -380,7 +380,7 @@ describe("mapping utilities", () => {
       const { getObjectId } = await import("../mapping");
       const itemId = "12345";
 
-      const objectId = await getObjectId(itemId, "testevenet");
+      const objectId = await getObjectId(itemId, "tauceti");
 
       expect(getSingletonObjectByType).toHaveBeenCalledWith(
         getObjectRegistryType(),
@@ -392,7 +392,7 @@ describe("mapping utilities", () => {
     it("uses OBJECT registry type when specified", async () => {
       const { getObjectId } = await import("../mapping");
 
-      await getObjectId("12345", "testevenet");
+      await getObjectId("12345", "tauceti");
 
       expect(getSingletonObjectByType).toHaveBeenCalledWith(
         getObjectRegistryType(),
@@ -402,7 +402,7 @@ describe("mapping utilities", () => {
     it("uses default OBJECT registry type when not specified", async () => {
       const { getObjectId } = await import("../mapping");
 
-      await getObjectId("12345", "testevenet");
+      await getObjectId("12345", "tauceti");
 
       expect(getSingletonObjectByType).toHaveBeenCalledWith(
         getObjectRegistryType(),
@@ -420,7 +420,7 @@ describe("mapping utilities", () => {
 
       const { getObjectId } = await import("../mapping");
 
-      await expect(getObjectId("12345", "testevenet")).rejects.toThrow(
+      await expect(getObjectId("12345", "tauceti")).rejects.toThrow(
         `ObjectRegistry not found for type: ${getObjectRegistryType()}`,
       );
     });
@@ -428,9 +428,9 @@ describe("mapping utilities", () => {
     it("caches registry address across multiple calls", async () => {
       const { getObjectId } = await import("../mapping");
 
-      await getObjectId("12345", "testevenet");
-      await getObjectId("67890", "testevenet");
-      await getObjectId("11111", "testevenet");
+      await getObjectId("12345", "tauceti");
+      await getObjectId("67890", "tauceti");
+      await getObjectId("11111", "tauceti");
 
       // Should only fetch registry once (cached)
       expect(getSingletonObjectByType).toHaveBeenCalledTimes(1);
