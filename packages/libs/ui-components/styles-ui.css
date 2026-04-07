@@ -1,3 +1,5 @@
+@reference "./styles.css";
+
 /* Loading Animation */
 @keyframes colorChange {
   0% {
@@ -74,11 +76,11 @@
 }
 
 .Eve-Scrollbar {
-  @apply p-[1px] border border-martianred absolute top-0 right-0 h-full w-[0.5rem];
+  @apply p-px border border-martianred absolute top-0 right-0 h-full w-2;
 }
 
 .Eve-Scroll-Thumb {
-  @apply bg-martianred relative w-[0.25rem];
+  @apply bg-martianred relative w-1;
   border-radius: 0px;
 }
 
@@ -88,7 +90,7 @@ button.Eve-Button {
 }
 
 button.Eve-Button-cancel {
-  @apply !bg-neutral-10 !text-neutral hover:!bg-neutral-20 !font-normal;
+  @apply bg-neutral-10! text-neutral! hover:bg-neutral-20! font-normal!;
 }
 
 button.Eve-Button.primary,
@@ -168,7 +170,7 @@ button.Eve-Button.tertiary:disabled {
 div.MuiFormControl-root.MuiTextField-root,
 .base-NumberInput-root,
 .Eve-Numerical-Input-input {
-  @apply !rounded-none !p-2 border border-neutral-10 bg-neutral-5;
+  @apply rounded-none! p-2! border border-neutral-10 bg-neutral-5;
   border: 1px solid hsla(60, 68%, 94%, 0.1);
 }
 
@@ -223,11 +225,11 @@ div.MuiInputBase-root.MuiOutlinedInput-root,
 }
 
 .empty-span-full:has(+ #Eve-Assembly-Module:empty) {
-  @apply !col-span-full grid;
+  @apply col-span-full! grid;
 }
 
 .hover-parent:hover .hover-block {
-  @apply !block;
+  @apply block!;
 }
 
 .Eve-Copy.clicked {
