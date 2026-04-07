@@ -90,8 +90,10 @@ export const DEFAULT_GRAPHQL_NETWORK: SuiGraphqlNetwork = "testnet";
 export enum TenantId {
   UTOPIA = "utopia",
   STILLNESS = "stillness",
-  TESTEVENET = "testevenet",
-  NEBULA = "nebula",
+  TAUCETI = "tauceti",
+  TIAKI = "tiaki",
+  TETRA = "tetra",
+  TESSERACT = "tesseract",
 }
 
 /** Tenant when not provided via URL ?tenant= (e.g. dev/default chain).
@@ -162,24 +164,38 @@ export interface TenantConfig {
   datahubHost: string;
 }
 
-/** Single source of truth for the four tenants (package ID + datahub host).
+/** Single source of truth for the six tenants (package ID + datahub host).
  * Corresponds to world contracts v0.0.18
  * @category Constants
  */
 export const TENANT_CONFIG: Record<TenantId, TenantConfig> = {
-  [TenantId.NEBULA]: {
+  [TenantId.TAUCETI]: {
     packageId:
       "0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1",
     evePackageId:
       "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9",
-    datahubHost: "world-api-nebula.test.evefrontier.tech",
+    datahubHost: "world-api-tauceti.test.priv.evefrontier.com",
   },
-  [TenantId.TESTEVENET]: {
+  [TenantId.TIAKI]: {
     packageId:
       "0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1",
     evePackageId:
       "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9",
-    datahubHost: "world-api-testevenet.test.evefrontier.tech",
+    datahubHost: "world-api-tiaki.test.priv.evefrontier.com",
+  },
+  [TenantId.TESSERACT]: {
+    packageId:
+      "0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1",
+    evePackageId:
+      "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9",
+    datahubHost: "world-api-tesseract.test.priv.evefrontier.com",
+  },
+  [TenantId.TETRA]: {
+    packageId:
+      "0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1",
+    evePackageId:
+      "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9",
+    datahubHost: "world-api-tetra.test.priv.evefrontier.com",
   },
   [TenantId.UTOPIA]: {
     packageId:

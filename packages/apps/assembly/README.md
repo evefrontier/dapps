@@ -75,10 +75,10 @@ pnpm lint:fix      # Fix issues automatically
 
 This project is automatically deployed to AWS Amplify. The deployment is configured to build from the latest commit on each of the following branches:
 
-- `stillness` - Production / Live tier environment
-- `nova` - Production / Live tier environment
-- `nebula` - Development environment
-- `oblivion`
+- `live` - Production / Live tier environment
+- `uat` - Staging environment
+- `test` - Test environment
+- `dev`
 
 Each branch will automatically trigger a new build and deployment when changes are pushed. The build process includes:
 

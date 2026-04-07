@@ -22,12 +22,12 @@ describe("resolveTenantFromSearch (tenant resolution)", () => {
     expect(resolveTenantFromSearch("?tenant=  stillness  ")).toBe(
       TenantId.STILLNESS,
     );
-    expect(resolveTenantFromSearch("?tenant=nebula  ")).toBe(TenantId.NEBULA);
+    expect(resolveTenantFromSearch("?tenant=tauceti  ")).toBe(TenantId.TAUCETI);
   });
 
   it("returns trimmed known tenant from param", () => {
-    expect(resolveTenantFromSearch(`?${QueryParams.TENANT}=nebula`)).toBe(
-      TenantId.NEBULA,
+    expect(resolveTenantFromSearch(`?${QueryParams.TENANT}=tauceti`)).toBe(
+      TenantId.TAUCETI,
     );
     expect(resolveTenantFromSearch(`?${QueryParams.TENANT}=utopia`)).toBe(
       TenantId.UTOPIA,
@@ -45,10 +45,14 @@ describe("resolveDatahubHost (host fallback)", () => {
     expect(resolveDatahubHost(TenantId.STILLNESS)).toBe(
       DATAHUB_BY_TENANT.stillness,
     );
-    expect(resolveDatahubHost(TenantId.NEBULA)).toBe(DATAHUB_BY_TENANT.nebula);
+    expect(resolveDatahubHost(TenantId.TAUCETI)).toBe(
+      DATAHUB_BY_TENANT.tauceti,
+    );
     expect(resolveDatahubHost(TenantId.UTOPIA)).toBe(DATAHUB_BY_TENANT.utopia);
-    expect(resolveDatahubHost(TenantId.TESTEVENET)).toBe(
-      DATAHUB_BY_TENANT.testevenet,
+    expect(resolveDatahubHost(TenantId.TIAKI)).toBe(DATAHUB_BY_TENANT.tiaki);
+    expect(resolveDatahubHost(TenantId.TETRA)).toBe(DATAHUB_BY_TENANT.tetra);
+    expect(resolveDatahubHost(TenantId.TESSERACT)).toBe(
+      DATAHUB_BY_TENANT.tesseract,
     );
   });
 });
