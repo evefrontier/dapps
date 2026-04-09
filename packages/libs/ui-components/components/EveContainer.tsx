@@ -66,19 +66,17 @@ const EveContainer: React.FC<EveContainerProps> = ({
     >
       {renderCorners()}
       {statusTextTop && (
-          <div className="text-sm font-disket bg-alert p-2">
-            {statusTextTop}
-          </div>
-        )}
+        <div className="text-sm font-disket bg-alert p-2">{statusTextTop}</div>
+      )}
       <div className="flex flex-col gap-2 w-full">
         {renderHeader()}
         {children}
       </div>
-              {statusTextBottom && (
-          <div className="text-sm font-disket bg-alert text-center p-1">
-            {statusTextBottom}
-          </div>
-        )}
+      {statusTextBottom && (
+        <div className="text-sm font-disket bg-alert text-center p-1">
+          {statusTextBottom}
+        </div>
+      )}
     </div>
   );
 };

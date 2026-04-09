@@ -1,8 +1,9 @@
-import react from "@vitejs/plugin-react-swc";
-import babel from "vite-plugin-babel";
-import { defineConfig } from "vite";
-import svgr from "vite-plugin-svgr";
 import path from "path";
+
+import react from "@vitejs/plugin-react-swc";
+import { defineConfig } from "vite";
+import babel from "vite-plugin-babel";
+import svgr from "vite-plugin-svgr";
 
 // https://vitejs.dev/config/
 export default defineConfig({

@@ -1,5 +1,3 @@
-import React from "react";
-
 import {
   useSmartObject,
   useConnection,
@@ -13,6 +11,8 @@ import {
   useNotification,
   createLogger,
 } from "@evefrontier/dapp-kit";
+import React from "react";
+
 import { EveButton } from "@eveworld/ui-components";
 
 import { bringOffline } from "../functions/bringOffline";

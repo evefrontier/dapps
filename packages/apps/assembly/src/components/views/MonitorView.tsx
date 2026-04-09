@@ -1,6 +1,3 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import React from "react";
-
 import {
   useSmartObject,
   Assemblies,
@@ -14,6 +11,9 @@ import {
   getAdjustedBurnRate,
   createLogger,
 } from "@evefrontier/dapp-kit";
+import { useState, useRef, useEffect, useCallback } from "react";
+import React from "react";
+
 import { EveButton } from "@eveworld/ui-components";
 import { ButtonCorner } from "@eveworld/ui-components/assets";
 
@@ -295,7 +295,7 @@ const MonitorView = React.memo(() => {
               {formatDuration(
                 isNegativeTime || (!isOnline && !canStartBurn)
                   ? 0
-                  : frozenTimeRemaining ?? timeRemaining,
+                  : (frozenTimeRemaining ?? timeRemaining),
               )}
             </div>
           </div>

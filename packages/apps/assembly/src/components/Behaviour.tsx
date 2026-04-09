@@ -1,6 +1,3 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
-
 import {
   useNotification,
   useSmartObject,
@@ -8,6 +5,10 @@ import {
   AssemblyType,
   getDappUrl,
 } from "@evefrontier/dapp-kit";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
+
 import {
   InventoryView,
   GateView,
@@ -16,8 +17,6 @@ import {
   TurretView,
   Graph,
 } from "@eveworld/ui-components";
-
-import { useCurrentAccount } from "@mysten/dapp-kit-react";
 
 interface DappIframeProps {
   assembly: AssemblyType<Assemblies>;
@@ -47,7 +46,6 @@ const DappIframe: React.FC<DappIframeProps> = ({ assembly }) => (
 interface ModuleRendererProps {
   assembly: AssemblyType<Assemblies>;
   currentAddress: `0x${string}`;
-  notify: any;
   selectedSmartGate: string | undefined;
   setSelectedSmartGate: (id: string) => void;
   showContainer: boolean;
@@ -56,7 +54,6 @@ interface ModuleRendererProps {
 const ModuleRenderer: React.FC<ModuleRendererProps> = ({
   assembly,
   currentAddress,
-  setSelectedSmartGate,
   showContainer = true,
 }) => {
   const isNetworkNode = assembly.type === Assemblies.NetworkNode;

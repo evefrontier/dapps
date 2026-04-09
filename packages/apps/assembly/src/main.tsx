@@ -1,9 +1,10 @@
+import { EveFrontierProvider } from "@evefrontier/dapp-kit";
 import { ThemeProvider, createTheme } from "@mui/material";
+import { QueryClient } from "@tanstack/react-query";
 import ReactDOM from "react-dom/client";
 import { ErrorBoundary } from "react-error-boundary";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import { EveFrontierProvider } from "@evefrontier/dapp-kit";
 import { ErrorNotice, ErrorNoticeTypes } from "@eveworld/ui-components";
 
 import BehaviourView from "./components/views/BehaviourView";
@@ -12,7 +13,6 @@ import Overview from "./components/views/Overview";
 import RootView from "./components/views/RootView";
 
 import App from "./App";
-import { QueryClient } from "@tanstack/react-query";
 
 const darkTheme = createTheme({
   palette: {

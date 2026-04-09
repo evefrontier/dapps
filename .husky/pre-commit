@@ -4,4 +4,5 @@ ROOT=$(git rev-parse --show-toplevel)
 cd "$ROOT"
 
 pnpm audit
+pnpm nx run-many -t lint --verbose --nxBail=true
 pnpm --filter @evefrontier/dapp-kit test:run

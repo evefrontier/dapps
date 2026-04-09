@@ -1,8 +1,6 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": [
-    "./index.ts"
-  ],
+  "entryPoints": ["./index.ts"],
   "entryPointStrategy": "expand",
   "out": "./docs/api",
   "name": "@evefrontier/dapp-kit",
@@ -39,9 +37,7 @@
     "includeCategories": true,
     "includeGroups": true
   },
-  "sort": [
-    "source-order"
-  ],
+  "sort": ["source-order"],
   "visibilityFilters": {
     "protected": false,
     "private": false,

@@ -17,6 +17,5 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["./**/*.ts", "./**/*.tsx", "./vite-env.d.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "vitest.config.ts"]
 }
-

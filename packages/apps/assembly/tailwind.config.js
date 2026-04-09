@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   presets: [require("@eveworld/ui-components/eveStyles.config")],
   content: [
     "*",

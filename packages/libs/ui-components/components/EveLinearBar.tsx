@@ -30,7 +30,7 @@ const EveLinearBar = React.memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 export default React.memo(EveLinearBar);

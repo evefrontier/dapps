@@ -1,10 +1,10 @@
-import React, { useEffect } from "react";
-
 import {
   useSmartObject,
   useNotification,
   Severity,
 } from "@evefrontier/dapp-kit";
+import React, { useEffect } from "react";
+
 import {
   ErrorNotice,
   ErrorNoticeTypes,
