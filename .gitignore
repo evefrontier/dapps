@@ -3,6 +3,7 @@ node_modules
 .npmrc
 
 build_outputs
+coverage
 
 # Ignores lerna debug
 lerna-debug.log

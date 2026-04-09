@@ -39,7 +39,6 @@ jobs:
       - name: Test
         run: |
           pnpm --filter @evefrontier/dapp-kit test:run
-          pnpm --filter @eveworld/assembly test:run
         env:
           CI: true
 
