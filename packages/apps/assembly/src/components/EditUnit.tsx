@@ -1,4 +1,5 @@
 import {
+  useConnection,
   useSmartObject,
   useNotification,
   isOwner,
@@ -37,6 +38,7 @@ const log = createLogger();
 const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
   const [isEdited, setIsEdited] = useState<boolean>(false);
 
+  const { currentAccount } = useConnection();
   const { notify } = useNotification();
   const { assembly, refetch } = useSmartObject();
 
@@ -131,7 +133,7 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
         }}
         className=""
         onClick={() => handleSave()}
-        disabled={!isOwner || !isEdited}
+        disabled={!isOwner(assembly, currentAccount?.address) || !isEdited}
         id="send-save-tx"
       >
         Save
