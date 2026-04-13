@@ -1,6 +1,3 @@
-import React, { useState } from "react";
-import { useLocation, useOutletContext } from "react-router-dom";
-
 import {
   AssemblyType,
   Assemblies,
@@ -8,6 +5,9 @@ import {
   State,
   CharacterInfo,
 } from "@evefrontier/dapp-kit";
+import React, { useState } from "react";
+import { useLocation, useOutletContext } from "react-router-dom";
+
 import { AssemblyInfo, EveContainer, Divider } from "@eveworld/ui-components";
 
 import Actions from "../Actions";

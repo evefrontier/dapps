@@ -61,7 +61,7 @@ const ErrorNotice = React.memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 export default React.memo(ErrorNotice);

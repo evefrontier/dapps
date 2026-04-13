@@ -81,8 +81,9 @@ export enum Assemblies {
 }
 
 /** @category Types */
-export interface AssemblyProperties<T extends Assemblies>
-  extends DetailedAssemblyResponse {
+export interface AssemblyProperties<
+  T extends Assemblies,
+> extends DetailedAssemblyResponse {
   type: T;
 }
 

@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
-
 import {
-  useNotification,
   useSmartObject,
   Assemblies,
   AssemblyType,
   getDappUrl,
 } from "@evefrontier/dapp-kit";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
+
 import {
   InventoryView,
   GateView,
@@ -16,8 +16,6 @@ import {
   TurretView,
   Graph,
 } from "@eveworld/ui-components";
-
-import { useCurrentAccount } from "@mysten/dapp-kit-react";
 
 interface DappIframeProps {
   assembly: AssemblyType<Assemblies>;
@@ -47,7 +45,6 @@ const DappIframe: React.FC<DappIframeProps> = ({ assembly }) => (
 interface ModuleRendererProps {
   assembly: AssemblyType<Assemblies>;
   currentAddress: `0x${string}`;
-  notify: any;
   selectedSmartGate: string | undefined;
   setSelectedSmartGate: (id: string) => void;
   showContainer: boolean;
@@ -56,7 +53,6 @@ interface ModuleRendererProps {
 const ModuleRenderer: React.FC<ModuleRendererProps> = ({
   assembly,
   currentAddress,
-  setSelectedSmartGate,
   showContainer = true,
 }) => {
   const isNetworkNode = assembly.type === Assemblies.NetworkNode;
@@ -148,7 +144,6 @@ const Behaviour = React.memo((): React.JSX.Element => {
   >(undefined);
   const { assembly } = useSmartObject();
   const currentAccount = useCurrentAccount();
-  const { notify } = useNotification();
   const showContainer = !useLocation().pathname.includes("client");
 
   if (!assembly || !currentAccount) {
@@ -167,7 +162,6 @@ const Behaviour = React.memo((): React.JSX.Element => {
     <ModuleRenderer
       assembly={assembly}
       currentAddress={currentAccount?.address as `0x${string}`}
-      notify={notify}
       selectedSmartGate={selectedSmartGate}
       setSelectedSmartGate={setSelectedSmartGate}
       showContainer={showContainer}

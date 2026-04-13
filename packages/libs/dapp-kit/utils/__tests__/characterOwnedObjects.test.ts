@@ -68,7 +68,9 @@ describe("getCharacterOwnedObjectsJson", () => {
   });
 
   it("returns undefined when data is null", () => {
-    expect(getCharacterOwnedObjectsJson(null as unknown as undefined)).toBeUndefined();
+    expect(
+      getCharacterOwnedObjectsJson(null as unknown as undefined),
+    ).toBeUndefined();
   });
 
   it("returns undefined when address is missing", () => {

@@ -1,8 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  createLogger,
-  resolveLogLevelFromEnv,
-} from "../logger";
+import { createLogger, resolveLogLevelFromEnv } from "../logger";
 
 describe("resolveLogLevelFromEnv", () => {
   it("uses error when viteMode is production", () => {

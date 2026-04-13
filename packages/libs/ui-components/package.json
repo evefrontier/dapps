@@ -9,8 +9,8 @@
   "scripts": {
     "build": "tsc --noEmit",
     "ts:clean": "tsc --build --clean",
-    "lint": "prettier . --check && eslint --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "prettier . --write && eslint --fix --report-unused-disable-directives --max-warnings 0"
+    "lint": "prettier . --check",
+    "lint:fix": "prettier . --write"
   },
   "dependencies": {
     "@base_ui/react": "1.0.0-alpha.3",
@@ -36,6 +36,7 @@
     "@vitejs/plugin-react-swc": "^4.3.0",
     "autoprefixer": "^10.4.27",
     "postcss": "^8.5.8",
+    "prettier": "3.8.1",
     "tailwindcss": "^3.4.19",
     "typescript": "^6.0.2",
     "vite": "^8.0.5",

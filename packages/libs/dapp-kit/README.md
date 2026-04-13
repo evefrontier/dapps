@@ -20,7 +20,11 @@ pnpm add @tanstack/react-query react
 2. Use `useConnection`, `useSmartObject`, `useNotification`, and `useSponsoredTransaction` as needed.
 
 ```tsx
-import { EveFrontierProvider, useConnection, useSmartObject } from "@evefrontier/dapp-kit";
+import {
+  EveFrontierProvider,
+  useConnection,
+  useSmartObject,
+} from "@evefrontier/dapp-kit";
 import { QueryClient } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
@@ -46,16 +50,15 @@ Configure assembly via env (`VITE_OBJECT_ID`, as Sui Object ID) or URL (`?itemId
 
 Install the package once; then import only what you need via subpaths.
 
-| Subpath | Use when you need |
-|--------|--------------------|
-| `@evefrontier/dapp-kit` | Default: providers, hooks, types, utils |
-| `@evefrontier/dapp-kit/graphql` | GraphQL client, queries, and response types |
-| `@evefrontier/dapp-kit/types` | Type definitions only |
-| `@evefrontier/dapp-kit/utils` | Utilities (parsing, transforms, config) |
-| `@evefrontier/dapp-kit/hooks` | Hooks only |
-| `@evefrontier/dapp-kit/providers` | Providers only |
-| `@evefrontier/dapp-kit/config` | Config / dApp kit setup |
-  
+| Subpath                           | Use when you need                           |
+| --------------------------------- | ------------------------------------------- |
+| `@evefrontier/dapp-kit`           | Default: providers, hooks, types, utils     |
+| `@evefrontier/dapp-kit/graphql`   | GraphQL client, queries, and response types |
+| `@evefrontier/dapp-kit/types`     | Type definitions only                       |
+| `@evefrontier/dapp-kit/utils`     | Utilities (parsing, transforms, config)     |
+| `@evefrontier/dapp-kit/hooks`     | Hooks only                                  |
+| `@evefrontier/dapp-kit/providers` | Providers only                              |
+| `@evefrontier/dapp-kit/config`    | Config / dApp kit setup                     |
 
 ## More
 

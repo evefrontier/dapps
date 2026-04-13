@@ -4,7 +4,8 @@ import { parseCharacterFromJson } from "../character";
 describe("parseCharacterFromJson", () => {
   const validCharacterJson = {
     id: "0x65916b0c872aa5e29b0e9ec66a29fa18cd5f85b188d48914d4437d42abc4f800",
-    character_address: "0x82da5c79037b5cb544ed89725f61a577d17c55a14941ea992a8d18cc476893d7",
+    character_address:
+      "0x82da5c79037b5cb544ed89725f61a577d17c55a14941ea992a8d18cc476893d7",
     tribe_id: 17,
     key: { item_id: "12345", tenant: "default" },
     metadata: {

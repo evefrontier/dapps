@@ -1,11 +1,10 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { fixupPluginRules } from "@eslint/compat";
 import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 import tsParser from "@typescript-eslint/parser";
-import _import from "eslint-plugin-import";
+import * as _import from "eslint-plugin-import-x";
 import globals from "globals";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -18,7 +17,7 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ["!**/*", "node_modules/**/*", "dist/**/*"],
+    ignores: ["node_modules/**", "dist/**", "build_outputs/**"],
   },
   ...compat.extends(
     "eslint:recommended",
@@ -26,7 +25,7 @@ export default [
   ),
   {
     plugins: {
-      import: fixupPluginRules(_import),
+      import: _import,
     },
 
     languageOptions: {

@@ -37,7 +37,7 @@ const ClickToCopy = React.memo(
         onClick={() => handleClick()}
       />
     );
-  }
+  },
 );
 
 export default React.memo(ClickToCopy);

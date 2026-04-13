@@ -1,8 +1,3 @@
-import { Outlet, useLocation } from "react-router-dom";
-
-import "./App.css";
-import "@eveworld/ui-components/styles.css";
-
 import {
   useNotification,
   useConnection,
@@ -12,6 +7,13 @@ import {
   CharacterInfo,
   createLogger,
 } from "@evefrontier/dapp-kit";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
+import { useEffect, useState } from "react";
+import { Outlet, useLocation } from "react-router-dom";
+
+import "./App.css";
+import "@eveworld/ui-components/styles.css";
+
 import {
   EveConnectWallet,
   EveFeralCodeGen,
@@ -20,9 +22,6 @@ import {
 } from "@eveworld/ui-components";
 
 import SkeletonConnect from "./components/skeletons/SkeletonConnect";
-
-import { useCurrentAccount } from "@mysten/dapp-kit-react";
-import { useEffect, useState } from "react";
 
 const log = createLogger();
 

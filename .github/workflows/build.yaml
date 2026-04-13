@@ -31,6 +31,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Lint
+        run: pnpm nx run-many -t lint --verbose --nxBail=true
+        env:
+          CI: true
+
+      - name: Test
+        run: |
+          pnpm --filter @evefrontier/dapp-kit test:run
+        env:
+          CI: true
+
       - name: Build packages
         run: |
           pnpm nx run-many -t build --verbose --nxBail=true
