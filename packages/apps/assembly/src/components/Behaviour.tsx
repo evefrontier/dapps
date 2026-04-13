@@ -1,5 +1,4 @@
 import {
-  useNotification,
   useSmartObject,
   Assemblies,
   AssemblyType,
@@ -145,7 +144,6 @@ const Behaviour = React.memo((): React.JSX.Element => {
   >(undefined);
   const { assembly } = useSmartObject();
   const currentAccount = useCurrentAccount();
-  const { notify } = useNotification();
   const showContainer = !useLocation().pathname.includes("client");
 
   if (!assembly || !currentAccount) {
@@ -164,7 +162,6 @@ const Behaviour = React.memo((): React.JSX.Element => {
     <ModuleRenderer
       assembly={assembly}
       currentAddress={currentAccount?.address as `0x${string}`}
-      notify={notify}
       selectedSmartGate={selectedSmartGate}
       setSelectedSmartGate={setSelectedSmartGate}
       showContainer={showContainer}
