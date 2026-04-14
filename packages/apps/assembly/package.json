@@ -50,7 +50,7 @@
     "globals": "^17.4.0",
     "postcss": "^8.5.8",
     "prettier": "3.8.1",
-    "tailwindcss": "^3.4.19",
+    "tailwindcss": "^4.2.2",
     "typescript": "^6.0.2",
     "vite": "^8.0.5",
     "vite-plugin-babel": "^1.6.0"
