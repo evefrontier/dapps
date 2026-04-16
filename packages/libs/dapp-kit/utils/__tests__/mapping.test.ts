@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { bcs } from "@mysten/sui/bcs";
 import { deriveObjectID } from "@mysten/sui/utils";
-import { parseStatus, getAssemblyType, getObjectId } from "../mapping";
+import { parseStatus, getAssemblyType } from "../mapping";
 import { Assemblies, State } from "../../types";
 import { TENANT_CONFIG, TenantId } from "../constants";
 
