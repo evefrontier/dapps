@@ -3,7 +3,7 @@ import { bcs } from "@mysten/sui/bcs";
 import { deriveObjectID } from "@mysten/sui/utils";
 import { parseStatus, getAssemblyType } from "../mapping";
 import { Assemblies, State } from "../../types";
-import { getObjectRegistryType } from "../constants";
+import { TENANT_CONFIG, TenantId } from "../constants";
 
 // Mock env vars for testing
 const TEST_EVE_WORLD_PACKAGE_ID =
@@ -115,6 +115,8 @@ describe("mapping utilities", () => {
     const mockCharacterRegistryAddress =
       "0xfedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321";
 
+    const defaultTenant = TenantId.UTOPIA;
+
     beforeEach(() => {
       vi.resetModules();
     });
@@ -129,11 +131,10 @@ describe("mapping utilities", () => {
       });
 
       const { getRegistryAddress } = await import("../mapping");
-      const address = await getRegistryAddress();
+      const address = await getRegistryAddress(defaultTenant);
 
-      expect(getSingletonObjectByType).toHaveBeenCalledWith(
-        getObjectRegistryType(),
-      );
+      const expectedType = `${TENANT_CONFIG[defaultTenant].packageId}::object_registry::ObjectRegistry`;
+      expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType);
       expect(address).toBe(mockAssemblyRegistryAddress);
     });
 
@@ -147,11 +148,10 @@ describe("mapping utilities", () => {
       });
 
       const { getRegistryAddress } = await import("../mapping");
-      const address = await getRegistryAddress();
+      const address = await getRegistryAddress(defaultTenant);
 
-      expect(getSingletonObjectByType).toHaveBeenCalledWith(
-        getObjectRegistryType(),
-      );
+      const expectedType = `${TENANT_CONFIG[defaultTenant].packageId}::object_registry::ObjectRegistry`;
+      expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType);
       expect(address).toBe(mockCharacterRegistryAddress);
     });
 
@@ -166,7 +166,7 @@ describe("mapping utilities", () => {
 
       const { getRegistryAddress } = await import("../mapping");
 
-      const address = await getRegistryAddress();
+      const address = await getRegistryAddress(defaultTenant);
 
       expect(getSingletonObjectByType).toHaveBeenCalledTimes(1);
       expect(address).toBe(mockAssemblyRegistryAddress);
@@ -183,8 +183,9 @@ describe("mapping utilities", () => {
 
       const { getRegistryAddress } = await import("../mapping");
 
-      await expect(getRegistryAddress()).rejects.toThrow(
-        `ObjectRegistry not found for type: ${getObjectRegistryType()}`,
+      const expectedType = `${TENANT_CONFIG[defaultTenant].packageId}::object_registry::ObjectRegistry`;
+      await expect(getRegistryAddress(defaultTenant)).rejects.toThrow(
+        `ObjectRegistry not found for type: ${expectedType}`,
       );
     });
 
@@ -195,8 +196,9 @@ describe("mapping utilities", () => {
 
       const { getRegistryAddress } = await import("../mapping");
 
-      await expect(getRegistryAddress()).rejects.toThrow(
-        `ObjectRegistry not found for type: ${getObjectRegistryType()}`,
+      const expectedType = `${TENANT_CONFIG[defaultTenant].packageId}::object_registry::ObjectRegistry`;
+      await expect(getRegistryAddress(defaultTenant)).rejects.toThrow(
+        `ObjectRegistry not found for type: ${expectedType}`,
       );
     });
   });
@@ -303,12 +305,29 @@ describe("mapping utilities", () => {
 
       const result = deriveObjectID(
         "0x226c1a6e456f7438f4a2bc83808df75fb3e47fea4b11ef220f9a2df8fb91a97c",
-        "0x2ff3e06b96eb830bdcffbc6cae9b8fe43f005c3b94cef05d9ec23057df16f107::in_game_id::TenantItemId",
+        `${TEST_EVE_WORLD_PACKAGE_ID}::in_game_id::TenantItemId`,
         key,
       );
 
       expect(result).toBe(
         "0xd4e78bd8312d46b58ad8acb0a352c278384914c705fd90968bef5eb8c44cb667",
+      );
+    });
+
+    it("works with new SSUID Utopia", () => {
+      const key = TenantItemIdBcs.serialize({
+        item_id: 1000000012391,
+        tenant: "utopia",
+      }).toBytes();
+
+      const result = deriveObjectID(
+        "0xc2b969a72046c47e24991d69472afb2216af9e91caf802684514f39706d7dc57",
+        `${TENANT_CONFIG[TenantId.UTOPIA].packageId}::in_game_id::TenantItemId`,
+        key,
+      );
+
+      expect(result).toBe(
+        "0xce8db35dbf8c86319814ade280b5c54d6d8e9778b5cfe7b32ec160f5fb699dc3",
       );
     });
 
@@ -382,31 +401,28 @@ describe("mapping utilities", () => {
 
       const objectId = await getObjectId(itemId, "tauceti");
 
-      expect(getSingletonObjectByType).toHaveBeenCalledWith(
-        getObjectRegistryType(),
-      );
+      const expectedType = `${TENANT_CONFIG[TenantId.TAUCETI].packageId}::object_registry::ObjectRegistry`;
+      expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType);
       expect(typeof objectId).toBe("string");
       expect(objectId.startsWith("0x")).toBe(true);
     });
 
-    it("uses OBJECT registry type when specified", async () => {
+    it("uses the tenant-specific package ID for the registry lookup", async () => {
       const { getObjectId } = await import("../mapping");
 
       await getObjectId("12345", "tauceti");
 
-      expect(getSingletonObjectByType).toHaveBeenCalledWith(
-        getObjectRegistryType(),
-      );
+      const expectedType = `${TENANT_CONFIG[TenantId.TAUCETI].packageId}::object_registry::ObjectRegistry`;
+      expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType);
     });
 
-    it("uses default OBJECT registry type when not specified", async () => {
+    it("uses utopia package ID for utopia tenant", async () => {
       const { getObjectId } = await import("../mapping");
 
-      await getObjectId("12345", "tauceti");
+      await getObjectId("12345", "utopia");
 
-      expect(getSingletonObjectByType).toHaveBeenCalledWith(
-        getObjectRegistryType(),
-      );
+      const expectedType = `${TENANT_CONFIG[TenantId.UTOPIA].packageId}::object_registry::ObjectRegistry`;
+      expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType);
     });
 
     it("propagates errors when registry address not found", async () => {
@@ -420,20 +436,39 @@ describe("mapping utilities", () => {
 
       const { getObjectId } = await import("../mapping");
 
+      const expectedType = `${TENANT_CONFIG[TenantId.TAUCETI].packageId}::object_registry::ObjectRegistry`;
       await expect(getObjectId("12345", "tauceti")).rejects.toThrow(
-        `ObjectRegistry not found for type: ${getObjectRegistryType()}`,
+        `ObjectRegistry not found for type: ${expectedType}`,
       );
     });
 
-    it("caches registry address across multiple calls", async () => {
+    it("caches registry address per tenant across multiple calls", async () => {
       const { getObjectId } = await import("../mapping");
 
       await getObjectId("12345", "tauceti");
       await getObjectId("67890", "tauceti");
       await getObjectId("11111", "tauceti");
 
-      // Should only fetch registry once (cached)
+      // Should only fetch registry once per tenant (cached)
       expect(getSingletonObjectByType).toHaveBeenCalledTimes(1);
+    });
+
+    it("fetches registry separately for different tenants", async () => {
+      vi.mocked(getSingletonObjectByType).mockResolvedValue({
+        data: {
+          objects: {
+            nodes: [{ address: mockRegistryAddress }],
+          },
+        },
+      });
+
+      const { getObjectId } = await import("../mapping");
+
+      await getObjectId("12345", "tauceti");
+      await getObjectId("12345", "utopia");
+
+      // Each tenant fetches its own registry
+      expect(getSingletonObjectByType).toHaveBeenCalledTimes(2);
     });
   });
 });
