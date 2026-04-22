@@ -106,8 +106,13 @@ export async function getObjectId(
   itemId: string,
   selectedTenant: string,
 ): Promise<string> {
+  const validTenantIds = Object.values(TenantId) as string[];
+  if (!validTenantIds.includes(selectedTenant)) {
+    throw new Error(
+      `Unknown tenant "${selectedTenant}". Valid tenants: ${validTenantIds.join(", ")}`,
+    );
+  }
   const registryAddress = await getRegistryAddress(selectedTenant as TenantId);
-
   const packageId =
     TENANT_CONFIG[selectedTenant as TenantId]?.packageId ??
     getEveWorldPackageId();
