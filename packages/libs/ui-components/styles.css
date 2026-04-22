@@ -1,5 +1,6 @@
 /* Base imports */
 @import "tailwindcss";
+@source "./**/*.{js,ts,jsx,tsx}";
 
 @theme {
   --font-favorit: "Favorit", monospace;
