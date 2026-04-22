@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@reference "@eveworld/ui-components/styles.css";
 
 body,
 #root {

@@ -66,7 +66,7 @@ export function getAssemblyType(typeRepr: string): Assemblies {
 const objectRegistryAddressCache: Record<string, string> = {};
 
 /**
- * Fetches the AssemblyRegistry singleton address from the chain for a given tenant.
+ * Fetches the ObjectRegistry singleton address from the chain for a given tenant.
  * Uses the tenant's package ID from TENANT_CONFIG to look up the correct registry.
  * Caches the result per tenant to avoid repeated queries.
  *
@@ -112,18 +112,16 @@ export async function getObjectId(
       `Unknown tenant "${selectedTenant}". Valid tenants: ${validTenantIds.join(", ")}`,
     );
   }
-  const registryAddress = await getRegistryAddress(selectedTenant as TenantId);
-  const packageId =
-    TENANT_CONFIG[selectedTenant as TenantId]?.packageId ??
-    getEveWorldPackageId();
+
+  const tenant = selectedTenant as TenantId;
+  const registryAddress = await getRegistryAddress(tenant);
+  const packageId = TENANT_CONFIG[tenant]?.packageId ?? getEveWorldPackageId();
 
   const bcsType = bcs.struct("TenantItemId", {
     item_id: bcs.u64(),
     tenant: bcs.string(),
   });
-  const key = bcsType
-    .serialize({ item_id: BigInt(itemId), tenant: selectedTenant })
-    .toBytes();
+  const key = bcsType.serialize({ item_id: BigInt(itemId), tenant }).toBytes();
 
   const objectId = deriveObjectID(
     registryAddress,
