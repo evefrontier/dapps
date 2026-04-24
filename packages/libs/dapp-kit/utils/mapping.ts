@@ -3,6 +3,9 @@ import { Assemblies, State } from "../types";
 import { deriveObjectID } from "@mysten/sui/utils";
 import { getEveWorldPackageId, TENANT_CONFIG, TenantId } from "./constants";
 import { getSingletonObjectByType } from "../graphql/client";
+import { createLogger } from "./logger";
+
+const log = createLogger();
 
 /**
  * Convert raw status variant string to State enum
@@ -70,14 +73,20 @@ const objectRegistryAddressCache: Record<string, string> = {};
  * Uses the tenant's package ID from TENANT_CONFIG to look up the correct registry.
  * Caches the result per tenant to avoid repeated queries.
  *
+ * If the tenant is not a predefined tenant such as in local development,
+ * fallback to the local Eve World package ID.
+ *
  * @category Utilities - Mapping
  */
-export async function getRegistryAddress(tenant: TenantId): Promise<string> {
+export async function getRegistryAddress(
+  tenant: string | TenantId,
+): Promise<string> {
   if (objectRegistryAddressCache[tenant]) {
     return objectRegistryAddressCache[tenant];
   }
 
-  const packageId = TENANT_CONFIG[tenant]?.packageId ?? getEveWorldPackageId();
+  const packageId =
+    TENANT_CONFIG[tenant as TenantId]?.packageId ?? getEveWorldPackageId();
   const registryType = `${packageId}::object_registry::ObjectRegistry`;
 
   const result = await getSingletonObjectByType(registryType);
@@ -96,6 +105,9 @@ export async function getRegistryAddress(tenant: TenantId): Promise<string> {
  * Uses the tenant-specific package ID from TENANT_CONFIG for the registry
  * lookup and the TenantItemId type tag.
  *
+ * If the tenant is not a predefined tenant such as in local development,
+ * fallback to the local Eve World package ID.
+ *
  * @param itemId - The in-game item ID
  * @param selectedTenant - The tenant identifier (e.g. "utopia", "stillness")
  * @returns The derived Sui object ID
@@ -104,13 +116,12 @@ export async function getRegistryAddress(tenant: TenantId): Promise<string> {
  */
 export async function getObjectId(
   itemId: string,
-  selectedTenant: string,
+  selectedTenant: string | TenantId,
 ): Promise<string> {
   const validTenantIds = Object.values(TenantId) as string[];
   if (!validTenantIds.includes(selectedTenant)) {
-    throw new Error(
-      `Unknown tenant "${selectedTenant}". Valid tenants: ${validTenantIds.join(", ")}`,
-    );
+    log.warn(`Tenant "${selectedTenant}" might be a local tenant.`);
+    console.warn(`Tenant "${selectedTenant}" might be a local tenant.`);
   }
 
   const tenant = selectedTenant as TenantId;

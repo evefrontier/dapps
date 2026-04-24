@@ -44,7 +44,7 @@
     "@changesets/cli": "^2.30.0",
     "dotenv": "^17.4.1"
   },
-  "packageManager": "pnpm@10.33.0",
+  "packageManager": "pnpm@10.33.2",
   "workspaces": [
     "packages/**/*",
     "packages/**/**/*",
