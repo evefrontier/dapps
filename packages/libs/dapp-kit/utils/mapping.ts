@@ -3,9 +3,6 @@ import { Assemblies, State } from "../types";
 import { deriveObjectID } from "@mysten/sui/utils";
 import { getEveWorldPackageId, TENANT_CONFIG, TenantId } from "./constants";
 import { getSingletonObjectByType } from "../graphql/client";
-import { createLogger } from "./logger";
-
-const log = createLogger();
 
 /**
  * Convert raw status variant string to State enum
@@ -120,7 +117,6 @@ export async function getObjectId(
 ): Promise<string> {
   const validTenantIds = Object.values(TenantId) as string[];
   if (!validTenantIds.includes(selectedTenant)) {
-    log.warn(`Tenant "${selectedTenant}" might be a local tenant.`);
     console.warn(`Tenant "${selectedTenant}" might be a local tenant.`);
   }
 

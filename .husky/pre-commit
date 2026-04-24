@@ -3,8 +3,6 @@ set -e
 ROOT=$(git rev-parse --show-toplevel)
 cd "$ROOT"
 
-export NX_SOCKET_DIR=/tmp/nx-tmp
-
 pnpm audit
 pnpm nx run-many -t lint --verbose --nxBail=true
 pnpm --filter @evefrontier/dapp-kit test:run
