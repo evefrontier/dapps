@@ -201,6 +201,23 @@ describe("mapping utilities", () => {
         `ObjectRegistry not found for type: ${expectedType}`,
       );
     });
+
+    it("falls back to getEveWorldPackageId for an unknown tenant string", async () => {
+      vi.mocked(getSingletonObjectByType).mockResolvedValueOnce({
+        data: {
+          objects: {
+            nodes: [{ address: mockAssemblyRegistryAddress }],
+          },
+        },
+      });
+
+      const { getRegistryAddress } = await import("../mapping");
+      const address = await getRegistryAddress("my-local-tenant");
+
+      const expectedType = `${TEST_EVE_WORLD_PACKAGE_ID}::object_registry::ObjectRegistry`;
+      expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType);
+      expect(address).toBe(mockAssemblyRegistryAddress);
+    });
   });
 
   // ============================================================================
@@ -451,6 +468,21 @@ describe("mapping utilities", () => {
 
       // Should only fetch registry once per tenant (cached)
       expect(getSingletonObjectByType).toHaveBeenCalledTimes(1);
+    });
+
+    it("warns and uses fallback package ID for an unknown tenant string", async () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      const { getObjectId } = await import("../mapping");
+      const objectId = await getObjectId("12345", "my-local-tenant");
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("my-local-tenant"),
+      );
+      const expectedType = `${TEST_EVE_WORLD_PACKAGE_ID}::object_registry::ObjectRegistry`;
+      expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType);
+      expect(typeof objectId).toBe("string");
+      expect(objectId.startsWith("0x")).toBe(true);
     });
 
     it("fetches registry separately for different tenants", async () => {
