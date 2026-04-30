@@ -1,16 +1,15 @@
 import {
-  useConnection,
-  useSmartObject,
-  useNotification,
-  isOwner,
-  useSponsoredTransaction,
-  SponsoredTransactionActions,
-  Severity,
   createLogger,
+  isOwner,
+  Severity,
+  SponsoredTransactionActions,
+  useConnection,
+  useNotification,
+  useSmartObject,
+  useSponsoredTransaction,
 } from "@evefrontier/dapp-kit";
-import React, { useState, useRef, RefObject } from "react";
-
-import { EveInput, EveButtonDuo, Divider } from "@eveworld/ui-components";
+import { Divider, EveButtonDuo, EveInput } from "@eveworld/ui-components";
+import React, { RefObject, useRef, useState } from "react";
 
 const log = createLogger();
 

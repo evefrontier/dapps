@@ -1,6 +1,6 @@
-import React, { ReactNode, useState, useEffect } from "react";
-import { TextField } from "@mui/material";
 import * as NumberField from "@base_ui/react/NumberField";
+import { TextField } from "@mui/material";
+import React, { ReactNode, useEffect, useState } from "react";
 
 /**
  * Component for editing text fields with different input types.

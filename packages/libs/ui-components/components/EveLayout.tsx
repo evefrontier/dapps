@@ -1,10 +1,10 @@
 import React, { ReactNode } from "react";
 import "../styles-ui.css";
-import Header from "./Header";
 import {
   CharacterInfo,
   DetailedSmartCharacterResponse,
 } from "@evefrontier/dapp-kit";
+import Header from "./Header";
 
 interface EveLayoutProps {
   children: ReactNode;

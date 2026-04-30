@@ -1,11 +1,11 @@
 import type { Wallet } from "@mysten/wallet-standard";
-import {
-  hasSponsoredTransactionFeature,
-  supportsSponsoredTransaction,
-  type EveFrontierSponsoredTransactionFeature,
-  type SponsoredTransactionMethod,
-} from "./features";
 import { EVEFRONTIER_SPONSORED_TRANSACTION } from "../types";
+import {
+  type EveFrontierSponsoredTransactionFeature,
+  hasSponsoredTransactionFeature,
+  type SponsoredTransactionMethod,
+  supportsSponsoredTransaction,
+} from "./features";
 
 /**
  * Check if a wallet supports the EVE Frontier sponsored transaction feature.

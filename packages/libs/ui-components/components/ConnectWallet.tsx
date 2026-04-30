@@ -1,6 +1,5 @@
-import { Logo } from "../assets";
-
 import React from "react";
+import { Logo } from "../assets";
 import EveButton from "./EveButton";
 
 const ConnectWallet = React.memo(

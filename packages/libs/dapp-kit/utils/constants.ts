@@ -130,7 +130,6 @@ export const STORAGE_KEYS = {
 /** Type IDs for in-game items.
  *  @category Constants
  */
-/* eslint-disable @typescript-eslint/no-loss-of-precision */
 export enum TYPEIDS {
   LENS = 77518,
   TRANSACTION_CHIP = 79193,

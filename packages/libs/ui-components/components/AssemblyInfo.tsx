@@ -1,16 +1,15 @@
-import React, { useEffect, useMemo, useState } from "react";
-
 import {
-  abbreviateAddress,
-  AssemblyType,
   Assemblies,
-  DetailedSmartCharacterResponse,
-  isOwner,
+  AssemblyType,
+  abbreviateAddress,
   CharacterInfo,
   createLogger,
+  DetailedSmartCharacterResponse,
+  isOwner,
 } from "@evefrontier/dapp-kit";
-import EveScroll from "./EveScroll";
+import React, { useEffect, useMemo, useState } from "react";
 import ClickToCopy from "./ClickToCopy";
+import EveScroll from "./EveScroll";
 
 const log = createLogger();
 

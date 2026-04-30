@@ -18,7 +18,7 @@ EVE Frontier Smart Assembly Base is a client-only dapp framework designed for se
 ### Dependencies 🔗
 
 - Node.js (v18+)
-- pnpm v8 (install via `npm install --global pnpm@8`)
+- Bun v1.3+
 - OneKey or EVE Vault wallet connected to `https://devnet-data-sync.nursery.reitnorf.com`
 
 ## Getting Started 🚀
@@ -35,7 +35,7 @@ To get a local copy of the project up and running, follow these simple steps.
 2.  **Install Packages**
 
     ```bash
-    pnpm install
+    bun install
     ```
 
 3.  **Set Up Environment Variables**
@@ -57,7 +57,7 @@ To get a local copy of the project up and running, follow these simple steps.
 4.  **Run the Development Server**
 
     ```bash
-    pnpm run dev
+    bun run dev
     ```
 
 5.  **View the Live App**
@@ -67,8 +67,8 @@ To get a local copy of the project up and running, follow these simple steps.
 ### Development Commands
 
 ```bash
-pnpm lint          # Check for linting issues
-pnpm lint:fix      # Fix issues automatically
+bun run lint          # Check for linting issues
+bun run lint:fix      # Fix issues automatically
 ```
 
 **Deployment**

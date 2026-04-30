@@ -1,21 +1,21 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { Assemblies } from "../../types";
 import {
   abbreviateAddress,
-  isOwner,
-  getTxUrl,
-  parseURL,
-  clickToCopy,
-  getCommonItems,
-  removeTrailingZeros,
-  getEnv,
-  getVolumeM3,
-  formatM3,
-  getDappUrl,
-  findOwnerByAddress,
   assertAssemblyType,
+  clickToCopy,
+  findOwnerByAddress,
   formatDuration,
+  formatM3,
+  getCommonItems,
+  getDappUrl,
+  getEnv,
+  getTxUrl,
+  getVolumeM3,
+  isOwner,
+  parseURL,
+  removeTrailingZeros,
 } from "../utils";
-import { Assemblies } from "../../types";
 
 describe("abbreviateAddress", () => {
   it("returns empty string for undefined or empty input", () => {

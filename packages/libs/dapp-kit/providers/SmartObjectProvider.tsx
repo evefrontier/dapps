@@ -1,30 +1,28 @@
 import {
-  ReactNode,
-  useState,
   createContext,
-  useEffect,
+  ReactNode,
   useCallback,
+  useEffect,
   useRef,
+  useState,
 } from "react";
-
+import { getAssemblyWithOwner, MoveObjectData } from "../graphql";
+import { useConnection } from "../hooks/useConnection";
 import {
   Assemblies,
   AssemblyType,
-  QueryParams,
   DetailedSmartCharacterResponse,
+  QueryParams,
+  SmartObjectContextType,
 } from "../types";
-
-import { DEFAULT_TENANT, POLLING_INTERVAL } from "../utils/constants";
-import { getAssemblyWithOwner, MoveObjectData } from "../graphql";
 import {
   createLogger,
   getObjectId,
   transformToAssembly,
   transformToCharacter,
 } from "../utils";
+import { DEFAULT_TENANT, POLLING_INTERVAL } from "../utils/constants";
 import { getDatahubGameInfo } from "../utils/datahub";
-import { useConnection } from "../hooks/useConnection";
-import { SmartObjectContextType } from "../types";
 
 const log = createLogger();
 

@@ -1,6 +1,6 @@
 import { MoveObjectData, RawSuiObjectData } from "../graphql/types";
 import { TransformOptions } from "../utils";
-import { State, Assemblies, type DatahubGameInfo } from "./types";
+import { Assemblies, type DatahubGameInfo, State } from "./types";
 
 // =========================================
 // Inventory Related Types
@@ -41,13 +41,13 @@ export interface StorageModule {
 }
 
 /** @category Types */
-export interface TurretModule {}
+export type TurretModule = {};
 
 /** @category Types */
-export interface ManufacturingModule {}
+export type ManufacturingModule = {};
 
 /** @category Types */
-export interface RefineryModule {}
+export type RefineryModule = {};
 
 /** @category Types */
 export interface GateModule {

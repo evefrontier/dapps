@@ -1,13 +1,8 @@
+import { abbreviateAddress, CharacterInfo } from "@evefrontier/dapp-kit";
 import React, { ReactNode, useEffect, useState } from "react";
 import {
+  ConnectWallet,
   Identicon1,
-  Identicon10,
-  Identicon11,
-  Identicon12,
-  Identicon13,
-  Identicon14,
-  Identicon15,
-  Identicon16,
   Identicon2,
   Identicon3,
   Identicon4,
@@ -16,11 +11,16 @@ import {
   Identicon7,
   Identicon8,
   Identicon9,
+  Identicon10,
+  Identicon11,
+  Identicon12,
+  Identicon13,
+  Identicon14,
+  Identicon15,
+  Identicon16,
 } from "../assets";
-
-import { abbreviateAddress, CharacterInfo } from "@evefrontier/dapp-kit";
 import ClickToCopy from "./ClickToCopy";
-import { ConnectWallet } from "../assets";
+
 const Header = React.memo(
   ({
     connected,

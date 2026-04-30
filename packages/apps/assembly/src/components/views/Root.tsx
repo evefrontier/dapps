@@ -1,14 +1,13 @@
 import {
-  AssemblyType,
   Assemblies,
+  AssemblyType,
+  CharacterInfo,
   DetailedSmartCharacterResponse,
   State,
-  CharacterInfo,
 } from "@evefrontier/dapp-kit";
+import { AssemblyInfo, Divider, EveContainer } from "@eveworld/ui-components";
 import React, { useState } from "react";
 import { useLocation, useOutletContext } from "react-router-dom";
-
-import { AssemblyInfo, EveContainer, Divider } from "@eveworld/ui-components";
 
 import Actions from "../Actions";
 import AssemblyIcon from "../AssemblyIcon";

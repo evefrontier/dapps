@@ -1,15 +1,14 @@
 import {
-  useSmartObject,
-  useNotification,
   Severity,
+  useNotification,
+  useSmartObject,
 } from "@evefrontier/dapp-kit";
-import React, { useEffect } from "react";
-
 import {
   ErrorNotice,
   ErrorNoticeTypes,
   EveContainer,
 } from "@eveworld/ui-components";
+import React, { useEffect } from "react";
 
 import Behaviour from "../Behaviour";
 import Root from "./Root";

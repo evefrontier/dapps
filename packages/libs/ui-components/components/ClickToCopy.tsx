@@ -1,7 +1,6 @@
-import React, { CSSProperties, useState } from "react";
-
-import { CopyIcon } from "../assets";
 import { clickToCopy } from "@evefrontier/dapp-kit";
+import React, { CSSProperties, useState } from "react";
+import { CopyIcon } from "../assets";
 
 /**
  * Renders a Copy icon that copies text to clipboard on click.

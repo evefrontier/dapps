@@ -1,23 +1,23 @@
+import { getObjectWithJson } from "../graphql";
+import type {
+  CharacterInfo,
+  MoveObjectData,
+  RawSuiObjectData,
+} from "../graphql/types";
 import {
   Assemblies,
   AssemblyType,
-  State,
-  DetailedSmartCharacterResponse,
-  SmartAssemblyResponse,
-  InventoryItem,
   DatahubGameInfo,
   DetailedAssemblyResponse,
+  DetailedSmartCharacterResponse,
+  InventoryItem,
+  SmartAssemblyResponse,
+  State,
 } from "../types";
-import type {
-  MoveObjectData,
-  RawSuiObjectData,
-  CharacterInfo,
-} from "../graphql/types";
-import { getAssemblyType, parseStatus } from "./mapping";
-import { getDatahubGameInfo } from "./datahub";
 import { getEnergyConfig, getEnergyUsageForType } from "./config";
-import { getObjectWithJson } from "../graphql";
+import { getDatahubGameInfo } from "./datahub";
 import { createLogger } from "./logger";
+import { getAssemblyType, parseStatus } from "./mapping";
 
 const log = createLogger();
 
@@ -129,7 +129,7 @@ export async function transformToAssembly(
 
   // Add module-specific data based on assembly type
   switch (assemblyType) {
-    case Assemblies.SmartStorageUnit:
+    case Assemblies.SmartStorageUnit: {
       const inventoryKey = rawData.inventory_keys?.[0];
       const inventoryData = dynamicFields[inventoryKey || ""] as
         | {
@@ -161,6 +161,7 @@ export async function transformToAssembly(
           ephemeralInventories: [],
         },
       } as AssemblyType<Assemblies.SmartStorageUnit>;
+    }
 
     case Assemblies.SmartTurret:
       return {
@@ -177,7 +178,7 @@ export async function transformToAssembly(
         },
       } as AssemblyType<Assemblies.SmartGate>;
 
-    case Assemblies.NetworkNode:
+    case Assemblies.NetworkNode: {
       const energyConfig = await getEnergyConfig();
       // TODO: Batch this call so that it can fetch all assemblies at once
       const linkedAssemblies: SmartAssemblyResponse[] = await Promise.all(
@@ -237,6 +238,7 @@ export async function transformToAssembly(
           linkedAssemblies: linkedAssemblies || [],
         },
       } as AssemblyType<Assemblies.NetworkNode>;
+    }
 
     case Assemblies.Manufacturing:
       return {

@@ -1,11 +1,12 @@
-import { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DAppKitProvider } from "@mysten/dapp-kit-react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactNode } from "react";
 import { dAppKit } from "../config/dapp-kit";
 
 import NotificationProvider from "./NotificationProvider";
 import SmartObjectProvider from "./SmartObjectProvider";
 import VaultProvider from "./VaultProvider";
+
 /**
  * EveFrontierProvider wraps the application with all necessary providers
  * for the EVE Frontier dApp kit.

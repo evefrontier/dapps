@@ -1,9 +1,9 @@
 import { SuiChain } from "@mysten/wallet-standard";
 import {
   Assemblies,
+  AssemblyType,
   DetailedAssemblyResponse,
   SmartAssemblyResponse,
-  AssemblyType,
 } from "../types";
 
 /**

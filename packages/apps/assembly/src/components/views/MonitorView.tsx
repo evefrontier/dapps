@@ -1,21 +1,19 @@
 import {
-  useSmartObject,
   Assemblies,
-  State,
-  formatDuration,
-  TYPEIDS,
-  useSponsoredTransaction,
-  getDatahubGameInfo,
-  DatahubGameInfo,
-  getFuelEfficiencyForType,
-  getAdjustedBurnRate,
   createLogger,
+  DatahubGameInfo,
+  formatDuration,
+  getAdjustedBurnRate,
+  getDatahubGameInfo,
+  getFuelEfficiencyForType,
+  State,
+  TYPEIDS,
+  useSmartObject,
+  useSponsoredTransaction,
 } from "@evefrontier/dapp-kit";
-import { useState, useRef, useEffect, useCallback } from "react";
-import React from "react";
-
 import { EveButton } from "@eveworld/ui-components";
 import { ButtonCorner } from "@eveworld/ui-components/assets";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { bringOffline } from "../../functions/bringOffline";
 import { bringOnline } from "../../functions/bringOnline";

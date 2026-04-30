@@ -1,15 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
-
 import {
-  AssemblyType,
   Assemblies,
-  type InventoryItem,
+  AssemblyType,
+  DatahubGameInfo,
   findOwnerByAddress,
   formatM3,
-  isOwner,
   getDatahubGameInfo,
-  DatahubGameInfo,
+  type InventoryItem,
+  isOwner,
 } from "@evefrontier/dapp-kit";
+import React, { useEffect, useMemo, useState } from "react";
 import EveLinearBar from "../components/EveLinearBar";
 import Offline from "./Offline";
 

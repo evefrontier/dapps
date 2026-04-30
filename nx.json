@@ -1,38 +1,22 @@
 {
   "targetDefaults": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "{workspaceRoot}/build_outputs/{projectRoot}/dist"
-      ],
+      "dependsOn": ["^build"],
+      "outputs": ["{workspaceRoot}/build_outputs/{projectRoot}/dist"],
       "cache": true
     },
     "lint": {
-      "dependsOn": [
-        "^lint"
-      ],
+      "dependsOn": ["^lint"],
       "cache": true
     },
     "ci:build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "{workspaceRoot}/build_outputs/{projectRoot}/dist"
-      ],
+      "dependsOn": ["^build"],
+      "outputs": ["{workspaceRoot}/build_outputs/{projectRoot}/dist"],
       "cache": true
     }
   },
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "plugins": [
-    {
-      "plugin": "@nx/eslint/plugin",
-      "options": {
-        "targetName": "lint"
-      }
-    },
     {
       "plugin": "@nx/vite/plugin",
       "options": {
@@ -45,14 +29,9 @@
     }
   ],
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "sharedGlobals": [],
-    "production": [
-      "default"
-    ]
+    "production": ["default"]
   },
   "projects": {
     "assembly": {
@@ -60,9 +39,7 @@
       "targets": {
         "ci:build": {
           "executor": "@nx/vite:build",
-          "outputs": [
-            "{workspaceRoot}/build_outputs/assembly/dist"
-          ],
+          "outputs": ["{workspaceRoot}/build_outputs/assembly/dist"],
           "options": {
             "outputPath": "build_outputs/assembly/dist",
             "mode": "production"

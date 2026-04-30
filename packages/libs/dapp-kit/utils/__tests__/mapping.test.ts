@@ -1,9 +1,9 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { bcs } from "@mysten/sui/bcs";
 import { deriveObjectID } from "@mysten/sui/utils";
-import { parseStatus, getAssemblyType } from "../mapping";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Assemblies, State } from "../../types";
 import { TENANT_CONFIG, TenantId } from "../constants";
+import { getAssemblyType, parseStatus } from "../mapping";
 
 // Mock env vars for testing
 const TEST_EVE_WORLD_PACKAGE_ID =

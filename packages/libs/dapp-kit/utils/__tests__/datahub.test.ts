@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { resolveTenantFromSearch, resolveDatahubHost } from "../datahub";
-import { DATAHUB_BY_TENANT, DEFAULT_TENANT, TenantId } from "../constants";
 import { QueryParams } from "../../types";
+import { DATAHUB_BY_TENANT, DEFAULT_TENANT, TenantId } from "../constants";
+import { resolveDatahubHost, resolveTenantFromSearch } from "../datahub";
 
 const DEFAULT_HOST = DATAHUB_BY_TENANT[DEFAULT_TENANT];
 

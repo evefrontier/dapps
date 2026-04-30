@@ -4,12 +4,6 @@
  * Provides custom wallet sponsored transaction features.
  */
 
-// Feature definitions and types
-export {
-  getAssemblyTypeApiString,
-  hasSponsoredTransactionFeature,
-  supportsSponsoredTransaction,
-} from "./features";
 export type {
   EveFrontierSponsoredTransactionFeature,
   SponsoredTransactionArgs,
@@ -17,10 +11,16 @@ export type {
   SponsoredTransactionMethod,
   SponsoredTransactionOutput,
 } from "./features";
+// Feature definitions and types
+export {
+  getAssemblyTypeApiString,
+  hasSponsoredTransactionFeature,
+  supportsSponsoredTransaction,
+} from "./features";
 
 // Utility functions
 export {
-  walletSupportsSponsoredTransaction,
   getSponsoredTransactionFeature,
   getSponsoredTransactionMethod,
+  walletSupportsSponsoredTransaction,
 } from "./utils";
