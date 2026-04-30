@@ -17,7 +17,7 @@
         "nx": "22.6.4",
         "typescript": "^6.0.3",
         "vite": "8.0.5",
-        "vitest": "^4.1.3",
+        "vitest": "4.1.3",
       },
     },
     "packages/apps/assembly": {
@@ -1659,6 +1659,8 @@
     "@emotion/babel-plugin/convert-source-map": ["convert-source-map@1.9.0", "", {}, "sha512-ASFBup0Mz1uyiIjANan1jzLQami9z1PoYSZCiiYW2FczPbenXc45FZdBZLzOT+r6+iciuEModtmCti+hjaAk0A=="],
 
     "@emotion/babel-plugin/escape-string-regexp": ["escape-string-regexp@4.0.0", "", {}, "sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA=="],
+
+    "@eveworld/assembly/@evefrontier/dapp-kit": ["@evefrontier/dapp-kit@file:packages/libs/dapp-kit", { "dependencies": { "@mysten/dapp-kit-core": "^1.2.2", "@mysten/dapp-kit-react": "^2.0.1", "@mysten/sui": "^2.14.1", "@mysten/wallet-standard": "^0.20.1", "@tanstack/react-query": "^5.96.2", "react": "^19.2.4" }, "devDependencies": { "@types/node": "^25.5.2", "@types/react": "^19.2.14", "@vitejs/plugin-react-swc": "^4.3.0", "@vitest/coverage-v8": "4.1.3", "@vitest/ui": "4.1.3", "typedoc": "^0.28.18", "typedoc-plugin-markdown": "^4.11.0", "typescript": "^6.0.2", "vite": "8.0.5", "vite-plugin-svgr": "^5.2.0", "vitest": "4.1.3" } }],
 
     "@eveworld/assembly/@eveworld/ui-components": ["@eveworld/ui-components@file:packages/libs/ui-components", { "dependencies": { "@base_ui/react": "1.0.0-alpha.3", "@emotion/react": "^11.14.0", "@emotion/styled": "^11.14.1", "@evefrontier/dapp-kit": "workspace:*", "@mui/material": "^7.3.9", "@mysten/wallet-standard": "^0.20.1", "react": "^19.2.4", "react-router-dom": "^7.14.0" }, "devDependencies": { "@tailwindcss/postcss": "^4.2.2", "@types/node": "^25.5.2", "@types/react": "^19.2.14", "@visx/axis": "^3.12.0", "@visx/curve": "^3.12.0", "@visx/grid": "^3.12.0", "@visx/group": "^3.12.0", "@visx/marker": "^3.12.0", "@visx/scale": "^3.12.0", "@visx/shape": "^3.12.0", "@visx/vendor": "^3.12.0", "@vitejs/plugin-react-swc": "^4.3.0", "autoprefixer": "^10.4.27", "postcss": "^8.5.10", "tailwindcss": "^4.2.2", "typescript": "^6.0.2", "vite": "8.0.5", "vite-plugin-svgr": "^5.2.0" } }],
 
