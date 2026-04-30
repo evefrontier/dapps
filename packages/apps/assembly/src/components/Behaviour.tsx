@@ -1,21 +1,20 @@
 import {
-  useSmartObject,
   Assemblies,
   AssemblyType,
   getDappUrl,
+  useSmartObject,
 } from "@evefrontier/dapp-kit";
+import {
+  EveButton,
+  EveContainer,
+  GateView,
+  Graph,
+  InventoryView,
+  TurretView,
+} from "@eveworld/ui-components";
 import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
-
-import {
-  InventoryView,
-  GateView,
-  EveContainer,
-  EveButton,
-  TurretView,
-  Graph,
-} from "@eveworld/ui-components";
 
 interface DappIframeProps {
   assembly: AssemblyType<Assemblies>;

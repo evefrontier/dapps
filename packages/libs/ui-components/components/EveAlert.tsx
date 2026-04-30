@@ -1,12 +1,12 @@
-import React from "react";
+import { getTxUrl, Severity } from "@evefrontier/dapp-kit";
 import { Alert, Snackbar } from "@mui/material";
-import { Severity, getTxUrl } from "@evefrontier/dapp-kit";
-import { Close } from "../assets";
-
 import { SUI_TESTNET_CHAIN } from "@mysten/wallet-standard";
+import React from "react";
+import { Close } from "../assets";
 
 import "../styles-ui.css";
 import EveContainer from "./EveContainer";
+
 /**
  * React component for displaying styled alerts with different severity levels.
  *

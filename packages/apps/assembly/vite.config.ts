@@ -1,6 +1,5 @@
-import path from "path";
-
 import react from "@vitejs/plugin-react-swc";
+import path from "path";
 import { defineConfig } from "vite";
 import babel from "vite-plugin-babel";
 import svgr from "vite-plugin-svgr";
@@ -36,7 +35,6 @@ export default defineConfig({
     minify: true,
     sourcemap: true,
     rollupOptions: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onLog(level, log: any, handler) {
         if (
           log.cause &&

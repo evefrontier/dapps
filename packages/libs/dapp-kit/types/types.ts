@@ -1,12 +1,12 @@
 import { SUI_GRAPHQL_NETWORKS } from "../utils";
 import {
   DetailedAssemblyResponse,
-  StorageModule,
-  TurretModule,
   GateModule,
-  RefineryModule,
   ManufacturingModule,
   NetworkNodeModule,
+  RefineryModule,
+  StorageModule,
+  TurretModule,
 } from "./worldApiReturnTypes";
 
 // =========================================
@@ -81,9 +81,8 @@ export enum Assemblies {
 }
 
 /** @category Types */
-export interface AssemblyProperties<
-  T extends Assemblies,
-> extends DetailedAssemblyResponse {
+export interface AssemblyProperties<T extends Assemblies>
+  extends DetailedAssemblyResponse {
   type: T;
 }
 

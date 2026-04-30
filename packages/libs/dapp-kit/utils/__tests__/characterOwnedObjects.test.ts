@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GetCharacterAndOwnedObjectsResponse } from "../../graphql/types";
 import {
-  getCharacterOwnedObjectsJson,
   getCharacterOwnedObjects,
+  getCharacterOwnedObjectsJson,
 } from "../characterOwnedObjects";
 
 vi.mock("../../graphql/client", () => ({

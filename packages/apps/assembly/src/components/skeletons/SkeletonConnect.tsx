@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
-
 import {
+  BehaviourSkeleton,
   MonitorSkeleton,
   RootSkeleton,
-  BehaviourSkeleton,
 } from "@eveworld/ui-components";
+import React, { useEffect } from "react";
 
 interface SkeletonConnectProps {
   handleConnect: () => void;

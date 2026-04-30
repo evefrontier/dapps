@@ -1,19 +1,18 @@
 import {
-  useSmartObject,
-  useConnection,
   ActionTypes,
-  State,
-  AssemblyType,
   Assemblies,
-  isOwner,
-  useSponsoredTransaction,
-  Severity,
-  useNotification,
+  AssemblyType,
   createLogger,
+  isOwner,
+  Severity,
+  State,
+  useConnection,
+  useNotification,
+  useSmartObject,
+  useSponsoredTransaction,
 } from "@evefrontier/dapp-kit";
-import React from "react";
-
 import { EveButton } from "@eveworld/ui-components";
+import React from "react";
 
 import { bringOffline } from "../functions/bringOffline";
 import { bringOnline } from "../functions/bringOnline";

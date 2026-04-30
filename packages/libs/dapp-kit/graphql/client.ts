@@ -1,44 +1,44 @@
+import { parseCharacterFromJson } from "../utils/character";
 import {
   getCharacterOwnerCapType,
   getCharacterPlayerProfileType,
   getSuiGraphqlEndpoint,
 } from "../utils/constants";
+import { createLogger } from "../utils/logger";
+import {
+  GET_CHARACTER_AND_OWNED_OBJECTS,
+  GET_OBJECT_BY_ADDRESS,
+  GET_OBJECT_DYNAMICFIELD_CHARACTER_WITH_JSON,
+  GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE,
+  GET_OBJECT_OWNER_AND_OWNED_OBJECTS_WITH_JSON,
+  GET_OBJECT_WITH_DYNAMIC_FIELDS,
+  GET_OBJECT_WITH_JSON,
+  GET_OBJECTS_BY_TYPE,
+  GET_OWNED_OBJECTS_BY_PACKAGE,
+  GET_OWNED_OBJECTS_BY_TYPE,
+  GET_SINGLETON_CONFIG_OBJECT_BY_TYPE,
+  GET_SINGLETON_OBJECT_BY_TYPE,
+  GET_WALLET_CHARACTERS,
+} from "./queries";
 import type {
-  GraphQLResponse,
+  CharacterInfo,
+  DynamicFieldNode,
+  GetCharacterAndOwnedObjectsResponse,
+  GetObjectAndCharacterOwnerResponse,
   GetObjectByAddressResponse,
   GetObjectOwnerAndOwnedObjectsResponse,
   GetObjectOwnerAndOwnedObjectsWithJsonResponse,
-  GetOwnedObjectsByTypeResponse,
-  GetOwnedObjectsByPackageResponse,
-  GetSingletonObjectByTypeResponse,
-  GetObjectsByTypeResponse,
   GetObjectResponse,
+  GetObjectsByTypeResponse,
   GetObjectWithJsonResponse,
-  CharacterInfo,
-  GetObjectAndCharacterOwnerResponse,
-  DynamicFieldNode,
-  RawSuiObjectData,
+  GetOwnedObjectsByPackageResponse,
+  GetOwnedObjectsByTypeResponse,
   GetSingletonConfigObjectByTypeResponse,
+  GetSingletonObjectByTypeResponse,
   GetWalletCharactersResponse,
-  GetCharacterAndOwnedObjectsResponse,
+  GraphQLResponse,
+  RawSuiObjectData,
 } from "./types";
-import { parseCharacterFromJson } from "../utils/character";
-import {
-  GET_OBJECT_BY_ADDRESS,
-  GET_OBJECT_WITH_DYNAMIC_FIELDS,
-  GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE,
-  GET_OBJECT_DYNAMICFIELD_CHARACTER_WITH_JSON,
-  GET_OBJECT_OWNER_AND_OWNED_OBJECTS_WITH_JSON,
-  GET_OWNED_OBJECTS_BY_TYPE,
-  GET_OWNED_OBJECTS_BY_PACKAGE,
-  GET_WALLET_CHARACTERS,
-  GET_CHARACTER_AND_OWNED_OBJECTS,
-  GET_SINGLETON_OBJECT_BY_TYPE,
-  GET_OBJECTS_BY_TYPE,
-  GET_OBJECT_WITH_JSON,
-  GET_SINGLETON_CONFIG_OBJECT_BY_TYPE,
-} from "./queries";
-import { createLogger } from "../utils/logger";
 
 const log = createLogger();
 

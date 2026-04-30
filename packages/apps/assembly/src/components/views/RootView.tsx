@@ -1,8 +1,6 @@
 import { useSmartObject } from "@evefrontier/dapp-kit";
+import { ErrorNotice, ErrorNoticeTypes } from "@eveworld/ui-components";
 import React from "react";
-
-import { ErrorNoticeTypes } from "@eveworld/ui-components";
-import { ErrorNotice } from "@eveworld/ui-components";
 
 import Root from "./Root";
 

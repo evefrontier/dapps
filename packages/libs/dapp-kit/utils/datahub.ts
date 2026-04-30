@@ -1,5 +1,5 @@
-import { DATAHUB_BY_TENANT, DEFAULT_TENANT } from "./constants";
 import { DatahubGameInfo, QueryParams } from "../types";
+import { DATAHUB_BY_TENANT, DEFAULT_TENANT } from "./constants";
 
 /**
  * Resolves tenant from a URL search string (e.g. window.location.search).

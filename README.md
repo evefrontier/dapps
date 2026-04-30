@@ -20,14 +20,14 @@ This monorepo contains the decentralized applications (dApps) of EVE Frontier, a
 
 ## Dependencies 🔗
 
-This monorepo is an Nx-configured pnpm workspace. By running `pnpm install` from the root, you can install dependencies for the entire monorepo.
+This monorepo is an Nx-configured Bun workspace. By running `bun install` from the root, you can install dependencies for the entire monorepo.
 
 ## Getting Started 🚀
 
 To install all dependencies, run:
 
 ```bash
-pnpm install
+bun install
 ```
 
 ## Building Packages 🛠️
@@ -37,13 +37,13 @@ Nx can be used to invoke build commands for each package directly from the proje
 To build all packages, run:
 
 ```bash
-npx nx run-many -t build
+bunx nx run-many -t build
 ```
 
 To build a specific package, use the target script flag:
 
 ```bash
-npx nx run @eveworld/assembly:build
+bunx nx run @eveworld/assembly:build
 ```
 
 ## License 📜

@@ -7,9 +7,9 @@ React SDK for building EVE Frontier dApps on the Sui blockchain.
 ## Install
 
 ```bash
-pnpm add @evefrontier/dapp-kit
+bun add @evefrontier/dapp-kit
 # peer deps
-pnpm add @tanstack/react-query react
+bun add @tanstack/react-query react
 ```
 
 > Keep your app’s versions of **react**, **@mysten/dapp-kit-react**, and **@mysten/sui** in sync with the versions used by this package to avoid type or runtime mismatches. Check `package.json` for the current ranges.

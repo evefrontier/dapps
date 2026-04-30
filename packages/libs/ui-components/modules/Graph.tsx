@@ -1,21 +1,20 @@
-import { AxisLeft, AxisBottom } from "@visx/axis";
+import {
+  Assemblies,
+  AssemblyType,
+  abbreviateAddress,
+  EXCLUDED_TYPEIDS,
+  SmartAssemblyResponse,
+  State,
+} from "@evefrontier/dapp-kit";
+import { AxisBottom, AxisLeft } from "@visx/axis";
 import * as allCurves from "@visx/curve";
 import { GridColumns, GridRows } from "@visx/grid";
 import { Group } from "@visx/group";
 import { scaleLinear } from "@visx/scale";
 import { LinePath } from "@visx/shape";
-import React, { useState, useRef, useEffect } from "react";
-
-import {
-  AssemblyType,
-  Assemblies,
-  State,
-  EXCLUDED_TYPEIDS,
-  abbreviateAddress,
-  SmartAssemblyResponse,
-} from "@evefrontier/dapp-kit";
+import React, { useEffect, useRef, useState } from "react";
+import { MoreVertical, Square } from "../assets";
 import ClickToCopy from "../components/ClickToCopy";
-import { Square, MoreVertical } from "../assets";
 
 interface DataPoint {
   timestamp: number;

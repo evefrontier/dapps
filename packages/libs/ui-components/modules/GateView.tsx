@@ -1,9 +1,8 @@
+import { Assemblies, AssemblyType, isOwner } from "@evefrontier/dapp-kit";
 import React, { useEffect, useState } from "react";
-
-import { AssemblyType, Assemblies, isOwner } from "@evefrontier/dapp-kit";
 import EveScroll from "../components/EveScroll";
-import Offline from "./Offline";
 import GateCard from "./GateCard";
+import Offline from "./Offline";
 
 interface GateViewProps {
   assembly: AssemblyType<Assemblies.SmartGate>;

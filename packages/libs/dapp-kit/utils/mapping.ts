@@ -1,8 +1,8 @@
 import { bcs } from "@mysten/sui/bcs";
-import { Assemblies, State } from "../types";
 import { deriveObjectID } from "@mysten/sui/utils";
-import { getEveWorldPackageId, TENANT_CONFIG, TenantId } from "./constants";
 import { getSingletonObjectByType } from "../graphql/client";
+import { Assemblies, State } from "../types";
+import { getEveWorldPackageId, TENANT_CONFIG, TenantId } from "./constants";
 
 /**
  * Convert raw status variant string to State enum

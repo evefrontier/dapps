@@ -210,7 +210,7 @@ div.MuiInputBase-root.MuiOutlinedInput-root,
 }
 .Eve-Numerical-Input-input button[aria-label="Increase"]:hover,
 .Eve-Numerical-Input-input button[aria-label="Decrease"]:hover {
-  @apply border-neutral  text-neutral;
+  @apply border-neutral text-neutral;
 }
 
 /* Radio buttons */

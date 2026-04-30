@@ -1,5 +1,5 @@
-import React from "react";
 import { Skeleton } from "@mui/material";
+import React from "react";
 
 const BehaviourSkeleton = React.memo((): React.JSX.Element => {
   return (

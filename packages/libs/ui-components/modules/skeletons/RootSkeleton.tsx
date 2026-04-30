@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import { Skeleton } from "@mui/material";
+import React, { useState } from "react";
 
 const RootSkeleton = React.memo((): React.JSX.Element => {
   return (

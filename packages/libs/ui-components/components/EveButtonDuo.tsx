@@ -1,5 +1,6 @@
 import React, { ButtonHTMLAttributes, FC } from "react";
-import { ButtonWrap, ButtonCorner } from "../assets";
+import { ButtonCorner, ButtonWrap } from "../assets";
+
 interface EveButtonDuoProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   onCancel: () => void;
   className?: string;

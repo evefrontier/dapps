@@ -1,15 +1,15 @@
 export { useConnection } from "./useConnection";
-export { useSmartObject } from "./useSmartObject";
 export { useNotification } from "./useNotification";
-export {
-  useSponsoredTransaction,
-  WalletSponsoredTransactionNotSupportedError,
-  WalletNotConnectedError,
-  WalletNoAccountSelectedError,
-  AssemblyIdRequiredError,
-} from "./useSponsoredTransaction";
+export { useSmartObject } from "./useSmartObject";
 export type {
-  UseSponsoredTransactionError,
   UseSponsoredTransactionArgs,
+  UseSponsoredTransactionError,
   UseSponsoredTransactionMutationOptions,
+} from "./useSponsoredTransaction";
+export {
+  AssemblyIdRequiredError,
+  useSponsoredTransaction,
+  WalletNoAccountSelectedError,
+  WalletNotConnectedError,
+  WalletSponsoredTransactionNotSupportedError,
 } from "./useSponsoredTransaction";

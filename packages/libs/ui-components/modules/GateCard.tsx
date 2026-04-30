@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from "react";
-
 import {
-  AssemblyType,
   Assemblies,
-  State,
+  AssemblyType,
   abbreviateAddress,
   isOwner,
-  RawSuiObjectData,
   parseStatus,
+  RawSuiObjectData,
+  State,
 } from "@evefrontier/dapp-kit";
+import React, { useEffect, useState } from "react";
 import { ButtonCorner, CopyIcon } from "../assets";
 import ClickToCopy from "../components/ClickToCopy";
 

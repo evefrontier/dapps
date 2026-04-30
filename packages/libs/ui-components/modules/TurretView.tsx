@@ -1,8 +1,8 @@
+import { Assemblies, AssemblyType } from "@evefrontier/dapp-kit";
 import React from "react";
-
-import { AssemblyType, Assemblies } from "@evefrontier/dapp-kit";
-import EveRadioGroup from "../components/Radio";
 import { Hamburger } from "../assets";
+import EveRadioGroup from "../components/Radio";
+
 const TurretView = React.memo(
   ({
     assembly,

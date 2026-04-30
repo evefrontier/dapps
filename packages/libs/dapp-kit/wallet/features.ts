@@ -6,8 +6,8 @@
  */
 
 import {
-  Assemblies,
   ASSEMBLY_TYPE_API_STRING,
+  Assemblies,
   AssemblyType,
   EVEFRONTIER_SPONSORED_TRANSACTION,
   SponsoredTransactionActions,

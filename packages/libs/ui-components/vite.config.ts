@@ -1,5 +1,5 @@
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import { defineConfig } from "vite";
 import svgr from "vite-plugin-svgr";
 
 // https://vitejs.dev/config/
@@ -25,7 +25,6 @@ export default defineConfig({
     minify: true,
     sourcemap: true,
     rollupOptions: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onLog(level, log: any, handler) {
         if (
           log.cause &&

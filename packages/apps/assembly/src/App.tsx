@@ -1,11 +1,11 @@
 import {
-  useNotification,
-  useConnection,
-  useSmartObject,
-  getWalletCharacters,
-  parseCharacterFromJson,
   CharacterInfo,
   createLogger,
+  getWalletCharacters,
+  parseCharacterFromJson,
+  useConnection,
+  useNotification,
+  useSmartObject,
 } from "@evefrontier/dapp-kit";
 import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { useEffect, useState } from "react";
@@ -15,10 +15,10 @@ import "./App.css";
 import "@eveworld/ui-components/styles.css";
 
 import {
+  EveAlert,
   EveConnectWallet,
   EveFeralCodeGen,
   EveLayout,
-  EveAlert,
 } from "@eveworld/ui-components";
 
 import SkeletonConnect from "./components/skeletons/SkeletonConnect";

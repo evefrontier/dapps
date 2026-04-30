@@ -1,12 +1,12 @@
 import { DetailedAssemblyResponse } from "@evefrontier/dapp-kit";
-import EveContainer from "./EveContainer";
 import React from "react";
+import EveContainer from "./EveContainer";
 
 import "../styles-ui.css";
 
 export enum ErrorNoticeTypes {
-  "SMART_ASSEMBLY",
-  "MESSAGE",
+  SMART_ASSEMBLY,
+  MESSAGE,
 }
 /**
  * Renders an error notice component based on the provided type.
@@ -26,7 +26,7 @@ const ErrorNotice = React.memo(
     loading?: boolean;
     assembly?: DetailedAssemblyResponse | null;
   }) => {
-    let message;
+    let message: string | undefined;
 
     switch (type) {
       case ErrorNoticeTypes.SMART_ASSEMBLY:
