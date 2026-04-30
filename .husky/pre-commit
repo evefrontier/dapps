@@ -4,5 +4,5 @@ ROOT=$(git rev-parse --show-toplevel)
 cd "$ROOT"
 
 bun audit
-bun nx run-many -t lint --verbose --nxBail=true
+bunx nx run-many -t lint --verbose --nxBail=true
 bun --filter @evefrontier/dapp-kit test:run

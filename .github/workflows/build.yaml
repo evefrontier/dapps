@@ -32,7 +32,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Lint
-        run: bun nx run-many -t lint --verbose --nxBail=true
+        run: bunx nx run-many -t lint --verbose --nxBail=true
         env:
           CI: true
 
@@ -44,7 +44,7 @@ jobs:
 
       - name: Build packages
         run: |
-          bun nx run-many -t build --verbose --nxBail=true
-          bun nx run assembly:ci:build --verbose --nxBail=true
+          bunx nx run-many -t build --verbose --nxBail=true
+          bunx nx run assembly:ci:build --verbose --nxBail=true
         env:
           CI: true
