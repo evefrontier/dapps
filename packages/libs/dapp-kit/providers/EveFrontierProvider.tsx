@@ -1,6 +1,6 @@
 import { DAppKitProvider } from "@mysten/dapp-kit-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { dAppKit } from "../config/dapp-kit";
 
 import NotificationProvider from "./NotificationProvider";

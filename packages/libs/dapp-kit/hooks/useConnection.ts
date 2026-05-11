@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { VaultContext } from "../providers/VaultProvider";
-import { VaultContextType } from "../types";
+import type { VaultContextType } from "../types";
 
 /**
  * Hook for managing wallet connection state in EVE Frontier dApps.

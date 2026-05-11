@@ -1,4 +1,4 @@
-import { DatahubGameInfo, QueryParams } from "../types";
+import { type DatahubGameInfo, QueryParams } from "../types";
 import { DATAHUB_BY_TENANT, DEFAULT_TENANT } from "./constants";
 
 /**

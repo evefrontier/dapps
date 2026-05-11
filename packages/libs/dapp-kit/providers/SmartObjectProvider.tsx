@@ -1,19 +1,13 @@
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { getAssemblyWithOwner, MoveObjectData } from "../graphql";
+import type { ReactNode } from "react";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import { getAssemblyWithOwner, type MoveObjectData } from "../graphql";
 import { useConnection } from "../hooks/useConnection";
 import {
   Assemblies,
-  AssemblyType,
-  DetailedSmartCharacterResponse,
+  type AssemblyType,
+  type DetailedSmartCharacterResponse,
   QueryParams,
-  SmartObjectContextType,
+  type SmartObjectContextType,
 } from "../types";
 import {
   createLogger,

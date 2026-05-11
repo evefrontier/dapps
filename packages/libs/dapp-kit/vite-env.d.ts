@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_EVE_WORLD_PACKAGE_ID: string;
   /** Optional smart assembly Sui object ID override */
   readonly VITE_OBJECT_ID?: string;
+  readonly VITE_LOG_LEVEL?: string;
 }
 
 interface ImportMeta {

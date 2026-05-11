@@ -190,9 +190,7 @@ describe("mapping utilities", () => {
     });
 
     it("throws error when GraphQL response has no data", async () => {
-      vi.mocked(getSingletonObjectByType).mockResolvedValueOnce({
-        data: undefined,
-      });
+      vi.mocked(getSingletonObjectByType).mockResolvedValueOnce({});
 
       const { getRegistryAddress } = await import("../mapping");
 

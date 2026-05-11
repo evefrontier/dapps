@@ -6,12 +6,12 @@ import type {
 } from "../graphql/types";
 import {
   Assemblies,
-  AssemblyType,
-  DatahubGameInfo,
-  DetailedAssemblyResponse,
-  DetailedSmartCharacterResponse,
-  InventoryItem,
-  SmartAssemblyResponse,
+  type AssemblyType,
+  type DatahubGameInfo,
+  type DetailedAssemblyResponse,
+  type DetailedSmartCharacterResponse,
+  type InventoryItem,
+  type SmartAssemblyResponse,
   State,
 } from "../types";
 import { getEnergyConfig, getEnergyUsageForType } from "./config";

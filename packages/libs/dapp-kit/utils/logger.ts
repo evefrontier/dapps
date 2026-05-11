@@ -105,7 +105,7 @@ const sanitizeFilePath = (path: string): string => {
   );
   cleaned = stripOrigin(cleaned);
   cleaned = stripWorkspaceRoot(cleaned);
-  cleaned = cleaned.split(/[?#]/)[0];
+  cleaned = cleaned.split(/[?#]/)[0] ?? "";
   return cleaned;
 };
 
@@ -116,6 +116,10 @@ const parseStackLine = (line: string): StackFrame | undefined => {
   }
 
   const [, rawPath, lineNumber, columnNumber] = match;
+  if (!rawPath || !lineNumber || !columnNumber) {
+    return undefined;
+  }
+
   return {
     filePath: rawPath,
     lineNumber: Number(lineNumber),
