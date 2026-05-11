@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { NotificationContext } from "../providers/NotificationProvider";
-import { NotificationContextType } from "../types";
+import type { NotificationContextType } from "../types";
 
 /**
  * Hook for displaying user notifications in EVE Frontier dApps.

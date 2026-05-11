@@ -1,5 +1,10 @@
-import { createContext, ReactNode, useCallback, useState } from "react";
-import { NotificationContextType, NotificationState, Severity } from "../types";
+import type { ReactNode } from "react";
+import { createContext, useCallback, useState } from "react";
+import {
+  type NotificationContextType,
+  type NotificationState,
+  Severity,
+} from "../types";
 
 /** @category Providers */
 export const NotificationContext = createContext<NotificationContextType>({

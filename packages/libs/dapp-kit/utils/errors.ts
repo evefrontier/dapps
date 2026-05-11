@@ -7,7 +7,7 @@ export type ErrorType = {
 };
 
 /** @category Utilities - Error helpers */
-export const ERRORS: Record<number | string, ErrorType> = {
+const NUMERIC_ERRORS = {
   1001: {
     code: 1001,
     name: "Unknown Error",
@@ -126,16 +126,19 @@ export const ERRORS: Record<number | string, ErrorType> = {
     patterns: ["no lens"],
     message: "There are no lenses available here",
   },
-};
+} satisfies Record<number, ErrorType>;
 
-/* Manually assign additional aliases for the ERRORS object */
-ERRORS.UNKNOWN_ERROR = ERRORS[1001];
-ERRORS.CONTRACT_CALL = ERRORS[2001];
-ERRORS.ABI_FUNCTION_NOT_FOUND = ERRORS[2004];
-ERRORS.FORWARDER_NOT_FOUND = ERRORS[2005];
-ERRORS.CALLFROM_NOT_FOUND = ERRORS[2006];
-ERRORS.INSUFFICIENT_EVE = ERRORS[3002];
-ERRORS.LENS_UNAVAILABLE = ERRORS[5001];
+/** @category Utilities - Error helpers */
+export const ERRORS: Record<number | string, ErrorType> = {
+  ...NUMERIC_ERRORS,
+  UNKNOWN_ERROR: NUMERIC_ERRORS[1001],
+  CONTRACT_CALL: NUMERIC_ERRORS[2001],
+  ABI_FUNCTION_NOT_FOUND: NUMERIC_ERRORS[2004],
+  FORWARDER_NOT_FOUND: NUMERIC_ERRORS[2005],
+  CALLFROM_NOT_FOUND: NUMERIC_ERRORS[2006],
+  INSUFFICIENT_EVE: NUMERIC_ERRORS[3002],
+  LENS_UNAVAILABLE: NUMERIC_ERRORS[5001],
+};
 
 /** @category Constants */
 export const ERROR_MESSAGES: Record<number, string> = Object.fromEntries(

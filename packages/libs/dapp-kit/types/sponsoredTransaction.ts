@@ -1,4 +1,4 @@
-import {
+import type {
   SponsoredTransactionArgs,
   SponsoredTransactionOutput,
 } from "../wallet";

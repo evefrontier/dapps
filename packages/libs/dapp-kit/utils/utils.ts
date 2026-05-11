@@ -1,9 +1,9 @@
-import { SuiChain } from "@mysten/wallet-standard";
+import type { SuiChain } from "@mysten/wallet-standard";
 import {
   Assemblies,
-  AssemblyType,
-  DetailedAssemblyResponse,
-  SmartAssemblyResponse,
+  type AssemblyType,
+  type DetailedAssemblyResponse,
+  type SmartAssemblyResponse,
 } from "../types";
 
 /**
@@ -80,7 +80,7 @@ export const isOwner = (
  * ```
  */
 export const getTxUrl = (suiChain: SuiChain, txHash: string): string => {
-  const network = suiChain.split(":")[1];
+  const network = suiChain.split(":")[1] ?? suiChain;
 
   return `https://suiscan.xyz/${network}/tx/${txHash}`;
 };
@@ -88,7 +88,7 @@ export const getTxUrl = (suiChain: SuiChain, txHash: string): string => {
 /** Strips protocol (e.g. https://) from a URL and returns the rest. @category Utilities - Formatting */
 export const parseURL = (string: string): string => {
   if (string.includes("://")) {
-    return string.split("://")[1];
+    return string.split("://")[1] ?? string;
   }
   return string;
 };

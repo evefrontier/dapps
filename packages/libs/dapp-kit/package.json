@@ -2,28 +2,43 @@
   "name": "@evefrontier/dapp-kit",
   "version": "0.1.9",
   "description": "React SDK for EVE Frontier dApps on Sui",
-  "main": "index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "author": "",
   "license": "MIT",
   "type": "module",
   "files": [
-    "index.ts",
-    "config",
-    "graphql",
-    "hooks",
-    "providers",
-    "types",
-    "utils",
-    "wallet"
+    "dist"
   ],
   "exports": {
-    ".": "./index.ts",
-    "./types": "./types/index.ts",
-    "./utils": "./utils/index.ts",
-    "./graphql": "./graphql/index.ts",
-    "./providers": "./providers/index.ts",
-    "./hooks": "./hooks/index.ts",
-    "./config": "./config/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js"
+    },
+    "./graphql": {
+      "types": "./dist/graphql/index.d.ts",
+      "import": "./dist/graphql/index.js"
+    },
+    "./providers": {
+      "types": "./dist/providers/index.d.ts",
+      "import": "./dist/providers/index.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
+      "import": "./dist/hooks/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "import": "./dist/config/index.js"
+    }
   },
   "dependencies": {
     "@mysten/dapp-kit-core": "^1.2.2",
@@ -47,7 +62,9 @@
     "vitest": "4.1.3"
   },
   "scripts": {
-    "build": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json && node scripts/fix-esm-extensions.cjs",
+    "prepack": "npm run build",
+    "typecheck": "tsc --noEmit",
     "ts:clean": "tsc --build --clean",
     "docs": "typedoc",
     "docs:md": "typedoc --plugin typedoc-plugin-markdown --out docs/markdown",

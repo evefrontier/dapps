@@ -1,8 +1,8 @@
-import { WalletAccount } from "@mysten/wallet-standard";
+import type { WalletAccount } from "@mysten/wallet-standard";
 import {
   Assemblies,
-  AssemblyType,
-  DetailedSmartCharacterResponse,
+  type AssemblyType,
+  type DetailedSmartCharacterResponse,
   Severity,
 } from "./types";
 

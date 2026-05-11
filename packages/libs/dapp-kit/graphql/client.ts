@@ -554,14 +554,16 @@ export async function getAssemblyWithOwner(assemblyId: string): Promise<{
       );
     }
 
-    return {
-      moveObject: {
-        contents: {
-          json: moveObject.contents.json,
-          type: moveObject.contents.type,
-        },
-        dynamicFields: dynamicFields || undefined,
+    const moveObjectWithDynamicFields = {
+      contents: {
+        json: moveObject.contents.json,
+        type: moveObject.contents.type,
       },
+      ...(dynamicFields ? { dynamicFields } : {}),
+    };
+
+    return {
+      moveObject: moveObjectWithDynamicFields,
       assemblyOwner: characterInfo,
       energySource: energySourceJson ?? null,
       destinationGate: destinationGateJson ?? null,
