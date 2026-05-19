@@ -55,10 +55,6 @@ export default defineConfig({
         "../../libs/ui-components",
       ),
       "@evefrontier/dapp-kit": path.resolve(__dirname, "../../libs/dapp-kit"),
-      "@mysten/dapp-kit-react": path.resolve(
-        __dirname,
-        "../../../node_modules/@mysten/dapp-kit-react",
-      ),
     },
     dedupe: [
       "@evefrontier/dapp-kit",
