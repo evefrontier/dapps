@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { SmartObjectContext } from "../providers/SmartObjectProvider";
-import { SmartObjectContextType } from "../types";
+import type { SmartObjectContextType } from "../types";
 
 /**
  * Hook for accessing smart assembly data from the Sui GraphQL Indexer.

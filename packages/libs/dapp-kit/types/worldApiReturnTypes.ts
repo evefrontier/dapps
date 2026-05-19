@@ -1,5 +1,5 @@
-import { MoveObjectData, RawSuiObjectData } from "../graphql/types";
-import { TransformOptions } from "../utils";
+import type { MoveObjectData, RawSuiObjectData } from "../graphql/types";
+import type { TransformOptions } from "../utils";
 import { Assemblies, type DatahubGameInfo, State } from "./types";
 
 // =========================================

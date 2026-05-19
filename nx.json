@@ -9,6 +9,10 @@
       "dependsOn": ["^lint"],
       "cache": true
     },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "cache": true
+    },
     "ci:build": {
       "dependsOn": ["^build"],
       "outputs": ["{workspaceRoot}/build_outputs/{projectRoot}/dist"],

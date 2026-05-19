@@ -6,7 +6,7 @@ import {
 import { getWallets } from "@mysten/wallet-standard";
 import {
   type UseMutationOptions,
-  UseMutationResult,
+  type UseMutationResult,
   useMutation,
 } from "@tanstack/react-query";
 import { Assemblies, QueryParams, SponsoredTransactionActions } from "../types";
@@ -14,7 +14,7 @@ import { createLogger, TenantId } from "../utils";
 import {
   getAssemblyTypeApiString,
   getSponsoredTransactionMethod,
-  SponsoredTransactionArgs,
+  type SponsoredTransactionArgs,
   type SponsoredTransactionInput,
   type SponsoredTransactionOutput,
   supportsSponsoredTransaction,
@@ -417,8 +417,8 @@ export function useSponsoredTransaction({
         txAction: args.txAction,
         assembly: assemblyId,
         assemblyType: assemblyType,
-        metadata: args.metadata,
         tenant,
+        ...(args.metadata ? { metadata: args.metadata } : {}),
       };
 
       log.info("Sponsored Transaction Payload:", payload);

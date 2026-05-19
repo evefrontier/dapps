@@ -1,5 +1,5 @@
-import { SUI_GRAPHQL_NETWORKS } from "../utils";
-import {
+import type { SUI_GRAPHQL_NETWORKS } from "../utils";
+import type {
   DetailedAssemblyResponse,
   GateModule,
   ManufacturingModule,

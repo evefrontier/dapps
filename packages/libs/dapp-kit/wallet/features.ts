@@ -8,11 +8,11 @@
 import {
   ASSEMBLY_TYPE_API_STRING,
   Assemblies,
-  AssemblyType,
+  type AssemblyType,
   EVEFRONTIER_SPONSORED_TRANSACTION,
   SponsoredTransactionActions,
-  SponsoredTransactionAssemblyType,
-  SponsoredTransactionMetadata,
+  type SponsoredTransactionAssemblyType,
+  type SponsoredTransactionMetadata,
 } from "../types";
 
 /**

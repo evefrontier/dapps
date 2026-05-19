@@ -2,7 +2,7 @@
 // Environment Variable Helpers
 // ============================================================================
 
-import { SuiGraphqlNetwork } from "../types";
+import type { SuiGraphqlNetwork } from "../types";
 
 /**
  * Get a required environment variable, throwing if not set.

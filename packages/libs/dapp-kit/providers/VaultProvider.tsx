@@ -3,8 +3,9 @@ import {
   useDAppKit,
   useWallets,
 } from "@mysten/dapp-kit-react";
-import { createContext, ReactNode, useEffect, useRef } from "react";
-import { SupportedWallets, VaultContextType } from "../types";
+import type { ReactNode } from "react";
+import { createContext, useEffect, useRef } from "react";
+import { SupportedWallets, type VaultContextType } from "../types";
 import { createLogger, STORAGE_KEYS } from "../utils";
 
 const log = createLogger();
