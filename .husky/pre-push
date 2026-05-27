@@ -3,4 +3,5 @@ set -e
 ROOT=$(git rev-parse --show-toplevel)
 cd "$ROOT"
 
-bunx nx run-many -t lint --verbose --nxBail=true
+bun audit
+bun --filter @evefrontier/dapp-kit test:run
