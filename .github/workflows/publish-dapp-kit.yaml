@@ -1,0 +1,53 @@
+name: Publish dapp-kit to GitHub Packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish-github-packages:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.release.prerelease == false
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: "package.json"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Verify release tag matches package version
+        working-directory: packages/libs/dapp-kit
+        run: |
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          RELEASE_VERSION="${GITHUB_REF_NAME#v}"
+
+          if [ "$PACKAGE_VERSION" != "$RELEASE_VERSION" ]; then
+            echo "Release tag ${GITHUB_REF_NAME} does not match @evefrontier/dapp-kit version ${PACKAGE_VERSION}."
+            exit 1
+          fi
+
+      - name: Test dapp-kit
+        run: bun --filter @evefrontier/dapp-kit test:run
+
+      - name: Build dapp-kit
+        run: bun --filter @evefrontier/dapp-kit build
+
+      - name: Publish to GitHub Packages
+        working-directory: packages/libs/dapp-kit
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bun publish --registry=https://npm.pkg.github.com --ignore-scripts --no-git-checks
