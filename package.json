@@ -5,8 +5,7 @@
     "build": "nx run-many -t build",
     "typecheck": "nx run-many -t typecheck",
     "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "prepare": "[ \"$CI\" = \"true\" ] || husky"
+    "lint:fix": "biome check --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",

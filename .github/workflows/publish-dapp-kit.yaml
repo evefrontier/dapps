@@ -1,4 +1,4 @@
-name: Publish dapp-kit to Github Packages
+name: Publish dapp-kit to GitHub Packages
 
 on:
   release:
