@@ -1,3 +1,4 @@
+import { Assemblies } from "@evefrontier/wallet-core/definitions";
 import type { SUI_GRAPHQL_NETWORKS } from "../utils";
 import type {
   DetailedAssemblyResponse,
@@ -69,16 +70,12 @@ export interface Notify {
 // Assembly Types
 // =========================================
 
-/** @category Types */
-export enum Assemblies {
-  SmartStorageUnit = "SmartStorageUnit",
-  SmartTurret = "SmartTurret",
-  SmartGate = "SmartGate",
-  NetworkNode = "NetworkNode",
-  Manufacturing = "Manufacturing",
-  Refinery = "Refinery",
-  Assembly = "Assembly",
-}
+/**
+ * @category Types
+ *
+ * TODO: This typedoc is not working when re-exported from wallet-core
+ */
+export { Assemblies } from "@evefrontier/wallet-core/definitions";
 
 /** @category Types */
 export interface AssemblyProperties<T extends Assemblies>

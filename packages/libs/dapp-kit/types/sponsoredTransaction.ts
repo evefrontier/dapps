@@ -7,17 +7,12 @@ import { Assemblies } from "./types";
 /**
  * Available sponsored transaction actions
  *
+ * @external SponsoredTransactionActions is defined in @evefrontier/wallet-core to ensure consistency between wallet and dapp-kit
  * @category Types
+ *
+ * TODO: This typedoc is not working when re-exported from wallet-core
  */
-export enum SponsoredTransactionActions {
-  BRING_ONLINE = "online",
-  BRING_OFFLINE = "offline",
-  /** @deprecated Use UPDATE_METADATA instead */
-  EDIT_UNIT = "edit-unit",
-  UPDATE_METADATA = "update-metadata",
-  LINK_SMART_GATE = "link-smart-gate",
-  UNLINK_SMART_GATE = "unlink-smart-gate",
-}
+export { SponsoredTransactionActions } from "@evefrontier/wallet-core/definitions";
 
 /** @category Types */
 export type SendSponsoredTransactionFn = (
