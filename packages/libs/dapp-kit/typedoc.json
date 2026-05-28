@@ -1,6 +1,8 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": ["./index.ts"],
+  "exclude": ["**/*.test.ts", "**/__tests__/**"],
+  "tsconfig": "./tsconfig.build.json",
   "entryPointStrategy": "expand",
   "out": "./docs/api",
   "name": "@evefrontier/dapp-kit",
