@@ -51,26 +51,9 @@ export type SponsoredTransactionArgs = Omit<
   metadata?: SponsoredTransactionMetadata;
 };
 
-/**
- * Output from a successful sponsored transaction
- *
- * TODO: This typedoc is not working when re-exported from wallet-core
- * @category Types
- */
-/**
- * The sponsored transaction method signature
- *
- * TODO: This typedoc is not working when re-exported from wallet-core
- * @category Wallet
- */
-/**
- * Feature interface for sponsored transactions.
- * Wallets that support this feature should implement this interface
- * in their `features` object.
- *
- * TODO: This typedoc is not working when re-exported from wallet-core
- * @category Wallet
- */
+// TODO: Add TypeDoc for SponsoredTransactionOutput, SponsoredTransactionMethod, and
+// EveFrontierSponsoredTransactionFeature — either here once re-export doc support lands,
+// or upstream in wallet-core.
 export type {
   EveVaultWalletFeatures as EveFrontierSponsoredTransactionFeature,
   SponsoredTransactionMethod,

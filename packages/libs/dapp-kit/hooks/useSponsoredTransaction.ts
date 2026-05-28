@@ -105,18 +105,18 @@ function resolveAssemblyId(
   assemblyItemId: string | number | undefined,
   queryItemId: string | null,
 ): string {
-  const rawId = assemblyItemId ?? queryItemId;
-  if (rawId == null || String(rawId).trim() === "") {
+  const tryResolve = (
+    value: string | number | null | undefined,
+  ): string | null => {
+    if (value == null || String(value).trim() === "") return null;
+    const id = String(value).trim();
+    return /^\d+$/.test(id) ? id : null;
+  };
+
+  const assemblyId = tryResolve(assemblyItemId) ?? tryResolve(queryItemId);
+  if (assemblyId == null) {
     throw new AssemblyIdRequiredError();
   }
-
-  const assemblyId = String(rawId).trim();
-  if (!/^\d+$/.test(assemblyId)) {
-    throw new AssemblyIdRequiredError(
-      `Assembly ID must be a non-negative integer; got "${assemblyId}"`,
-    );
-  }
-
   return assemblyId;
 }
 
