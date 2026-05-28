@@ -63,16 +63,6 @@ const Actions = React.memo(
             const gateAssembly = assembly as AssemblyType<Assemblies.SmartGate>;
             return gateAssembly.isParentNodeOnline ?? false;
           }
-          case Assemblies.Manufacturing: {
-            const manufacturingAssembly =
-              assembly as AssemblyType<Assemblies.Manufacturing>;
-            return manufacturingAssembly.isParentNodeOnline ?? false;
-          }
-          case Assemblies.Refinery: {
-            const refineryAssembly =
-              assembly as AssemblyType<Assemblies.Refinery>;
-            return refineryAssembly.isParentNodeOnline ?? false;
-          }
           case Assemblies.NetworkNode: {
             const networkAssembly =
               assembly as AssemblyType<Assemblies.NetworkNode>;
@@ -134,7 +124,9 @@ const Actions = React.memo(
       } catch (error) {
         notify({
           type: Severity.Error,
-          message: `Failed to bring ${action}: ${error instanceof Error ? error.message : "Unknown error"}`,
+          message: `Failed to bring ${action}: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
         });
       }
     };
@@ -173,7 +165,9 @@ const Actions = React.memo(
             onClick={handleEditAction}
             disabled={!isEntityOwner}
             id="edit-unit"
-            className={`${assembly.type === Assemblies.NetworkNode ? "col-span-2" : ""}`}
+            className={`${
+              assembly.type === Assemblies.NetworkNode ? "col-span-2" : ""
+            }`}
           >
             Edit assembly
           </EveButton>

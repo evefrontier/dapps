@@ -44,12 +44,6 @@ export interface StorageModule {
 export type TurretModule = {};
 
 /** @category Types */
-export type ManufacturingModule = {};
-
-/** @category Types */
-export type RefineryModule = {};
-
-/** @category Types */
 export interface GateModule {
   destinationId: string | undefined;
   destinationGate: RawSuiObjectData | null;

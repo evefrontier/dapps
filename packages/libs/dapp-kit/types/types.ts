@@ -3,9 +3,7 @@ import type { SUI_GRAPHQL_NETWORKS } from "../utils";
 import type {
   DetailedAssemblyResponse,
   GateModule,
-  ManufacturingModule,
   NetworkNodeModule,
-  RefineryModule,
   StorageModule,
   TurretModule,
 } from "./worldApiReturnTypes";
@@ -93,13 +91,9 @@ export type AssemblyType<T extends Assemblies> = {
         ? AssemblyProperties<K> & { gate: GateModule }
         : K extends Assemblies.NetworkNode
           ? AssemblyProperties<K> & { networkNode: NetworkNodeModule }
-          : K extends Assemblies.Refinery
-            ? AssemblyProperties<K> & { refinery: RefineryModule }
-            : K extends Assemblies.Manufacturing
-              ? AssemblyProperties<K> & { manufacturing: ManufacturingModule }
-              : K extends Assemblies.Assembly
-                ? AssemblyProperties<K>
-                : never;
+          : K extends Assemblies.Assembly
+            ? AssemblyProperties<K>
+            : never;
 }[T];
 
 // =========================================
