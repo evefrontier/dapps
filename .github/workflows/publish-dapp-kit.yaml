@@ -50,8 +50,10 @@ jobs:
       - name: Build dapp-kit
         run: bun --filter @evefrontier/dapp-kit build
 
+      - name: Configure registry auth
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+
       - name: Publish to GitHub Packages
         working-directory: packages/libs/dapp-kit
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bun publish --registry=https://npm.pkg.github.com --ignore-scripts --no-git-checks
+        run: |
+          bun publish --registry=https://npm.pkg.github.com --ignore-scripts --no-git-checks
