@@ -35,12 +35,7 @@ export { getAssemblyTypeApiString } from "@evefrontier/wallet-core/definitions";
  * Migrate either wallet-core or dapp-kit to use the same shape for sponsored transaction input.
  * @category Types
  */
-export type SponsoredTransactionInput = Omit<
-  WalletCoreSponsoredTransactionInput,
-  "item_id" | "assembly"
-> & {
-  assembly: string | number;
-  item_id: string | number;
+export type SponsoredTransactionInput = WalletCoreSponsoredTransactionInput & {
   tenant: string;
 };
 
