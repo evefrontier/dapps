@@ -6,12 +6,14 @@
  */
 
 import {
-  ASSEMBLY_TYPE_API_STRING,
+  type EveVaultWalletFeatures as EveFrontierSponsoredTransactionFeature,
+  type SponsoredTransactionInput as WalletCoreSponsoredTransactionInput,
+} from "@evefrontier/wallet-core/wallet-standard-extensions";
+import {
   Assemblies,
   type AssemblyType,
   EVEFRONTIER_SPONSORED_TRANSACTION,
   SponsoredTransactionActions,
-  type SponsoredTransactionAssemblyType,
   type SponsoredTransactionMetadata,
 } from "../types";
 
@@ -19,30 +21,28 @@ import {
  * Maps an assembly type enum to the API string expected by the sponsored transaction backend.
  *
  * @category Wallet
+ * TODO: This typedoc is not working when re-exported from wallet-core
  */
-export function getAssemblyTypeApiString(
-  type: Assemblies,
-): SponsoredTransactionAssemblyType {
-  return ASSEMBLY_TYPE_API_STRING[type];
-}
+export { getAssemblyTypeApiString } from "@evefrontier/wallet-core/definitions";
 
 /**
  * Input for a sponsored transaction request
  * Takes the transformed item_id and assembly type values of the assembly object
  * Normalization from assembly object to this flat shape is done in the hook by design;
  * callers may pass either the full assembly or pre-flattened values.
+ *
+ * TODO: This typedoc is not working when re-exported from wallet-core
+ * Migrate either wallet-core or dapp-kit to use the same shape for sponsored transaction input.
  * @category Types
  */
-export interface SponsoredTransactionInput {
-  /** The transaction to be sponsored and executed */
-  txAction: SponsoredTransactionActions;
-  /** Assembly ID */
-  assembly: AssemblyType<Assemblies>["item_id"];
+export type SponsoredTransactionInput = Omit<
+  WalletCoreSponsoredTransactionInput,
+  "item_id" | "assembly"
+> & {
+  assembly: string | number;
+  item_id: string | number;
   tenant: string;
-  /** The assembly type to be sponsored and executed */
-  assemblyType: SponsoredTransactionAssemblyType;
-  metadata?: SponsoredTransactionMetadata;
-}
+};
 
 /** Sponsored tx args with assembly object; id and assemblyType are derived. Tenant is optional; the hook resolves it from args, URL query param, or default. */
 export type SponsoredTransactionArgs = Omit<
@@ -59,41 +59,28 @@ export type SponsoredTransactionArgs = Omit<
 /**
  * Output from a successful sponsored transaction
  *
+ * TODO: This typedoc is not working when re-exported from wallet-core
  * @category Types
  */
-export interface SponsoredTransactionOutput {
-  /** The transaction digest */
-  digest: string;
-  /** The transaction effects (BCS encoded) */
-  effects?: string;
-  /** Raw effects bytes (if available) */
-  rawEffects?: number[];
-}
-
 /**
  * The sponsored transaction method signature
  *
+ * TODO: This typedoc is not working when re-exported from wallet-core
  * @category Wallet
  */
-export type SponsoredTransactionMethod = (
-  input: SponsoredTransactionInput,
-) => Promise<SponsoredTransactionOutput>;
-
 /**
  * Feature interface for sponsored transactions.
  * Wallets that support this feature should implement this interface
  * in their `features` object.
  *
+ * TODO: This typedoc is not working when re-exported from wallet-core
  * @category Wallet
  */
-export interface EveFrontierSponsoredTransactionFeature {
-  readonly [EVEFRONTIER_SPONSORED_TRANSACTION]: {
-    /** Feature version for compatibility checking */
-    readonly version: "1.0.0";
-    /** Execute a gas-sponsored transaction */
-    signSponsoredTransaction: SponsoredTransactionMethod;
-  };
-}
+export type {
+  EveVaultWalletFeatures as EveFrontierSponsoredTransactionFeature,
+  SponsoredTransactionMethod,
+  SponsoredTransactionOutput,
+} from "@evefrontier/wallet-core/wallet-standard-extensions";
 
 // ============================================================================
 // Type Guards
