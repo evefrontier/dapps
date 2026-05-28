@@ -48,12 +48,6 @@ export function getAssemblyType(typeRepr: string): Assemblies {
   if (typeRepr.includes("::network_node::NetworkNode")) {
     return Assemblies.NetworkNode;
   }
-  if (typeRepr.includes("::manufacturing::Manufacturing")) {
-    return Assemblies.Manufacturing;
-  }
-  if (typeRepr.includes("::refinery::Refinery")) {
-    return Assemblies.Refinery;
-  }
   if (typeRepr.includes("::assembly::Assembly")) {
     return Assemblies.Assembly;
   }

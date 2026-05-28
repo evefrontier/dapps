@@ -98,35 +98,26 @@ export class AssemblyIdRequiredError extends Error {
 // ============================================================================
 
 /**
- * Resolves assembly ID to a non-negative integer from the assembly object or query param.
+ * Resolves assembly ID to a non-negative integer string from the assembly object or query param.
  * Fails fast with {@link AssemblyIdRequiredError} if neither source provides a valid id.
  */
 function resolveAssemblyId(
-  assemblyItemId: number | undefined,
+  assemblyItemId: string | number | undefined,
   queryItemId: string | null,
-): number {
-  const fromAssembly =
-    typeof assemblyItemId === "number" &&
-    Number.isInteger(assemblyItemId) &&
-    assemblyItemId >= 0
-      ? assemblyItemId
-      : undefined;
+): string {
+  const tryResolve = (
+    value: string | number | null | undefined,
+  ): string | null => {
+    if (value == null || String(value).trim() === "") return null;
+    const id = String(value).trim();
+    return /^\d+$/.test(id) ? id : null;
+  };
 
-  if (fromAssembly !== undefined) {
-    return fromAssembly;
+  const assemblyId = tryResolve(assemblyItemId) ?? tryResolve(queryItemId);
+  if (assemblyId == null) {
+    throw new AssemblyIdRequiredError();
   }
-
-  if (queryItemId != null && queryItemId.trim() !== "") {
-    const parsed = parseInt(queryItemId.trim(), 10);
-    if (Number.isNaN(parsed) || parsed < 0) {
-      throw new AssemblyIdRequiredError(
-        `Query param itemId must be a non-negative integer; got "${queryItemId}"`,
-      );
-    }
-    return parsed;
-  }
-
-  throw new AssemblyIdRequiredError();
+  return assemblyId;
 }
 
 // ============================================================================

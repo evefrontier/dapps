@@ -149,14 +149,6 @@ const Behaviour = React.memo((): React.JSX.Element => {
     return <div className="Eve-Module" />;
   }
 
-  const isRefineryOrManufacturing =
-    assembly.type === Assemblies.Refinery ||
-    assembly.type === Assemblies.Manufacturing;
-
-  if (isRefineryOrManufacturing) {
-    return <div className="Eve-Module" />;
-  }
-
   return (
     <ModuleRenderer
       assembly={assembly}

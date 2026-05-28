@@ -1,10 +1,9 @@
+import { Assemblies } from "@evefrontier/wallet-core/definitions";
 import type { SUI_GRAPHQL_NETWORKS } from "../utils";
 import type {
   DetailedAssemblyResponse,
   GateModule,
-  ManufacturingModule,
   NetworkNodeModule,
-  RefineryModule,
   StorageModule,
   TurretModule,
 } from "./worldApiReturnTypes";
@@ -69,16 +68,12 @@ export interface Notify {
 // Assembly Types
 // =========================================
 
-/** @category Types */
-export enum Assemblies {
-  SmartStorageUnit = "SmartStorageUnit",
-  SmartTurret = "SmartTurret",
-  SmartGate = "SmartGate",
-  NetworkNode = "NetworkNode",
-  Manufacturing = "Manufacturing",
-  Refinery = "Refinery",
-  Assembly = "Assembly",
-}
+/**
+ * @category Types
+ *
+ * TODO: This typedoc is not working when re-exported from wallet-core
+ */
+export { Assemblies } from "@evefrontier/wallet-core/definitions";
 
 /** @category Types */
 export interface AssemblyProperties<T extends Assemblies>
@@ -96,13 +91,9 @@ export type AssemblyType<T extends Assemblies> = {
         ? AssemblyProperties<K> & { gate: GateModule }
         : K extends Assemblies.NetworkNode
           ? AssemblyProperties<K> & { networkNode: NetworkNodeModule }
-          : K extends Assemblies.Refinery
-            ? AssemblyProperties<K> & { refinery: RefineryModule }
-            : K extends Assemblies.Manufacturing
-              ? AssemblyProperties<K> & { manufacturing: ManufacturingModule }
-              : K extends Assemblies.Assembly
-                ? AssemblyProperties<K>
-                : never;
+          : K extends Assemblies.Assembly
+            ? AssemblyProperties<K>
+            : never;
 }[T];
 
 // =========================================

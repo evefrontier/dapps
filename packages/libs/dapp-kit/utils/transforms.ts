@@ -240,22 +240,6 @@ export async function transformToAssembly(
       } as AssemblyType<Assemblies.NetworkNode>;
     }
 
-    case Assemblies.Manufacturing:
-      return {
-        ...baseAssembly,
-        manufacturing: {
-          isParentNodeOnline: state === State.ONLINE,
-        },
-      } as AssemblyType<Assemblies.Manufacturing>;
-
-    case Assemblies.Refinery:
-      return {
-        ...baseAssembly,
-        refinery: {
-          isParentNodeOnline: state === State.ONLINE,
-        },
-      } as AssemblyType<Assemblies.Refinery>;
-
     default:
       // Default to Assembly
       return {
