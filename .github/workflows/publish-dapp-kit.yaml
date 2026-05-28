@@ -40,7 +40,7 @@ jobs:
           RELEASE_VERSION="dapp-kit/v${PACKAGE_VERSION}"
 
           if [ "$GITHUB_REF_NAME" != "$RELEASE_VERSION" ]; then
-            echo "Release tag ${GITHUB_REF_NAME} does not match @evefrontier/dapp-kit version ${PACKAGE_VERSION}."
+            echo "Release tag ${GITHUB_REF_NAME} does not match expected tag ${RELEASE_VERSION} for @evefrontier/dapp-kit version ${PACKAGE_VERSION}."
             exit 1
           fi
 
