@@ -6,10 +6,10 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'packages/libs/dapp-kit/**'
-      - 'bun.lock'
-      - 'package.json'
-      - '.github/workflows/docs.yaml'
+      - "packages/libs/dapp-kit/**"
+      - "bun.lock"
+      - "package.json"
+      - ".github/workflows/docs.yaml"
 
 jobs:
   build-docs:
@@ -25,10 +25,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: ".nvmrc"
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        timeout-minutes: 2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Generate TypeDoc documentation
         working-directory: packages/libs/dapp-kit
@@ -43,7 +46,7 @@ jobs:
 
   deploy-docs:
     needs: build-docs
-    if: github.event_name == 'release'  # Only deploy on release
+    if: github.event_name == 'release' # Only deploy on release
     runs-on: ubuntu-latest
     permissions:
       pages: write

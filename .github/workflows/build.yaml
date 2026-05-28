@@ -4,13 +4,13 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'packages/**'
-      - 'bun.lock'
-      - 'package.json'
-      - 'biome.jsonc'
-      - 'nx.json'
-      - 'tsconfig.json'
-      - '.github/workflows/build.yaml'
+      - "packages/**"
+      - "bun.lock"
+      - "package.json"
+      - "biome.jsonc"
+      - "nx.json"
+      - "tsconfig.json"
+      - ".github/workflows/build.yaml"
 
 jobs:
   build:
@@ -26,10 +26,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: ".nvmrc"
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        timeout-minutes: 2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Lint
         run: bunx nx run-many -t lint --verbose --nxBail=true
