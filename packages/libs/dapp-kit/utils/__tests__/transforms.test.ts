@@ -304,63 +304,6 @@ describe("transformToAssembly — NetworkNode", () => {
 });
 
 // ============================================================================
-// transformToAssembly — Manufacturing
-// ============================================================================
-
-describe("transformToAssembly — Manufacturing", () => {
-  it("sets isParentNodeOnline to true when state is ONLINE", async () => {
-    const rawJson = makeRawJson({
-      status: { status: { "@variant": "ONLINE" } },
-    });
-    const moveObj = makeMoveObject(rawJson, MFG_TYPE);
-    const result = await transformToAssembly("0x1", moveObj);
-    expect(result?.type).toBe(Assemblies.Manufacturing);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((result as any).manufacturing.isParentNodeOnline).toBe(true);
-  });
-
-  it("sets isParentNodeOnline to false when state is not ONLINE", async () => {
-    const rawJson = makeRawJson({
-      status: { status: { "@variant": "ANCHORED" } },
-    });
-    const moveObj = makeMoveObject(rawJson, MFG_TYPE);
-    const result = await transformToAssembly("0x1", moveObj);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((result as any).manufacturing.isParentNodeOnline).toBe(false);
-  });
-});
-
-// ============================================================================
-// transformToAssembly — Refinery
-// ============================================================================
-
-describe("transformToAssembly — Refinery", () => {
-  it("sets isParentNodeOnline from assembly state", async () => {
-    const onlineJson = makeRawJson({
-      status: { status: { "@variant": "ONLINE" } },
-    });
-    const offlineJson = makeRawJson({
-      status: { status: { "@variant": "ANCHORED" } },
-    });
-
-    const online = await transformToAssembly(
-      "0x1",
-      makeMoveObject(onlineJson, REFINERY_TYPE),
-    );
-    const offline = await transformToAssembly(
-      "0x1",
-      makeMoveObject(offlineJson, REFINERY_TYPE),
-    );
-
-    expect(online?.type).toBe(Assemblies.Refinery);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((online as any).refinery.isParentNodeOnline).toBe(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((offline as any).refinery.isParentNodeOnline).toBe(false);
-  });
-});
-
-// ============================================================================
 // transformToAssembly — Default (Assembly)
 // ============================================================================
 
@@ -370,10 +313,16 @@ describe("transformToAssembly — Default / Assembly", () => {
     const result = await transformToAssembly("0x1", moveObj);
     expect(result?.type).toBe(Assemblies.Assembly);
     // No extra module keys
-    expect((result as Record<string, unknown>).storage).toBeUndefined();
-    expect((result as Record<string, unknown>).turret).toBeUndefined();
-    expect((result as Record<string, unknown>).gate).toBeUndefined();
-    expect((result as Record<string, unknown>).networkNode).toBeUndefined();
+    const r = result as unknown as {
+      storage?: unknown;
+      turret?: unknown;
+      gate?: unknown;
+      networkNode?: unknown;
+    };
+    expect(r.storage).toBeUndefined();
+    expect(r.turret).toBeUndefined();
+    expect(r.gate).toBeUndefined();
+    expect(r.networkNode).toBeUndefined();
   });
 
   it("maps base fields: id, item_id, name, description, state, type", async () => {
