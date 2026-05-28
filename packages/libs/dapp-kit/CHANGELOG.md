@@ -1,5 +1,11 @@
 # @evefrontier/dapp-kit
 
+## 0.1.10
+
+### Patch Changes
+
+- use wallet-core for types, defs
+
 ## 0.1.9
 
 ### Patch Changes
