@@ -28,7 +28,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["@evefrontier/dapp-kit"],
+    exclude: ["@evefrontier/dapp-kit"],
   },
   build: {
     target: "es2022",
@@ -54,7 +54,10 @@ export default defineConfig({
         __dirname,
         "../../libs/ui-components",
       ),
-      "@evefrontier/dapp-kit": path.resolve(__dirname, "../../libs/dapp-kit"),
+      "@evefrontier/dapp-kit": path.resolve(
+        __dirname,
+        "../../libs/dapp-kit/index.ts",
+      ),
     },
     dedupe: [
       "@evefrontier/dapp-kit",

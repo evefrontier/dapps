@@ -26,6 +26,21 @@ export function makeObjectWallet(
   } as unknown as Wallet;
 }
 
+/** Wallet whose `features` is an array of feature name strings (UiWallet shape). */
+export function makeArrayWallet(
+  signFn: SponsoredTransactionMethod = SIGN_FN,
+): Wallet {
+  void signFn;
+  return {
+    name: "EVE Vault",
+    version: "1.0.0",
+    icon: "data:image/png;base64,",
+    chains: ["sui:testnet"],
+    accounts: [],
+    features: [EVEFRONTIER_SPONSORED_TRANSACTION],
+  } as unknown as Wallet;
+}
+
 /** Plain wallet with no sponsored-tx feature. */
 export function makePlainWallet(): Wallet {
   return {

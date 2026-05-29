@@ -1,4 +1,4 @@
-import type { Wallet } from "@mysten/wallet-standard";
+import { getWallets } from "@mysten/wallet-standard";
 import { EVEFRONTIER_SPONSORED_TRANSACTION } from "../types";
 import {
   type EveFrontierSponsoredTransactionFeature,
@@ -15,8 +15,8 @@ import {
  * this feature.
  *
  * @category Wallet
- * @param wallet - The wallet object from wallet-standard
- * @returns True if the wallet implements the `evefrontier:sponsoredTransaction` feature
+ * @param wallet - The UiWallet object from dapp-kit
+ * @returns True if the wallet's feature list includes `evefrontier:sponsoredTransaction`
  *
  * @example Filter supported wallets
  * ```tsx
@@ -38,7 +38,9 @@ import {
  * }
  * ```
  */
-export function walletSupportsSponsoredTransaction(wallet: Wallet): boolean {
+export function walletSupportsSponsoredTransaction(wallet: {
+  features: unknown;
+}): boolean {
   return supportsSponsoredTransaction(wallet.features);
 }
 
@@ -50,7 +52,7 @@ export function walletSupportsSponsoredTransaction(wallet: Wallet): boolean {
  * which provides React Query integration and automatic error handling.
  *
  * @category Wallet
- * @param wallet - The wallet object from wallet-standard
+ * @param wallet - The UiWallet object from dapp-kit
  * @returns The sponsored transaction method, or undefined if not supported
  *
  * @example Direct wallet feature access
@@ -72,16 +74,34 @@ export function walletSupportsSponsoredTransaction(wallet: Wallet): boolean {
  *
  * @see {@link useSponsoredTransaction} for the recommended React hook approach
  */
-export function getSponsoredTransactionFeature(
-  wallet: Wallet,
-): SponsoredTransactionMethod | undefined {
+export function getSponsoredTransactionFeature(wallet: {
+  features: unknown;
+  name?: string;
+  version?: string;
+}): SponsoredTransactionMethod | undefined {
+  if (!supportsSponsoredTransaction(wallet.features)) {
+    return undefined;
+  }
+
+  // wallet.features is array-shaped (UiWallet); find the corresponding raw wallet
+  // in the Wallet Standard registry by name to access the feature implementation.
+  const rawWallets = getWallets().get();
+  const rawWallet = rawWallets.find(
+    (rw) =>
+      rw.name === wallet.name &&
+      (wallet.version == null || rw.version === wallet.version),
+  );
+
   if (
-    !hasSponsoredTransactionFeature(wallet.features as Record<string, unknown>)
+    rawWallet == null ||
+    !hasSponsoredTransactionFeature(
+      rawWallet.features as Record<string, unknown>,
+    )
   ) {
     return undefined;
   }
 
-  const feature = (wallet.features as Record<string, unknown>)[
+  const feature = (rawWallet.features as Record<string, unknown>)[
     EVEFRONTIER_SPONSORED_TRANSACTION
   ] as EveFrontierSponsoredTransactionFeature[typeof EVEFRONTIER_SPONSORED_TRANSACTION];
 
