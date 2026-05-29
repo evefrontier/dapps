@@ -25,6 +25,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version-file: ".nvmrc"
+          registry-url: "https://npm.pkg.github.com"
 
       - name: Install dependencies
         timeout-minutes: 2
@@ -36,10 +37,10 @@ jobs:
         working-directory: packages/libs/dapp-kit
         run: |
           PACKAGE_VERSION="$(node -p "require('./package.json').version")"
-          RELEASE_VERSION="${GITHUB_REF_NAME#v}"
+          RELEASE_VERSION="dapp-kit/v${PACKAGE_VERSION}"
 
-          if [ "$PACKAGE_VERSION" != "$RELEASE_VERSION" ]; then
-            echo "Release tag ${GITHUB_REF_NAME} does not match @evefrontier/dapp-kit version ${PACKAGE_VERSION}."
+          if [ "$GITHUB_REF_NAME" != "$RELEASE_VERSION" ]; then
+            echo "Release tag ${GITHUB_REF_NAME} does not match expected tag ${RELEASE_VERSION} for @evefrontier/dapp-kit version ${PACKAGE_VERSION}."
             exit 1
           fi
 
@@ -49,8 +50,15 @@ jobs:
       - name: Build dapp-kit
         run: bun --filter @evefrontier/dapp-kit build
 
+      - name: Configure registry auth
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+
       - name: Publish to GitHub Packages
         working-directory: packages/libs/dapp-kit
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bun publish --registry=https://npm.pkg.github.com --ignore-scripts --no-git-checks
+        run: |
+          bun publish --registry=https://npm.pkg.github.com --ignore-scripts --no-git-checks
+
+      - name: Remove .npmrc
+        if: always()
+        shell: bash
+        run: rm -f .npmrc
