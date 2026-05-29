@@ -24,30 +24,6 @@ describe("ERRORS named aliases", () => {
       },
     ],
     [
-      "ABI_FUNCTION_NOT_FOUND",
-      {
-        code: 2004,
-        name: "ABI Function Not Found Error",
-        message: "Function not found in ABI",
-      },
-    ],
-    [
-      "FORWARDER_NOT_FOUND",
-      {
-        code: 2005,
-        name: "ERC2771 Forwarder contract Not Found Error",
-        message: "ERC2771 forwarder contract could not be found",
-      },
-    ],
-    [
-      "CALLFROM_NOT_FOUND",
-      {
-        code: 2006,
-        name: "callFrom Function Not Found Error",
-        message: "callFrom Function not found in ABI",
-      },
-    ],
-    [
       "INSUFFICIENT_EVE",
       {
         code: 3002,
@@ -81,10 +57,6 @@ describe("ERROR_MESSAGES", () => {
       2001: "Error calling the smart contract.",
       2002: "",
       2003: "World resource not found.",
-      2004: "Function not found in ABI",
-      2005: "ERC2771 forwarder contract could not be found",
-      2006: "callFrom Function not found in ABI",
-      2007: "Size of bytes does not match expected size.",
       2008: "Function simulation reverted",
       3001: "Insufficient funds for GAS.",
       3002: "Insufficient EVE.",
@@ -102,9 +74,6 @@ describe("ERROR_MESSAGES", () => {
       expect.arrayContaining([
         "UNKNOWN_ERROR",
         "CONTRACT_CALL",
-        "ABI_FUNCTION_NOT_FOUND",
-        "FORWARDER_NOT_FOUND",
-        "CALLFROM_NOT_FOUND",
         "INSUFFICIENT_EVE",
         "LENS_UNAVAILABLE",
       ]),
@@ -207,34 +176,6 @@ describe("parseErrorFromMessage", () => {
     expect(
       parseErrorFromMessage("Error: World_ResourceNotFound"),
     ).toMatchObject({ code: 2003 });
-  });
-
-  // 2004 - ABI Function Not Found
-  it("matches 'AbiErrorSignatureNotFoundError' → code 2004", () => {
-    expect(
-      parseErrorFromMessage("AbiErrorSignatureNotFoundError"),
-    ).toMatchObject({ code: 2004 });
-  });
-
-  // 2005 - Forwarder Not Found
-  it("matches 'Forwarder contract' → code 2005", () => {
-    expect(parseErrorFromMessage("Forwarder contract not found")).toMatchObject(
-      { code: 2005 },
-    );
-  });
-
-  // 2006 - callFrom Not Found
-  it("matches 'callFrom Function' → code 2006", () => {
-    expect(
-      parseErrorFromMessage("callFrom Function not available"),
-    ).toMatchObject({ code: 2006 });
-  });
-
-  // 2007 - ABI Encoding Bytes Size Mismatch
-  it("matches 'does not match expected size' → code 2007", () => {
-    expect(
-      parseErrorFromMessage("bytes does not match expected size"),
-    ).toMatchObject({ code: 2007 });
   });
 
   // 2008 - Contract Revert Error

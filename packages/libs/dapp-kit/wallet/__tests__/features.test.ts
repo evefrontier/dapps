@@ -1,4 +1,3 @@
-import type { Wallet } from "@mysten/wallet-standard";
 import { describe, expect, it } from "vitest";
 import { Assemblies, EVEFRONTIER_SPONSORED_TRANSACTION } from "../../types";
 import {
@@ -6,29 +5,7 @@ import {
   hasSponsoredTransactionFeature,
   supportsSponsoredTransaction,
 } from "../features";
-
-// ============================================================================
-// Shared test helpers
-// ============================================================================
-
-const SIGN_FN = async () => ({ digest: "0xtest" });
-
-/** Wallet whose `features` is an object with the sponsored-tx implementation. */
-function makeObjectWallet(signFn = SIGN_FN): Wallet {
-  return {
-    name: "EVE Vault",
-    version: "1.0.0",
-    icon: "data:image/png;base64,",
-    chains: ["sui:testnet"],
-    accounts: [],
-    features: {
-      [EVEFRONTIER_SPONSORED_TRANSACTION]: {
-        version: "1.0.0" as const,
-        signSponsoredTransaction: signFn,
-      },
-    },
-  } as unknown as Wallet;
-}
+import { makeObjectWallet } from "./testHelpers";
 
 // ============================================================================
 // getAssemblyTypeApiString
@@ -91,20 +68,6 @@ describe("supportsSponsoredTransaction", () => {
 
   it("returns false for undefined", () => {
     expect(supportsSponsoredTransaction(undefined)).toBe(false);
-  });
-
-  it("returns false for an empty array", () => {
-    expect(supportsSponsoredTransaction([])).toBe(false);
-  });
-
-  it("returns false for an array that does not contain the feature key", () => {
-    expect(supportsSponsoredTransaction(["sui:signTransaction"])).toBe(false);
-  });
-
-  it("returns true for an array containing the feature key", () => {
-    expect(
-      supportsSponsoredTransaction([EVEFRONTIER_SPONSORED_TRANSACTION]),
-    ).toBe(true);
   });
 
   it("returns true for object-shaped features with a valid implementation", () => {

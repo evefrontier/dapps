@@ -73,8 +73,6 @@ const SSU_TYPE = "0xpkg::storage_unit::StorageUnit";
 const TURRET_TYPE = "0xpkg::turret::Turret";
 const GATE_TYPE = "0xpkg::gate::Gate";
 const NODE_TYPE = "0xpkg::network_node::NetworkNode";
-const MFG_TYPE = "0xpkg::manufacturing::Manufacturing";
-const REFINERY_TYPE = "0xpkg::refinery::Refinery";
 const DEFAULT_TYPE = "0xpkg::assembly::Assembly";
 
 // ============================================================================

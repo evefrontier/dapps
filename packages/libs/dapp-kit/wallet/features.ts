@@ -85,17 +85,14 @@ export function hasSponsoredTransactionFeature(
 
 /**
  * Check if a wallet supports the sponsored transaction feature.
- * Supports both legacy object-shaped features and v2 array-shaped features
- * (list of feature names).
+ * Requires the Wallet Standard object-shaped feature implementation.
  *
  * @category Wallet
  */
 export function supportsSponsoredTransaction(features: unknown): boolean {
-  if (Array.isArray(features)) {
-    return (features as string[]).includes(EVEFRONTIER_SPONSORED_TRANSACTION);
-  }
-  if (typeof features === "object" && features !== null) {
-    return hasSponsoredTransactionFeature(features as Record<string, unknown>);
-  }
-  return false;
+  return (
+    typeof features === "object" &&
+    features !== null &&
+    hasSponsoredTransactionFeature(features as Record<string, unknown>)
+  );
 }

@@ -87,31 +87,3 @@ export function getSponsoredTransactionFeature(
 
   return feature.signSponsoredTransaction;
 }
-
-/**
- * Get the sponsored transaction method from a wallet, supporting both
- * object-shaped features (legacy) and array-shaped features (v2).
- * When features is an array, tries the wallet object for a top-level
- * feature implementation (e.g. wallet['evefrontier:sponsoredTransaction']).
- */
-export function getSponsoredTransactionMethod(
-  wallet: Wallet | { features: unknown; name?: string; version?: string },
-): SponsoredTransactionMethod | undefined {
-  const fromFeatures = getSponsoredTransactionFeature(wallet as Wallet);
-  if (fromFeatures) return fromFeatures;
-
-  if (!supportsSponsoredTransaction(wallet.features)) return undefined;
-
-  const w = wallet as Record<string, unknown>;
-  const feature = w[EVEFRONTIER_SPONSORED_TRANSACTION];
-  if (
-    feature !== null &&
-    typeof feature === "object" &&
-    typeof (feature as { signSponsoredTransaction?: unknown })
-      .signSponsoredTransaction === "function"
-  ) {
-    return (feature as { signSponsoredTransaction: SponsoredTransactionMethod })
-      .signSponsoredTransaction;
-  }
-  return undefined;
-}

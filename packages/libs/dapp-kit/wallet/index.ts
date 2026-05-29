@@ -21,6 +21,5 @@ export {
 // Utility functions
 export {
   getSponsoredTransactionFeature,
-  getSponsoredTransactionMethod,
   walletSupportsSponsoredTransaction,
 } from "./utils";

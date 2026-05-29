@@ -1,9 +1,4 @@
-import {
-  useCurrentAccount,
-  useDAppKit,
-  useWallets,
-} from "@mysten/dapp-kit-react";
-import { getWallets } from "@mysten/wallet-standard";
+import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
 import {
   type UseMutationOptions,
   type UseMutationResult,
@@ -13,7 +8,7 @@ import { Assemblies, QueryParams, SponsoredTransactionActions } from "../types";
 import { createLogger, TenantId } from "../utils";
 import {
   getAssemblyTypeApiString,
-  getSponsoredTransactionMethod,
+  getSponsoredTransactionFeature,
   type SponsoredTransactionArgs,
   type SponsoredTransactionInput,
   type SponsoredTransactionOutput,
@@ -303,7 +298,6 @@ export function useSponsoredTransaction({
   UseSponsoredTransactionArgs
 > {
   const dAppKit = useDAppKit();
-  const wallets = useWallets();
   const currentAccount = useCurrentAccount();
 
   const queryParams = new URLSearchParams(window.location.search);
@@ -340,48 +334,11 @@ export function useSponsoredTransaction({
         );
       }
 
-      // Resolve method: prefer raw Wallet Standard wallets (object-shaped features), then store/current/list
-      const walletName = (wallet as ResolvableWallet).name;
-      const walletVersion = (wallet as ResolvableWallet).version;
-      const rawWallets =
-        typeof getWallets === "function" ? getWallets().get() : [];
-      const rawWallet = rawWallets.find(
-        (w) =>
-          w.name === walletName &&
-          (walletVersion == null || w.version === walletVersion),
+      const signSponsoredTransaction = getSponsoredTransactionFeature(
+        wallet as unknown as Parameters<
+          typeof getSponsoredTransactionFeature
+        >[0],
       );
-      let signSponsoredTransaction =
-        (rawWallet != null
-          ? getSponsoredTransactionMethod(
-              rawWallet as Parameters<typeof getSponsoredTransactionMethod>[0],
-            )
-          : undefined) ??
-        (walletFromStore != null
-          ? getSponsoredTransactionMethod(
-              walletFromStore as Parameters<
-                typeof getSponsoredTransactionMethod
-              >[0],
-            )
-          : undefined) ??
-        getSponsoredTransactionMethod(
-          wallet as Parameters<typeof getSponsoredTransactionMethod>[0],
-        );
-      if (!signSponsoredTransaction) {
-        const walletFromList = wallets.find(
-          (w) =>
-            w.name === (wallet as ResolvableWallet).name &&
-            ((wallet as ResolvableWallet).version == null ||
-              w.version === (wallet as ResolvableWallet).version),
-        );
-        signSponsoredTransaction =
-          walletFromList != null
-            ? getSponsoredTransactionMethod(
-                walletFromList as Parameters<
-                  typeof getSponsoredTransactionMethod
-                >[0],
-              )
-            : undefined;
-      }
       if (!signSponsoredTransaction) {
         throw new WalletSponsoredTransactionNotSupportedError(
           (wallet as ResolvableWallet).name,
