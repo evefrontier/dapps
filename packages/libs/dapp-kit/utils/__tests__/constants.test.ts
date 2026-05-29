@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  GRAPHQL_ENDPOINTS,
   getCharacterOwnerCapType,
   getCharacterPlayerProfileType,
   getEnergyConfigType,
@@ -32,27 +31,31 @@ describe("constants", () => {
   describe("getSuiGraphqlEndpoint", () => {
     it("returns testnet URL for 'testnet'", () => {
       expect(getSuiGraphqlEndpoint("testnet")).toBe(
-        GRAPHQL_ENDPOINTS["testnet"],
+        "https://graphql.testnet.sui.io/graphql",
       );
     });
 
     it("returns devnet URL for 'devnet'", () => {
-      expect(getSuiGraphqlEndpoint("devnet")).toBe(GRAPHQL_ENDPOINTS["devnet"]);
+      expect(getSuiGraphqlEndpoint("devnet")).toBe(
+        "https://graphql.devnet.sui.io/graphql",
+      );
     });
 
     it("returns mainnet URL for 'mainnet'", () => {
       expect(getSuiGraphqlEndpoint("mainnet")).toBe(
-        GRAPHQL_ENDPOINTS["mainnet"],
+        "https://graphql.mainnet.sui.io/graphql",
       );
     });
 
     it("defaults to testnet URL when called with no argument", () => {
-      expect(getSuiGraphqlEndpoint()).toBe(GRAPHQL_ENDPOINTS["testnet"]);
+      expect(getSuiGraphqlEndpoint()).toBe(
+        "https://graphql.testnet.sui.io/graphql",
+      );
     });
 
     it("falls back to testnet URL for an unknown network string", () => {
       expect(getSuiGraphqlEndpoint("unknown-net")).toBe(
-        GRAPHQL_ENDPOINTS["testnet"],
+        "https://graphql.testnet.sui.io/graphql",
       );
     });
   });
@@ -121,11 +124,33 @@ describe("constants", () => {
   // ============================================================================
 
   describe("getEveCoinType", () => {
-    it.each(
-      Object.values(TenantId) as TenantId[],
-    )("returns a valid EVE coin type for tenant %s", (tenantId) => {
-      const coinType = getEveCoinType(tenantId);
-      expect(coinType).toMatch(/^0x[0-9a-f]+::EVE::EVE$/);
+    it.each([
+      [
+        TenantId.TAUCETI,
+        "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9::EVE::EVE",
+      ],
+      [
+        TenantId.TIAKI,
+        "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9::EVE::EVE",
+      ],
+      [
+        TenantId.TESSERACT,
+        "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9::EVE::EVE",
+      ],
+      [
+        TenantId.TETRA,
+        "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9::EVE::EVE",
+      ],
+      [
+        TenantId.UTOPIA,
+        "0xf0446b93345c1118f21239d7ac58fb82d005219b2016e100f074e4d17162a465::EVE::EVE",
+      ],
+      [
+        TenantId.STILLNESS,
+        "0x2a66a89b5a735738ffa4423ac024d23571326163f324f9051557617319e59d60::EVE::EVE",
+      ],
+    ])("returns the EVE coin type for tenant %s", (tenantId, expected) => {
+      expect(getEveCoinType(tenantId)).toBe(expected);
     });
   });
 
@@ -134,10 +159,14 @@ describe("constants", () => {
   // ============================================================================
 
   describe("KNOWN_EVE_COIN_TYPES", () => {
-    it("contains the coin type for every TenantId", () => {
-      for (const tenantId of Object.values(TenantId) as TenantId[]) {
-        expect(KNOWN_EVE_COIN_TYPES.has(getEveCoinType(tenantId))).toBe(true);
-      }
+    it("contains the expected distinct EVE coin types", () => {
+      expect(KNOWN_EVE_COIN_TYPES).toEqual(
+        new Set([
+          "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9::EVE::EVE",
+          "0xf0446b93345c1118f21239d7ac58fb82d005219b2016e100f074e4d17162a465::EVE::EVE",
+          "0x2a66a89b5a735738ffa4423ac024d23571326163f324f9051557617319e59d60::EVE::EVE",
+        ]),
+      );
     });
 
     it("does not contain an arbitrary coin type string", () => {

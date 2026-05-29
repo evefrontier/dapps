@@ -6,32 +6,65 @@ import { ERROR_MESSAGES, ERRORS, parseErrorFromMessage } from "../errors";
 // ============================================================================
 
 describe("ERRORS named aliases", () => {
-  it("UNKNOWN_ERROR is same reference as ERRORS[1001]", () => {
-    expect(ERRORS.UNKNOWN_ERROR).toBe(ERRORS[1001]);
-  });
-
-  it("CONTRACT_CALL is same reference as ERRORS[2001]", () => {
-    expect(ERRORS.CONTRACT_CALL).toBe(ERRORS[2001]);
-  });
-
-  it("ABI_FUNCTION_NOT_FOUND is same reference as ERRORS[2004]", () => {
-    expect(ERRORS.ABI_FUNCTION_NOT_FOUND).toBe(ERRORS[2004]);
-  });
-
-  it("FORWARDER_NOT_FOUND is same reference as ERRORS[2005]", () => {
-    expect(ERRORS.FORWARDER_NOT_FOUND).toBe(ERRORS[2005]);
-  });
-
-  it("CALLFROM_NOT_FOUND is same reference as ERRORS[2006]", () => {
-    expect(ERRORS.CALLFROM_NOT_FOUND).toBe(ERRORS[2006]);
-  });
-
-  it("INSUFFICIENT_EVE is same reference as ERRORS[3002]", () => {
-    expect(ERRORS.INSUFFICIENT_EVE).toBe(ERRORS[3002]);
-  });
-
-  it("LENS_UNAVAILABLE is same reference as ERRORS[5001]", () => {
-    expect(ERRORS.LENS_UNAVAILABLE).toBe(ERRORS[5001]);
+  it.each([
+    [
+      "UNKNOWN_ERROR",
+      {
+        code: 1001,
+        name: "Unknown Error",
+        message: "An unknown error occurred.",
+      },
+    ],
+    [
+      "CONTRACT_CALL",
+      {
+        code: 2001,
+        name: "Contract Call Error",
+        message: "Error calling the smart contract.",
+      },
+    ],
+    [
+      "ABI_FUNCTION_NOT_FOUND",
+      {
+        code: 2004,
+        name: "ABI Function Not Found Error",
+        message: "Function not found in ABI",
+      },
+    ],
+    [
+      "FORWARDER_NOT_FOUND",
+      {
+        code: 2005,
+        name: "ERC2771 Forwarder contract Not Found Error",
+        message: "ERC2771 forwarder contract could not be found",
+      },
+    ],
+    [
+      "CALLFROM_NOT_FOUND",
+      {
+        code: 2006,
+        name: "callFrom Function Not Found Error",
+        message: "callFrom Function not found in ABI",
+      },
+    ],
+    [
+      "INSUFFICIENT_EVE",
+      {
+        code: 3002,
+        name: "Insufficient Eve",
+        message: "Insufficient EVE.",
+      },
+    ],
+    [
+      "LENS_UNAVAILABLE",
+      {
+        code: 5001,
+        name: "Lens Unavailable",
+        message: "There are no lenses available here",
+      },
+    ],
+  ])("%s exposes the expected public error", (alias, expected) => {
+    expect(ERRORS[alias]).toMatchObject(expected);
   });
 });
 
@@ -40,27 +73,42 @@ describe("ERRORS named aliases", () => {
 // ============================================================================
 
 describe("ERROR_MESSAGES", () => {
-  it("contains only numeric keys", () => {
-    for (const key of Object.keys(ERROR_MESSAGES)) {
-      expect(/^\d+$/.test(key)).toBe(true);
-    }
+  it("contains the expected public message map by numeric code", () => {
+    expect(ERROR_MESSAGES).toEqual({
+      1001: "An unknown error occurred.",
+      1002: "",
+      1003: "",
+      2001: "Error calling the smart contract.",
+      2002: "",
+      2003: "World resource not found.",
+      2004: "Function not found in ABI",
+      2005: "ERC2771 forwarder contract could not be found",
+      2006: "callFrom Function not found in ABI",
+      2007: "Size of bytes does not match expected size.",
+      2008: "Function simulation reverted",
+      3001: "Insufficient funds for GAS.",
+      3002: "Insufficient EVE.",
+      3003: "User rejected the transaction.",
+      3004: "",
+      4001: "",
+      4002: "",
+      4003: "Please check the chain your wallet is connected to.",
+      5001: "There are no lenses available here",
+    });
   });
 
-  it("does not include the UNKNOWN_ERROR string key", () => {
-    expect("UNKNOWN_ERROR" in ERROR_MESSAGES).toBe(false);
-  });
-
-  it("does not include any of the other string alias keys", () => {
-    for (const key of [
-      "CONTRACT_CALL",
-      "ABI_FUNCTION_NOT_FOUND",
-      "FORWARDER_NOT_FOUND",
-      "CALLFROM_NOT_FOUND",
-      "INSUFFICIENT_EVE",
-      "LENS_UNAVAILABLE",
-    ]) {
-      expect(key in ERROR_MESSAGES).toBe(false);
-    }
+  it("does not expose named aliases as message keys", () => {
+    expect(Object.keys(ERROR_MESSAGES)).not.toEqual(
+      expect.arrayContaining([
+        "UNKNOWN_ERROR",
+        "CONTRACT_CALL",
+        "ABI_FUNCTION_NOT_FOUND",
+        "FORWARDER_NOT_FOUND",
+        "CALLFROM_NOT_FOUND",
+        "INSUFFICIENT_EVE",
+        "LENS_UNAVAILABLE",
+      ]),
+    );
   });
 });
 

@@ -43,6 +43,8 @@ const CHAR_JSON = {
 /** Build the deeply nested GraphQL response for getObjectAndCharacterOwner. */
 function makeAssemblyResponse(options: {
   asMoveObject?: object | null;
+  objectJson?: Record<string, unknown>;
+  typeRepr?: string;
   withCharacter?: boolean;
   withEnergySource?: boolean;
   withDestinationGate?: boolean;
@@ -50,6 +52,8 @@ function makeAssemblyResponse(options: {
 }) {
   const {
     asMoveObject = null,
+    objectJson = { id: "0xobj", type_id: "77917" },
+    typeRepr = `${TEST_PKG}::storage_unit::StorageUnit`,
     withCharacter = false,
     withEnergySource = false,
     withDestinationGate = false,
@@ -125,8 +129,8 @@ function makeAssemblyResponse(options: {
       object: {
         asMoveObject: {
           contents: {
-            json: { id: "0xobj", type_id: "77917" },
-            type: { repr: `${TEST_PKG}::storage_unit::StorageUnit` },
+            json: objectJson,
+            type: { repr: typeRepr },
             bcs: "",
             extract: charPath,
             energySource,
@@ -160,7 +164,7 @@ describe("executeGraphQLQuery", () => {
   it("makes a POST request with correct Content-Type", async () => {
     await executeGraphQLQuery("{ __typename }", {});
     expect(fetchMock).toHaveBeenCalledOnce();
-    const [, init] = fetchMock.mock.calls[0];
+    const [, init] = fetchMock.mock.calls[0]!;
     expect(init.method).toBe("POST");
     expect(init.headers["Content-Type"]).toBe("application/json");
   });
@@ -169,7 +173,7 @@ describe("executeGraphQLQuery", () => {
     const query = "query Test { __typename }";
     const variables = { address: "0x123" };
     await executeGraphQLQuery(query, variables);
-    const [, init] = fetchMock.mock.calls[0];
+    const [, init] = fetchMock.mock.calls[0]!;
     expect(JSON.parse(init.body)).toEqual({ query, variables });
   });
 
@@ -189,7 +193,7 @@ describe("executeGraphQLQuery", () => {
 
   it("calls getSuiGraphqlEndpoint() to determine the URL", async () => {
     await executeGraphQLQuery("{ __typename }", {});
-    const [url] = fetchMock.mock.calls[0];
+    const [url] = fetchMock.mock.calls[0]!;
     // Default endpoint is testnet
     expect(url).toContain("testnet.sui.io");
   });
@@ -211,7 +215,7 @@ describe("getObjectWithJson", () => {
 
     await getObjectWithJson("0xabc");
 
-    const [, init] = fetchMock.mock.calls[0];
+    const [, init] = fetchMock.mock.calls[0]!;
     const body = JSON.parse(init.body);
     expect(body.query).toBe(GET_OBJECT_WITH_JSON);
     expect(body.variables).toEqual({ address: "0xabc" });
@@ -234,7 +238,7 @@ describe("getObjectWithDynamicFields", () => {
 
     await getObjectWithDynamicFields("0xdef");
 
-    const [, init] = fetchMock.mock.calls[0];
+    const [, init] = fetchMock.mock.calls[0]!;
     const body = JSON.parse(init.body);
     expect(body.query).toBe(GET_OBJECT_WITH_DYNAMIC_FIELDS);
     expect(body.variables).toEqual({ objectId: "0xdef" });
@@ -292,7 +296,7 @@ describe("getAssemblyWithOwner", () => {
         makeAssemblyResponse({
           asMoveObject: {},
           withCharacter: false,
-          withEnergySource: false,
+          withEnergySource: true,
         }),
       ),
     );
@@ -333,12 +337,14 @@ describe("getAssemblyWithOwner", () => {
     expect(result.moveObject?.dynamicFields?.nodes).toHaveLength(1);
   });
 
-  it("returns energySource: null (no throw) when energy source is absent", async () => {
+  it("returns energySource: null (no throw) for a network node without parent energy source", async () => {
     vi.stubGlobal(
       "fetch",
       mockFetch(
         makeAssemblyResponse({
           asMoveObject: {},
+          objectJson: { id: "0xnode", type_id: "88092" },
+          typeRepr: `${TEST_PKG}::network_node::NetworkNode`,
           withCharacter: true,
           withEnergySource: false,
         }),
@@ -348,5 +354,8 @@ describe("getAssemblyWithOwner", () => {
     const result = await getAssemblyWithOwner("0xassembly");
     expect(result.energySource).toBeNull();
     expect(result.assemblyOwner).not.toBeNull();
+    expect(result.moveObject?.contents.type?.repr).toBe(
+      `${TEST_PKG}::network_node::NetworkNode`,
+    );
   });
 });

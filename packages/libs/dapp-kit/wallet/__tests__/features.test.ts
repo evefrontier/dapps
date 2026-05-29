@@ -1,10 +1,6 @@
 import type { Wallet } from "@mysten/wallet-standard";
 import { describe, expect, it } from "vitest";
-import {
-  ASSEMBLY_TYPE_API_STRING,
-  Assemblies,
-  EVEFRONTIER_SPONSORED_TRANSACTION,
-} from "../../types";
+import { Assemblies, EVEFRONTIER_SPONSORED_TRANSACTION } from "../../types";
 import {
   getAssemblyTypeApiString,
   hasSponsoredTransactionFeature,
@@ -39,9 +35,13 @@ function makeObjectWallet(signFn = SIGN_FN): Wallet {
 // ============================================================================
 
 describe("getAssemblyTypeApiString", () => {
-  it.each(
-    Object.entries(ASSEMBLY_TYPE_API_STRING) as [Assemblies, string][],
-  )("%s → %s", (assemblyKey, expected) => {
+  it.each([
+    [Assemblies.SmartStorageUnit, "storage-units"],
+    [Assemblies.SmartTurret, "turrets"],
+    [Assemblies.SmartGate, "gates"],
+    [Assemblies.NetworkNode, "network-nodes"],
+    [Assemblies.Assembly, "assemblies"],
+  ])("maps %s to API value %s", (assemblyKey, expected) => {
     expect(getAssemblyTypeApiString(assemblyKey)).toBe(expected);
   });
 });
