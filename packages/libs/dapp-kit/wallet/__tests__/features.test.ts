@@ -48,6 +48,17 @@ describe("hasSponsoredTransactionFeature", () => {
     ).toBe(false);
   });
 
+  it("returns false when signSponsoredTransaction is not a function", () => {
+    expect(
+      hasSponsoredTransactionFeature({
+        [EVEFRONTIER_SPONSORED_TRANSACTION]: {
+          version: "1.0.0",
+          signSponsoredTransaction: "not-a-function",
+        },
+      }),
+    ).toBe(false);
+  });
+
   it("returns true for a valid feature object with signSponsoredTransaction", () => {
     expect(
       hasSponsoredTransactionFeature(
@@ -82,6 +93,17 @@ describe("supportsSponsoredTransaction", () => {
     expect(
       supportsSponsoredTransaction({
         [EVEFRONTIER_SPONSORED_TRANSACTION]: { version: "1.0.0" },
+      }),
+    ).toBe(false);
+  });
+
+  it("returns false for object-shaped features with a non-function signSponsoredTransaction", () => {
+    expect(
+      supportsSponsoredTransaction({
+        [EVEFRONTIER_SPONSORED_TRANSACTION]: {
+          version: "1.0.0",
+          signSponsoredTransaction: "not-a-function",
+        },
       }),
     ).toBe(false);
   });

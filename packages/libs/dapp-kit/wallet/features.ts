@@ -79,7 +79,8 @@ export function hasSponsoredTransactionFeature(
     EVEFRONTIER_SPONSORED_TRANSACTION in features &&
     typeof featureValue === "object" &&
     featureValue !== null &&
-    "signSponsoredTransaction" in (featureValue as object)
+    typeof (featureValue as { signSponsoredTransaction?: unknown })
+      .signSponsoredTransaction === "function"
   );
 }
 
