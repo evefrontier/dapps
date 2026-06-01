@@ -5,10 +5,7 @@
  * standard Sui wallet capabilities.
  */
 
-import {
-  type EveVaultWalletFeatures as EveFrontierSponsoredTransactionFeature,
-  type SponsoredTransactionInput as WalletCoreSponsoredTransactionInput,
-} from "@evefrontier/wallet-core/wallet-standard-extensions";
+import { type SponsoredTransactionInput as WalletCoreSponsoredTransactionInput } from "@evefrontier/wallet-core/wallet-standard-extensions";
 import {
   Assemblies,
   type AssemblyType,
