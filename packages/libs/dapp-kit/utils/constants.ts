@@ -2,7 +2,7 @@
 // Environment Variable Helpers
 // ============================================================================
 
-import type { SuiGraphqlNetwork } from "../types";
+import type { SuiGraphqlNetwork } from '../types'
 
 /**
  * Get a required environment variable, throwing if not set.
@@ -10,14 +10,14 @@ import type { SuiGraphqlNetwork } from "../types";
  * @throws {Error} If the environment variable is not set
  */
 function getEnvVar(name: string): string {
-  const value = import.meta.env[name];
+  const value = import.meta.env[name]
   if (!value) {
     throw new Error(
       `Missing required environment variable: ${name}. ` +
         `Please set it in your .env file.`,
-    );
+    )
   }
-  return value;
+  return value
 }
 
 // ============================================================================
@@ -25,7 +25,7 @@ function getEnvVar(name: string): string {
 // ============================================================================
 
 function isSuiGraphqlNetwork(value: string): value is SuiGraphqlNetwork {
-  return SUI_GRAPHQL_NETWORKS.includes(value as SuiGraphqlNetwork);
+  return SUI_GRAPHQL_NETWORKS.includes(value as SuiGraphqlNetwork)
 }
 
 /**
@@ -38,8 +38,8 @@ function isSuiGraphqlNetwork(value: string): value is SuiGraphqlNetwork {
 export function getSuiGraphqlEndpoint(
   env: string = DEFAULT_GRAPHQL_NETWORK,
 ): string {
-  const network = isSuiGraphqlNetwork(env) ? env : DEFAULT_GRAPHQL_NETWORK;
-  return GRAPHQL_ENDPOINTS[network];
+  const network = isSuiGraphqlNetwork(env) ? env : DEFAULT_GRAPHQL_NETWORK
+  return GRAPHQL_ENDPOINTS[network]
 }
 
 /**
@@ -49,31 +49,31 @@ export function getSuiGraphqlEndpoint(
  * @category Utilities - Config
  */
 export const getEveWorldPackageId = (): string =>
-  getEnvVar("VITE_EVE_WORLD_PACKAGE_ID");
+  getEnvVar('VITE_EVE_WORLD_PACKAGE_ID')
 
 /** Type string for Character OwnerCap from the EVE World package. @category Utilities - Config */
 export const getCharacterOwnerCapType = (): string => {
-  const pkg = getEveWorldPackageId();
-  return `${pkg}::access::OwnerCap<${pkg}::character::Character>`;
-};
+  const pkg = getEveWorldPackageId()
+  return `${pkg}::access::OwnerCap<${pkg}::character::Character>`
+}
 
 /** Type string for Character PlayerProfile from the EVE World package. @category Utilities - Config */
 export const getCharacterPlayerProfileType = (): string => {
-  const pkg = getEveWorldPackageId();
-  return `${pkg}::character::PlayerProfile`;
-};
+  const pkg = getEveWorldPackageId()
+  return `${pkg}::character::PlayerProfile`
+}
 
 /** Type string for ObjectRegistry from the EVE World package. @category Utilities - Config */
 export const getObjectRegistryType = (): string =>
-  `${getEveWorldPackageId()}::object_registry::ObjectRegistry`;
+  `${getEveWorldPackageId()}::object_registry::ObjectRegistry`
 
 /** Type string for EnergyConfig from the EVE World package. @category Utilities - Config */
 export const getEnergyConfigType = (): string =>
-  `${getEveWorldPackageId()}::energy::EnergyConfig`;
+  `${getEveWorldPackageId()}::energy::EnergyConfig`
 
 /** Type string for FuelConfig from the EVE World package. @category Utilities - Config */
 export const getFuelEfficiencyConfigType = (): string =>
-  `${getEveWorldPackageId()}::fuel::FuelConfig`;
+  `${getEveWorldPackageId()}::fuel::FuelConfig`
 
 // ============================================================================
 // Constants
@@ -82,50 +82,50 @@ export const getFuelEfficiencyConfigType = (): string =>
 /** Default Sui network for GraphQL endpoint selection.
  *  @category Constants
  */
-export const DEFAULT_GRAPHQL_NETWORK: SuiGraphqlNetwork = "testnet";
+export const DEFAULT_GRAPHQL_NETWORK: SuiGraphqlNetwork = 'testnet'
 
 /** Tenant IDs.
  *  @category Constants
  */
 export enum TenantId {
-  UTOPIA = "utopia",
-  STILLNESS = "stillness",
-  TAUCETI = "tauceti",
-  TIAKI = "tiaki",
-  TETRA = "tetra",
-  TESSERACT = "tesseract",
+  UTOPIA = 'utopia',
+  STILLNESS = 'stillness',
+  TAUCETI = 'tauceti',
+  TIAKI = 'tiaki',
+  TETRA = 'tetra',
+  TESSERACT = 'tesseract',
 }
 
 /** Tenant when not provided via URL ?tenant= (e.g. dev/default chain).
  *  @category Constants
  */
-export const DEFAULT_TENANT = TenantId.STILLNESS;
+export const DEFAULT_TENANT = TenantId.STILLNESS
 
 /** Allowed Sui network identifiers for GraphQL endpoint selection.
  *  @category Constants
  */
-export const SUI_GRAPHQL_NETWORKS = ["testnet", "devnet", "mainnet"] as const;
+export const SUI_GRAPHQL_NETWORKS = ['testnet', 'devnet', 'mainnet'] as const
 
 /** GraphQL endpoint URLs for each Sui network.
  *  @category Constants
  */
 export const GRAPHQL_ENDPOINTS: Record<SuiGraphqlNetwork, string> = {
-  testnet: "https://graphql.testnet.sui.io/graphql",
-  devnet: "https://graphql.devnet.sui.io/graphql",
-  mainnet: "https://graphql.mainnet.sui.io/graphql",
-};
+  testnet: 'https://graphql.testnet.sui.io/graphql',
+  devnet: 'https://graphql.devnet.sui.io/graphql',
+  mainnet: 'https://graphql.mainnet.sui.io/graphql',
+}
 
 /** Polling interval in milliseconds (10 seconds).
  *  @category Constants
  */
-export const POLLING_INTERVAL = 10000;
+export const POLLING_INTERVAL = 10000
 
 /** Local storage keys.
  *  @category Constants
  */
 export const STORAGE_KEYS = {
-  CONNECTED: "eve-dapp-connected",
-} as const;
+  CONNECTED: 'eve-dapp-connected',
+} as const
 
 /** Type IDs for in-game items.
  *  @category Constants
@@ -152,15 +152,15 @@ export const EXCLUDED_TYPEIDS = [
   TYPEIDS.PORTABLE_PRINTER,
   TYPEIDS.PORTABLE_STORAGE,
   TYPEIDS.REFUGE,
-];
+]
 
 /** Per-tenant config: EVE token package ID (Sui) and Datahub API host. v0.0.18
  * @category Constants
  */
 export interface TenantConfig {
-  packageId: string;
-  evePackageId: string;
-  datahubHost: string;
+  packageId: string
+  evePackageId: string
+  datahubHost: string
 }
 
 /** Single source of truth for the six tenants (package ID + datahub host).
@@ -170,47 +170,47 @@ export interface TenantConfig {
 export const TENANT_CONFIG: Record<TenantId, TenantConfig> = {
   [TenantId.TAUCETI]: {
     packageId:
-      "0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1",
+      '0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1',
     evePackageId:
-      "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9",
-    datahubHost: "world-api-tauceti.test.priv.evefrontier.com",
+      '0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9',
+    datahubHost: 'world-api-tauceti.test.priv.evefrontier.com',
   },
   [TenantId.TIAKI]: {
     packageId:
-      "0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1",
+      '0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1',
     evePackageId:
-      "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9",
-    datahubHost: "world-api-tiaki.test.priv.evefrontier.com",
+      '0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9',
+    datahubHost: 'world-api-tiaki.test.priv.evefrontier.com',
   },
   [TenantId.TESSERACT]: {
     packageId:
-      "0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1",
+      '0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1',
     evePackageId:
-      "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9",
-    datahubHost: "world-api-tesseract.test.priv.evefrontier.com",
+      '0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9',
+    datahubHost: 'world-api-tesseract.test.priv.evefrontier.com',
   },
   [TenantId.TETRA]: {
     packageId:
-      "0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1",
+      '0x353988e063b4683580e3603dbe9e91fefd8f6a06263a646d43fd3a2f3ef6b8c1',
     evePackageId:
-      "0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9",
-    datahubHost: "world-api-tetra.test.priv.evefrontier.com",
+      '0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9',
+    datahubHost: 'world-api-tetra.test.priv.evefrontier.com',
   },
   [TenantId.UTOPIA]: {
     packageId:
-      "0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75",
+      '0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75',
     evePackageId:
-      "0xf0446b93345c1118f21239d7ac58fb82d005219b2016e100f074e4d17162a465",
-    datahubHost: "world-api-utopia.uat.pub.evefrontier.com",
+      '0xf0446b93345c1118f21239d7ac58fb82d005219b2016e100f074e4d17162a465',
+    datahubHost: 'world-api-utopia.uat.pub.evefrontier.com',
   },
   [TenantId.STILLNESS]: {
     packageId:
-      "0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c",
+      '0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c',
     evePackageId:
-      "0x2a66a89b5a735738ffa4423ac024d23571326163f324f9051557617319e59d60",
-    datahubHost: "world-api-stillness.live.tech.evefrontier.com",
+      '0x2a66a89b5a735738ffa4423ac024d23571326163f324f9051557617319e59d60',
+    datahubHost: 'world-api-stillness.live.tech.evefrontier.com',
   },
-};
+}
 
 /** EVE token package ID per tenant (derived from TENANT_CONFIG).
  * @category Constants
@@ -219,7 +219,7 @@ export const EVE_PACKAGE_ID_BY_TENANT = Object.fromEntries(
   (Object.entries(TENANT_CONFIG) as [TenantId, TenantConfig][]).map(
     ([id, config]) => [id, config.evePackageId],
   ),
-) as Record<TenantId, string>;
+) as Record<TenantId, string>
 
 /** Datahub API host per tenant (derived from TENANT_CONFIG).
  * @category Constants
@@ -228,10 +228,10 @@ export const DATAHUB_BY_TENANT = Object.fromEntries(
   (Object.entries(TENANT_CONFIG) as [TenantId, TenantConfig][]).map(
     ([id, config]) => [id, config.datahubHost],
   ),
-) as Record<TenantId, string>;
+) as Record<TenantId, string>
 
 /** @category Constants */
-const EVE_COIN_TYPE_SUFFIX = "::EVE::EVE";
+const EVE_COIN_TYPE_SUFFIX = '::EVE::EVE'
 
 /**
  * Returns the EVE token coin type for the given tenant.
@@ -242,7 +242,7 @@ const EVE_COIN_TYPE_SUFFIX = "::EVE::EVE";
  * @category Utilities - Config
  */
 export function getEveCoinType(tenantId: TenantId): string {
-  return `${EVE_PACKAGE_ID_BY_TENANT[tenantId]}${EVE_COIN_TYPE_SUFFIX}`;
+  return `${EVE_PACKAGE_ID_BY_TENANT[tenantId]}${EVE_COIN_TYPE_SUFFIX}`
 }
 
 /** Known EVE coin types (one per tenant) for strict matching.
@@ -250,4 +250,4 @@ export function getEveCoinType(tenantId: TenantId): string {
  */
 export const KNOWN_EVE_COIN_TYPES = new Set(
   (Object.keys(EVE_PACKAGE_ID_BY_TENANT) as TenantId[]).map(getEveCoinType),
-);
+)

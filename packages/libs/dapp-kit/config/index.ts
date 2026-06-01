@@ -1,1 +1,1 @@
-export { dAppKit } from "./dapp-kit";
+export { dAppKit } from './dapp-kit'

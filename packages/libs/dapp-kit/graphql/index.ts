@@ -15,7 +15,7 @@ export {
   getSingletonObjectByType,
   // Character/owner resolution
   getWalletCharacters,
-} from "./client";
+} from './client'
 
 // Query Strings
 export {
@@ -33,7 +33,7 @@ export {
   // Singleton & type-based queries
   GET_SINGLETON_OBJECT_BY_TYPE,
   GET_WALLET_CHARACTERS,
-} from "./queries";
+} from './queries'
 
 // Types
-export * from "./types";
+export * from './types'

@@ -8,14 +8,14 @@
 
 /** Response wrapper for GraphQL with optional `data` and `errors`. @category GraphQL Types */
 export interface GraphQLResponse<T = unknown> {
-  data?: T;
-  errors?: Array<{ message: string }>;
+  data?: T
+  errors?: Array<{ message: string }>
 }
 
 /** Pagination cursor and has-next flag. @category GraphQL Types */
 export interface PageInfo {
-  hasNextPage: boolean;
-  endCursor: string | null;
+  hasNextPage: boolean
+  endCursor: string | null
 }
 
 // ============================================================================
@@ -24,38 +24,38 @@ export interface PageInfo {
 
 /** @category GraphQL Types */
 export interface TypeRepr {
-  repr: string;
+  repr: string
 }
 
 /** @category GraphQL Types */
 export interface TypeReprWithLayout extends TypeRepr {
-  layout?: string;
+  layout?: string
 }
 
 /** @category GraphQL Types */
 export interface ContentsBcs {
-  bcs: string;
+  bcs: string
 }
 
 /** @category GraphQL Types */
 export interface ContentsTypeAndBcs extends ContentsBcs {
-  type: TypeRepr;
+  type: TypeRepr
 }
 
 /** @category GraphQL Types */
 export interface ContentsJsonAndBcs extends ContentsBcs {
-  json: Record<string, unknown>;
+  json: Record<string, unknown>
 }
 
 /** @category GraphQL Types */
 export interface ContentsTypeJsonAndBcs extends ContentsJsonAndBcs {
-  type: TypeRepr;
+  type: TypeRepr
 }
 
 /** Contents with type + json only (no bcs). Reuses ContentsTypeJsonAndBcs shape.
  *  @category GraphQL Types
  */
-export type ContentsTypeAndJson = Pick<ContentsTypeJsonAndBcs, "type" | "json">;
+export type ContentsTypeAndJson = Pick<ContentsTypeJsonAndBcs, 'type' | 'json'>
 
 /** Node shape: contents.extract.asAddress.asObject.asMoveObject.contents.
  *  Reusable for any extract-path node whose inner contents are typed as T.
@@ -67,28 +67,28 @@ export interface ExtractAsMoveObjectNode<T = ContentsTypeAndJson> {
       asAddress: {
         asObject: {
           asMoveObject: {
-            contents: T;
-          };
-        };
-      };
-    };
-  };
+            contents: T
+          }
+        }
+      }
+    }
+  }
 }
 
 /** @category GraphQL Types */
 export interface PreviousTransaction {
-  effects?: { timestamp?: string };
+  effects?: { timestamp?: string }
 }
 
 /** @category GraphQL Types */
 export interface ObjectNodes<T> {
-  nodes: T[];
+  nodes: T[]
 }
 
 /** @category GraphQL Types */
 export interface AddressWithObjects<T> {
-  address: string;
-  objects: ObjectNodes<T>;
+  address: string
+  objects: ObjectNodes<T>
 }
 
 /** GraphQL asAddress → asObject → asMoveObject ref chain.
@@ -97,24 +97,24 @@ export interface AddressWithObjects<T> {
 export interface AsMoveObjectRef<T> {
   asAddress?: {
     asObject?: {
-      asMoveObject?: T;
-    };
-  };
+      asMoveObject?: T
+    }
+  }
 }
 
 /** Contents with only json (optional payload).
  *  @category GraphQL Types
  */
 export interface ContentsJsonOnly {
-  json: Record<string, unknown>;
+  json: Record<string, unknown>
 }
 
 /** Move object ref whose contents have json of type T.
  *  @category GraphQL Types
  */
 export type MoveObjectRefWithJson<T> = AsMoveObjectRef<{
-  contents: { json: T };
-}>;
+  contents: { json: T }
+}>
 
 // ============================================================================
 // Move Object Types
@@ -122,27 +122,27 @@ export type MoveObjectRefWithJson<T> = AsMoveObjectRef<{
 
 /** @category GraphQL Types */
 export interface MoveObjectContents {
-  json?: Record<string, unknown>;
-  bcs?: string;
-  type?: TypeReprWithLayout;
+  json?: Record<string, unknown>
+  bcs?: string
+  type?: TypeReprWithLayout
 }
 
 /** @category GraphQL Types */
 export interface DynamicFieldNode {
   contents: {
-    json: Record<string, unknown>;
-    type: { layout: string };
-  };
+    json: Record<string, unknown>
+    type: { layout: string }
+  }
   name: {
-    json: unknown;
-    type: TypeRepr;
-  };
+    json: unknown
+    type: TypeRepr
+  }
 }
 
 /** @category GraphQL Types */
 export interface MoveObjectData {
-  contents: MoveObjectContents;
-  dynamicFields?: ObjectNodes<DynamicFieldNode>;
+  contents: MoveObjectContents
+  dynamicFields?: ObjectNodes<DynamicFieldNode>
 }
 
 // ============================================================================
@@ -151,25 +151,25 @@ export interface MoveObjectData {
 
 /** @category GraphQL Types */
 export interface SuiObjectResponse {
-  address?: string;
-  version?: number;
-  digest?: string;
-  asMoveObject: MoveObjectData | null;
+  address?: string
+  version?: number
+  digest?: string
+  asMoveObject: MoveObjectData | null
 }
 
 /** @category GraphQL Types */
 export interface GetObjectResponse {
-  object?: SuiObjectResponse;
+  object?: SuiObjectResponse
 }
 
 /** @category GraphQL Types */
 export interface GetObjectByAddressResponse {
   object?: {
-    address: string;
-    version: number;
-    digest: string;
-    asMoveObject: { contents: ContentsTypeAndBcs } | null;
-  };
+    address: string
+    version: number
+    digest: string
+    asMoveObject: { contents: ContentsTypeAndBcs } | null
+  }
 }
 
 // ============================================================================
@@ -178,35 +178,35 @@ export interface GetObjectByAddressResponse {
 
 /** @category GraphQL Types */
 export interface OwnedObjectNode {
-  contents: ContentsBcs;
-  previousTransaction?: PreviousTransaction;
+  contents: ContentsBcs
+  previousTransaction?: PreviousTransaction
 }
 
 /** @category GraphQL Types */
 export interface AddressOwner {
-  address: AddressWithObjects<OwnedObjectNode>;
+  address: AddressWithObjects<OwnedObjectNode>
 }
 
 /** @category GraphQL Types */
 export interface GetObjectOwnerAndOwnedObjectsResponse {
-  object?: { owner?: { address?: AddressOwner["address"] } };
+  object?: { owner?: { address?: AddressOwner['address'] } }
 }
 
 /** @category GraphQL Types */
 export interface OwnedObjectNodeWithJson {
-  address: string;
-  contents: ContentsJsonAndBcs;
-  previousTransaction?: PreviousTransaction;
+  address: string
+  contents: ContentsJsonAndBcs
+  previousTransaction?: PreviousTransaction
 }
 
 /** @category GraphQL Types */
 export interface AddressOwnerWithJson {
-  address: AddressWithObjects<OwnedObjectNodeWithJson>;
+  address: AddressWithObjects<OwnedObjectNodeWithJson>
 }
 
 /** @category GraphQL Types */
 export interface GetObjectOwnerAndOwnedObjectsWithJsonResponse {
-  object?: { owner?: { address?: AddressOwnerWithJson["address"] } };
+  object?: { owner?: { address?: AddressOwnerWithJson['address'] } }
 }
 
 /** Node shape for owner's objects in GetObjectAndCharacterOwner (authorizedObj → character).
@@ -214,8 +214,8 @@ export interface GetObjectOwnerAndOwnedObjectsWithJsonResponse {
  */
 export interface CharacterOwnerNode {
   contents: {
-    authorizedObj: MoveObjectRefWithJson<RawCharacterData>;
-  };
+    authorizedObj: MoveObjectRefWithJson<RawCharacterData>
+  }
 }
 
 /** @category GraphQL Types */
@@ -224,25 +224,25 @@ export interface GetObjectAndCharacterOwnerResponse {
     asMoveObject: {
       contents: ContentsTypeJsonAndBcs & {
         extract?: AsMoveObjectRef<{
-          owner: { address: AddressWithObjects<CharacterOwnerNode> };
-          contents?: ContentsJsonOnly;
-        }> | null;
-        energySource?: AsMoveObjectRef<{ contents?: ContentsJsonOnly }>;
-        destinationGate?: AsMoveObjectRef<{ contents?: ContentsJsonOnly }>;
-      };
-      dynamicFields?: ObjectNodes<DynamicFieldNode>;
-    };
-  };
+          owner: { address: AddressWithObjects<CharacterOwnerNode> }
+          contents?: ContentsJsonOnly
+        }> | null
+        energySource?: AsMoveObjectRef<{ contents?: ContentsJsonOnly }>
+        destinationGate?: AsMoveObjectRef<{ contents?: ContentsJsonOnly }>
+      }
+      dynamicFields?: ObjectNodes<DynamicFieldNode>
+    }
+  }
 }
 
 /** @category GraphQL Types */
 export interface GetObjectWithJsonResponse {
   object?: {
-    address: string;
-    version: number;
-    digest: string;
-    asMoveObject: { contents: ContentsTypeJsonAndBcs } | null;
-  };
+    address: string
+    version: number
+    digest: string
+    asMoveObject: { contents: ContentsTypeJsonAndBcs } | null
+  }
 }
 
 // ============================================================================
@@ -251,12 +251,12 @@ export interface GetObjectWithJsonResponse {
 
 /** @category GraphQL Types */
 export interface OwnedObjectAddressNode {
-  address: string;
+  address: string
 }
 
 /** @category GraphQL Types */
 export interface GetOwnedObjectsByTypeResponse {
-  address?: { objects: ObjectNodes<OwnedObjectAddressNode> };
+  address?: { objects: ObjectNodes<OwnedObjectAddressNode> }
 }
 
 // ============================================================================
@@ -265,19 +265,19 @@ export interface GetOwnedObjectsByTypeResponse {
 
 /** @category GraphQL Types */
 export interface OwnedObjectFullNode {
-  address: string;
-  version: number;
-  asMoveObject: MoveObjectData | null;
+  address: string
+  version: number
+  asMoveObject: MoveObjectData | null
 }
 
 /** @category GraphQL Types */
 export interface GetOwnedObjectsByPackageResponse {
-  objects: ObjectNodes<OwnedObjectFullNode>;
+  objects: ObjectNodes<OwnedObjectFullNode>
 }
 
 /** @category GraphQL Types */
 export interface GetWalletCharactersResponse {
-  address: AddressWithObjects<ExtractAsMoveObjectNode>;
+  address: AddressWithObjects<ExtractAsMoveObjectNode>
 }
 
 /** @category GraphQL Types */
@@ -287,18 +287,18 @@ export interface CharacterAndOwnedObjectsNode {
       asAddress: {
         asObject?: {
           asMoveObject?: {
-            contents: ContentsTypeAndJson;
-          };
-        };
-        objects: ObjectNodes<ExtractAsMoveObjectNode>;
-      };
-    };
-  };
+            contents: ContentsTypeAndJson
+          }
+        }
+        objects: ObjectNodes<ExtractAsMoveObjectNode>
+      }
+    }
+  }
 }
 
 /** @category GraphQL Types */
 export interface GetCharacterAndOwnedObjectsResponse {
-  address: AddressWithObjects<CharacterAndOwnedObjectsNode>;
+  address: AddressWithObjects<CharacterAndOwnedObjectsNode>
 }
 
 // ============================================================================
@@ -307,20 +307,20 @@ export interface GetCharacterAndOwnedObjectsResponse {
 
 /** @category GraphQL Types */
 export interface GetSingletonObjectByTypeResponse {
-  objects: ObjectNodes<OwnedObjectAddressNode>;
+  objects: ObjectNodes<OwnedObjectAddressNode>
 }
 
 /** @category GraphQL Types */
 export interface ConfigExtractDynamicFieldNode {
-  key: { json: string };
-  value: { json: string };
+  key: { json: string }
+  value: { json: string }
 }
 
 /** @category GraphQL Types */
 export interface GetSingletonConfigObjectByTypeResponse {
   objects: {
     nodes: Array<{
-      address: string;
+      address: string
       asMoveObject: {
         contents: {
           extract: {
@@ -328,31 +328,31 @@ export interface GetSingletonConfigObjectByTypeResponse {
               asAddress: {
                 addressAt: {
                   dynamicFields: {
-                    pageInfo: PageInfo;
-                    nodes: ConfigExtractDynamicFieldNode[];
-                  };
-                };
-              };
-            };
-          };
-        };
-      };
-    }>;
-  };
+                    pageInfo: PageInfo
+                    nodes: ConfigExtractDynamicFieldNode[]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }>
+  }
 }
 
 /** @category GraphQL Types */
 export interface ObjectWithContentsNode {
-  address: string;
-  version: number;
+  address: string
+  version: number
   asMoveObject: {
-    contents: { json: Record<string, unknown>; type: TypeRepr };
-  } | null;
+    contents: { json: Record<string, unknown>; type: TypeRepr }
+  } | null
 }
 
 /** @category GraphQL Types */
 export interface GetObjectsByTypeResponse {
-  objects: ObjectNodes<ObjectWithContentsNode> & { pageInfo: PageInfo };
+  objects: ObjectNodes<ObjectWithContentsNode> & { pageInfo: PageInfo }
 }
 
 // ============================================================================
@@ -365,57 +365,57 @@ export interface GetObjectsByTypeResponse {
  * @category GraphQL Types
  */
 export interface RawSuiObjectData {
-  id: string;
-  type_id: string;
-  extension: unknown;
-  inventory_keys?: string[];
+  id: string
+  type_id: string
+  extension: unknown
+  inventory_keys?: string[]
   /** Linked gate ID for Smart Gates */
-  linked_gate_id?: string;
+  linked_gate_id?: string
   /** Energy source ID for linked assemblies of network nodes */
-  energy_source_id?: string;
+  energy_source_id?: string
   key?: {
-    item_id: string;
-    tenant: string;
-  };
+    item_id: string
+    tenant: string
+  }
   location?: {
-    location_hash: string;
-    structure_id: string;
-  };
+    location_hash: string
+    structure_id: string
+  }
   metadata?: {
-    assembly_id: string;
-    description: string;
-    name: string;
-    url: string;
-  };
-  owner_cap_id?: string;
+    assembly_id: string
+    description: string
+    name: string
+    url: string
+  }
+  owner_cap_id?: string
   status?: {
-    assembly_id?: string;
-    item_id?: string;
+    assembly_id?: string
+    item_id?: string
     status: {
-      "@variant": string;
-    };
-    type_id?: string;
-  };
+      '@variant': string
+    }
+    type_id?: string
+  }
   /** Fuel data for Network Nodes */
   fuel?: {
-    max_capacity: string;
-    burn_rate_in_ms: string;
-    type_id: string;
-    unit_volume: string;
-    quantity: string;
-    is_burning: boolean;
-    previous_cycle_elapsed_time: string;
-    burn_start_time: string;
-    last_updated: string;
-  };
+    max_capacity: string
+    burn_rate_in_ms: string
+    type_id: string
+    unit_volume: string
+    quantity: string
+    is_burning: boolean
+    previous_cycle_elapsed_time: string
+    burn_start_time: string
+    last_updated: string
+  }
   /** Energy source data for Network Nodes */
   energy_source?: {
-    max_energy_production: string;
-    current_energy_production: string;
-    total_reserved_energy: string;
-  };
+    max_energy_production: string
+    current_energy_production: string
+    total_reserved_energy: string
+  }
   /** Connected assembly IDs for Network Nodes */
-  connected_assembly_ids?: string[];
+  connected_assembly_ids?: string[]
 }
 
 /**
@@ -425,8 +425,8 @@ export interface RawSuiObjectData {
  * @category GraphQL Types
  */
 export interface OwnerCapData {
-  authorized_object_id: string;
-  id: string;
+  authorized_object_id: string
+  id: string
 }
 
 /**
@@ -435,22 +435,22 @@ export interface OwnerCapData {
  * @category GraphQL Types
  */
 export interface RawCharacterData {
-  id: `0x${string}`;
+  id: `0x${string}`
   key: {
-    item_id: string;
-    tenant: string;
-  };
-  tribe_id: number;
-  character_address: `0x${string}`;
+    item_id: string
+    tenant: string
+  }
+  tribe_id: number
+  character_address: `0x${string}`
   metadata: {
-    assembly_id: `0x${string}`;
-    name: string;
-    description: string;
-    url: string;
-  };
-  owner_cap_id: `0x${string}`;
+    assembly_id: `0x${string}`
+    name: string
+    description: string
+    url: string
+  }
+  owner_cap_id: `0x${string}`
   // Additional fields that may be present
-  [key: string]: unknown;
+  [key: string]: unknown
 }
 
 /**
@@ -459,10 +459,10 @@ export interface RawCharacterData {
  * @category GraphQL Types
  */
 export interface CharacterInfo {
-  id: string;
-  address: string;
-  name: string;
-  tribeId: number;
-  characterId: number;
-  _raw?: RawCharacterData;
+  id: string
+  address: string
+  name: string
+  tribeId: number
+  characterId: number
+  _raw?: RawCharacterData
 }

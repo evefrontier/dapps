@@ -1,6 +1,6 @@
-import type { MoveObjectData, RawSuiObjectData } from "../graphql/types";
-import type { TransformOptions } from "../utils";
-import { Assemblies, type DatahubGameInfo, State } from "./types";
+import type { MoveObjectData, RawSuiObjectData } from '../graphql/types'
+import type { TransformOptions } from '../utils'
+import { Assemblies, type DatahubGameInfo, State } from './types'
 
 // =========================================
 // Inventory Related Types
@@ -8,22 +8,22 @@ import { Assemblies, type DatahubGameInfo, State } from "./types";
 
 /** @category Types */
 export interface InventoryItem {
-  id: string;
-  item_id: string;
-  location: { location_hash: string };
-  quantity: number;
-  tenant: string;
-  type_id: number;
-  name: string;
+  id: string
+  item_id: string
+  location: { location_hash: string }
+  quantity: number
+  tenant: string
+  type_id: number
+  name: string
 }
 
 /** @category Types */
 export interface EphemeralInventory {
-  ownerId: string;
-  ownerName: string;
-  storageCapacity: bigint;
-  usedCapacity: bigint;
-  ephemeralInventoryItems: InventoryItem[];
+  ownerId: string
+  ownerName: string
+  storageCapacity: bigint
+  usedCapacity: bigint
+  ephemeralInventoryItems: InventoryItem[]
 }
 
 // =========================================
@@ -33,29 +33,29 @@ export interface EphemeralInventory {
 /** @category Types */
 export interface StorageModule {
   mainInventory: {
-    capacity: string;
-    usedCapacity: string;
-    items: InventoryItem[];
-  };
-  ephemeralInventories: EphemeralInventory[];
+    capacity: string
+    usedCapacity: string
+    items: InventoryItem[]
+  }
+  ephemeralInventories: EphemeralInventory[]
 }
 
 /** @category Types */
-export type TurretModule = {};
+export type TurretModule = {}
 
 /** @category Types */
 export interface GateModule {
-  destinationId: string | undefined;
-  destinationGate: RawSuiObjectData | null;
+  destinationId: string | undefined
+  destinationGate: RawSuiObjectData | null
 }
 
 /** @category Types */
 export interface NetworkNodeModule {
-  fuel: FuelResponse;
-  energyProduction: number;
-  energyMaxCapacity: number;
-  totalReservedEnergy: number;
-  linkedAssemblies: SmartAssemblyResponse[];
+  fuel: FuelResponse
+  energyProduction: number
+  energyMaxCapacity: number
+  totalReservedEnergy: number
+  linkedAssemblies: SmartAssemblyResponse[]
 }
 
 // =========================================
@@ -64,21 +64,21 @@ export interface NetworkNodeModule {
 
 /** @category Types @internal */
 export interface FuelResponse {
-  quantity: number;
-  burnTimeInMs: number;
-  burnStartTime: number;
-  isBurning: boolean;
-  lastUpdated: number;
-  maxCapacity: number;
-  previousCycleElapsedTime: number;
-  unitVolume: number;
-  typeId: number;
+  quantity: number
+  burnTimeInMs: number
+  burnStartTime: number
+  isBurning: boolean
+  lastUpdated: number
+  maxCapacity: number
+  previousCycleElapsedTime: number
+  unitVolume: number
+  typeId: number
 }
 
 /** @category Types @internal */
 export interface BurnResponse {
-  isBurning: boolean;
-  startTime: string;
+  isBurning: boolean
+  startTime: string
 }
 
 // =========================================
@@ -87,13 +87,13 @@ export interface BurnResponse {
 
 /** @category Types @internal */
 export interface SolarSystem {
-  id: number;
-  name: string;
+  id: number
+  name: string
   location: {
-    x: number;
-    y: number;
-    z: number;
-  };
+    x: number
+    y: number
+    z: number
+  }
 }
 
 // =========================================
@@ -102,11 +102,11 @@ export interface SolarSystem {
 
 /** @category Types @internal */
 export interface SmartCharacterResponse {
-  address: string;
-  id: string;
-  name: string;
-  tribeId: number;
-  characterId: number;
+  address: string
+  id: string
+  name: string
+  tribeId: number
+  characterId: number
 }
 
 // =========================================
@@ -115,24 +115,24 @@ export interface SmartCharacterResponse {
 
 /** @category Types */
 export interface SmartAssemblyResponse {
-  id: string;
-  item_id: number;
-  type: Assemblies;
-  typeDetails?: DatahubGameInfo;
-  name: string;
-  state: State;
-  character?: SmartCharacterResponse;
-  solarSystem?: SolarSystem;
-  isParentNodeOnline?: boolean;
-  energySourceId?: string;
-  energyUsage: number;
-  typeId: number;
-  _raw?: MoveObjectData;
-  _options?: TransformOptions;
+  id: string
+  item_id: number
+  type: Assemblies
+  typeDetails?: DatahubGameInfo
+  name: string
+  state: State
+  character?: SmartCharacterResponse
+  solarSystem?: SolarSystem
+  isParentNodeOnline?: boolean
+  energySourceId?: string
+  energyUsage: number
+  typeId: number
+  _raw?: MoveObjectData
+  _options?: TransformOptions
 }
 
 /** @category Types */
 export interface DetailedAssemblyResponse extends SmartAssemblyResponse {
-  description: string;
-  dappURL: string;
+  description: string
+  dappURL: string
 }

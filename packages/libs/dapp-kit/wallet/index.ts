@@ -10,15 +10,15 @@ export type {
   SponsoredTransactionInput,
   SponsoredTransactionMethod,
   SponsoredTransactionOutput,
-} from "./features";
+} from './features'
 // Feature definitions and types
 export {
   getAssemblyTypeApiString,
   supportsSponsoredTransaction,
-} from "./features";
+} from './features'
 
 // Utility functions
 export {
   getSponsoredTransactionFeature,
   walletSupportsSponsoredTransaction,
-} from "./utils";
+} from './utils'

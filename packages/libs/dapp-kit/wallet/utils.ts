@@ -1,11 +1,11 @@
-import type { UiWalletHandle } from "@wallet-standard/ui";
-import { getWalletFeature } from "@wallet-standard/ui";
-import { EVEFRONTIER_SPONSORED_TRANSACTION } from "../types";
+import type { UiWalletHandle } from '@wallet-standard/ui'
+import { getWalletFeature } from '@wallet-standard/ui'
+import { EVEFRONTIER_SPONSORED_TRANSACTION } from '../types'
 import {
   type EveFrontierSponsoredTransactionFeature,
   type SponsoredTransactionMethod,
   supportsSponsoredTransaction,
-} from "./features";
+} from './features'
 
 /**
  * Check if a wallet supports the EVE Frontier sponsored transaction feature.
@@ -39,9 +39,9 @@ import {
  * ```
  */
 export function walletSupportsSponsoredTransaction(wallet: {
-  features: unknown;
+  features: unknown
 }): boolean {
-  return supportsSponsoredTransaction(wallet.features);
+  return supportsSponsoredTransaction(wallet.features)
 }
 
 /**
@@ -75,21 +75,21 @@ export function walletSupportsSponsoredTransaction(wallet: {
  * @see {@link useSponsoredTransaction} for the recommended React hook approach
  */
 export function getSponsoredTransactionFeature(wallet: {
-  features: unknown;
-  name?: string;
-  version?: string;
+  features: unknown
+  name?: string
+  version?: string
 }): SponsoredTransactionMethod | undefined {
   if (!supportsSponsoredTransaction(wallet.features)) {
-    return undefined;
+    return undefined
   }
 
   try {
     const feature = getWalletFeature(
       wallet as unknown as UiWalletHandle,
       EVEFRONTIER_SPONSORED_TRANSACTION,
-    ) as EveFrontierSponsoredTransactionFeature[typeof EVEFRONTIER_SPONSORED_TRANSACTION];
-    return feature.signSponsoredTransaction;
+    ) as EveFrontierSponsoredTransactionFeature[typeof EVEFRONTIER_SPONSORED_TRANSACTION]
+    return feature.signSponsoredTransaction
   } catch {
-    return undefined;
+    return undefined
   }
 }

@@ -1,24 +1,24 @@
-import type { ReactNode } from "react";
-import { createContext, useCallback, useState } from "react";
+import type { ReactNode } from 'react'
+import { createContext, useCallback, useState } from 'react'
 import {
   type NotificationContextType,
   type NotificationState,
   Severity,
-} from "../types";
+} from '../types'
 
 /** @category Providers */
 export const NotificationContext = createContext<NotificationContextType>({
   notify: () => {},
   notification: {
-    message: "",
-    txHash: "",
+    message: '',
+    txHash: '',
     onSuccess: () => {},
     severity: Severity.Success,
     handleClose: () => {},
     isOpen: false,
   },
   handleClose: () => {},
-});
+})
 
 /**
  * NotificationProvider manages notifications for transactions and messages.
@@ -26,21 +26,21 @@ export const NotificationContext = createContext<NotificationContextType>({
  * @category Providers
  */
 const NotificationProvider = ({ children }: { children: ReactNode }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
-  const [severity, setSeverity] = useState<Severity>(Severity.Info);
-  const [txHash, setTxHash] = useState<string>("");
-  const [onSuccess, setOnSuccess] = useState<NotificationState["onSuccess"]>(
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [message, setMessage] = useState<string>('')
+  const [severity, setSeverity] = useState<Severity>(Severity.Info)
+  const [txHash, setTxHash] = useState<string>('')
+  const [onSuccess, setOnSuccess] = useState<NotificationState['onSuccess']>(
     () => () => {},
-  );
+  )
 
   const handleClose = useCallback(() => {
-    setIsOpen(false);
+    setIsOpen(false)
     if (severity === Severity.Success) {
-      onSuccess();
+      onSuccess()
     }
-    setOnSuccess(() => () => {});
-  }, [onSuccess, severity]);
+    setOnSuccess(() => () => {})
+  }, [onSuccess, severity])
 
   const notify = useCallback(
     ({
@@ -49,48 +49,48 @@ const NotificationProvider = ({ children }: { children: ReactNode }) => {
       txHash,
       onSuccess,
     }: {
-      type: Severity;
-      message?: string;
-      txHash?: string;
-      onSuccess?: () => void;
+      type: Severity
+      message?: string
+      txHash?: string
+      onSuccess?: () => void
     }) => {
-      setSeverity(type);
-      setIsOpen(true);
-      setOnSuccess(() => onSuccess ?? (() => {}));
+      setSeverity(type)
+      setIsOpen(true)
+      setOnSuccess(() => onSuccess ?? (() => {}))
 
       // If success with txHash, show success message with transaction hash
       if (type === Severity.Success && txHash) {
         setMessage(
-          `Transaction was successful. ${message ?? ""} Transaction hash: ${txHash}`,
-        );
-        setTxHash(txHash);
-        return;
+          `Transaction was successful. ${message ?? ''} Transaction hash: ${txHash}`,
+        )
+        setTxHash(txHash)
+        return
       }
 
       // Otherwise, show the passed message or a default based on severity
       if (message) {
-        setMessage(message);
+        setMessage(message)
       } else {
         switch (type) {
           case Severity.Success:
-            setMessage("Operation completed successfully.");
-            break;
+            setMessage('Operation completed successfully.')
+            break
           case Severity.Error:
-            setMessage("An error occurred.");
-            break;
+            setMessage('An error occurred.')
+            break
           case Severity.Warning:
-            setMessage("Warning.");
-            break;
+            setMessage('Warning.')
+            break
           case Severity.Info:
           default:
-            setMessage("Processing...");
-            break;
+            setMessage('Processing...')
+            break
         }
       }
-      setTxHash(txHash ?? "");
+      setTxHash(txHash ?? '')
     },
     [],
-  );
+  )
 
   const notification: NotificationState = {
     message,
@@ -99,13 +99,13 @@ const NotificationProvider = ({ children }: { children: ReactNode }) => {
     severity,
     handleClose,
     isOpen,
-  };
+  }
 
   return (
     <NotificationContext.Provider value={{ notify, handleClose, notification }}>
       {children}
     </NotificationContext.Provider>
-  );
-};
+  )
+}
 
-export default NotificationProvider;
+export default NotificationProvider

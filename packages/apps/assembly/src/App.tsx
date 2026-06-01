@@ -6,63 +6,61 @@ import {
   useConnection,
   useNotification,
   useSmartObject,
-} from "@evefrontier/dapp-kit";
-import { useCurrentAccount } from "@mysten/dapp-kit-react";
-import { useEffect, useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+} from '@evefrontier/dapp-kit'
+import { useCurrentAccount } from '@mysten/dapp-kit-react'
+import { useEffect, useState } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
 
-import "./App.css";
-import "@eveworld/ui-components/styles.css";
+import './App.css'
+import '@eveworld/ui-components/styles.css'
 
 import {
   EveAlert,
   EveConnectWallet,
   EveFeralCodeGen,
   EveLayout,
-} from "@eveworld/ui-components";
+} from '@eveworld/ui-components'
 
-import SkeletonConnect from "./components/skeletons/SkeletonConnect";
+import SkeletonConnect from './components/skeletons/SkeletonConnect'
 
-const log = createLogger();
+const log = createLogger()
 
 /**
  * Main App component that handles different rendering states based on connection and client status.
  */
 const App = () => {
-  const [userCharacter, setUserCharacter] = useState<CharacterInfo | null>(
-    null,
-  );
+  const [userCharacter, setUserCharacter] = useState<CharacterInfo | null>(null)
   const { handleConnect, handleDisconnect, walletAddress, hasEveVault } =
-    useConnection();
-  const { notification } = useNotification();
-  const { assembly } = useSmartObject();
+    useConnection()
+  const { notification } = useNotification()
+  const { assembly } = useSmartObject()
 
-  const currentAccount = useCurrentAccount();
-  const connected = !!currentAccount;
+  const currentAccount = useCurrentAccount()
+  const connected = !!currentAccount
 
   // Get the character from the wallet
   useEffect(() => {
     if (connected) {
       getWalletCharacters(currentAccount?.address).then((response) => {
-        const data = response.data;
+        const data = response.data
         if (!data) {
-          log.warn("[Dapp] No data returned from getWalletCharacters");
-          return;
+          log.warn('[Dapp] No data returned from getWalletCharacters')
+          return
         }
         const json =
           data?.address?.objects?.nodes?.[0]?.contents?.extract?.asAddress
-            ?.asObject?.asMoveObject?.contents?.json;
-        const characterInfo = parseCharacterFromJson(json);
+            ?.asObject?.asMoveObject?.contents?.json
+        const characterInfo = parseCharacterFromJson(json)
 
         if (characterInfo) {
-          setUserCharacter(characterInfo);
+          setUserCharacter(characterInfo)
         }
-      });
+      })
     }
-  }, [connected, currentAccount?.address]);
+  }, [connected, currentAccount?.address])
 
   // Check if the user is on a client route
-  const isClient = useLocation().pathname.includes("client");
+  const isClient = useLocation().pathname.includes('client')
 
   /**
    * If user is on a client route AND not fully connected (missing provider, public client, or wallet client):
@@ -77,7 +75,7 @@ const App = () => {
         hasEveVault={hasEveVault}
         path={useLocation().pathname}
       />
-    );
+    )
   }
 
   /**
@@ -96,7 +94,7 @@ const App = () => {
         />
         <GenerateEveFeralCodeGen style="bottom-12 text-martianred-60" />
       </div>
-    );
+    )
   }
 
   /**
@@ -110,9 +108,9 @@ const App = () => {
    */
 
   if (assembly?.id) {
-    log.info(`[Dapp] Assembly %s connected`, assembly?.id);
+    log.info(`[Dapp] Assembly %s connected`, assembly?.id)
   } else {
-    log.warn("[Dapp] No assembly ID connected");
+    log.warn('[Dapp] No assembly ID connected')
   }
 
   return (
@@ -128,36 +126,36 @@ const App = () => {
       <EveLayout
         connected={connected}
         handleDisconnect={() => {
-          handleDisconnect();
-          setUserCharacter(null);
+          handleDisconnect()
+          setUserCharacter(null)
         }}
         isClient={isClient}
-        walletAddress={walletAddress || ""}
+        walletAddress={walletAddress || ''}
         userCharacter={userCharacter}
       >
         <Outlet context={{ userCharacter }} />
       </EveLayout>
     </>
-  );
-};
+  )
+}
 
-export default App;
+export default App
 
 const GenerateEveFeralCodeGen = ({
   style,
   count = 5,
 }: {
-  style?: string;
-  count?: number;
+  style?: string
+  count?: number
 }) => {
-  const codes = Array.from({ length: count }, (_, i) => i);
+  const codes = Array.from({ length: count }, (_, i) => i)
   return (
     <div
       className={`absolute flex justify-between px-10 justify-items-center w-full text-xs ${style}`}
     >
       {codes.map((index) => (
         <EveFeralCodeGen key={index} />
-      ))}{" "}
+      ))}{' '}
     </div>
-  );
-};
+  )
+}

@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
-import { ConnectWallet } from "../assets";
-import EveButton from "./EveButton";
+import { ConnectWallet } from '../assets'
+import EveButton from './EveButton'
 
 /**
  * Component for connecting different supported wallets in Eve dApps.
@@ -16,8 +16,8 @@ const EveConnectWallet = React.memo(
     handleConnect,
     hasEveVault,
   }: {
-    handleConnect: () => void;
-    hasEveVault: boolean;
+    handleConnect: () => void
+    hasEveVault: boolean
   }): React.JSX.Element => {
     return (
       <div className="h-screen max-w-[560px] mx-auto relative flex flex-col items-center justify-center">
@@ -25,7 +25,7 @@ const EveConnectWallet = React.memo(
           className="h-[280px] w-[280px] relative cursor-pointer"
           onClick={() => handleConnect()}
         >
-          <ConnectWallet className="mx-auto my-auto h-full" />{" "}
+          <ConnectWallet className="mx-auto my-auto h-full" />{' '}
           <div className="absolute w-full -bottom-4">
             <EveButton
               variant="primary"
@@ -33,8 +33,8 @@ const EveConnectWallet = React.memo(
               id="connect-evevault"
             >
               {hasEveVault
-                ? "Connect with EVE Vault"
-                : "Please install EVE Vault"}
+                ? 'Connect with EVE Vault'
+                : 'Please install EVE Vault'}
             </EveButton>
           </div>
         </div>
@@ -46,15 +46,15 @@ const EveConnectWallet = React.memo(
             variant="tertiary"
             className="mx-auto"
             onClick={() =>
-              window.open("https://docs.evefrontier.com/Dapp/quick-start")
+              window.open('https://docs.evefrontier.com/Dapp/quick-start')
             }
           >
             Documentation
           </EveButton>
         </div>
       </div>
-    );
+    )
   },
-);
+)
 
-export default React.memo(EveConnectWallet);
+export default React.memo(EveConnectWallet)

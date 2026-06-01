@@ -1,72 +1,72 @@
-import { EveFrontierProvider } from "@evefrontier/dapp-kit";
-import { ErrorNotice, ErrorNoticeTypes } from "@eveworld/ui-components";
-import { createTheme, ThemeProvider } from "@mui/material";
-import { QueryClient } from "@tanstack/react-query";
-import ReactDOM from "react-dom/client";
-import { ErrorBoundary } from "react-error-boundary";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import App from "./App";
-import BehaviourView from "./components/views/BehaviourView";
-import MonitorView from "./components/views/MonitorView";
-import Overview from "./components/views/Overview";
-import RootView from "./components/views/RootView";
+import { EveFrontierProvider } from '@evefrontier/dapp-kit'
+import { ErrorNotice, ErrorNoticeTypes } from '@eveworld/ui-components'
+import { createTheme, ThemeProvider } from '@mui/material'
+import { QueryClient } from '@tanstack/react-query'
+import ReactDOM from 'react-dom/client'
+import { ErrorBoundary } from 'react-error-boundary'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import App from './App'
+import BehaviourView from './components/views/BehaviourView'
+import MonitorView from './components/views/MonitorView'
+import Overview from './components/views/Overview'
+import RootView from './components/views/RootView'
 
 const darkTheme = createTheme({
   palette: {
-    mode: "dark",
+    mode: 'dark',
   },
   typography: {
-    fontFamily: "Favorit",
+    fontFamily: 'Favorit',
   },
   components: {
     MuiPaper: {
       styleOverrides: {
         root: {
-          padding: "0px !important",
+          padding: '0px !important',
         },
       },
     },
     MuiAlert: {
       styleOverrides: {
         root: {
-          backgroundColor: "transparent",
+          backgroundColor: 'transparent',
           letterSpacing: 0,
         },
         message: {
-          padding: "0px !important",
+          padding: '0px !important',
         },
       },
     },
   },
-});
+})
 
 const router = createBrowserRouter([
   {
     element: <App />,
     children: [
       {
-        path: "*",
+        path: '*',
         element: <Overview />,
       },
       {
-        path: "/client/root",
+        path: '/client/root',
         element: <RootView />,
       },
       {
-        path: "/client/behaviour",
+        path: '/client/behaviour',
         element: <BehaviourView />,
       },
       {
-        path: "/client/networknode/monitor",
+        path: '/client/networknode/monitor',
         element: <MonitorView />,
       },
     ],
   },
-]);
+])
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <ErrorBoundary
     fallback={
       <ErrorNotice
@@ -81,4 +81,4 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       </ThemeProvider>
     </EveFrontierProvider>
   </ErrorBoundary>,
-);
+)

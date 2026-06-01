@@ -1,24 +1,24 @@
-import React, { HtmlHTMLAttributes, ReactNode } from "react";
-import "../styles-ui.css";
-import { Union } from "../assets";
+import React, { HtmlHTMLAttributes, ReactNode } from 'react'
+import '../styles-ui.css'
+import { Union } from '../assets'
 
-type ContainerVariant = "default" | "warning" | "minimal";
+type ContainerVariant = 'default' | 'warning' | 'minimal'
 
 interface EveContainerProps extends HtmlHTMLAttributes<HTMLDivElement> {
-  children: ReactNode;
-  variant?: ContainerVariant;
-  statusTextTop?: string;
-  statusTextBottom?: string;
-  headerText?: string;
-  showBorder?: boolean;
-  showHeader?: boolean;
+  children: ReactNode
+  variant?: ContainerVariant
+  statusTextTop?: string
+  statusTextBottom?: string
+  headerText?: string
+  showBorder?: boolean
+  showHeader?: boolean
 }
 
 const EveContainer: React.FC<EveContainerProps> = ({
-  className = "",
+  className = '',
   children,
   id,
-  variant = "default",
+  variant = 'default',
   statusTextTop,
   statusTextBottom,
   headerText,
@@ -27,27 +27,27 @@ const EveContainer: React.FC<EveContainerProps> = ({
   ...rest
 }) => {
   const getBorderClasses = () => {
-    if (!showBorder) return "";
-    return variant === "warning"
-      ? "border border-alert"
-      : "border border-neutral-20";
-  };
+    if (!showBorder) return ''
+    return variant === 'warning'
+      ? 'border border-alert'
+      : 'border border-neutral-20'
+  }
 
   const getBackgroundClass = () => {
-    return variant === "minimal" ? "" : "blur-bg";
-  };
+    return variant === 'minimal' ? '' : 'blur-bg'
+  }
 
   const renderHeader = () => {
-    if (!showHeader || !headerText) return null;
+    if (!showHeader || !headerText) return null
     return (
       <div className="Title flex p-2 border border-neutral-20">
         {headerText}
       </div>
-    );
-  };
+    )
+  }
 
   const renderCorners = () => {
-    if (!showBorder) return null;
+    if (!showBorder) return null
     return (
       <>
         <Union className="absolute -top-[5px] -left-[5px]" />
@@ -55,8 +55,8 @@ const EveContainer: React.FC<EveContainerProps> = ({
         <Union className="absolute -bottom-[5px] -left-[5px]" />
         <Union className="absolute -bottom-[5px] -right-[5px]" />
       </>
-    );
-  };
+    )
+  }
 
   return (
     <div
@@ -78,7 +78,7 @@ const EveContainer: React.FC<EveContainerProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default EveContainer;
+export default EveContainer

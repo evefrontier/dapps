@@ -3,16 +3,16 @@
 // =========================================
 // Config
 // =========================================
-export { dAppKit } from "./config/dapp-kit";
+export { dAppKit } from './config/dapp-kit'
 // =========================================
 // GraphQL - Query execution & helper functions
 // =========================================
-export * from "./graphql";
+export * from './graphql'
 export type {
   UseSponsoredTransactionArgs,
   UseSponsoredTransactionError,
   UseSponsoredTransactionMutationOptions,
-} from "./hooks";
+} from './hooks'
 // Hooks
 // Hook error types and sponsored transaction types
 export {
@@ -23,7 +23,7 @@ export {
   WalletNoAccountSelectedError,
   WalletNotConnectedError,
   WalletSponsoredTransactionNotSupportedError,
-} from "./hooks";
+} from './hooks'
 export {
   EveFrontierProvider,
   NotificationContext,
@@ -32,21 +32,21 @@ export {
   SmartObjectProvider,
   VaultContext,
   VaultProvider,
-} from "./providers";
+} from './providers'
 // =========================================
 // Types (re-exported from ./types)
 // =========================================
-export * from "./types";
+export * from './types'
 // =========================================
 // Utils (re-exported from ./utils)
 // =========================================
-export * from "./utils";
+export * from './utils'
 export {
   getEnergyConfig,
   getEnergyUsageForType,
   getFuelEfficiencyConfig,
   getFuelEfficiencyForType,
-} from "./utils/config";
+} from './utils/config'
 
 // =========================================
 // Constants & Configuration
@@ -58,14 +58,14 @@ export {
   getSuiGraphqlEndpoint,
   POLLING_INTERVAL,
   STORAGE_KEYS,
-} from "./utils/constants";
+} from './utils/constants'
 export type {
   EveFrontierSponsoredTransactionFeature,
   SponsoredTransactionArgs,
   SponsoredTransactionInput,
   SponsoredTransactionMethod,
   SponsoredTransactionOutput,
-} from "./wallet";
+} from './wallet'
 // =========================================
 // Wallet Standard Extensions
 // =========================================
@@ -73,4 +73,4 @@ export {
   getAssemblyTypeApiString,
   getSponsoredTransactionFeature,
   walletSupportsSponsoredTransaction,
-} from "./wallet";
+} from './wallet'

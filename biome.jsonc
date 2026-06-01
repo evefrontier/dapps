@@ -66,9 +66,8 @@
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "double",
-      "semicolons": "always",
-      "trailingCommas": "all"
+      "quoteStyle": "single",
+      "semicolons": "asNeeded"
     }
   },
   "assist": {

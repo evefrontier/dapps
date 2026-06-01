@@ -1,23 +1,23 @@
-import react from "@vitejs/plugin-react-swc";
-import path from "path";
-import { defineConfig } from "vite";
-import babel from "vite-plugin-babel";
-import svgr from "vite-plugin-svgr";
+import react from '@vitejs/plugin-react-swc'
+import path from 'path'
+import { defineConfig } from 'vite'
+import babel from 'vite-plugin-babel'
+import svgr from 'vite-plugin-svgr'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     svgr({
-      include: "**/*.svg",
+      include: '**/*.svg',
       svgrOptions: {
-        exportType: "named",
-        namedExport: "ReactComponent",
+        exportType: 'named',
+        namedExport: 'ReactComponent',
       },
     }),
     babel({
       babelConfig: {
-        plugins: ["babel-plugin-react-compiler"],
+        plugins: ['babel-plugin-react-compiler'],
       },
     }),
   ],
@@ -28,10 +28,10 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ["@evefrontier/dapp-kit"],
+    exclude: ['@evefrontier/dapp-kit'],
   },
   build: {
-    target: "es2022",
+    target: 'es2022',
     minify: true,
     sourcemap: true,
     rollupOptions: {
@@ -40,29 +40,29 @@ export default defineConfig({
           log.cause &&
           log.cause.message === `Can't resolve original location of error.`
         ) {
-          return;
+          return
         }
-        handler(level, log);
+        handler(level, log)
       },
     },
   },
-  base: "./",
-  publicDir: path.resolve(__dirname, "public"),
+  base: './',
+  publicDir: path.resolve(__dirname, 'public'),
   resolve: {
     alias: {
-      "@eveworld/ui-components": path.resolve(
+      '@eveworld/ui-components': path.resolve(
         __dirname,
-        "../../libs/ui-components",
+        '../../libs/ui-components',
       ),
-      "@evefrontier/dapp-kit": path.resolve(
+      '@evefrontier/dapp-kit': path.resolve(
         __dirname,
-        "../../libs/dapp-kit/index.ts",
+        '../../libs/dapp-kit/index.ts',
       ),
     },
     dedupe: [
-      "@evefrontier/dapp-kit",
-      "@eveworld/ui-components",
-      "@mysten/dapp-kit-react",
+      '@evefrontier/dapp-kit',
+      '@eveworld/ui-components',
+      '@mysten/dapp-kit-react',
     ],
   },
-});
+})

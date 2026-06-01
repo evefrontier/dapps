@@ -1,31 +1,31 @@
-import type { ReactNode } from "react";
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
-import { getAssemblyWithOwner, type MoveObjectData } from "../graphql";
-import { useConnection } from "../hooks/useConnection";
+import type { ReactNode } from 'react'
+import { createContext, useCallback, useEffect, useRef, useState } from 'react'
+import { getAssemblyWithOwner, type MoveObjectData } from '../graphql'
+import { useConnection } from '../hooks/useConnection'
 import {
   Assemblies,
   type AssemblyType,
   type DetailedSmartCharacterResponse,
   QueryParams,
   type SmartObjectContextType,
-} from "../types";
+} from '../types'
 import {
   createLogger,
   getObjectId,
   transformToAssembly,
   transformToCharacter,
-} from "../utils";
-import { DEFAULT_TENANT, POLLING_INTERVAL } from "../utils/constants";
-import { getDatahubGameInfo } from "../utils/datahub";
+} from '../utils'
+import { DEFAULT_TENANT, POLLING_INTERVAL } from '../utils/constants'
+import { getDatahubGameInfo } from '../utils/datahub'
 
-const log = createLogger();
+const log = createLogger()
 
 /** Input for fetching object data: either itemId + tenant (derive object ID) or a Sui object ID directly.
  * @category Types
  */
 export type FetchObjectDataInput =
   | { itemId: string; selectedTenant: string }
-  | { objectId: string };
+  | { objectId: string }
 
 /** @category Providers */
 export const SmartObjectContext = createContext<SmartObjectContextType>({
@@ -35,7 +35,7 @@ export const SmartObjectContext = createContext<SmartObjectContextType>({
   loading: true,
   error: null,
   refetch: async () => {},
-});
+})
 
 /**
  * SmartObjectProvider component provides context for smart objects data.
@@ -52,46 +52,46 @@ export const SmartObjectContext = createContext<SmartObjectContextType>({
 const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
   const [assembly, setAssembly] = useState<AssemblyType<Assemblies> | null>(
     null,
-  );
+  )
   const [assemblyOwner, setAssemblyOwner] =
-    useState<DetailedSmartCharacterResponse | null>(null);
-  const [selectedObjectId, setSelectedObjectId] = useState<string>("");
-  const [selectedTenant, setSelectedTenant] = useState<string>("");
-  const [isObjectIdDirect, setIsObjectIdDirect] = useState<boolean>(false); // Whether selectedObjectId is a Sui object ID or derived from itemId + tenant.
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+    useState<DetailedSmartCharacterResponse | null>(null)
+  const [selectedObjectId, setSelectedObjectId] = useState<string>('')
+  const [selectedTenant, setSelectedTenant] = useState<string>('')
+  const [isObjectIdDirect, setIsObjectIdDirect] = useState<boolean>(false) // Whether selectedObjectId is a Sui object ID or derived from itemId + tenant.
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const lastDataHashRef = useRef<string | null>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const lastDataHashRef = useRef<string | null>(null)
 
-  const { isConnected } = useConnection();
+  const { isConnected } = useConnection()
 
   // Fetch object data with owner/assemblyOwner info.
   // Accepts either { itemId, selectedTenant } (derive Sui object ID) or { objectId } (use directly).
   const fetchObjectData = useCallback(
     async (input: FetchObjectDataInput, isInitialFetch = false) => {
-      const hasItemId = "itemId" in input && "selectedTenant" in input;
+      const hasItemId = 'itemId' in input && 'selectedTenant' in input
       if (hasItemId) {
-        if (!input.itemId || !input.selectedTenant) return;
+        if (!input.itemId || !input.selectedTenant) return
       } else {
-        if (!input.objectId) return;
+        if (!input.objectId) return
       }
 
       if (isInitialFetch) {
-        setLoading(true);
+        setLoading(true)
       }
-      setError(null);
+      setError(null)
 
       try {
         const objectId = hasItemId
           ? await getObjectId(input.itemId, input.selectedTenant)
-          : input.objectId;
+          : input.objectId
         log.info(
-          "[DappKit] SmartObjectProvider: Fetching object:",
+          '[DappKit] SmartObjectProvider: Fetching object:',
           hasItemId
             ? { itemId: input.itemId, selectedTenant: input.selectedTenant }
             : { objectId },
-        );
+        )
 
         // Fetch both assembly and assemblyOwner data
         const {
@@ -99,16 +99,16 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
           assemblyOwner: characterInfo,
           energySource,
           destinationGate,
-        } = await getAssemblyWithOwner(objectId);
+        } = await getAssemblyWithOwner(objectId)
 
         if (!moveObject) {
           log.warn(
-            "[DappKit] SmartObjectProvider: Object not found or not a Move object",
-          );
-          setAssembly(null);
-          setAssemblyOwner(null);
-          setError("Object not found or not a Move object");
-          return;
+            '[DappKit] SmartObjectProvider: Object not found or not a Move object',
+          )
+          setAssembly(null)
+          setAssemblyOwner(null)
+          setError('Object not found or not a Move object')
+          return
         }
 
         // Create a hash of the data to check for changes
@@ -116,28 +116,28 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
           moveObject,
           assemblyOwner: characterInfo,
           energySource,
-        });
+        })
 
         // Only update state if the data changed (optimization for polling)
         if (isInitialFetch || lastDataHashRef.current !== dataHash) {
-          log.info("[DappKit] SmartObjectProvider: Object data updated");
-          lastDataHashRef.current = dataHash;
+          log.info('[DappKit] SmartObjectProvider: Object data updated')
+          lastDataHashRef.current = dataHash
 
           // Extract typeId from the raw JSON to fetch datahub info
           const rawJson = moveObject.contents?.json as
             | { type_id?: string; status?: { type_id?: string } }
-            | undefined;
-          const typeId = rawJson?.type_id || rawJson?.status?.type_id || "0";
+            | undefined
+          const typeId = rawJson?.type_id || rawJson?.status?.type_id || '0'
 
           // Fetch datahub game info (name, description, image defaults)
-          let datahubInfo = null;
+          let datahubInfo = null
           try {
-            datahubInfo = await getDatahubGameInfo(parseInt(typeId, 10));
+            datahubInfo = await getDatahubGameInfo(parseInt(typeId, 10))
           } catch (err) {
             log.warn(
-              "[DappKit] SmartObjectProvider: Failed to fetch datahub info:",
+              '[DappKit] SmartObjectProvider: Failed to fetch datahub info:',
               err,
-            );
+            )
           }
 
           // Transform assembly with assemblyOwner and datahub info
@@ -150,124 +150,124 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
               energySource: energySource,
               destinationGate: destinationGate,
             },
-          );
+          )
 
-          setAssembly(transformed);
+          setAssembly(transformed)
 
           // Transform and set assemblyOwner: owner of the assembly
           if (characterInfo) {
-            const transformedCharacter = transformToCharacter(characterInfo);
-            setAssemblyOwner(transformedCharacter);
+            const transformedCharacter = transformToCharacter(characterInfo)
+            setAssemblyOwner(transformedCharacter)
           } else {
-            setAssemblyOwner(null);
+            setAssemblyOwner(null)
           }
         }
-        setError(null);
+        setError(null)
       } catch (err: unknown) {
-        log.error("[DappKit] SmartObjectProvider: Query error:", err);
-        setError(err instanceof Error ? err.message : "Failed to fetch object");
+        log.error('[DappKit] SmartObjectProvider: Query error:', err)
+        setError(err instanceof Error ? err.message : 'Failed to fetch object')
       } finally {
         if (isInitialFetch) {
-          setLoading(false);
+          setLoading(false)
         }
       }
     },
     [],
-  );
+  )
 
   // Initialize the object ID (env or query params) and tenant (query params).
   // Tenant comes from URL ?tenant= with fallback DEFAULT_TENANT.
   useEffect(() => {
-    log.info("[DappKit] SmartObjectProvider: Checking for item ID");
+    log.info('[DappKit] SmartObjectProvider: Checking for item ID')
 
-    const queryParams = new URLSearchParams(window.location.search);
+    const queryParams = new URLSearchParams(window.location.search)
     const queryTenant =
-      queryParams.get(QueryParams.TENANT)?.trim() || DEFAULT_TENANT;
+      queryParams.get(QueryParams.TENANT)?.trim() || DEFAULT_TENANT
 
     // Check if an object ID exists in the .env file
-    const envObjectId = import.meta.env.VITE_OBJECT_ID;
+    const envObjectId = import.meta.env.VITE_OBJECT_ID
 
     if (envObjectId) {
       log.info(
-        "[DappKit] SmartObjectProvider: Using Sui object ID from env:",
+        '[DappKit] SmartObjectProvider: Using Sui object ID from env:',
         envObjectId,
-      );
-      setSelectedObjectId(envObjectId);
-      setSelectedTenant(queryTenant);
-      setIsObjectIdDirect(true);
-      return;
+      )
+      setSelectedObjectId(envObjectId)
+      setSelectedTenant(queryTenant)
+      setIsObjectIdDirect(true)
+      return
     }
 
     // Else, derive object ID from item ID and tenant and passed via query param
-    const queryItemId = queryParams.get(QueryParams.ITEM_ID);
+    const queryItemId = queryParams.get(QueryParams.ITEM_ID)
 
     if (queryItemId) {
-      setSelectedObjectId(queryItemId);
-      setSelectedTenant(queryTenant);
-      setIsObjectIdDirect(false);
+      setSelectedObjectId(queryItemId)
+      setSelectedTenant(queryTenant)
+      setIsObjectIdDirect(false)
     } else {
-      log.error("[DappKit] SmartObjectProvider: No object ID provided");
-      setLoading(false);
+      log.error('[DappKit] SmartObjectProvider: No object ID provided')
+      setLoading(false)
     }
-  }, []);
+  }, [])
 
   // Fetch and poll for object data
   useEffect(() => {
     if (!selectedObjectId || !isConnected) {
-      setLoading(false);
-      return;
+      setLoading(false)
+      return
     }
 
     const input: FetchObjectDataInput = isObjectIdDirect
       ? { objectId: selectedObjectId }
-      : { itemId: selectedObjectId, selectedTenant };
+      : { itemId: selectedObjectId, selectedTenant }
 
     // Initial fetch
-    fetchObjectData(input, true);
+    fetchObjectData(input, true)
 
     // Set up polling
     pollingRef.current = setInterval(() => {
-      fetchObjectData(input, false);
-    }, POLLING_INTERVAL);
+      fetchObjectData(input, false)
+    }, POLLING_INTERVAL)
 
     log.info(
-      "[DappKit] SmartObjectProvider: Started polling for object:",
+      '[DappKit] SmartObjectProvider: Started polling for object:',
       selectedObjectId,
-    );
+    )
 
     return () => {
       if (pollingRef.current) {
-        clearInterval(pollingRef.current);
-        pollingRef.current = null;
-        log.info("[DappKit] SmartObjectProvider: Stopped polling");
+        clearInterval(pollingRef.current)
+        pollingRef.current = null
+        log.info('[DappKit] SmartObjectProvider: Stopped polling')
       }
-      lastDataHashRef.current = null;
-    };
+      lastDataHashRef.current = null
+    }
   }, [
     selectedObjectId,
     selectedTenant,
     isObjectIdDirect,
     isConnected,
     fetchObjectData,
-  ]);
+  ])
 
   const handleRefetch = useCallback(async () => {
-    if (!selectedObjectId) return;
+    if (!selectedObjectId) return
     const input: FetchObjectDataInput = isObjectIdDirect
       ? { objectId: selectedObjectId }
-      : { itemId: selectedObjectId, selectedTenant };
-    await fetchObjectData(input, true);
-  }, [selectedObjectId, selectedTenant, isObjectIdDirect, fetchObjectData]);
+      : { itemId: selectedObjectId, selectedTenant }
+    await fetchObjectData(input, true)
+  }, [selectedObjectId, selectedTenant, isObjectIdDirect, fetchObjectData])
 
   // Refetch with retries after a mutation (e.g. metadata save)
   // so the indexer can catch up.
   const handleRefetchWithRetries = useCallback(async () => {
-    await handleRefetch();
+    await handleRefetch()
     await new Promise<void>((resolve) => {
-      setTimeout(resolve, 1500);
-    });
-    await handleRefetch();
-  }, [handleRefetch]);
+      setTimeout(resolve, 1500)
+    })
+    await handleRefetch()
+  }, [handleRefetch])
 
   return (
     <SmartObjectContext.Provider
@@ -282,7 +282,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
     >
       {children}
     </SmartObjectContext.Provider>
-  );
-};
+  )
+}
 
-export default SmartObjectProvider;
+export default SmartObjectProvider
