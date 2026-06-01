@@ -44,30 +44,6 @@ const NUMERIC_ERRORS = {
     patterns: ["Error: World_ResourceNotFound"],
     message: "World resource not found.",
   },
-  2004: {
-    code: 2004,
-    name: "ABI Function Not Found Error",
-    patterns: ["AbiErrorSignatureNotFoundError"],
-    message: "Function not found in ABI",
-  },
-  2005: {
-    code: 2005,
-    name: "ERC2771 Forwarder contract Not Found Error",
-    patterns: ["Forwarder contract"],
-    message: "ERC2771 forwarder contract could not be found",
-  },
-  2006: {
-    code: 2006,
-    name: "callFrom Function Not Found Error",
-    patterns: ["callFrom Function"],
-    message: "callFrom Function not found in ABI",
-  },
-  2007: {
-    code: 2007,
-    name: "Abi Encoding Bytes Size Mismatch Error",
-    patterns: ["does not match expected size"],
-    message: "Size of bytes does not match expected size.",
-  },
   2008: {
     code: 2008,
     name: "Contract Revert Error",
@@ -133,9 +109,6 @@ export const ERRORS: Record<number | string, ErrorType> = {
   ...NUMERIC_ERRORS,
   UNKNOWN_ERROR: NUMERIC_ERRORS[1001],
   CONTRACT_CALL: NUMERIC_ERRORS[2001],
-  ABI_FUNCTION_NOT_FOUND: NUMERIC_ERRORS[2004],
-  FORWARDER_NOT_FOUND: NUMERIC_ERRORS[2005],
-  CALLFROM_NOT_FOUND: NUMERIC_ERRORS[2006],
   INSUFFICIENT_EVE: NUMERIC_ERRORS[3002],
   LENS_UNAVAILABLE: NUMERIC_ERRORS[5001],
 };

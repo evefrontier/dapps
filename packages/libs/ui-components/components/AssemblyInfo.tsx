@@ -41,11 +41,15 @@ const AssemblyInfo = React.memo(
     useEffect(() => {
       if (!isAssemblyOwner) {
         log.warn(
-          `[Dapp] AssemblyInfo: Not owner, connected to wallet %s which is ${userCharacter?.id == "0" ? "not a" : "a"} smart character`,
+          `[Dapp] AssemblyInfo: Not owner, connected to wallet %s which is ${
+            userCharacter?.id == "0" ? "not a" : "a"
+          } smart character`,
           userCharacter?.address,
         );
       }
     }, [isAssemblyOwner, userCharacter]);
+
+    console.log("assemblyOwner", assemblyOwner);
 
     return (
       <div className={`Entity-About ${styles ? styles : ""}`} id="entity-about">
@@ -56,9 +60,9 @@ const AssemblyInfo = React.memo(
           <SmartAssemblyInfoLine
             title="Owner"
             value={assemblyOwner?.address || ""}
-            additionalInfo={`${
-              isAssemblyOwner ? "(You)" : ""
-            } ${assemblyOwner?.name ? assemblyOwner?.name : ""}`}
+            additionalInfo={`${isAssemblyOwner ? "(You)" : ""} ${
+              assemblyOwner?.name ? assemblyOwner?.name : ""
+            }`}
             clickToExpand={true}
           />
           <SmartAssemblyInfoLine

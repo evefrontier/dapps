@@ -14,13 +14,11 @@ export type {
 // Feature definitions and types
 export {
   getAssemblyTypeApiString,
-  hasSponsoredTransactionFeature,
   supportsSponsoredTransaction,
 } from "./features";
 
 // Utility functions
 export {
   getSponsoredTransactionFeature,
-  getSponsoredTransactionMethod,
   walletSupportsSponsoredTransaction,
 } from "./utils";

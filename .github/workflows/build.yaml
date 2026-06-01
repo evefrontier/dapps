@@ -18,6 +18,7 @@ jobs:
     permissions:
       contents: read
       packages: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v6
 
@@ -44,9 +45,16 @@ jobs:
 
       - name: Test
         run: |
-          bun --filter @evefrontier/dapp-kit test:run
+          bun --filter @evefrontier/dapp-kit test:coverage
         env:
           CI: true
+
+      - name: Report coverage
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: "@evefrontier/dapp-kit"
+          json-summary-path: packages/libs/dapp-kit/coverage/coverage-summary.json
+          json-final-path: packages/libs/dapp-kit/coverage/coverage-final.json
 
       - name: Build packages
         run: |

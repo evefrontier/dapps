@@ -72,6 +72,5 @@ export type {
 export {
   getAssemblyTypeApiString,
   getSponsoredTransactionFeature,
-  hasSponsoredTransactionFeature,
   walletSupportsSponsoredTransaction,
 } from "./wallet";

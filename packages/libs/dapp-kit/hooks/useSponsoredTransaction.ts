@@ -1,9 +1,4 @@
-import {
-  useCurrentAccount,
-  useDAppKit,
-  useWallets,
-} from "@mysten/dapp-kit-react";
-import { getWallets } from "@mysten/wallet-standard";
+import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
 import {
   type UseMutationOptions,
   type UseMutationResult,
@@ -13,7 +8,7 @@ import { Assemblies, QueryParams, SponsoredTransactionActions } from "../types";
 import { createLogger, TenantId } from "../utils";
 import {
   getAssemblyTypeApiString,
-  getSponsoredTransactionMethod,
+  getSponsoredTransactionFeature,
   type SponsoredTransactionArgs,
   type SponsoredTransactionInput,
   type SponsoredTransactionOutput,
@@ -98,26 +93,35 @@ export class AssemblyIdRequiredError extends Error {
 // ============================================================================
 
 /**
- * Resolves assembly ID to a non-negative integer string from the assembly object or query param.
+ * Resolves assembly ID to a non-negative integer from the assembly object or query param.
  * Fails fast with {@link AssemblyIdRequiredError} if neither source provides a valid id.
  */
 function resolveAssemblyId(
-  assemblyItemId: string | number | undefined,
+  assemblyItemId: number | undefined,
   queryItemId: string | null,
-): string {
-  const tryResolve = (
-    value: string | number | null | undefined,
-  ): string | null => {
-    if (value == null || String(value).trim() === "") return null;
-    const id = String(value).trim();
-    return /^\d+$/.test(id) ? id : null;
-  };
+): number {
+  const fromAssembly =
+    typeof assemblyItemId === "number" &&
+    Number.isInteger(assemblyItemId) &&
+    assemblyItemId >= 0
+      ? assemblyItemId
+      : undefined;
 
-  const assemblyId = tryResolve(assemblyItemId) ?? tryResolve(queryItemId);
-  if (assemblyId == null) {
-    throw new AssemblyIdRequiredError();
+  if (fromAssembly !== undefined) {
+    return fromAssembly;
   }
-  return assemblyId;
+
+  if (queryItemId != null && queryItemId.trim() !== "") {
+    const parsed = parseInt(queryItemId.trim(), 10);
+    if (Number.isNaN(parsed) || parsed < 0) {
+      throw new AssemblyIdRequiredError(
+        `Query param itemId must be a non-negative integer; got "${queryItemId}"`,
+      );
+    }
+    return parsed;
+  }
+
+  throw new AssemblyIdRequiredError();
 }
 
 // ============================================================================
@@ -303,7 +307,6 @@ export function useSponsoredTransaction({
   UseSponsoredTransactionArgs
 > {
   const dAppKit = useDAppKit();
-  const wallets = useWallets();
   const currentAccount = useCurrentAccount();
 
   const queryParams = new URLSearchParams(window.location.search);
@@ -340,48 +343,11 @@ export function useSponsoredTransaction({
         );
       }
 
-      // Resolve method: prefer raw Wallet Standard wallets (object-shaped features), then store/current/list
-      const walletName = (wallet as ResolvableWallet).name;
-      const walletVersion = (wallet as ResolvableWallet).version;
-      const rawWallets =
-        typeof getWallets === "function" ? getWallets().get() : [];
-      const rawWallet = rawWallets.find(
-        (w) =>
-          w.name === walletName &&
-          (walletVersion == null || w.version === walletVersion),
+      const signSponsoredTransaction = getSponsoredTransactionFeature(
+        wallet as unknown as Parameters<
+          typeof getSponsoredTransactionFeature
+        >[0],
       );
-      let signSponsoredTransaction =
-        (rawWallet != null
-          ? getSponsoredTransactionMethod(
-              rawWallet as Parameters<typeof getSponsoredTransactionMethod>[0],
-            )
-          : undefined) ??
-        (walletFromStore != null
-          ? getSponsoredTransactionMethod(
-              walletFromStore as Parameters<
-                typeof getSponsoredTransactionMethod
-              >[0],
-            )
-          : undefined) ??
-        getSponsoredTransactionMethod(
-          wallet as Parameters<typeof getSponsoredTransactionMethod>[0],
-        );
-      if (!signSponsoredTransaction) {
-        const walletFromList = wallets.find(
-          (w) =>
-            w.name === (wallet as ResolvableWallet).name &&
-            ((wallet as ResolvableWallet).version == null ||
-              w.version === (wallet as ResolvableWallet).version),
-        );
-        signSponsoredTransaction =
-          walletFromList != null
-            ? getSponsoredTransactionMethod(
-                walletFromList as Parameters<
-                  typeof getSponsoredTransactionMethod
-                >[0],
-              )
-            : undefined;
-      }
       if (!signSponsoredTransaction) {
         throw new WalletSponsoredTransactionNotSupportedError(
           (wallet as ResolvableWallet).name,

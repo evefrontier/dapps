@@ -5,10 +5,7 @@
  * standard Sui wallet capabilities.
  */
 
-import {
-  type EveVaultWalletFeatures as EveFrontierSponsoredTransactionFeature,
-  type SponsoredTransactionInput as WalletCoreSponsoredTransactionInput,
-} from "@evefrontier/wallet-core/wallet-standard-extensions";
+import { type SponsoredTransactionInput as WalletCoreSponsoredTransactionInput } from "@evefrontier/wallet-core/wallet-standard-extensions";
 import {
   Assemblies,
   type AssemblyType,
@@ -65,37 +62,14 @@ export type {
 // ============================================================================
 
 /**
- * Type guard to check if an object has the sponsored transaction feature
- * (object form with implementation).
- *
- * @category Wallet
- */
-export function hasSponsoredTransactionFeature(
-  features: Record<string, unknown>,
-): features is Record<string, unknown> &
-  EveFrontierSponsoredTransactionFeature {
-  const featureValue = features[EVEFRONTIER_SPONSORED_TRANSACTION];
-  return (
-    EVEFRONTIER_SPONSORED_TRANSACTION in features &&
-    typeof featureValue === "object" &&
-    featureValue !== null &&
-    "signSponsoredTransaction" in (featureValue as object)
-  );
-}
-
-/**
  * Check if a wallet supports the sponsored transaction feature.
- * Supports both legacy object-shaped features and v2 array-shaped features
- * (list of feature names).
+ * Supports array-shaped features like UIWallet object shape (list of feature names).
  *
  * @category Wallet
  */
 export function supportsSponsoredTransaction(features: unknown): boolean {
   if (Array.isArray(features)) {
     return (features as string[]).includes(EVEFRONTIER_SPONSORED_TRANSACTION);
-  }
-  if (typeof features === "object" && features !== null) {
-    return hasSponsoredTransactionFeature(features as Record<string, unknown>);
   }
   return false;
 }
