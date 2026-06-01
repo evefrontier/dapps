@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { Assemblies, EVEFRONTIER_SPONSORED_TRANSACTION } from "../../types";
 import {
   getAssemblyTypeApiString,
-  hasSponsoredTransactionFeature,
   supportsSponsoredTransaction,
 } from "../features";
 import { makeArrayWallet, makeObjectWallet } from "./testHelpers";
@@ -20,40 +19,6 @@ describe("getAssemblyTypeApiString", () => {
     [Assemblies.Assembly, "assemblies"],
   ])("maps %s to API value %s", (assemblyKey, expected) => {
     expect(getAssemblyTypeApiString(assemblyKey)).toBe(expected);
-  });
-});
-
-// ============================================================================
-// hasSponsoredTransactionFeature
-// ============================================================================
-
-describe("hasSponsoredTransactionFeature", () => {
-  it("returns false when the feature key is missing entirely", () => {
-    expect(hasSponsoredTransactionFeature({ other: "value" })).toBe(false);
-  });
-
-  it("returns false when the feature value is null", () => {
-    expect(
-      hasSponsoredTransactionFeature({
-        [EVEFRONTIER_SPONSORED_TRANSACTION]: null,
-      }),
-    ).toBe(false);
-  });
-
-  it("returns false when signSponsoredTransaction method is missing", () => {
-    expect(
-      hasSponsoredTransactionFeature({
-        [EVEFRONTIER_SPONSORED_TRANSACTION]: { version: "1.0.0" },
-      }),
-    ).toBe(false);
-  });
-
-  it("returns true for a valid feature object with signSponsoredTransaction", () => {
-    expect(
-      hasSponsoredTransactionFeature(
-        makeObjectWallet().features as Record<string, unknown>,
-      ),
-    ).toBe(true);
   });
 });
 

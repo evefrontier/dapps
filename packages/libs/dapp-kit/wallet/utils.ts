@@ -2,7 +2,6 @@ import { getWallets } from "@mysten/wallet-standard";
 import { EVEFRONTIER_SPONSORED_TRANSACTION } from "../types";
 import {
   type EveFrontierSponsoredTransactionFeature,
-  hasSponsoredTransactionFeature,
   type SponsoredTransactionMethod,
   supportsSponsoredTransaction,
 } from "./features";
@@ -92,12 +91,7 @@ export function getSponsoredTransactionFeature(wallet: {
       (wallet.version == null || rw.version === wallet.version),
   );
 
-  if (
-    rawWallet == null ||
-    !hasSponsoredTransactionFeature(
-      rawWallet.features as Record<string, unknown>,
-    )
-  ) {
+  if (rawWallet == null) {
     return undefined;
   }
 

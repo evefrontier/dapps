@@ -14,7 +14,6 @@ export type {
 // Feature definitions and types
 export {
   getAssemblyTypeApiString,
-  hasSponsoredTransactionFeature,
   supportsSponsoredTransaction,
 } from "./features";
 
