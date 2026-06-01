@@ -7,90 +7,90 @@ import {
   getDatahubGameInfo,
   type InventoryItem,
   isOwner,
-} from "@evefrontier/dapp-kit";
-import React, { useEffect, useMemo, useState } from "react";
-import EveLinearBar from "../components/EveLinearBar";
-import Offline from "./Offline";
+} from '@evefrontier/dapp-kit'
+import React, { useEffect, useMemo, useState } from 'react'
+import EveLinearBar from '../components/EveLinearBar'
+import Offline from './Offline'
 
 const InventoryView = React.memo(
   ({
     assembly,
     currentAddress,
   }: {
-    assembly: AssemblyType<Assemblies.SmartStorageUnit>;
-    currentAddress: `0x${string}`;
+    assembly: AssemblyType<Assemblies.SmartStorageUnit>
+    currentAddress: `0x${string}`
   }): React.JSX.Element => {
     const [itemDetailsMap, setItemDetailsMap] = useState<
       Map<number, DatahubGameInfo>
-    >(new Map());
+    >(new Map())
 
     const inventoryItems = useMemo((): InventoryItem[] | undefined => {
-      if (!assembly) return undefined;
-      const { mainInventory, ephemeralInventories } = assembly.storage;
-      const entityOwner = isOwner(assembly, currentAddress);
+      if (!assembly) return undefined
+      const { mainInventory, ephemeralInventories } = assembly.storage
+      const entityOwner = isOwner(assembly, currentAddress)
       const playerInventory = ephemeralInventories.find((x) =>
         findOwnerByAddress(x.ownerId, currentAddress),
-      );
+      )
       // If owner, return persistent storage items
       // If player, return own ephemeral storage items
       return entityOwner
         ? mainInventory?.items?.map((item: any) => item)
-        : playerInventory?.ephemeralInventoryItems?.map((item) => item);
-    }, [assembly, currentAddress]);
+        : playerInventory?.ephemeralInventoryItems?.map((item) => item)
+    }, [assembly, currentAddress])
 
     // Stable primitive: only changes when the set of type_ids changes.
     const typeIdsKey = useMemo(() => {
-      if (!inventoryItems?.length) return "";
+      if (!inventoryItems?.length) return ''
       return [...new Set(inventoryItems.map((item) => item.type_id))]
         .sort((a, b) => a - b)
-        .join(",");
-    }, [inventoryItems]);
+        .join(',')
+    }, [inventoryItems])
 
     // Batch fetch all unique type_ids in parallel when inventory contents change.
     useEffect(() => {
       if (!typeIdsKey) {
-        setItemDetailsMap(new Map());
-        return;
+        setItemDetailsMap(new Map())
+        return
       }
-      const uniqueTypeIds = typeIdsKey.split(",").map(Number);
-      let cancelled = false;
+      const uniqueTypeIds = typeIdsKey.split(',').map(Number)
+      let cancelled = false
       Promise.all(
         uniqueTypeIds.map((typeId) =>
           getDatahubGameInfo(typeId).then((info) => [typeId, info] as const),
         ),
       ).then((results) => {
-        if (!cancelled) setItemDetailsMap(new Map(results));
-      });
+        if (!cancelled) setItemDetailsMap(new Map(results))
+      })
       return () => {
-        cancelled = true;
-      };
-    }, [typeIdsKey]);
+        cancelled = true
+      }
+    }, [typeIdsKey])
 
-    if (!assembly) return <></>;
+    if (!assembly) return <></>
 
-    const { mainInventory, ephemeralInventories } = assembly.storage;
+    const { mainInventory, ephemeralInventories } = assembly.storage
 
-    const isEntityOwner: boolean = isOwner(assembly, currentAddress);
+    const isEntityOwner: boolean = isOwner(assembly, currentAddress)
 
     const playerInventory = ephemeralInventories.find((x) =>
       findOwnerByAddress(x.ownerId, currentAddress),
-    );
+    )
 
     const storageCap = isEntityOwner
       ? mainInventory?.capacity
-      : playerInventory?.storageCapacity || mainInventory?.capacity; // Fallback to main inventory capacity if player inventory is undefined
+      : playerInventory?.storageCapacity || mainInventory?.capacity // Fallback to main inventory capacity if player inventory is undefined
     const usedCap = isEntityOwner
       ? mainInventory?.usedCapacity
-      : playerInventory?.usedCapacity;
+      : playerInventory?.usedCapacity
 
     return (
       <>
-        {assembly.state === "online" ? (
+        {assembly.state === 'online' ? (
           <div className="text-xs flex flex-col !p-4 gap-2 min-h-full">
             <div className="flex flex-col w-full">
               <div
                 className="grid w-full font-disket text-xs text-neutral-50"
-                style={{ gridTemplateColumns: "60% 20% 20%" }}
+                style={{ gridTemplateColumns: '60% 20% 20%' }}
               >
                 <span>Name</span>
                 <span>Amount</span>
@@ -101,8 +101,8 @@ const InventoryView = React.memo(
             <div
               className="grid w-full text-neutral text-sm overflow-y-scroll"
               style={{
-                gridTemplateColumns: "60% 20% 20%",
-                lineHeight: "1.15rem",
+                gridTemplateColumns: '60% 20% 20%',
+                lineHeight: '1.15rem',
               }}
             >
               {!inventoryItems || inventoryItems.length === 0 ? (
@@ -119,8 +119,8 @@ const InventoryView = React.memo(
             </div>
 
             <EveLinearBar
-              nominator={formatM3(usedCap ?? "0")}
-              denominator={formatM3(storageCap ?? "0")}
+              nominator={formatM3(usedCap ?? '0')}
+              denominator={formatM3(storageCap ?? '0')}
               label={`m3`}
             />
           </div>
@@ -128,18 +128,18 @@ const InventoryView = React.memo(
           <Offline isParentNodeOnline={assembly.isParentNodeOnline ?? false} />
         )}
       </>
-    );
+    )
   },
-);
+)
 
 const InventoryItemRow = ({
   item,
   details,
 }: {
-  item: InventoryItem;
-  details?: DatahubGameInfo;
+  item: InventoryItem
+  details?: DatahubGameInfo
 }) => {
-  const { quantity, type_id } = item;
+  const { quantity, type_id } = item
 
   return (
     <>
@@ -147,7 +147,7 @@ const InventoryItemRow = ({
       <span>{quantity}</span>
       <span>{type_id}</span>
     </>
-  );
-};
+  )
+}
 
-export default InventoryView;
+export default InventoryView

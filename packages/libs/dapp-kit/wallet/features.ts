@@ -5,14 +5,14 @@
  * standard Sui wallet capabilities.
  */
 
-import { type SponsoredTransactionInput as WalletCoreSponsoredTransactionInput } from "@evefrontier/wallet-core/wallet-standard-extensions";
+import { type SponsoredTransactionInput as WalletCoreSponsoredTransactionInput } from '@evefrontier/wallet-core/wallet-standard-extensions'
 import {
   Assemblies,
   type AssemblyType,
   EVEFRONTIER_SPONSORED_TRANSACTION,
   SponsoredTransactionActions,
   type SponsoredTransactionMetadata,
-} from "../types";
+} from '../types'
 
 /**
  * Maps an assembly type enum to the API string expected by the sponsored transaction backend.
@@ -20,7 +20,7 @@ import {
  * @category Wallet
  * TODO: This typedoc is not working when re-exported from wallet-core
  */
-export { getAssemblyTypeApiString } from "@evefrontier/wallet-core/definitions";
+export { getAssemblyTypeApiString } from '@evefrontier/wallet-core/definitions'
 
 /**
  * Input for a sponsored transaction request
@@ -33,20 +33,20 @@ export { getAssemblyTypeApiString } from "@evefrontier/wallet-core/definitions";
  * @category Types
  */
 export type SponsoredTransactionInput = WalletCoreSponsoredTransactionInput & {
-  tenant: string;
-};
+  tenant: string
+}
 
 /** Sponsored tx args with assembly object; id and assemblyType are derived. Tenant is optional; the hook resolves it from args, URL query param, or default. */
 export type SponsoredTransactionArgs = Omit<
   SponsoredTransactionInput,
-  "assembly" | "assemblyType" | "account" | "tenant"
+  'assembly' | 'assemblyType' | 'account' | 'tenant'
 > & {
-  assembly: AssemblyType<Assemblies>;
-  account?: string;
-  tenant?: string;
-  txAction: SponsoredTransactionActions;
-  metadata?: SponsoredTransactionMetadata;
-};
+  assembly: AssemblyType<Assemblies>
+  account?: string
+  tenant?: string
+  txAction: SponsoredTransactionActions
+  metadata?: SponsoredTransactionMetadata
+}
 
 // TODO: Add TypeDoc for SponsoredTransactionOutput, SponsoredTransactionMethod, and
 // EveFrontierSponsoredTransactionFeature — either here once re-export doc support lands,
@@ -55,7 +55,7 @@ export type {
   EveVaultWalletFeatures as EveFrontierSponsoredTransactionFeature,
   SponsoredTransactionMethod,
   SponsoredTransactionOutput,
-} from "@evefrontier/wallet-core/wallet-standard-extensions";
+} from '@evefrontier/wallet-core/wallet-standard-extensions'
 
 // ============================================================================
 // Type Guards
@@ -69,7 +69,7 @@ export type {
  */
 export function supportsSponsoredTransaction(features: unknown): boolean {
   if (Array.isArray(features)) {
-    return (features as string[]).includes(EVEFRONTIER_SPONSORED_TRANSACTION);
+    return (features as string[]).includes(EVEFRONTIER_SPONSORED_TRANSACTION)
   }
-  return false;
+  return false
 }

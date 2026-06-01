@@ -4,13 +4,13 @@ import React, {
   useEffect,
   useRef,
   useState,
-} from "react";
-import "../styles-ui.css";
+} from 'react'
+import '../styles-ui.css'
 
 interface FakeScrollbarProps extends HTMLAttributes<HTMLElement> {
-  children: ReactNode;
-  maxHeight: string;
-  classStyles?: string;
+  children: ReactNode
+  maxHeight: string
+  classStyles?: string
 }
 
 const EveScroll: React.FC<FakeScrollbarProps> = ({
@@ -19,50 +19,50 @@ const EveScroll: React.FC<FakeScrollbarProps> = ({
   classStyles,
   ...props
 }) => {
-  const { id } = props;
+  const { id } = props
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const scrollTopRatioRef = useRef<number>(0);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [scrollVisible, setScrollVisible] = useState(false);
-  const [scrollHeight, setScrollHeight] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null)
+  const scrollTopRatioRef = useRef<number>(0)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [scrollVisible, setScrollVisible] = useState(false)
+  const [scrollHeight, setScrollHeight] = useState(0)
 
   useEffect(() => {
     if (containerRef.current && contentRef.current) {
-      const containerHeight = containerRef.current.clientHeight;
-      const contentHeight = contentRef.current.scrollHeight;
+      const containerHeight = containerRef.current.clientHeight
+      const contentHeight = contentRef.current.scrollHeight
 
-      setScrollVisible(contentHeight > containerHeight);
-      setScrollHeight((containerHeight / contentHeight) * containerHeight);
+      setScrollVisible(contentHeight > containerHeight)
+      setScrollHeight((containerHeight / contentHeight) * containerHeight)
     }
-  }, [children]);
+  }, [children])
 
   const handleScroll = () => {
     if (containerRef.current && contentRef.current) {
-      const containerHeight = containerRef.current.clientHeight;
-      const contentHeight = contentRef.current.scrollHeight;
+      const containerHeight = containerRef.current.clientHeight
+      const contentHeight = contentRef.current.scrollHeight
 
-      const scrollTop = containerRef.current.scrollTop;
-      const scrollTopRatio = scrollTop / contentHeight;
-      const newScrollTop = scrollTopRatio * containerHeight;
+      const scrollTop = containerRef.current.scrollTop
+      const scrollTopRatio = scrollTop / contentHeight
+      const newScrollTop = scrollTopRatio * containerHeight
 
-      contentRef.current.scrollTop = newScrollTop;
+      contentRef.current.scrollTop = newScrollTop
     }
-  };
+  }
 
   const handleContentScroll = () => {
     if (containerRef.current && contentRef.current) {
-      const contentHeight = contentRef.current.scrollHeight;
+      const contentHeight = contentRef.current.scrollHeight
 
-      const scrollTop = contentRef.current.scrollTop;
-      const scrollTopRatio = scrollTop / contentHeight;
+      const scrollTop = contentRef.current.scrollTop
+      const scrollTopRatio = scrollTop / contentHeight
 
       // Synchronize scroll position between the custom scrollbar and the actual scroll position of the content.
-      scrollTopRatioRef.current = scrollTopRatio;
+      scrollTopRatioRef.current = scrollTopRatio
     }
-  };
+  }
 
-  const contentWidth = scrollVisible ? `w-[calc(100%-0.5rem)]` : `w-full`;
+  const contentWidth = scrollVisible ? `w-[calc(100%-0.5rem)]` : `w-full`
 
   return (
     <div
@@ -74,7 +74,7 @@ const EveScroll: React.FC<FakeScrollbarProps> = ({
     >
       <div
         className={`Eve-Scroll-Content ${contentWidth} ${
-          classStyles ? classStyles : ""
+          classStyles ? classStyles : ''
         }`}
         ref={contentRef}
         onScroll={handleContentScroll}
@@ -93,7 +93,7 @@ const EveScroll: React.FC<FakeScrollbarProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default EveScroll;
+export default EveScroll

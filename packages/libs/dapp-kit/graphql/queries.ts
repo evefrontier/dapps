@@ -28,7 +28,7 @@ export const GET_OBJECT_BY_ADDRESS = `
       }
     }
   }
-`;
+`
 
 /**
  * Object by address with JSON contents and dynamic fields (nodes).
@@ -61,7 +61,7 @@ export const GET_OBJECT_WITH_DYNAMIC_FIELDS = `
       }
     }
   }
-`;
+`
 
 /**
  * Assembly object with owner/character extract and character-owned objects (e.g. inventory).
@@ -153,7 +153,7 @@ query GetObjectOwnerCharacterOwnerAndInventory(
     }
   }
 }
-`;
+`
 
 // ============================================================================
 // Owner & Ownership Queries
@@ -194,7 +194,7 @@ export const GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE = `
       }
     }
   }
-`;
+`
 
 /**
  * Query to get an object's owner and their owned objects of a specific type
@@ -232,7 +232,7 @@ export const GET_OBJECT_OWNER_AND_OWNED_OBJECTS_WITH_JSON = `
       }
     }
   }
-`;
+`
 
 /**
  * Query to get full object details with JSON contents
@@ -257,7 +257,7 @@ export const GET_OBJECT_WITH_JSON = `
       }
     }
   }
-`;
+`
 
 /**
  * Query to get all objects of a specific type owned by an address
@@ -279,7 +279,7 @@ export const GET_OWNED_OBJECTS_BY_TYPE = `
       }
     }
   }
-`;
+`
 
 /**
  * Query for fetching objects owned by an address filtered by package
@@ -322,7 +322,7 @@ export const GET_OWNED_OBJECTS_BY_PACKAGE = `
       }
     }
   }
-`;
+`
 
 // ============================================================================
 // Character Queries
@@ -366,7 +366,7 @@ export const GET_WALLET_CHARACTERS = `
         }
     }
 }
-`;
+`
 
 /**
  * Query to get character owned by a wallet and objects owned by the character
@@ -426,7 +426,7 @@ query GetCharacterAndOwnedObjects($owner: SuiAddress!, $characterPlayerProfileTy
         }
     }
 }
-`;
+`
 
 // ============================================================================
 // Singleton & Type-based Queries
@@ -451,7 +451,7 @@ export const GET_SINGLETON_OBJECT_BY_TYPE = `
       }
     }
   }
-`;
+`
 
 /**
  * Query to get a singleton config object by its type
@@ -494,7 +494,7 @@ export const GET_SINGLETON_CONFIG_OBJECT_BY_TYPE = `
         }
     }
 }
-`;
+`
 
 /**
  * Query to get all objects of a specific type (global search)
@@ -529,4 +529,4 @@ export const GET_OBJECTS_BY_TYPE = `
       }
     }
   }
-`;
+`

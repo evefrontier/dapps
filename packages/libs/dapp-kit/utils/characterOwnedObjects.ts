@@ -1,8 +1,8 @@
-import { getCharacterAndOwnedObjects } from "../graphql/client";
-import type { GetCharacterAndOwnedObjectsResponse } from "../graphql/types";
-import { createLogger } from "./logger";
+import { getCharacterAndOwnedObjects } from '../graphql/client'
+import type { GetCharacterAndOwnedObjectsResponse } from '../graphql/types'
+import { createLogger } from './logger'
 
-const log = createLogger();
+const log = createLogger()
 
 /**
  * Extracts the JSON payloads from the first character's owned objects
@@ -17,12 +17,12 @@ export function getCharacterOwnedObjectsJson(
   data: GetCharacterAndOwnedObjectsResponse | undefined,
 ): Record<string, unknown>[] | undefined {
   const objects =
-    data?.address?.objects?.nodes?.[0]?.contents?.extract?.asAddress?.objects;
-  if (!objects?.nodes?.length) return undefined;
+    data?.address?.objects?.nodes?.[0]?.contents?.extract?.asAddress?.objects
+  if (!objects?.nodes?.length) return undefined
   return objects.nodes.map(
     (node) =>
       node.contents.extract.asAddress.asObject.asMoveObject.contents.json,
-  );
+  )
 }
 
 /**
@@ -39,15 +39,15 @@ export async function getCharacterOwnedObjects(
 ): Promise<Record<string, unknown>[] | undefined> {
   const response = await getCharacterAndOwnedObjects(address).then(
     (response) => {
-      const data = response.data;
+      const data = response.data
       if (!data) {
-        log.warn("[Dapp] No data returned from getCharacterAndOwnedObjects");
-        return;
+        log.warn('[Dapp] No data returned from getCharacterAndOwnedObjects')
+        return
       }
-      const ownedObjectsJson = getCharacterOwnedObjectsJson(data);
-      return ownedObjectsJson;
+      const ownedObjectsJson = getCharacterOwnedObjectsJson(data)
+      return ownedObjectsJson
     },
-  );
+  )
 
-  return response;
+  return response
 }

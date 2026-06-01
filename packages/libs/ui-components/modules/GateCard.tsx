@@ -6,54 +6,53 @@ import {
   parseStatus,
   RawSuiObjectData,
   State,
-} from "@evefrontier/dapp-kit";
-import React, { useEffect, useState } from "react";
-import { ButtonCorner, CopyIcon } from "../assets";
-import ClickToCopy from "../components/ClickToCopy";
+} from '@evefrontier/dapp-kit'
+import React, { useEffect, useState } from 'react'
+import { ButtonCorner, CopyIcon } from '../assets'
+import ClickToCopy from '../components/ClickToCopy'
 
 interface GateInfoProps {
-  linked?: AssemblyType<Assemblies.SmartGate>;
-  destinationGate?: RawSuiObjectData;
+  linked?: AssemblyType<Assemblies.SmartGate>
+  destinationGate?: RawSuiObjectData
 }
 
 interface GateCardProps {
-  isLinked: boolean;
-  isOwner: boolean;
+  isLinked: boolean
+  isOwner: boolean
   /**
    * @deprecated No longer used; selection is handled by the parent. Will be removed in a future version.
    */
-  isSelected?: boolean;
+  isSelected?: boolean
   /**
    * @deprecated No longer used; selection is handled by the parent. Will be removed in a future version.
    */
-  onSelect?: () => void; // Deprecated
-  gate?: AssemblyType<Assemblies.SmartGate>;
-  parentGate: AssemblyType<Assemblies.SmartGate>;
-  destinationGate?: RawSuiObjectData;
+  onSelect?: () => void // Deprecated
+  gate?: AssemblyType<Assemblies.SmartGate>
+  parentGate: AssemblyType<Assemblies.SmartGate>
+  destinationGate?: RawSuiObjectData
 }
 
 const GateInfo: React.FC<GateInfoProps> = ({ linked, destinationGate }) => {
-  if (!destinationGate) return <></>;
+  if (!destinationGate) return <></>
 
-  const { id, key, linked_gate_id, metadata, type_id, status } =
-    destinationGate;
+  const { id, key, linked_gate_id, metadata, type_id, status } = destinationGate
 
-  const { name, description, url } = metadata ?? {};
+  const { name, description, url } = metadata ?? {}
 
-  const state = parseStatus(status?.status?.["@variant"]);
+  const state = parseStatus(status?.status?.['@variant'])
 
   const renderInfoMessage = () => {
     // If gate is linked to another gate, show the name of the linked gate
     if (linked) {
-      return "Linked to " + (linked.name || abbreviateAddress(linked?.id));
+      return 'Linked to ' + (linked.name || abbreviateAddress(linked?.id))
     } else if (state === State.ANCHORED) {
       // If gate is anchored, show "Offline"
-      return "Offline";
+      return 'Offline'
     }
 
     // Otherwise, show the type of the gate
-    return type_id;
-  };
+    return type_id
+  }
 
   return (
     <div className="flex flex-col">
@@ -66,11 +65,11 @@ const GateInfo: React.FC<GateInfoProps> = ({ linked, destinationGate }) => {
         <span className="text-sm">{renderInfoMessage()}</span>
       </div>
     </div>
-  );
-};
+  )
+}
 
 interface ButtonCornersProps {
-  color?: string;
+  color?: string
 }
 
 const ButtonCorners: React.FC<ButtonCornersProps> = ({ color }) => (
@@ -88,16 +87,16 @@ const ButtonCorners: React.FC<ButtonCornersProps> = ({ color }) => (
       className={`absolute -bottom-[1px] -right-[1px] rotate-90 button-corner ${color}`}
     />
   </>
-);
+)
 
 const GateCard = React.memo(
   ({ gate, isLinked, isOwner, destinationGate }: GateCardProps) => {
-    const [isLinkedElsewhere, setIsLinkedElsewhere] = useState<boolean>(false);
+    const [isLinkedElsewhere, setIsLinkedElsewhere] = useState<boolean>(false)
     const [linkedGateInfo, setLinkedGateInfo] = useState<
       AssemblyType<Assemblies.SmartGate> | undefined
-    >(undefined);
+    >(undefined)
     const [canBeInteractedWith, setCanBeInteractedWith] =
-      useState<boolean>(false);
+      useState<boolean>(false)
 
     useEffect(() => {
       /** Check if user is owner of given gate
@@ -105,24 +104,24 @@ const GateCard = React.memo(
        * If both are true, gate can be interacted with
        */
 
-      if (!gate) return;
+      if (!gate) return
 
       if (isOwner && gate.state === State.ONLINE) {
-        setCanBeInteractedWith(true);
+        setCanBeInteractedWith(true)
       }
-    }, [gate]);
+    }, [gate])
 
     const baseClasses =
-      "relative flex justify-between w-full border bg-neutral-5 hover:bg-neutral-10";
+      'relative flex justify-between w-full border bg-neutral-5 hover:bg-neutral-10'
     const borderClasses = isLinked
-      ? "border-martianred-10"
-      : "border-neutral-10";
+      ? 'border-martianred-10'
+      : 'border-neutral-10'
     const disabledClasses =
       isLinkedElsewhere || !canBeInteractedWith
-        ? "opacity-50 !hover:bg-neutral-5"
-        : "";
+        ? 'opacity-50 !hover:bg-neutral-5'
+        : ''
     const innerBorderClasses =
-      "flex w-full font-disket text-base text-neutral-60 justify-center border border-martianred-30 p-4";
+      'flex w-full font-disket text-base text-neutral-60 justify-center border border-martianred-30 p-4'
 
     /** If there is no gate, show a placeholder for a gate in range */
     if (!destinationGate) {
@@ -131,7 +130,7 @@ const GateCard = React.memo(
           <div className={innerBorderClasses}>No gate linked</div>
           <ButtonCorners color="text-martianred" />
         </div>
-      );
+      )
     } else {
       /** If there is a gate linked, show special UI for it */
       return (
@@ -146,9 +145,9 @@ const GateCard = React.memo(
           </div>
           <ButtonCorners color="text-martianred" />
         </div>
-      );
+      )
     }
   },
-);
+)
 
-export default GateCard;
+export default GateCard

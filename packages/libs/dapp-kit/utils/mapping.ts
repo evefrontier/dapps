@@ -1,8 +1,8 @@
-import { bcs } from "@mysten/sui/bcs";
-import { deriveObjectID } from "@mysten/sui/utils";
-import { getSingletonObjectByType } from "../graphql/client";
-import { Assemblies, State } from "../types";
-import { getEveWorldPackageId, TENANT_CONFIG, TenantId } from "./constants";
+import { bcs } from '@mysten/sui/bcs'
+import { deriveObjectID } from '@mysten/sui/utils'
+import { getSingletonObjectByType } from '../graphql/client'
+import { Assemblies, State } from '../types'
+import { getEveWorldPackageId, TENANT_CONFIG, TenantId } from './constants'
 
 /**
  * Convert raw status variant string to State enum
@@ -10,21 +10,21 @@ import { getEveWorldPackageId, TENANT_CONFIG, TenantId } from "./constants";
  * @category Utilities - Mapping
  */
 export function parseStatus(statusVariant: string | undefined): State {
-  if (!statusVariant) return State.NULL;
+  if (!statusVariant) return State.NULL
 
   switch (statusVariant.toUpperCase()) {
-    case "ONLINE":
-      return State.ONLINE;
-    case "OFFLINE":
-      return State.ANCHORED;
-    case "ANCHORED":
-      return State.ANCHORED;
-    case "UNANCHORED":
-      return State.UNANCHORED;
-    case "DESTROYED":
-      return State.DESTROYED;
+    case 'ONLINE':
+      return State.ONLINE
+    case 'OFFLINE':
+      return State.ANCHORED
+    case 'ANCHORED':
+      return State.ANCHORED
+    case 'UNANCHORED':
+      return State.UNANCHORED
+    case 'DESTROYED':
+      return State.DESTROYED
     default:
-      return State.NULL;
+      return State.NULL
   }
 }
 
@@ -36,28 +36,28 @@ export function parseStatus(statusVariant: string | undefined): State {
  * @category Utilities - Mapping
  */
 export function getAssemblyType(typeRepr: string): Assemblies {
-  if (typeRepr.includes("::storage_unit::StorageUnit")) {
-    return Assemblies.SmartStorageUnit;
+  if (typeRepr.includes('::storage_unit::StorageUnit')) {
+    return Assemblies.SmartStorageUnit
   }
-  if (typeRepr.includes("::turret::Turret")) {
-    return Assemblies.SmartTurret;
+  if (typeRepr.includes('::turret::Turret')) {
+    return Assemblies.SmartTurret
   }
-  if (typeRepr.includes("::gate::Gate")) {
-    return Assemblies.SmartGate;
+  if (typeRepr.includes('::gate::Gate')) {
+    return Assemblies.SmartGate
   }
-  if (typeRepr.includes("::network_node::NetworkNode")) {
-    return Assemblies.NetworkNode;
+  if (typeRepr.includes('::network_node::NetworkNode')) {
+    return Assemblies.NetworkNode
   }
-  if (typeRepr.includes("::assembly::Assembly")) {
-    return Assemblies.Assembly;
+  if (typeRepr.includes('::assembly::Assembly')) {
+    return Assemblies.Assembly
   }
 
   // Assembly type not found, return default Assembly
-  return Assemblies.Assembly;
+  return Assemblies.Assembly
 }
 
 // Cache for the Registry address, keyed by tenant
-const objectRegistryAddressCache: Record<string, string> = {};
+const objectRegistryAddressCache: Record<string, string> = {}
 
 /**
  * Fetches the ObjectRegistry singleton address from the chain for a given tenant.
@@ -73,22 +73,22 @@ export async function getRegistryAddress(
   tenant: string | TenantId,
 ): Promise<string> {
   if (objectRegistryAddressCache[tenant]) {
-    return objectRegistryAddressCache[tenant];
+    return objectRegistryAddressCache[tenant]
   }
 
   const packageId =
-    TENANT_CONFIG[tenant as TenantId]?.packageId ?? getEveWorldPackageId();
-  const registryType = `${packageId}::object_registry::ObjectRegistry`;
+    TENANT_CONFIG[tenant as TenantId]?.packageId ?? getEveWorldPackageId()
+  const registryType = `${packageId}::object_registry::ObjectRegistry`
 
-  const result = await getSingletonObjectByType(registryType);
+  const result = await getSingletonObjectByType(registryType)
 
-  const address = result.data?.objects?.nodes?.[0]?.address;
+  const address = result.data?.objects?.nodes?.[0]?.address
   if (!address) {
-    throw new Error(`ObjectRegistry not found for type: ${registryType}`);
+    throw new Error(`ObjectRegistry not found for type: ${registryType}`)
   }
 
-  objectRegistryAddressCache[tenant] = address;
-  return address;
+  objectRegistryAddressCache[tenant] = address
+  return address
 }
 
 /**
@@ -109,26 +109,26 @@ export async function getObjectId(
   itemId: string,
   selectedTenant: string | TenantId,
 ): Promise<string> {
-  const validTenantIds = Object.values(TenantId) as string[];
+  const validTenantIds = Object.values(TenantId) as string[]
   if (!validTenantIds.includes(selectedTenant)) {
-    console.warn(`Tenant "${selectedTenant}" might be a local tenant.`);
+    console.warn(`Tenant "${selectedTenant}" might be a local tenant.`)
   }
 
-  const tenant = selectedTenant as TenantId;
-  const registryAddress = await getRegistryAddress(tenant);
-  const packageId = TENANT_CONFIG[tenant]?.packageId ?? getEveWorldPackageId();
+  const tenant = selectedTenant as TenantId
+  const registryAddress = await getRegistryAddress(tenant)
+  const packageId = TENANT_CONFIG[tenant]?.packageId ?? getEveWorldPackageId()
 
-  const bcsType = bcs.struct("TenantItemId", {
+  const bcsType = bcs.struct('TenantItemId', {
     item_id: bcs.u64(),
     tenant: bcs.string(),
-  });
-  const key = bcsType.serialize({ item_id: BigInt(itemId), tenant }).toBytes();
+  })
+  const key = bcsType.serialize({ item_id: BigInt(itemId), tenant }).toBytes()
 
   const objectId = deriveObjectID(
     registryAddress,
     `${packageId}::in_game_id::TenantItemId`,
     key,
-  );
+  )
 
-  return objectId;
+  return objectId
 }

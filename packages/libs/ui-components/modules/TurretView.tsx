@@ -1,15 +1,15 @@
-import { Assemblies, AssemblyType } from "@evefrontier/dapp-kit";
-import React from "react";
-import { Hamburger } from "../assets";
-import EveRadioGroup from "../components/Radio";
+import { Assemblies, AssemblyType } from '@evefrontier/dapp-kit'
+import React from 'react'
+import { Hamburger } from '../assets'
+import EveRadioGroup from '../components/Radio'
 
 const TurretView = React.memo(
   ({
     assembly,
   }: {
-    assembly: AssemblyType<Assemblies.SmartTurret>;
+    assembly: AssemblyType<Assemblies.SmartTurret>
   }): React.JSX.Element => {
-    if (!assembly) return <></>;
+    if (!assembly) return <></>
 
     return (
       <div className="flex flex-col !p-4 gap-2 min-h-full">
@@ -21,15 +21,15 @@ const TurretView = React.memo(
           <EveRadioGroup
             options={[
               {
-                value: "all",
-                label: "All in range",
+                value: 'all',
+                label: 'All in range',
               },
             ]}
           />
         </div>
       </div>
-    );
+    )
   },
-);
+)
 
-export default TurretView;
+export default TurretView

@@ -2,13 +2,13 @@ import {
   BehaviourSkeleton,
   MonitorSkeleton,
   RootSkeleton,
-} from "@eveworld/ui-components";
-import React, { useEffect } from "react";
+} from '@eveworld/ui-components'
+import React, { useEffect } from 'react'
 
 interface SkeletonConnectProps {
-  handleConnect: () => void;
-  hasEveVault: boolean;
-  path: string;
+  handleConnect: () => void
+  hasEveVault: boolean
+  path: string
 }
 
 /**
@@ -29,21 +29,21 @@ const SkeletonConnect = React.memo(
   }: SkeletonConnectProps): React.JSX.Element => {
     useEffect(() => {
       if (hasEveVault) {
-        handleConnect();
+        handleConnect()
       }
-    }, [hasEveVault]);
+    }, [hasEveVault])
 
-    if (path.includes("/client/networknode/monitor")) {
-      return <MonitorSkeleton />;
+    if (path.includes('/client/networknode/monitor')) {
+      return <MonitorSkeleton />
     }
-    if (path.includes("/client/root")) {
-      return <RootSkeleton />;
+    if (path.includes('/client/root')) {
+      return <RootSkeleton />
     }
-    if (path.includes("/client/behaviour")) {
-      return <BehaviourSkeleton />;
+    if (path.includes('/client/behaviour')) {
+      return <BehaviourSkeleton />
     }
-    return <BehaviourSkeleton />;
+    return <BehaviourSkeleton />
   },
-);
+)
 
-export default React.memo(SkeletonConnect);
+export default React.memo(SkeletonConnect)

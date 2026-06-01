@@ -1,11 +1,11 @@
-import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
+import { useCurrentAccount, useDAppKit } from '@mysten/dapp-kit-react'
 import {
   type UseMutationOptions,
   type UseMutationResult,
   useMutation,
-} from "@tanstack/react-query";
-import { Assemblies, QueryParams, SponsoredTransactionActions } from "../types";
-import { createLogger, TenantId } from "../utils";
+} from '@tanstack/react-query'
+import { Assemblies, QueryParams, SponsoredTransactionActions } from '../types'
+import { createLogger, TenantId } from '../utils'
 import {
   getAssemblyTypeApiString,
   getSponsoredTransactionFeature,
@@ -13,17 +13,17 @@ import {
   type SponsoredTransactionInput,
   type SponsoredTransactionOutput,
   supportsSponsoredTransaction,
-} from "../wallet";
+} from '../wallet'
 
-const log = createLogger();
+const log = createLogger()
 
 /** Wallet-like shape from dApp Kit (UiWallet or connection store). */
 type ResolvableWallet = {
-  features: unknown;
-  name?: string;
-  version?: string;
-  [key: string]: unknown;
-};
+  features: unknown
+  name?: string
+  version?: string
+  [key: string]: unknown
+}
 
 // ============================================================================
 // Error Types
@@ -42,9 +42,9 @@ export class WalletSponsoredTransactionNotSupportedError extends Error {
     super(
       walletName
         ? `Wallet "${walletName}" does not support sponsored transactions`
-        : "Connected wallet does not support sponsored transactions",
-    );
-    this.name = "WalletSponsoredTransactionNotSupportedError";
+        : 'Connected wallet does not support sponsored transactions',
+    )
+    this.name = 'WalletSponsoredTransactionNotSupportedError'
   }
 }
 
@@ -55,8 +55,8 @@ export class WalletSponsoredTransactionNotSupportedError extends Error {
  */
 export class WalletNotConnectedError extends Error {
   constructor() {
-    super("No wallet connected");
-    this.name = "WalletNotConnectedError";
+    super('No wallet connected')
+    this.name = 'WalletNotConnectedError'
   }
 }
 
@@ -67,8 +67,8 @@ export class WalletNotConnectedError extends Error {
  */
 export class WalletNoAccountSelectedError extends Error {
   constructor() {
-    super("No account selected in wallet");
-    this.name = "WalletNoAccountSelectedError";
+    super('No account selected in wallet')
+    this.name = 'WalletNoAccountSelectedError'
   }
 }
 
@@ -82,9 +82,9 @@ export class AssemblyIdRequiredError extends Error {
   constructor(reason?: string) {
     super(
       reason ??
-        "Assembly ID is required: pass an assembly object with item_id or set the itemId query param to a valid non-negative integer",
-    );
-    this.name = "AssemblyIdRequiredError";
+        'Assembly ID is required: pass an assembly object with item_id or set the itemId query param to a valid non-negative integer',
+    )
+    this.name = 'AssemblyIdRequiredError'
   }
 }
 
@@ -101,38 +101,38 @@ function resolveAssemblyId(
   queryItemId: string | null,
 ): number {
   const fromAssembly =
-    typeof assemblyItemId === "number" &&
+    typeof assemblyItemId === 'number' &&
     Number.isInteger(assemblyItemId) &&
     assemblyItemId >= 0
       ? assemblyItemId
-      : undefined;
+      : undefined
 
   if (fromAssembly !== undefined) {
-    return fromAssembly;
+    return fromAssembly
   }
 
-  if (queryItemId != null && queryItemId.trim() !== "") {
-    const parsed = parseInt(queryItemId.trim(), 10);
+  if (queryItemId != null && queryItemId.trim() !== '') {
+    const parsed = parseInt(queryItemId.trim(), 10)
     if (Number.isNaN(parsed) || parsed < 0) {
       throw new AssemblyIdRequiredError(
         `Query param itemId must be a non-negative integer; got "${queryItemId}"`,
-      );
+      )
     }
-    return parsed;
+    return parsed
   }
 
-  throw new AssemblyIdRequiredError();
+  throw new AssemblyIdRequiredError()
 }
 
 // ============================================================================
 // Retry helpers (502 Bad Gateway)
 // ============================================================================
 
-const DEFAULT_MAX_RETRIES = 2;
-const DEFAULT_RETRY_DELAY_MS = 1500;
+const DEFAULT_MAX_RETRIES = 2
+const DEFAULT_RETRY_DELAY_MS = 1500
 
 function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 /**
@@ -141,12 +141,12 @@ function delay(ms: number): Promise<void> {
  */
 function isRetryableSponsorError(error: unknown): boolean {
   if (error instanceof Error) {
-    const msg = error.message.toLowerCase();
-    if (msg.includes("502") || msg.includes("bad gateway")) return true;
+    const msg = error.message.toLowerCase()
+    if (msg.includes('502') || msg.includes('bad gateway')) return true
   }
-  const withResponse = error as { response?: { status?: number } };
-  if (withResponse?.response?.status === 502) return true;
-  return false;
+  const withResponse = error as { response?: { status?: number } }
+  if (withResponse?.response?.status === 502) return true
+  return false
 }
 
 // ============================================================================
@@ -163,7 +163,7 @@ export type UseSponsoredTransactionError =
   | WalletNotConnectedError
   | WalletNoAccountSelectedError
   | AssemblyIdRequiredError
-  | Error;
+  | Error
 
 /**
  * Arguments passed to {@link useSponsoredTransaction} mutate/mutateAsync.
@@ -171,7 +171,7 @@ export type UseSponsoredTransactionError =
  *
  * @category Hooks - Sponsored Transaction
  */
-export type UseSponsoredTransactionArgs = SponsoredTransactionArgs;
+export type UseSponsoredTransactionArgs = SponsoredTransactionArgs
 
 /**
  * React Query mutation options for {@link useSponsoredTransaction}.
@@ -184,8 +184,8 @@ export type UseSponsoredTransactionMutationOptions = Omit<
     UseSponsoredTransactionError,
     UseSponsoredTransactionArgs
   >,
-  "mutationFn"
->;
+  'mutationFn'
+>
 
 // ============================================================================
 // Hook Implementation
@@ -306,69 +306,69 @@ export function useSponsoredTransaction({
   UseSponsoredTransactionError,
   UseSponsoredTransactionArgs
 > {
-  const dAppKit = useDAppKit();
-  const currentAccount = useCurrentAccount();
+  const dAppKit = useDAppKit()
+  const currentAccount = useCurrentAccount()
 
-  const queryParams = new URLSearchParams(window.location.search);
-  const queryItemId = queryParams.get(QueryParams.ITEM_ID);
-  const queryTenant = queryParams.get(QueryParams.TENANT);
+  const queryParams = new URLSearchParams(window.location.search)
+  const queryItemId = queryParams.get(QueryParams.ITEM_ID)
+  const queryTenant = queryParams.get(QueryParams.TENANT)
 
   return useMutation({
     mutationKey: [
-      "evefrontier",
-      "sponsored-transaction",
+      'evefrontier',
+      'sponsored-transaction',
       ...(mutationKey ?? []),
     ],
     mutationFn: async (args): Promise<SponsoredTransactionOutput> => {
       // Resolve wallet at call time
       const connection =
-        typeof dAppKit.stores?.$connection?.get === "function"
+        typeof dAppKit.stores?.$connection?.get === 'function'
           ? (dAppKit.stores.$connection.get() as { wallet?: ResolvableWallet })
-          : null;
-      const walletFromStore = connection?.wallet;
-      const wallet = walletFromStore ?? null;
+          : null
+      const walletFromStore = connection?.wallet
+      const wallet = walletFromStore ?? null
 
       if (!wallet) {
-        throw new WalletNotConnectedError();
+        throw new WalletNotConnectedError()
       }
 
-      const signerAccount = args.account ?? currentAccount?.address;
+      const signerAccount = args.account ?? currentAccount?.address
       if (!signerAccount) {
-        throw new WalletNoAccountSelectedError();
+        throw new WalletNoAccountSelectedError()
       }
 
       if (!supportsSponsoredTransaction(wallet.features)) {
         throw new WalletSponsoredTransactionNotSupportedError(
           (wallet as ResolvableWallet).name,
-        );
+        )
       }
 
       const signSponsoredTransaction = getSponsoredTransactionFeature(
         wallet as unknown as Parameters<
           typeof getSponsoredTransactionFeature
         >[0],
-      );
+      )
       if (!signSponsoredTransaction) {
         throw new WalletSponsoredTransactionNotSupportedError(
           (wallet as ResolvableWallet).name,
-        );
+        )
       }
 
-      const tenant = (args.tenant ?? queryTenant ?? TenantId.UTOPIA).trim();
+      const tenant = (args.tenant ?? queryTenant ?? TenantId.UTOPIA).trim()
       if (!tenant) {
         throw new Error(
-          "Tenant could not be resolved; pass tenant or set the tenant query param",
-        );
+          'Tenant could not be resolved; pass tenant or set the tenant query param',
+        )
       }
 
-      const assemblyId = resolveAssemblyId(args.assembly.item_id, queryItemId);
+      const assemblyId = resolveAssemblyId(args.assembly.item_id, queryItemId)
 
       // If the txAction is UPDATE_METADATA, it goes through the standard assembly type
       const assemblyType = getAssemblyTypeApiString(
         args.txAction === SponsoredTransactionActions.UPDATE_METADATA
           ? Assemblies.Assembly
           : args.assembly.type,
-      );
+      )
 
       const payload: SponsoredTransactionInput = {
         txAction: args.txAction,
@@ -376,24 +376,24 @@ export function useSponsoredTransaction({
         assemblyType: assemblyType,
         tenant,
         ...(args.metadata ? { metadata: args.metadata } : {}),
-      };
+      }
 
-      log.info("Sponsored Transaction Payload:", payload);
+      log.info('Sponsored Transaction Payload:', payload)
 
-      let lastError: unknown;
-      const maxAttempts = DEFAULT_MAX_RETRIES + 1;
+      let lastError: unknown
+      const maxAttempts = DEFAULT_MAX_RETRIES + 1
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-          return await signSponsoredTransaction(payload);
+          return await signSponsoredTransaction(payload)
         } catch (e) {
-          lastError = e;
-          const canRetry = attempt < maxAttempts && isRetryableSponsorError(e);
-          if (!canRetry) throw e;
-          await delay(DEFAULT_RETRY_DELAY_MS);
+          lastError = e
+          const canRetry = attempt < maxAttempts && isRetryableSponsorError(e)
+          if (!canRetry) throw e
+          await delay(DEFAULT_RETRY_DELAY_MS)
         }
       }
-      throw lastError;
+      throw lastError
     },
     ...mutationOptions,
-  });
+  })
 }

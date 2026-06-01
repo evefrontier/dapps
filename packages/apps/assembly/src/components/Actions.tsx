@@ -10,14 +10,14 @@ import {
   useNotification,
   useSmartObject,
   useSponsoredTransaction,
-} from "@evefrontier/dapp-kit";
-import { EveButton } from "@eveworld/ui-components";
-import React from "react";
+} from '@evefrontier/dapp-kit'
+import { EveButton } from '@eveworld/ui-components'
+import React from 'react'
 
-import { bringOffline } from "../functions/bringOffline";
-import { bringOnline } from "../functions/bringOnline";
+import { bringOffline } from '../functions/bringOffline'
+import { bringOnline } from '../functions/bringOnline'
 
-const log = createLogger();
+const log = createLogger()
 
 /**
  * Handles actions for a smart storage unit, such as editing unit details, bringing online/offline, and accessing dApp link.
@@ -31,17 +31,17 @@ const Actions = React.memo(
     setIsEditing,
     isOnline,
   }: {
-    setIsEditing: (isEditing: boolean) => void;
-    isOnline: boolean;
+    setIsEditing: (isEditing: boolean) => void
+    isOnline: boolean
   }) => {
-    const { assembly, refetch } = useSmartObject();
-    const { currentAccount } = useConnection();
-    const { notify } = useNotification();
-    const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction();
+    const { assembly, refetch } = useSmartObject()
+    const { currentAccount } = useConnection()
+    const { notify } = useNotification()
+    const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction()
 
-    if (assembly === undefined || assembly === null) return <></>;
+    if (assembly === undefined || assembly === null) return <></>
 
-    const isEntityOwner: boolean = isOwner(assembly, currentAccount?.address);
+    const isEntityOwner: boolean = isOwner(assembly, currentAccount?.address)
 
     // If parent node is online, linked assembly can be brought online
     const canBringOnline: boolean = (() => {
@@ -51,39 +51,39 @@ const Actions = React.memo(
         switch (assembly.type) {
           case Assemblies.SmartStorageUnit: {
             const storageAssembly =
-              assembly as AssemblyType<Assemblies.SmartStorageUnit>;
-            return storageAssembly.isParentNodeOnline ?? false;
+              assembly as AssemblyType<Assemblies.SmartStorageUnit>
+            return storageAssembly.isParentNodeOnline ?? false
           }
           case Assemblies.SmartTurret: {
             const turretAssembly =
-              assembly as AssemblyType<Assemblies.SmartTurret>;
-            return turretAssembly.isParentNodeOnline ?? false;
+              assembly as AssemblyType<Assemblies.SmartTurret>
+            return turretAssembly.isParentNodeOnline ?? false
           }
           case Assemblies.SmartGate: {
-            const gateAssembly = assembly as AssemblyType<Assemblies.SmartGate>;
-            return gateAssembly.isParentNodeOnline ?? false;
+            const gateAssembly = assembly as AssemblyType<Assemblies.SmartGate>
+            return gateAssembly.isParentNodeOnline ?? false
           }
           case Assemblies.NetworkNode: {
             const networkAssembly =
-              assembly as AssemblyType<Assemblies.NetworkNode>;
+              assembly as AssemblyType<Assemblies.NetworkNode>
             // If already online, can always bring offline
             // If offline, can only bring online if there is fuel
             return (
               networkAssembly.state === State.ONLINE ||
               Number(networkAssembly.networkNode.fuel.quantity) > 0
-            );
+            )
           }
           case Assemblies.Assembly: {
-            const baseAssembly = assembly as AssemblyType<Assemblies.Assembly>;
-            return baseAssembly.isParentNodeOnline ?? false;
+            const baseAssembly = assembly as AssemblyType<Assemblies.Assembly>
+            return baseAssembly.isParentNodeOnline ?? false
           }
           default:
-            return true;
+            return true
         }
-      };
+      }
 
-      return getParentNodeStatus(assembly) ?? false;
-    })();
+      return getParentNodeStatus(assembly) ?? false
+    })()
 
     // If smart assembly is online, user is allowed to bring offline
     const handleAction = async (action: ActionTypes) => {
@@ -92,48 +92,48 @@ const Actions = React.memo(
           const result = await bringOnline({
             assembly,
             sendSponsoredTransaction,
-          });
+          })
 
-          log.info("bringOnline result", result);
+          log.info('bringOnline result', result)
           if (result?.digest) {
             notify({
               type: Severity.Success,
               txHash: result.digest,
               onSuccess: async () => {
-                await refetch();
+                await refetch()
               },
-            });
+            })
           }
         } else {
           const result = await bringOffline({
             assembly,
             sendSponsoredTransaction,
-          });
+          })
 
-          log.info("bringOffline result", result);
+          log.info('bringOffline result', result)
           if (result?.digest) {
             notify({
               type: Severity.Success,
               txHash: result.digest,
               onSuccess: async () => {
-                await refetch();
+                await refetch()
               },
-            });
+            })
           }
         }
       } catch (error) {
         notify({
           type: Severity.Error,
           message: `Failed to bring ${action}: ${
-            error instanceof Error ? error.message : "Unknown error"
+            error instanceof Error ? error.message : 'Unknown error'
           }`,
-        });
+        })
       }
-    };
+    }
 
     const handleEditAction = () => {
-      setIsEditing(true);
-    };
+      setIsEditing(true)
+    }
 
     return (
       <div className="grid grid-cols-2 gap-2" id="SmartObject-Actions">
@@ -166,15 +166,15 @@ const Actions = React.memo(
             disabled={!isEntityOwner}
             id="edit-unit"
             className={`${
-              assembly.type === Assemblies.NetworkNode ? "col-span-2" : ""
+              assembly.type === Assemblies.NetworkNode ? 'col-span-2' : ''
             }`}
           >
             Edit assembly
           </EveButton>
         </>
       </div>
-    );
+    )
   },
-);
+)
 
-export default React.memo(Actions);
+export default React.memo(Actions)

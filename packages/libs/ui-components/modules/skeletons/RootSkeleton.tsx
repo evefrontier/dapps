@@ -1,5 +1,5 @@
-import { Skeleton } from "@mui/material";
-import React, { useState } from "react";
+import { Skeleton } from '@mui/material'
+import React, { useState } from 'react'
 
 const RootSkeleton = React.memo((): React.JSX.Element => {
   return (
@@ -11,7 +11,7 @@ const RootSkeleton = React.memo((): React.JSX.Element => {
       <Skeleton variant="rectangular" height={34} />
       <Skeleton variant="rectangular" height={342} />
     </div>
-  );
-});
+  )
+})
 
-export default RootSkeleton;
+export default RootSkeleton

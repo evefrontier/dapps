@@ -1,4 +1,4 @@
-const MS_PER_HOUR = 3600000;
+const MS_PER_HOUR = 3600000
 
 /**
  * Result of adjusting raw burn time for efficiency.
@@ -6,8 +6,8 @@ const MS_PER_HOUR = 3600000;
  * - unitsPerHour: how many units are burned per hour at this rate
  */
 export interface AdjustedBurnRate {
-  burnTimePerUnitMs: number;
-  unitsPerHour: number;
+  burnTimePerUnitMs: number
+  unitsPerHour: number
 }
 
 /**
@@ -25,22 +25,22 @@ export function getAdjustedBurnRate(
   efficiencyPercent: number | null | undefined,
 ): AdjustedBurnRate {
   const raw =
-    Number.isFinite(rawBurnTimeMs) && rawBurnTimeMs >= 0 ? rawBurnTimeMs : 0;
+    Number.isFinite(rawBurnTimeMs) && rawBurnTimeMs >= 0 ? rawBurnTimeMs : 0
 
   const validEfficiency =
     efficiencyPercent != null &&
     Number.isFinite(efficiencyPercent) &&
     efficiencyPercent > 0 &&
-    efficiencyPercent <= 100;
+    efficiencyPercent <= 100
 
   const burnTimePerUnitMs = validEfficiency
     ? raw * (efficiencyPercent / 100)
-    : raw;
+    : raw
 
   const unitsPerHour =
     burnTimePerUnitMs > 0 && Number.isFinite(burnTimePerUnitMs)
       ? MS_PER_HOUR / burnTimePerUnitMs
-      : 0;
+      : 0
 
-  return { burnTimePerUnitMs, unitsPerHour };
+  return { burnTimePerUnitMs, unitsPerHour }
 }

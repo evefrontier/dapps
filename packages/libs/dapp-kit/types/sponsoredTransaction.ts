@@ -1,7 +1,7 @@
 import type {
   SponsoredTransactionArgs,
   SponsoredTransactionOutput,
-} from "../wallet";
+} from '../wallet'
 
 /**
  * Available sponsored transaction actions
@@ -11,16 +11,16 @@ import type {
  *
  * TODO: This typedoc is not working when re-exported from wallet-core
  */
-export { SponsoredTransactionActions } from "@evefrontier/wallet-core/definitions";
+export { SponsoredTransactionActions } from '@evefrontier/wallet-core/definitions'
 
 /** @category Types */
 export type SendSponsoredTransactionFn = (
   input: SponsoredTransactionArgs,
   options?: {
-    onSuccess?: (data: SponsoredTransactionOutput) => void;
-    onError?: (error: Error) => void;
+    onSuccess?: (data: SponsoredTransactionOutput) => void
+    onError?: (error: Error) => void
   },
-) => Promise<SponsoredTransactionOutput>;
+) => Promise<SponsoredTransactionOutput>
 
 // ============================================================================
 // Feature Identifiers
@@ -37,7 +37,7 @@ export type SendSponsoredTransactionFn = (
 export {
   EVEFRONTIER_SPONSORED_TRANSACTION,
   type SponsoredTransactionMetadata,
-} from "@evefrontier/wallet-core/wallet-standard-extensions";
+} from '@evefrontier/wallet-core/wallet-standard-extensions'
 
 // ============================================================================
 // Sponsored Transaction Types
@@ -55,4 +55,4 @@ export {
 export {
   ASSEMBLY_TYPE_API_STRING,
   type SponsoredTransactionAssemblyType,
-} from "@evefrontier/wallet-core/definitions";
+} from '@evefrontier/wallet-core/definitions'

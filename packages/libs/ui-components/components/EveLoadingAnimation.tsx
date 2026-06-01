@@ -1,10 +1,10 @@
-import React, { ReactNode } from "react";
-import "../styles-ui.css";
+import React, { ReactNode } from 'react'
+import '../styles-ui.css'
 
 interface StyleProps {
-  left: string;
-  rightPosition: string;
-  right: string;
+  left: string
+  rightPosition: string
+  right: string
 }
 
 const EveLoadingAnimation = React.memo(
@@ -12,11 +12,11 @@ const EveLoadingAnimation = React.memo(
     position,
     children,
   }: {
-    position: "horizontal" | "vertical" | "diagonal";
-    children: ReactNode;
+    position: 'horizontal' | 'vertical' | 'diagonal'
+    children: ReactNode
   }) => {
     const renderBoxes = () => {
-      const boxes: React.JSX.Element[] = [];
+      const boxes: React.JSX.Element[] = []
       for (let i = 0; i < 6; i++) {
         boxes.push(
           <div
@@ -24,33 +24,33 @@ const EveLoadingAnimation = React.memo(
             className="h-2 w-2 animated-box"
             style={{ animationDelay: `${0.5 * i}s` }}
           />,
-        );
+        )
       }
-      return boxes;
-    };
+      return boxes
+    }
 
-    let styleProps: StyleProps;
+    let styleProps: StyleProps
     switch (position) {
-      case "horizontal":
+      case 'horizontal':
         styleProps = {
-          left: "",
-          rightPosition: "top-0",
-          right: "flex-row-reverse",
-        };
-        break;
-      case "vertical":
+          left: '',
+          rightPosition: 'top-0',
+          right: 'flex-row-reverse',
+        }
+        break
+      case 'vertical':
         styleProps = {
-          left: "flex-col-reverse",
-          rightPosition: "",
-          right: "flex-col-reverse",
-        };
-        break;
-      case "diagonal":
+          left: 'flex-col-reverse',
+          rightPosition: '',
+          right: 'flex-col-reverse',
+        }
+        break
+      case 'diagonal':
         styleProps = {
-          left: "flex-col-reverse",
-          rightPosition: "top-0 self-reverse",
-          right: "flex-col",
-        };
+          left: 'flex-col-reverse',
+          rightPosition: 'top-0 self-reverse',
+          right: 'flex-col',
+        }
     }
 
     return (
@@ -67,8 +67,8 @@ const EveLoadingAnimation = React.memo(
           </div>
         </div>
       </div>
-    );
+    )
   },
-);
+)
 
-export default React.memo(EveLoadingAnimation);
+export default React.memo(EveLoadingAnimation)

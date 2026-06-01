@@ -7,11 +7,11 @@ import {
   useNotification,
   useSmartObject,
   useSponsoredTransaction,
-} from "@evefrontier/dapp-kit";
-import { Divider, EveButtonDuo, EveInput } from "@eveworld/ui-components";
-import React, { RefObject, useRef, useState } from "react";
+} from '@evefrontier/dapp-kit'
+import { Divider, EveButtonDuo, EveInput } from '@eveworld/ui-components'
+import React, { RefObject, useRef, useState } from 'react'
 
-const log = createLogger();
+const log = createLogger()
 
 /**
  * EditUnit component for handling editing of Smart Assembly properties.
@@ -35,33 +35,33 @@ const log = createLogger();
  * - Executes a transaction to set Smart Assembly metadata.
  */
 const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
-  const [isEdited, setIsEdited] = useState<boolean>(false);
+  const [isEdited, setIsEdited] = useState<boolean>(false)
 
-  const { currentAccount } = useConnection();
-  const { notify } = useNotification();
-  const { assembly, refetch } = useSmartObject();
+  const { currentAccount } = useConnection()
+  const { notify } = useNotification()
+  const { assembly, refetch } = useSmartObject()
 
-  const urlValueRef = useRef(assembly?.dappURL ?? "");
-  const nameValueRef = useRef(assembly?.name ?? "");
-  const descriptionValueRef = useRef(assembly?.description ?? "");
+  const urlValueRef = useRef(assembly?.dappURL ?? '')
+  const nameValueRef = useRef(assembly?.name ?? '')
+  const descriptionValueRef = useRef(assembly?.description ?? '')
 
-  const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction();
+  const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction()
 
   const handleEdit = (
     refString: RefObject<string | number>,
     eventString: string | number | null,
   ): void => {
-    if (eventString == null || !assembly) return;
+    if (eventString == null || !assembly) return
 
-    setIsEdited(true);
-    refString.current = eventString;
-  };
+    setIsEdited(true)
+    refString.current = eventString
+  }
 
   /** Async function that calls ´setEntityRecordOffchain´,
    * setting Smart Assembly URL, name, description in one transaction.
    **/
   const handleSave = async () => {
-    if (!assembly) return;
+    if (!assembly) return
     try {
       const result = await sendSponsoredTransaction({
         txAction: SponsoredTransactionActions.UPDATE_METADATA,
@@ -71,26 +71,26 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
           description: descriptionValueRef.current as string,
           url: urlValueRef.current as string,
         },
-      });
+      })
 
-      log.info("update metadata result", result);
+      log.info('update metadata result', result)
       if (result?.digest) {
         notify({
           type: Severity.Success,
           txHash: result.digest,
           onSuccess: async () => {
-            await refetch();
-            handleClose();
+            await refetch()
+            handleClose()
           },
-        });
+        })
       }
     } catch (error) {
       notify({
         type: Severity.Error,
-        message: `Failed to edit: ${error instanceof Error ? error.message : "Unknown error"}`,
-      });
+        message: `Failed to edit: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      })
     }
-  };
+  }
 
   return (
     <div className="!p-4 grid gap-2">
@@ -108,7 +108,7 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
         maxChars={100}
       />
 
-      {assembly?.type.includes("Smart") && (
+      {assembly?.type.includes('Smart') && (
         <>
           <Divider />
           <div className="mb-4">
@@ -128,7 +128,7 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
       <div className="mb-2" />
       <EveButtonDuo
         onCancel={() => {
-          handleClose();
+          handleClose()
         }}
         className=""
         onClick={() => handleSave()}
@@ -138,7 +138,7 @@ const EditUnit = React.memo(({ handleClose }: { handleClose: () => void }) => {
         Save
       </EveButtonDuo>
     </div>
-  );
-});
+  )
+})
 
-export default React.memo(EditUnit);
+export default React.memo(EditUnit)

@@ -1,22 +1,22 @@
-import type { CharacterInfo, RawCharacterData } from "../graphql/types";
+import type { CharacterInfo, RawCharacterData } from '../graphql/types'
 import type {
   CharacterJsonKey,
   CharacterJsonMetadata,
   LooseCharacterJson,
-} from "../types/character";
+} from '../types/character'
 
 function isPlainCharacterJson(value: unknown): value is LooseCharacterJson {
-  return value != null && typeof value === "object" && !Array.isArray(value);
+  return value != null && typeof value === 'object' && !Array.isArray(value)
 }
 
 function parseOptionalInt(value: unknown): number {
-  if (value == null) return 0;
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string") {
-    const n = parseInt(value, 10);
-    return Number.isNaN(n) ? 0 : n;
+  if (value == null) return 0
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string') {
+    const n = parseInt(value, 10)
+    return Number.isNaN(n) ? 0 : n
   }
-  return 0;
+  return 0
 }
 
 /**
@@ -29,30 +29,30 @@ function parseOptionalInt(value: unknown): number {
  */
 export function parseCharacterFromJson(json: unknown): CharacterInfo | null {
   if (!isPlainCharacterJson(json)) {
-    return null;
+    return null
   }
 
-  const metadataValue = json.metadata;
+  const metadataValue = json.metadata
   const metadata =
     metadataValue != null &&
-    typeof metadataValue === "object" &&
+    typeof metadataValue === 'object' &&
     !Array.isArray(metadataValue)
       ? (metadataValue as CharacterJsonMetadata)
-      : undefined;
+      : undefined
 
-  const keyValue = json.key;
+  const keyValue = json.key
   const key =
-    keyValue != null && typeof keyValue === "object" && !Array.isArray(keyValue)
+    keyValue != null && typeof keyValue === 'object' && !Array.isArray(keyValue)
       ? (keyValue as CharacterJsonKey)
-      : undefined;
+      : undefined
 
   return {
-    id: typeof json.id === "string" ? json.id : "",
+    id: typeof json.id === 'string' ? json.id : '',
     address:
-      typeof json.character_address === "string" ? json.character_address : "",
-    name: typeof metadata?.name === "string" ? metadata.name : "",
+      typeof json.character_address === 'string' ? json.character_address : '',
+    name: typeof metadata?.name === 'string' ? metadata.name : '',
     tribeId: parseOptionalInt(json.tribe_id),
     characterId: parseOptionalInt(key?.item_id),
     _raw: json as RawCharacterData,
-  };
+  }
 }

@@ -1,5 +1,5 @@
-import { type DatahubGameInfo, QueryParams } from "../types";
-import { DATAHUB_BY_TENANT, DEFAULT_TENANT } from "./constants";
+import { type DatahubGameInfo, QueryParams } from '../types'
+import { DATAHUB_BY_TENANT, DEFAULT_TENANT } from './constants'
 
 /**
  * Resolves tenant from a URL search string (e.g. window.location.search).
@@ -9,8 +9,8 @@ import { DATAHUB_BY_TENANT, DEFAULT_TENANT } from "./constants";
 export function resolveTenantFromSearch(search: string): string {
   const tenant =
     new URLSearchParams(search).get(QueryParams.TENANT)?.trim() ||
-    DEFAULT_TENANT;
-  return tenant;
+    DEFAULT_TENANT
+  return tenant
 }
 
 /**
@@ -21,7 +21,7 @@ export function resolveDatahubHost(tenant: string): string {
   return (
     DATAHUB_BY_TENANT[tenant as keyof typeof DATAHUB_BY_TENANT] ??
     DATAHUB_BY_TENANT[DEFAULT_TENANT]
-  );
+  )
 }
 
 /**
@@ -55,11 +55,11 @@ export function resolveDatahubHost(tenant: string): string {
 export async function getDatahubGameInfo(
   typeId: number,
 ): Promise<DatahubGameInfo> {
-  const tenant = resolveTenantFromSearch(window.location.search);
-  const host = resolveDatahubHost(tenant);
+  const tenant = resolveTenantFromSearch(window.location.search)
+  const host = resolveDatahubHost(tenant)
 
-  const response = await fetch(`https://${host}/v2/types/${typeId}`);
-  const data = await response.json();
+  const response = await fetch(`https://${host}/v2/types/${typeId}`)
+  const data = await response.json()
 
-  return data;
+  return data
 }

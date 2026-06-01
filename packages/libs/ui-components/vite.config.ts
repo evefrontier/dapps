@@ -1,16 +1,16 @@
-import react from "@vitejs/plugin-react-swc";
-import { defineConfig } from "vite";
-import svgr from "vite-plugin-svgr";
+import react from '@vitejs/plugin-react-swc'
+import { defineConfig } from 'vite'
+import svgr from 'vite-plugin-svgr'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     svgr({
-      include: "**/*.svg",
+      include: '**/*.svg',
       svgrOptions: {
-        exportType: "named",
-        namedExport: "ReactComponent",
+        exportType: 'named',
+        namedExport: 'ReactComponent',
       },
     }),
   ],
@@ -21,7 +21,7 @@ export default defineConfig({
     },
   },
   build: {
-    target: "es2022",
+    target: 'es2022',
     minify: true,
     sourcemap: true,
     rollupOptions: {
@@ -30,13 +30,13 @@ export default defineConfig({
           log.cause &&
           log.cause.message === `Can't resolve original location of error.`
         ) {
-          return;
+          return
         }
-        handler(level, log);
+        handler(level, log)
       },
     },
   },
   assetsInclude: [],
-  base: "./",
+  base: './',
   resolve: {},
-});
+})
