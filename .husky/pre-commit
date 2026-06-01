@@ -3,4 +3,5 @@ set -e
 ROOT=$(git rev-parse --show-toplevel)
 cd "$ROOT"
 
+export PATH="$HOME/.bun/bin:$PATH"
 bunx nx run-many -t lint --verbose --nxBail=true

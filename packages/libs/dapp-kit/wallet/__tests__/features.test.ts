@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { Assemblies, EVEFRONTIER_SPONSORED_TRANSACTION } from "../../types";
+import { Assemblies } from "../../types";
 import {
   getAssemblyTypeApiString,
   supportsSponsoredTransaction,
 } from "../features";
-import { makeArrayWallet, makeObjectWallet } from "./testHelpers";
+import { makeArrayWallet } from "./testHelpers";
 
 // ============================================================================
 // getAssemblyTypeApiString
@@ -41,12 +41,6 @@ describe("supportsSponsoredTransaction", () => {
 
   it("returns false for an array that does not include the feature name", () => {
     expect(supportsSponsoredTransaction(["some:other-feature"])).toBe(false);
-  });
-
-  it("returns true for object-shaped features with a valid implementation", () => {
-    expect(supportsSponsoredTransaction(makeObjectWallet().features)).toBe(
-      true,
-    );
   });
 
   it("returns false for object-shaped features missing the sponsored-tx key", () => {

@@ -1,4 +1,5 @@
-import { getWallets } from "@mysten/wallet-standard";
+import type { UiWalletHandle } from "@wallet-standard/ui";
+import { getWalletFeature } from "@wallet-standard/ui";
 import { EVEFRONTIER_SPONSORED_TRANSACTION } from "../types";
 import {
   type EveFrontierSponsoredTransactionFeature,
@@ -82,22 +83,13 @@ export function getSponsoredTransactionFeature(wallet: {
     return undefined;
   }
 
-  // wallet.features is array-shaped (UiWallet); find the corresponding raw wallet
-  // in the Wallet Standard registry by name to access the feature implementation.
-  const rawWallets = getWallets().get();
-  const rawWallet = rawWallets.find(
-    (rw) =>
-      rw.name === wallet.name &&
-      (wallet.version == null || rw.version === wallet.version),
-  );
-
-  if (rawWallet == null) {
+  try {
+    const feature = getWalletFeature(
+      wallet as unknown as UiWalletHandle,
+      EVEFRONTIER_SPONSORED_TRANSACTION,
+    ) as EveFrontierSponsoredTransactionFeature[typeof EVEFRONTIER_SPONSORED_TRANSACTION];
+    return feature.signSponsoredTransaction;
+  } catch {
     return undefined;
   }
-
-  const feature = (rawWallet.features as Record<string, unknown>)[
-    EVEFRONTIER_SPONSORED_TRANSACTION
-  ] as EveFrontierSponsoredTransactionFeature[typeof EVEFRONTIER_SPONSORED_TRANSACTION];
-
-  return feature.signSponsoredTransaction;
 }

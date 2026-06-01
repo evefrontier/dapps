@@ -3,20 +3,14 @@ import {
   getSponsoredTransactionFeature,
   walletSupportsSponsoredTransaction,
 } from "../utils";
-import {
-  makeArrayWallet,
-  makeObjectWallet,
-  makePlainWallet,
-  SIGN_FN,
-} from "./testHelpers";
+import { makeArrayWallet, makePlainWallet, SIGN_FN } from "./testHelpers";
 
-vi.mock("@mysten/wallet-standard", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@mysten/wallet-standard")>();
-  return { ...actual, getWallets: vi.fn() };
+vi.mock("@wallet-standard/ui", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@wallet-standard/ui")>();
+  return { ...actual, getWalletFeature: vi.fn() };
 });
 
-const { getWallets } = await import("@mysten/wallet-standard");
+const { getWalletFeature } = await import("@wallet-standard/ui");
 
 // ============================================================================
 // walletSupportsSponsoredTransaction
@@ -40,14 +34,11 @@ describe("getSponsoredTransactionFeature", () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("returns the signSponsoredTransaction fn from an array-features wallet", () => {
-    vi.mocked(getWallets).mockReturnValue({
-      get: () => [makeObjectWallet(SIGN_FN)],
-      on: vi.fn() as never,
-      register: vi.fn() as never,
+    vi.mocked(getWalletFeature).mockReturnValue({
+      version: "1.0.0",
+      signSponsoredTransaction: SIGN_FN,
     });
-    expect(getSponsoredTransactionFeature(makeArrayWallet(SIGN_FN))).toBe(
-      SIGN_FN,
-    );
+    expect(getSponsoredTransactionFeature(makeArrayWallet())).toBe(SIGN_FN);
   });
 
   it("returns undefined for a wallet with no sponsored-tx feature", () => {
