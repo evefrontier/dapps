@@ -1,4 +1,4 @@
-import { Assemblies, AssemblyType } from '@evefrontier/dapp-kit'
+import { Assemblies, type AssemblyType } from '@evefrontier/dapp-kit'
 import React from 'react'
 import { Hamburger } from '../assets'
 import EveRadioGroup from '../components/Radio'

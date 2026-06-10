@@ -1,9 +1,6 @@
 import React, { ReactNode } from 'react'
 import '../styles-ui.css'
-import {
-  CharacterInfo,
-  DetailedSmartCharacterResponse,
-} from '@evefrontier/dapp-kit'
+import { CharacterInfo } from '@evefrontier/dapp-kit'
 import Header from './Header'
 
 interface EveLayoutProps {
