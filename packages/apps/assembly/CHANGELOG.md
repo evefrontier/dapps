@@ -1,5 +1,11 @@
 # @eveworld/assembly
 
+## 0.3.1
+
+### Patch Changes
+
+- use newest dapp-kit
+
 ## 0.3.0
 
 ### Minor Changes
