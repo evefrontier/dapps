@@ -1,12 +1,12 @@
-import React from "react";
-import { Alert, Snackbar } from "@mui/material";
-import { Severity, getTxUrl } from "@evefrontier/dapp-kit";
-import { Close } from "../assets";
+import { getTxUrl, Severity } from '@evefrontier/dapp-kit'
+import { Alert, Snackbar } from '@mui/material'
+import { SUI_TESTNET_CHAIN } from '@mysten/wallet-standard'
+import React from 'react'
+import { Close } from '../assets'
 
-import { SUI_TESTNET_CHAIN } from "@mysten/wallet-standard";
+import '../styles-ui.css'
+import EveContainer from './EveContainer'
 
-import "../styles-ui.css";
-import EveContainer from "./EveContainer";
 /**
  * React component for displaying styled alerts with different severity levels.
  *
@@ -25,41 +25,41 @@ const EveAlert = React.memo(
     message,
     txHash,
   }: {
-    severity: Severity;
-    isOpen: boolean;
-    handleClose: () => void;
-    message: string;
-    txHash?: string;
+    severity: Severity
+    isOpen: boolean
+    handleClose: () => void
+    message: string
+    txHash?: string
   }): React.JSX.Element => {
     const severityIcon = {
       error: {
-        color: "neutral",
-        bgcolor: "alert",
+        color: 'neutral',
+        bgcolor: 'alert',
       },
       warning: {
-        color: "neutral",
-        bgcolor: "alert",
+        color: 'neutral',
+        bgcolor: 'alert',
       },
       info: {
-        color: "crude",
-        bgcolor: "neutral",
+        color: 'crude',
+        bgcolor: 'neutral',
       },
       success: {
-        color: "crude",
-        bgcolor: "neutral",
+        color: 'crude',
+        bgcolor: 'neutral',
       },
-    };
+    }
 
     const isSevere =
-      severity === Severity.Error || severity === Severity.Warning;
+      severity === Severity.Error || severity === Severity.Warning
 
-    const bgColor = "bg-" + severityIcon[`${severity}`].bgcolor;
-    const textColor = "text-" + severityIcon[`${severity}`].color;
+    const bgColor = 'bg-' + severityIcon[`${severity}`].bgcolor
+    const textColor = 'text-' + severityIcon[`${severity}`].color
 
     return (
       <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        sx={{ top: "4.5rem !important" }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ top: '4.5rem !important' }}
         open={isOpen}
         onClose={() => (isSevere ? null : handleClose())}
         id="eve-alert"
@@ -67,22 +67,22 @@ const EveAlert = React.memo(
       >
         <div>
           <EveContainer
-            variant={severity === Severity.Error ? "warning" : undefined}
+            variant={severity === Severity.Error ? 'warning' : undefined}
             className="bg-crude"
           >
             <Alert
               severity={severity}
               icon={false}
               sx={{
-                width: "100%",
-                maxWidth: "80vw",
+                width: '100%',
+                maxWidth: '80vw',
                 color: severityIcon[`${severity}`].color,
                 boxShadow: 0,
                 borderRadius: 0,
               }}
               onClick={() => {
                 if (severity === Severity.Success && txHash) {
-                  window.open(getTxUrl(SUI_TESTNET_CHAIN, txHash));
+                  window.open(getTxUrl(SUI_TESTNET_CHAIN, txHash))
                 }
               }}
             >
@@ -107,7 +107,7 @@ const EveAlert = React.memo(
                   className="p-1 flex-col justify-start items-start flex"
                   onClick={() => {
                     if (severity === Severity.Success && txHash) {
-                      window.open(getTxUrl(SUI_TESTNET_CHAIN, txHash));
+                      window.open(getTxUrl(SUI_TESTNET_CHAIN, txHash))
                     }
                   }}
                   id="message-box-container"
@@ -131,8 +131,8 @@ const EveAlert = React.memo(
           </EveContainer>
         </div>
       </Snackbar>
-    );
+    )
   },
-);
+)
 
-export default React.memo(EveAlert);
+export default React.memo(EveAlert)

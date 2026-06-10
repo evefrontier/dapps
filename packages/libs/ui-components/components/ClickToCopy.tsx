@@ -1,7 +1,6 @@
-import React, { CSSProperties, useState } from "react";
-
-import { CopyIcon } from "../assets";
-import { clickToCopy } from "@evefrontier/dapp-kit";
+import { clickToCopy } from '@evefrontier/dapp-kit'
+import React, { CSSProperties, useState } from 'react'
+import { CopyIcon } from '../assets'
 
 /**
  * Renders a Copy icon that copies text to clipboard on click.
@@ -16,28 +15,28 @@ const ClickToCopy = React.memo(
     className,
     style,
   }: {
-    text: string | undefined;
-    className?: string;
-    style?: CSSProperties;
+    text: string | undefined
+    className?: string
+    style?: CSSProperties
   }) => {
-    const [clicked, setClicked] = useState(false);
+    const [clicked, setClicked] = useState(false)
 
     const handleClick = () => {
-      setClicked(true);
-      clickToCopy(text ?? "");
+      setClicked(true)
+      clickToCopy(text ?? '')
       setTimeout(() => {
-        setClicked(false);
-      }, 3000);
-    };
+        setClicked(false)
+      }, 3000)
+    }
 
     return (
       <CopyIcon
-        className={`Eve-Copy ml-2 cursor-pointer ${className} ${clicked ? "clicked" : ""}`}
+        className={`Eve-Copy ml-2 cursor-pointer ${className} ${clicked ? 'clicked' : ''}`}
         style={style}
         onClick={() => handleClick()}
       />
-    );
+    )
   },
-);
+)
 
-export default React.memo(ClickToCopy);
+export default React.memo(ClickToCopy)

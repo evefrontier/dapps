@@ -1,24 +1,23 @@
 import {
-  useSmartObject,
   Assemblies,
   AssemblyType,
   getDappUrl,
-} from "@evefrontier/dapp-kit";
-import { useCurrentAccount } from "@mysten/dapp-kit-react";
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
-
+  useSmartObject,
+} from '@evefrontier/dapp-kit'
 import {
-  InventoryView,
-  GateView,
-  EveContainer,
   EveButton,
-  TurretView,
+  EveContainer,
+  GateView,
   Graph,
-} from "@eveworld/ui-components";
+  InventoryView,
+  TurretView,
+} from '@eveworld/ui-components'
+import { useCurrentAccount } from '@mysten/dapp-kit-react'
+import React, { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 interface DappIframeProps {
-  assembly: AssemblyType<Assemblies>;
+  assembly: AssemblyType<Assemblies>
 }
 
 const DappIframe: React.FC<DappIframeProps> = ({ assembly }) => (
@@ -34,20 +33,20 @@ const DappIframe: React.FC<DappIframeProps> = ({ assembly }) => (
     <EveButton
       variant="secondary"
       onClick={() => {
-        window.open(getDappUrl(assembly), "_blank");
+        window.open(getDappUrl(assembly), '_blank')
       }}
     >
       Open in new tab
     </EveButton>
   </div>
-);
+)
 
 interface ModuleRendererProps {
-  assembly: AssemblyType<Assemblies>;
-  currentAddress: `0x${string}`;
-  selectedSmartGate: string | undefined;
-  setSelectedSmartGate: (id: string) => void;
-  showContainer: boolean;
+  assembly: AssemblyType<Assemblies>
+  currentAddress: `0x${string}`
+  selectedSmartGate: string | undefined
+  setSelectedSmartGate: (id: string) => void
+  showContainer: boolean
 }
 
 const ModuleRenderer: React.FC<ModuleRendererProps> = ({
@@ -55,31 +54,31 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
   currentAddress,
   showContainer = true,
 }) => {
-  const isNetworkNode = assembly.type === Assemblies.NetworkNode;
-  const hasDappUrl = assembly.dappURL && !isNetworkNode;
+  const isNetworkNode = assembly.type === Assemblies.NetworkNode
+  const hasDappUrl = assembly.dappURL && !isNetworkNode
 
   const getContainerVariant = () => {
-    if (hasDappUrl) return "warning" as const;
-    return "default" as const;
-  };
+    if (hasDappUrl) return 'warning' as const
+    return 'default' as const
+  }
 
   const getContainerProps = () => ({
-    className: "flex flex-col min-h-full",
-    id: "Eve-Assembly-Module",
+    className: 'flex flex-col min-h-full',
+    id: 'Eve-Assembly-Module',
     variant: getContainerVariant(),
     showBorder: showContainer,
     showHeader: showContainer,
     ...(hasDappUrl && {
-      statusTextTop: "BEHAVIOR",
+      statusTextTop: 'BEHAVIOR',
       statusTextBottom:
-        "ATT. Pilot, you are interacting with an interface outside of Frontier.",
+        'ATT. Pilot, you are interacting with an interface outside of Frontier.',
     }),
-  });
+  })
 
   const renderModule = () => {
     const result = (() => {
       switch (assembly.type) {
-        case "SmartStorageUnit":
+        case 'SmartStorageUnit':
           return {
             component: (
               <InventoryView
@@ -87,9 +86,9 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
                 currentAddress={currentAddress}
               />
             ),
-            headerText: "STORAGE",
-          };
-        case "SmartGate":
+            headerText: 'STORAGE',
+          }
+        case 'SmartGate':
           return {
             component: (
               <GateView
@@ -97,8 +96,8 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
                 viewerAddress={currentAddress}
               />
             ),
-            headerText: "GATE",
-          };
+            headerText: 'GATE',
+          }
         case Assemblies.SmartTurret:
           return {
             component: (
@@ -106,8 +105,8 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
                 assembly={assembly as AssemblyType<Assemblies.SmartTurret>}
               />
             ),
-            headerText: "TURRET",
-          };
+            headerText: 'TURRET',
+          }
         case Assemblies.NetworkNode:
           return {
             component: (
@@ -117,45 +116,37 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
                 assembly={assembly as AssemblyType<Assemblies.NetworkNode>}
               />
             ),
-            headerText: "GENERATOR",
-          };
+            headerText: 'GENERATOR',
+          }
         default:
           return {
             component: <></>,
-            headerText: "",
-          };
+            headerText: '',
+          }
       }
-    })();
+    })()
 
-    return result;
-  };
+    return result
+  }
 
-  const { component, headerText } = renderModule();
+  const { component, headerText } = renderModule()
   return (
     <EveContainer {...getContainerProps()} headerText={headerText}>
       {hasDappUrl ? <DappIframe assembly={assembly} /> : component}
     </EveContainer>
-  );
-};
+  )
+}
 
 const Behaviour = React.memo((): React.JSX.Element => {
   const [selectedSmartGate, setSelectedSmartGate] = useState<
     string | undefined
-  >(undefined);
-  const { assembly } = useSmartObject();
-  const currentAccount = useCurrentAccount();
-  const showContainer = !useLocation().pathname.includes("client");
+  >(undefined)
+  const { assembly } = useSmartObject()
+  const currentAccount = useCurrentAccount()
+  const showContainer = !useLocation().pathname.includes('client')
 
   if (!assembly || !currentAccount) {
-    return <div className="Eve-Module" />;
-  }
-
-  const isRefineryOrManufacturing =
-    assembly.type === Assemblies.Refinery ||
-    assembly.type === Assemblies.Manufacturing;
-
-  if (isRefineryOrManufacturing) {
-    return <div className="Eve-Module" />;
+    return <div className="Eve-Module" />
   }
 
   return (
@@ -166,7 +157,7 @@ const Behaviour = React.memo((): React.JSX.Element => {
       setSelectedSmartGate={setSelectedSmartGate}
       showContainer={showContainer}
     />
-  );
-});
+  )
+})
 
-export default Behaviour;
+export default Behaviour

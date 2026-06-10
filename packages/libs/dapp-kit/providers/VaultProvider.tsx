@@ -1,13 +1,14 @@
-import { ReactNode, useRef, useEffect, createContext } from "react";
 import {
   useCurrentAccount,
-  useWallets,
   useDAppKit,
-} from "@mysten/dapp-kit-react";
-import { createLogger, STORAGE_KEYS } from "../utils";
-import { SupportedWallets, VaultContextType } from "../types";
+  useWallets,
+} from '@mysten/dapp-kit-react'
+import type { ReactNode } from 'react'
+import { createContext, useEffect, useRef } from 'react'
+import { SupportedWallets, type VaultContextType } from '../types'
+import { createLogger, STORAGE_KEYS } from '../utils'
 
-const log = createLogger();
+const log = createLogger()
 
 /** @category Providers */
 export const VaultContext = createContext<VaultContextType>({
@@ -17,7 +18,7 @@ export const VaultContext = createContext<VaultContextType>({
   isConnected: false,
   handleConnect: () => {},
   handleDisconnect: () => {},
-});
+})
 
 /**
  * VaultProvider component provides a context for managing Sui wallet connections.
@@ -25,69 +26,69 @@ export const VaultContext = createContext<VaultContextType>({
  */
 // Module-level flag to prevent auto-connect from running multiple times
 // (persists across component remounts caused by wallet state changes)
-let globalAutoConnectAttempted = false;
+let globalAutoConnectAttempted = false
 
 /** @category Providers */
 const VaultProvider = ({ children }: { children: ReactNode }) => {
   // Sui dapp-kit hooks
-  const currentAccount = useCurrentAccount();
-  const dAppKit = useDAppKit();
-  const { connectWallet, disconnectWallet } = dAppKit;
-  const wallets = useWallets();
+  const currentAccount = useCurrentAccount()
+  const dAppKit = useDAppKit()
+  const { connectWallet, disconnectWallet } = dAppKit
+  const wallets = useWallets()
 
   // Find Eve Vault wallet if available
   const eveVaultWallet = wallets.find(
     (wallet) =>
       wallet.name.includes(SupportedWallets.EVE_FRONTIER_CLIENT_WALLET) ||
       wallet.name.includes(SupportedWallets.EVE_VAULT),
-  );
+  )
 
   // Track if auto-connect has been attempted to prevent infinite loops
-  const hasAttemptedAutoConnect = useRef(false);
+  const hasAttemptedAutoConnect = useRef(false)
 
   const handleConnect = () => {
-    const walletToConnect = eveVaultWallet || wallets[0];
+    const walletToConnect = eveVaultWallet || wallets[0]
 
     if (!walletToConnect) {
-      log.warn("No wallet available to connect");
-      return;
+      log.warn('No wallet available to connect')
+      return
     }
 
     try {
-      connectWallet({ wallet: walletToConnect });
-      log.info("[DappKit] Connected to wallet:", walletToConnect.name);
-      localStorage.setItem(STORAGE_KEYS.CONNECTED, "true");
+      connectWallet({ wallet: walletToConnect })
+      log.info('[DappKit] Connected to wallet:', walletToConnect.name)
+      localStorage.setItem(STORAGE_KEYS.CONNECTED, 'true')
     } catch (error) {
-      log.error("[DappKit] Failed to connect wallet:", error);
+      log.error('[DappKit] Failed to connect wallet:', error)
     }
-  };
+  }
 
   const handleDisconnect = () => {
-    disconnectWallet();
-    localStorage.removeItem(STORAGE_KEYS.CONNECTED);
-    log.info("[DappKit] Wallet disconnected");
-  };
+    disconnectWallet()
+    localStorage.removeItem(STORAGE_KEYS.CONNECTED)
+    log.info('[DappKit] Wallet disconnected')
+  }
 
   // Auto-reconnect if user was previously connected (only once)
   useEffect(() => {
     // Use both local ref AND global flag for maximum protection against re-render loops
-    if (hasAttemptedAutoConnect.current || globalAutoConnectAttempted) return;
+    if (hasAttemptedAutoConnect.current || globalAutoConnectAttempted) return
 
     const isPreviouslyConnected =
-      localStorage.getItem(STORAGE_KEYS.CONNECTED) === "true";
+      localStorage.getItem(STORAGE_KEYS.CONNECTED) === 'true'
 
     if (
-      typeof window !== "undefined" &&
+      typeof window !== 'undefined' &&
       isPreviouslyConnected &&
       eveVaultWallet
     ) {
-      hasAttemptedAutoConnect.current = true;
-      globalAutoConnectAttempted = true;
-      handleConnect();
+      hasAttemptedAutoConnect.current = true
+      globalAutoConnectAttempted = true
+      handleConnect()
     }
-  }, [eveVaultWallet, handleConnect]);
+  }, [eveVaultWallet, handleConnect])
 
-  const isConnected = !!currentAccount;
+  const isConnected = !!currentAccount
 
   return (
     <VaultContext.Provider
@@ -102,7 +103,7 @@ const VaultProvider = ({ children }: { children: ReactNode }) => {
     >
       {children}
     </VaultContext.Provider>
-  );
-};
+  )
+}
 
-export default VaultProvider;
+export default VaultProvider

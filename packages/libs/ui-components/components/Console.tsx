@@ -1,44 +1,43 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent } from "react";
-import "../styles-ui.css";
+import React, { ChangeEvent, KeyboardEvent, useEffect, useState } from 'react'
+import '../styles-ui.css'
 
 const Console: React.FC = () => {
-  const [logs, setLogs] = useState<string[]>([]);
-  const [input, setInput] = useState<string>("");
+  const [logs, setLogs] = useState<string[]>([])
+  const [input, setInput] = useState<string>('')
 
   const handleConsoleLog = (message: any) => {
     const formattedMessage =
-      typeof message === "object"
+      typeof message === 'object'
         ? JSON.stringify(message, null, 2)
-        : String(message);
-    setLogs((prevLogs) => [...prevLogs, formattedMessage]);
-  };
+        : String(message)
+    setLogs((prevLogs) => [...prevLogs, formattedMessage])
+  }
 
   const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value);
-  };
+    setInput(e.target.value)
+  }
 
   const handleExecute = () => {
     try {
-      const result = eval(input); // Be careful with eval in production code
-      handleConsoleLog(result);
+      const result = eval(input) // Be careful with eval in production code
+      handleConsoleLog(result)
     } catch (error: any) {
-      handleConsoleLog(`Error: ${error.message}`);
+      handleConsoleLog(`Error: ${error.message}`)
     }
-    setInput("");
-  };
+    setInput('')
+  }
 
   useEffect(() => {
-    const originalConsoleLog = console.log;
+    const originalConsoleLog = console.log
     console.log = (message: any) => {
-      handleConsoleLog(message);
-      originalConsoleLog(message);
-    };
+      handleConsoleLog(message)
+      originalConsoleLog(message)
+    }
 
     return () => {
-      console.log = originalConsoleLog;
-    };
-  }, []);
+      console.log = originalConsoleLog
+    }
+  }, [])
 
   return (
     <div className="console max-h-1/2">
@@ -54,12 +53,12 @@ const Console: React.FC = () => {
         value={input}
         onChange={handleInput}
         onKeyPress={(e: KeyboardEvent<HTMLInputElement>) => {
-          if (e.key === "Enter") handleExecute();
+          if (e.key === 'Enter') handleExecute()
         }}
         placeholder="Enter JavaScript code"
       />
     </div>
-  );
-};
+  )
+}
 
-export default Console;
+export default Console

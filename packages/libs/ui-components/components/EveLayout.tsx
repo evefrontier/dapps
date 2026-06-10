@@ -1,18 +1,18 @@
-import React, { ReactNode } from "react";
-import "../styles-ui.css";
-import Header from "./Header";
+import React, { ReactNode } from 'react'
+import '../styles-ui.css'
 import {
   CharacterInfo,
   DetailedSmartCharacterResponse,
-} from "@evefrontier/dapp-kit";
+} from '@evefrontier/dapp-kit'
+import Header from './Header'
 
 interface EveLayoutProps {
-  children: ReactNode;
-  connected: boolean;
-  handleDisconnect: () => void;
-  isClient?: boolean;
-  walletAddress: string;
-  userCharacter: CharacterInfo | null;
+  children: ReactNode
+  connected: boolean
+  handleDisconnect: () => void
+  isClient?: boolean
+  walletAddress: string
+  userCharacter: CharacterInfo | null
 }
 
 const EveLayout: React.FC<EveLayoutProps> = ({
@@ -39,7 +39,7 @@ const EveLayout: React.FC<EveLayoutProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default EveLayout;
+export default EveLayout

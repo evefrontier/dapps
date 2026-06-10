@@ -1,7 +1,7 @@
-import { dAppKit } from "../config/dapp-kit";
+import { dAppKit } from '../config/dapp-kit'
 
-declare module "@mysten/dapp-kit-react" {
+declare module '@mysten/dapp-kit-react' {
   interface Register {
-    dAppKit: typeof dAppKit;
+    dAppKit: typeof dAppKit
   }
 }

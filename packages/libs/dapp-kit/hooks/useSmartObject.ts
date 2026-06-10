@@ -1,6 +1,6 @@
-import { useContext } from "react";
-import { SmartObjectContext } from "../providers/SmartObjectProvider";
-import { SmartObjectContextType } from "../types";
+import { useContext } from 'react'
+import { SmartObjectContext } from '../providers/SmartObjectProvider'
+import type { SmartObjectContextType } from '../types'
 
 /**
  * Hook for accessing smart assembly data from the Sui GraphQL Indexer.
@@ -56,11 +56,9 @@ import { SmartObjectContextType } from "../types";
  *
  */
 export function useSmartObject(): SmartObjectContextType {
-  const context = useContext(SmartObjectContext);
+  const context = useContext(SmartObjectContext)
   if (!context) {
-    throw new Error(
-      "useSmartObject must be used within an EveFrontierProvider",
-    );
+    throw new Error('useSmartObject must be used within an EveFrontierProvider')
   }
-  return context;
+  return context
 }

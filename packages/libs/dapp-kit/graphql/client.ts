@@ -1,46 +1,46 @@
+import { parseCharacterFromJson } from '../utils/character'
 import {
   getCharacterOwnerCapType,
   getCharacterPlayerProfileType,
   getSuiGraphqlEndpoint,
-} from "../utils/constants";
+} from '../utils/constants'
+import { createLogger } from '../utils/logger'
+import {
+  GET_CHARACTER_AND_OWNED_OBJECTS,
+  GET_OBJECT_BY_ADDRESS,
+  GET_OBJECT_DYNAMICFIELD_CHARACTER_WITH_JSON,
+  GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE,
+  GET_OBJECT_OWNER_AND_OWNED_OBJECTS_WITH_JSON,
+  GET_OBJECT_WITH_DYNAMIC_FIELDS,
+  GET_OBJECT_WITH_JSON,
+  GET_OBJECTS_BY_TYPE,
+  GET_OWNED_OBJECTS_BY_PACKAGE,
+  GET_OWNED_OBJECTS_BY_TYPE,
+  GET_SINGLETON_CONFIG_OBJECT_BY_TYPE,
+  GET_SINGLETON_OBJECT_BY_TYPE,
+  GET_WALLET_CHARACTERS,
+} from './queries'
 import type {
-  GraphQLResponse,
+  CharacterInfo,
+  DynamicFieldNode,
+  GetCharacterAndOwnedObjectsResponse,
+  GetObjectAndCharacterOwnerResponse,
   GetObjectByAddressResponse,
   GetObjectOwnerAndOwnedObjectsResponse,
   GetObjectOwnerAndOwnedObjectsWithJsonResponse,
-  GetOwnedObjectsByTypeResponse,
-  GetOwnedObjectsByPackageResponse,
-  GetSingletonObjectByTypeResponse,
-  GetObjectsByTypeResponse,
   GetObjectResponse,
+  GetObjectsByTypeResponse,
   GetObjectWithJsonResponse,
-  CharacterInfo,
-  GetObjectAndCharacterOwnerResponse,
-  DynamicFieldNode,
-  RawSuiObjectData,
+  GetOwnedObjectsByPackageResponse,
+  GetOwnedObjectsByTypeResponse,
   GetSingletonConfigObjectByTypeResponse,
+  GetSingletonObjectByTypeResponse,
   GetWalletCharactersResponse,
-  GetCharacterAndOwnedObjectsResponse,
-} from "./types";
-import { parseCharacterFromJson } from "../utils/character";
-import {
-  GET_OBJECT_BY_ADDRESS,
-  GET_OBJECT_WITH_DYNAMIC_FIELDS,
-  GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE,
-  GET_OBJECT_DYNAMICFIELD_CHARACTER_WITH_JSON,
-  GET_OBJECT_OWNER_AND_OWNED_OBJECTS_WITH_JSON,
-  GET_OWNED_OBJECTS_BY_TYPE,
-  GET_OWNED_OBJECTS_BY_PACKAGE,
-  GET_WALLET_CHARACTERS,
-  GET_CHARACTER_AND_OWNED_OBJECTS,
-  GET_SINGLETON_OBJECT_BY_TYPE,
-  GET_OBJECTS_BY_TYPE,
-  GET_OBJECT_WITH_JSON,
-  GET_SINGLETON_CONFIG_OBJECT_BY_TYPE,
-} from "./queries";
-import { createLogger } from "../utils/logger";
+  GraphQLResponse,
+  RawSuiObjectData,
+} from './types'
 
-const log = createLogger();
+const log = createLogger()
 
 /**
  * Execute a GraphQL query against the Sui blockchain endpoint.
@@ -73,21 +73,21 @@ export async function executeGraphQLQuery<T = unknown>(
   variables: Record<string, unknown>,
 ): Promise<GraphQLResponse<T>> {
   const response = await fetch(getSuiGraphqlEndpoint(), {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       query,
       variables,
     }),
-  });
+  })
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    throw new Error(`HTTP error! status: ${response.status}`)
   }
 
-  return response.json();
+  return response.json()
 }
 
 // ============================================================================
@@ -114,7 +114,7 @@ export async function getObjectByAddress(address: string) {
   return executeGraphQLQuery<GetObjectByAddressResponse>(
     GET_OBJECT_BY_ADDRESS,
     { address },
-  );
+  )
 }
 
 /**
@@ -141,7 +141,7 @@ export async function getObjectWithDynamicFields(objectId: string) {
   return executeGraphQLQuery<GetObjectResponse>(
     GET_OBJECT_WITH_DYNAMIC_FIELDS,
     { objectId },
-  );
+  )
 }
 
 /**
@@ -164,7 +164,7 @@ export async function getObjectWithDynamicFields(objectId: string) {
 export async function getObjectWithJson(address: string) {
   return executeGraphQLQuery<GetObjectWithJsonResponse>(GET_OBJECT_WITH_JSON, {
     address,
-  });
+  })
 }
 
 /**
@@ -197,7 +197,7 @@ export async function getObjectOwnerAndOwnedObjectsByType(
       object: objectAddress,
       owned_object_type: ownedObjectType,
     },
-  );
+  )
 }
 
 /**
@@ -221,7 +221,7 @@ export async function getObjectOwnerAndOwnedObjectsWithJson(
       object: objectAddress,
       owned_object_type: ownedObjectType,
     },
-  );
+  )
 }
 
 /**
@@ -242,7 +242,7 @@ export async function getObjectAndCharacterOwner(objectAddress: string) {
       objectId: objectAddress,
       characterOwnerType: getCharacterOwnerCapType(),
     },
-  );
+  )
 }
 
 /**
@@ -275,7 +275,7 @@ export async function getOwnedObjectsByType(
       owner,
       object_type: objectType,
     },
-  );
+  )
 }
 
 /**
@@ -308,7 +308,7 @@ export async function getOwnedObjectsByPackage(
       owner,
       packageId,
     },
-  );
+  )
 }
 
 /**
@@ -324,7 +324,7 @@ export async function getWalletCharacters(wallet: string) {
       owner: wallet,
       characterPlayerProfileType: getCharacterPlayerProfileType(),
     },
-  );
+  )
 }
 
 /**
@@ -340,7 +340,7 @@ export async function getCharacterAndOwnedObjects(wallet: string) {
       owner: wallet,
       characterPlayerProfileType: getCharacterPlayerProfileType(),
     },
-  );
+  )
 }
 
 /**
@@ -365,7 +365,7 @@ export async function getSingletonObjectByType(objectType: string) {
     {
       object_type: objectType,
     },
-  );
+  )
 }
 
 /**
@@ -396,7 +396,7 @@ export async function getSingletonConfigObjectByType(
       object_type: objectType,
       table_name: tableName,
     },
-  );
+  )
 }
 
 /**
@@ -435,7 +435,7 @@ export async function getObjectsByType(
     object_type: objectType,
     first: options?.first ?? 50,
     after: options?.after,
-  });
+  })
 }
 
 /**
@@ -479,100 +479,102 @@ export async function getObjectsByType(
 export async function getAssemblyWithOwner(assemblyId: string): Promise<{
   moveObject: {
     contents: {
-      json: Record<string, unknown>;
-      type?: { repr: string };
-    };
+      json: Record<string, unknown>
+      type?: { repr: string }
+    }
     dynamicFields?: {
-      nodes: DynamicFieldNode[];
-    };
-  } | null;
-  assemblyOwner: CharacterInfo | null;
-  energySource: RawSuiObjectData | null;
-  destinationGate: RawSuiObjectData | null;
+      nodes: DynamicFieldNode[]
+    }
+  } | null
+  assemblyOwner: CharacterInfo | null
+  energySource: RawSuiObjectData | null
+  destinationGate: RawSuiObjectData | null
 }> {
   try {
-    const result = await getObjectAndCharacterOwner(assemblyId);
+    const result = await getObjectAndCharacterOwner(assemblyId)
 
     if (!result.data?.object?.asMoveObject) {
-      log.warn("[DappKit] getAssemblyWithOwner: Assembly not found");
+      log.warn('[DappKit] getAssemblyWithOwner: Assembly not found')
       return {
         moveObject: null,
         assemblyOwner: null,
         energySource: null,
         destinationGate: null,
-      };
+      }
     }
 
-    const moveObject = result.data.object.asMoveObject;
+    const moveObject = result.data.object.asMoveObject
 
-    const dynamicFields = moveObject.dynamicFields;
+    const dynamicFields = moveObject.dynamicFields
 
     // Extract character info from the owner chain
-    let characterInfo: CharacterInfo | null = null;
+    let characterInfo: CharacterInfo | null = null
 
     const characterMoveObject =
       moveObject.contents.extract?.asAddress?.asObject?.asMoveObject?.owner
         ?.address?.objects?.nodes[0]?.contents?.authorizedObj?.asAddress
-        ?.asObject?.asMoveObject;
+        ?.asObject?.asMoveObject
 
     if (!characterMoveObject?.contents?.json) {
-      log.warn("[DappKit] getAssemblyWithOwner: Character not found");
+      log.warn('[DappKit] getAssemblyWithOwner: Character not found')
       return {
         moveObject: result.data?.object?.asMoveObject,
         assemblyOwner: null,
         energySource: null,
         destinationGate: null,
-      };
+      }
     }
 
-    const characterJson = characterMoveObject?.contents.json;
-    characterInfo = parseCharacterFromJson(characterJson);
+    const characterJson = characterMoveObject?.contents.json
+    characterInfo = parseCharacterFromJson(characterJson)
     if (!characterInfo) {
       log.warn(
-        "[DappKit] getAssemblyWithOwner: Could not extract character JSON from owner chain",
-      );
+        '[DappKit] getAssemblyWithOwner: Could not extract character JSON from owner chain',
+      )
     }
 
     const energySourceMoveObject =
-      moveObject.contents.energySource?.asAddress?.asObject?.asMoveObject;
+      moveObject.contents.energySource?.asAddress?.asObject?.asMoveObject
 
     if (!energySourceMoveObject?.contents?.json) {
-      log.warn("[DappKit] getAssemblyWithOwner: Energy source not found");
+      log.warn('[DappKit] getAssemblyWithOwner: Energy source not found')
     }
 
     const destinationGateMoveObject =
-      moveObject.contents.destinationGate?.asAddress?.asObject?.asMoveObject;
+      moveObject.contents.destinationGate?.asAddress?.asObject?.asMoveObject
 
     const energySourceJson = energySourceMoveObject?.contents
-      ?.json as unknown as RawSuiObjectData | null;
+      ?.json as unknown as RawSuiObjectData | null
     const destinationGateJson = destinationGateMoveObject?.contents
-      ?.json as unknown as RawSuiObjectData | null;
+      ?.json as unknown as RawSuiObjectData | null
 
     if (!energySourceJson) {
       log.warn(
-        "[DappKit] getAssemblyWithOwner: Energy source not found. Object might be a network node.",
-      );
+        '[DappKit] getAssemblyWithOwner: Energy source not found. Object might be a network node.',
+      )
+    }
+
+    const moveObjectWithDynamicFields = {
+      contents: {
+        json: moveObject.contents.json,
+        type: moveObject.contents.type,
+      },
+      ...(dynamicFields ? { dynamicFields } : {}),
     }
 
     return {
-      moveObject: {
-        contents: {
-          json: moveObject.contents.json,
-          type: moveObject.contents.type,
-        },
-        dynamicFields: dynamicFields || undefined,
-      },
+      moveObject: moveObjectWithDynamicFields,
       assemblyOwner: characterInfo,
       energySource: energySourceJson ?? null,
       destinationGate: destinationGateJson ?? null,
-    };
+    }
   } catch (error) {
-    log.error("[DappKit] getAssemblyWithOwner error:", error);
+    log.error('[DappKit] getAssemblyWithOwner error:', error)
     return {
       moveObject: null,
       assemblyOwner: null,
       energySource: null,
       destinationGate: null,
-    };
+    }
   }
 }

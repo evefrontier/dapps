@@ -1,8 +1,9 @@
-import React, { ButtonHTMLAttributes, FC } from "react";
-import { ButtonWrap, ButtonCorner } from "../assets";
+import React, { ButtonHTMLAttributes, FC } from 'react'
+import { ButtonCorner, ButtonWrap } from '../assets'
+
 interface EveButtonDuoProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  onCancel: () => void;
-  className?: string;
+  onCancel: () => void
+  className?: string
 }
 
 const EveButtonDuo: FC<EveButtonDuoProps> = ({
@@ -11,11 +12,11 @@ const EveButtonDuo: FC<EveButtonDuoProps> = ({
   className,
   ...props
 }) => {
-  const { disabled, onClick, style, id } = props;
+  const { disabled, onClick, style, id } = props
 
   return (
     <div
-      className={`Eve-Button-Duo relative w-full items-center flex gap-2 ${className ? className : ""}`}
+      className={`Eve-Button-Duo relative w-full items-center flex gap-2 ${className ? className : ''}`}
     >
       <button className={`Eve-Button Eve-Button-cancel`} onClick={onCancel}>
         Cancel
@@ -34,7 +35,7 @@ const EveButtonDuo: FC<EveButtonDuoProps> = ({
       <ButtonWrap className="absolute -left-[5px]" />
       <ButtonWrap className="absolute -right-[5px] rotate-180" />
     </div>
-  );
-};
+  )
+}
 
-export default React.memo(EveButtonDuo);
+export default React.memo(EveButtonDuo)

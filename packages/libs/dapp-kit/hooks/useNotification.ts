@@ -1,6 +1,6 @@
-import { useContext } from "react";
-import { NotificationContext } from "../providers/NotificationProvider";
-import { NotificationContextType } from "../types";
+import { useContext } from 'react'
+import { NotificationContext } from '../providers/NotificationProvider'
+import type { NotificationContextType } from '../types'
 
 /**
  * Hook for displaying user notifications in EVE Frontier dApps.
@@ -72,11 +72,11 @@ import { NotificationContextType } from "../types";
  * ```
  */
 export function useNotification(): NotificationContextType {
-  const context = useContext(NotificationContext);
+  const context = useContext(NotificationContext)
   if (!context) {
     throw new Error(
-      "useNotification must be used within an EveFrontierProvider",
-    );
+      'useNotification must be used within an EveFrontierProvider',
+    )
   }
-  return context;
+  return context
 }

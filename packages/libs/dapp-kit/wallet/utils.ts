@@ -1,11 +1,11 @@
-import type { Wallet } from "@mysten/wallet-standard";
+import type { UiWalletHandle } from '@wallet-standard/ui'
+import { getWalletFeature } from '@wallet-standard/ui'
+import { EVEFRONTIER_SPONSORED_TRANSACTION } from '../types'
 import {
-  hasSponsoredTransactionFeature,
-  supportsSponsoredTransaction,
   type EveFrontierSponsoredTransactionFeature,
   type SponsoredTransactionMethod,
-} from "./features";
-import { EVEFRONTIER_SPONSORED_TRANSACTION } from "../types";
+  supportsSponsoredTransaction,
+} from './features'
 
 /**
  * Check if a wallet supports the EVE Frontier sponsored transaction feature.
@@ -15,8 +15,8 @@ import { EVEFRONTIER_SPONSORED_TRANSACTION } from "../types";
  * this feature.
  *
  * @category Wallet
- * @param wallet - The wallet object from wallet-standard
- * @returns True if the wallet implements the `evefrontier:sponsoredTransaction` feature
+ * @param wallet - The UiWallet object from dapp-kit
+ * @returns True if the wallet's feature list includes `evefrontier:sponsoredTransaction`
  *
  * @example Filter supported wallets
  * ```tsx
@@ -38,8 +38,10 @@ import { EVEFRONTIER_SPONSORED_TRANSACTION } from "../types";
  * }
  * ```
  */
-export function walletSupportsSponsoredTransaction(wallet: Wallet): boolean {
-  return supportsSponsoredTransaction(wallet.features);
+export function walletSupportsSponsoredTransaction(wallet: {
+  features: unknown
+}): boolean {
+  return supportsSponsoredTransaction(wallet.features)
 }
 
 /**
@@ -50,7 +52,7 @@ export function walletSupportsSponsoredTransaction(wallet: Wallet): boolean {
  * which provides React Query integration and automatic error handling.
  *
  * @category Wallet
- * @param wallet - The wallet object from wallet-standard
+ * @param wallet - The UiWallet object from dapp-kit
  * @returns The sponsored transaction method, or undefined if not supported
  *
  * @example Direct wallet feature access
@@ -72,46 +74,22 @@ export function walletSupportsSponsoredTransaction(wallet: Wallet): boolean {
  *
  * @see {@link useSponsoredTransaction} for the recommended React hook approach
  */
-export function getSponsoredTransactionFeature(
-  wallet: Wallet,
-): SponsoredTransactionMethod | undefined {
-  if (
-    !hasSponsoredTransactionFeature(wallet.features as Record<string, unknown>)
-  ) {
-    return undefined;
+export function getSponsoredTransactionFeature(wallet: {
+  features: unknown
+  name?: string
+  version?: string
+}): SponsoredTransactionMethod | undefined {
+  if (!supportsSponsoredTransaction(wallet.features)) {
+    return undefined
   }
 
-  const feature = (wallet.features as Record<string, unknown>)[
-    EVEFRONTIER_SPONSORED_TRANSACTION
-  ] as EveFrontierSponsoredTransactionFeature[typeof EVEFRONTIER_SPONSORED_TRANSACTION];
-
-  return feature.signSponsoredTransaction;
-}
-
-/**
- * Get the sponsored transaction method from a wallet, supporting both
- * object-shaped features (legacy) and array-shaped features (v2).
- * When features is an array, tries the wallet object for a top-level
- * feature implementation (e.g. wallet['evefrontier:sponsoredTransaction']).
- */
-export function getSponsoredTransactionMethod(
-  wallet: Wallet | { features: unknown; name?: string; version?: string },
-): SponsoredTransactionMethod | undefined {
-  const fromFeatures = getSponsoredTransactionFeature(wallet as Wallet);
-  if (fromFeatures) return fromFeatures;
-
-  if (!supportsSponsoredTransaction(wallet.features)) return undefined;
-
-  const w = wallet as Record<string, unknown>;
-  const feature = w[EVEFRONTIER_SPONSORED_TRANSACTION];
-  if (
-    feature !== null &&
-    typeof feature === "object" &&
-    typeof (feature as { signSponsoredTransaction?: unknown })
-      .signSponsoredTransaction === "function"
-  ) {
-    return (feature as { signSponsoredTransaction: SponsoredTransactionMethod })
-      .signSponsoredTransaction;
+  try {
+    const feature = getWalletFeature(
+      wallet as unknown as UiWalletHandle,
+      EVEFRONTIER_SPONSORED_TRANSACTION,
+    ) as EveFrontierSponsoredTransactionFeature[typeof EVEFRONTIER_SPONSORED_TRANSACTION]
+    return feature.signSponsoredTransaction
+  } catch {
+    return undefined
   }
-  return undefined;
 }

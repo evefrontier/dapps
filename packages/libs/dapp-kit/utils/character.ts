@@ -1,13 +1,22 @@
-import type { CharacterInfo, RawCharacterData } from "../graphql/types";
+import type { CharacterInfo, RawCharacterData } from '../graphql/types'
+import type {
+  CharacterJsonKey,
+  CharacterJsonMetadata,
+  LooseCharacterJson,
+} from '../types/character'
+
+function isPlainCharacterJson(value: unknown): value is LooseCharacterJson {
+  return value != null && typeof value === 'object' && !Array.isArray(value)
+}
 
 function parseOptionalInt(value: unknown): number {
-  if (value == null) return 0;
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string") {
-    const n = parseInt(value, 10);
-    return Number.isNaN(n) ? 0 : n;
+  if (value == null) return 0
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string') {
+    const n = parseInt(value, 10)
+    return Number.isNaN(n) ? 0 : n
   }
-  return 0;
+  return 0
 }
 
 /**
@@ -19,28 +28,31 @@ function parseOptionalInt(value: unknown): number {
  * @category Character Helpers
  */
 export function parseCharacterFromJson(json: unknown): CharacterInfo | null {
-  if (json == null || typeof json !== "object" || Array.isArray(json)) {
-    return null;
+  if (!isPlainCharacterJson(json)) {
+    return null
   }
-  const obj = json as Record<string, unknown>;
+
+  const metadataValue = json.metadata
   const metadata =
-    obj.metadata != null &&
-    typeof obj.metadata === "object" &&
-    !Array.isArray(obj.metadata)
-      ? (obj.metadata as Record<string, unknown>)
-      : undefined;
+    metadataValue != null &&
+    typeof metadataValue === 'object' &&
+    !Array.isArray(metadataValue)
+      ? (metadataValue as CharacterJsonMetadata)
+      : undefined
+
+  const keyValue = json.key
   const key =
-    obj.key != null && typeof obj.key === "object" && !Array.isArray(obj.key)
-      ? (obj.key as Record<string, unknown>)
-      : undefined;
+    keyValue != null && typeof keyValue === 'object' && !Array.isArray(keyValue)
+      ? (keyValue as CharacterJsonKey)
+      : undefined
 
   return {
-    id: typeof obj.id === "string" ? obj.id : "",
+    id: typeof json.id === 'string' ? json.id : '',
     address:
-      typeof obj.character_address === "string" ? obj.character_address : "",
-    name: typeof metadata?.name === "string" ? metadata.name : "",
-    tribeId: parseOptionalInt(obj.tribe_id),
+      typeof json.character_address === 'string' ? json.character_address : '',
+    name: typeof metadata?.name === 'string' ? metadata.name : '',
+    tribeId: parseOptionalInt(json.tribe_id),
     characterId: parseOptionalInt(key?.item_id),
     _raw: json as RawCharacterData,
-  };
+  }
 }

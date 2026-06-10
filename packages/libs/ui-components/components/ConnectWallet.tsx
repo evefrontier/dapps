@@ -1,7 +1,6 @@
-import { Logo } from "../assets";
-
-import React from "react";
-import EveButton from "./EveButton";
+import React from 'react'
+import { Logo } from '../assets'
+import EveButton from './EveButton'
 
 const ConnectWallet = React.memo(
   ({ handleConnect }: { handleConnect: () => void }): React.JSX.Element => {
@@ -33,15 +32,15 @@ const ConnectWallet = React.memo(
             variant="ghost"
             className="text-xl"
             onClick={() =>
-              window.open("https://docs.evefrontier.com/Dapp/quick-start")
+              window.open('https://docs.evefrontier.com/Dapp/quick-start')
             }
           >
             EVE Frontier Docs
           </EveButton>
         </div>
       </div>
-    );
+    )
   },
-);
+)
 
-export default React.memo(ConnectWallet);
+export default React.memo(ConnectWallet)

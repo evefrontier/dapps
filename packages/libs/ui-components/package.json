@@ -9,8 +9,8 @@
   "scripts": {
     "build": "tsc --noEmit",
     "ts:clean": "tsc --build --clean",
-    "lint": "prettier . --check",
-    "lint:fix": "prettier . --write"
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
   },
   "dependencies": {
     "@base_ui/react": "1.0.0-alpha.3",
@@ -23,6 +23,7 @@
     "react-router-dom": "^7.14.0"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^25.5.2",
     "@types/react": "^19.2.14",
     "@visx/axis": "^3.12.0",
@@ -35,11 +36,10 @@
     "@visx/vendor": "^3.12.0",
     "@vitejs/plugin-react-swc": "^4.3.0",
     "autoprefixer": "^10.4.27",
-    "postcss": "^8.5.8",
-    "prettier": "3.8.1",
-    "tailwindcss": "^3.4.19",
+    "postcss": "^8.5.10",
     "typescript": "^6.0.2",
-    "vite": "^8.0.5",
-    "vite-plugin-svgr": "^5.2.0"
+    "vite": "8.0.5",
+    "vite-plugin-svgr": "^5.2.0",
+    "tailwindcss": "^4.2.2"
   }
 }

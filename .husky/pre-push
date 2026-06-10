@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+set -e
+ROOT=$(git rev-parse --show-toplevel)
+cd "$ROOT"
+
+export PATH="$HOME/.bun/bin:$PATH"
+bun audit
+bun --filter @evefrontier/dapp-kit test:run

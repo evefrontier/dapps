@@ -1,6 +1,6 @@
-import React, { ReactNode, useState, useEffect } from "react";
-import { TextField } from "@mui/material";
-import * as NumberField from "@base_ui/react/NumberField";
+import * as NumberField from '@base_ui/react/NumberField'
+import { TextField } from '@mui/material'
+import React, { ReactNode, useEffect, useState } from 'react'
 
 /**
  * Component for editing text fields with different input types.
@@ -21,60 +21,60 @@ export default function EveInput({
   placeholder,
   maxChars,
 }: {
-  inputType: "string" | "multiline" | "numerical";
-  defaultValue: React.MutableRefObject<string | number> | ReactNode;
-  fieldName: string;
-  onChange: (value: string | number | null) => void;
-  placeholder?: string;
-  maxChars?: number;
+  inputType: 'string' | 'multiline' | 'numerical'
+  defaultValue: React.MutableRefObject<string | number> | ReactNode
+  fieldName: string
+  onChange: (value: string | number | null) => void
+  placeholder?: string
+  maxChars?: number
 }): React.JSX.Element {
   // Internal state to track character count
-  const [currentChars, setCurrentChars] = useState<number>(0);
+  const [currentChars, setCurrentChars] = useState<number>(0)
 
   // Internal state to track input value
-  const [inputValue, setInputValue] = useState<string>("");
+  const [inputValue, setInputValue] = useState<string>('')
 
   // Initialize character count and input value based on defaultValue
   useEffect(() => {
-    let initialValue = "";
+    let initialValue = ''
 
-    if (typeof defaultValue === "string") {
-      initialValue = defaultValue;
+    if (typeof defaultValue === 'string') {
+      initialValue = defaultValue
     } else if (
       defaultValue &&
-      typeof defaultValue === "object" &&
-      "current" in defaultValue &&
-      typeof defaultValue.current === "string"
+      typeof defaultValue === 'object' &&
+      'current' in defaultValue &&
+      typeof defaultValue.current === 'string'
     ) {
-      initialValue = defaultValue.current;
+      initialValue = defaultValue.current
     }
 
-    setInputValue(initialValue);
-    setCurrentChars(initialValue.length);
-  }, [defaultValue]);
+    setInputValue(initialValue)
+    setCurrentChars(initialValue.length)
+  }, [defaultValue])
 
   const defaultIsString = () => {
-    if (typeof defaultValue === "string") return defaultValue;
-  };
+    if (typeof defaultValue === 'string') return defaultValue
+  }
 
-  const fieldId = fieldName.replace(/\s/g, "");
+  const fieldId = fieldName.replace(/\s/g, '')
 
   // Handle input changes with character limit validation
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = event.target.value;
+    const newValue = event.target.value
 
     // Check if the input exceeds the maximum character limit
     if (maxChars && newValue.length > maxChars) {
-      return;
+      return
     }
 
     // Update internal state
-    setInputValue(newValue);
-    setCurrentChars(newValue.length);
+    setInputValue(newValue)
+    setCurrentChars(newValue.length)
 
     // Notify parent component
-    onChange(newValue);
-  };
+    onChange(newValue)
+  }
 
   return (
     <div className="TextField grid w-full gap-2 mb-4" id={`edit-${fieldId}`}>
@@ -88,15 +88,15 @@ export default function EveInput({
           </span>
         )}
       </div>
-      {inputType == "numerical" ? (
+      {inputType == 'numerical' ? (
         <NumberField.Root
           id={`input-${fieldId}`}
-          className={"Eve-Numerical-Input-input"}
+          className={'Eve-Numerical-Input-input'}
           aria-label={`numerical-input-${fieldId}`}
           min={0}
           onValueChange={(val: string | number | null) => {
-            setCurrentChars(typeof val === "string" ? val.length : 0);
-            onChange(val);
+            setCurrentChars(typeof val === 'string' ? val.length : 0)
+            onChange(val)
           }}
         >
           <NumberField.Group>
@@ -109,8 +109,8 @@ export default function EveInput({
         </NumberField.Root>
       ) : (
         <TextField
-          multiline={inputType == "multiline"}
-          minRows={inputType == "multiline" ? 3 : undefined}
+          multiline={inputType == 'multiline'}
+          minRows={inputType == 'multiline' ? 3 : undefined}
           id={`input-${fieldId}`}
           placeholder={defaultIsString() ?? placeholder ?? fieldName}
           value={inputValue}
@@ -122,5 +122,5 @@ export default function EveInput({
         />
       )}
     </div>
-  );
+  )
 }

@@ -1,13 +1,8 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import { abbreviateAddress, CharacterInfo } from '@evefrontier/dapp-kit'
+import React, { ReactNode, useEffect, useState } from 'react'
 import {
+  ConnectWallet,
   Identicon1,
-  Identicon10,
-  Identicon11,
-  Identicon12,
-  Identicon13,
-  Identicon14,
-  Identicon15,
-  Identicon16,
   Identicon2,
   Identicon3,
   Identicon4,
@@ -16,11 +11,16 @@ import {
   Identicon7,
   Identicon8,
   Identicon9,
-} from "../assets";
+  Identicon10,
+  Identicon11,
+  Identicon12,
+  Identicon13,
+  Identicon14,
+  Identicon15,
+  Identicon16,
+} from '../assets'
+import ClickToCopy from './ClickToCopy'
 
-import { abbreviateAddress, CharacterInfo } from "@evefrontier/dapp-kit";
-import ClickToCopy from "./ClickToCopy";
-import { ConnectWallet } from "../assets";
 const Header = React.memo(
   ({
     connected,
@@ -28,27 +28,27 @@ const Header = React.memo(
     walletAddress,
     userCharacter,
   }: {
-    connected: boolean;
-    handleDisconnect: () => void;
-    walletAddress: string;
-    userCharacter: CharacterInfo | null;
+    connected: boolean
+    handleDisconnect: () => void
+    walletAddress: string
+    userCharacter: CharacterInfo | null
   }) => {
-    const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
-    const [identicon, setIdenticon] = useState<number>(1);
+    const [dropdownOpen, setDropdownOpen] = useState<boolean>(false)
+    const [identicon, setIdenticon] = useState<number>(1)
 
     useEffect(() => {
       // If wallet has been previously connected
-      const identiconNumber = localStorage.getItem("eve-dapp-identicon");
+      const identiconNumber = localStorage.getItem('eve-dapp-identicon')
       if (identiconNumber) {
-        setIdenticon(Number(identiconNumber));
+        setIdenticon(Number(identiconNumber))
       } else {
-        const randomNumber = Math.floor(Math.random() * 16) + 1;
-        localStorage.setItem("eve-dapp-identicon", randomNumber.toString());
-        setIdenticon(randomNumber);
+        const randomNumber = Math.floor(Math.random() * 16) + 1
+        localStorage.setItem('eve-dapp-identicon', randomNumber.toString())
+        setIdenticon(randomNumber)
       }
-    }, []);
+    }, [])
 
-    const identiconStyles = "w-[30px] h-[30px] text-neutral";
+    const identiconStyles = 'w-[30px] h-[30px] text-neutral'
 
     const identiconMap: Record<number, ReactNode> = {
       1: <Identicon1 className={identiconStyles} />,
@@ -67,7 +67,7 @@ const Header = React.memo(
       14: <Identicon14 className={identiconStyles} />,
       15: <Identicon15 className={identiconStyles} />,
       16: <Identicon16 className={identiconStyles} />,
-    };
+    }
 
     return (
       <header
@@ -93,7 +93,7 @@ const Header = React.memo(
                 </span>
                 <div
                   id="menu-dropdown"
-                  className={`absolute right-0 ${dropdownOpen ? "!block" : "!hidden"}`}
+                  className={`absolute right-0 ${dropdownOpen ? '!block' : '!hidden'}`}
                 >
                   <div className="menu-dropdown-item">
                     {abbreviateAddress(walletAddress)}
@@ -110,8 +110,8 @@ const Header = React.memo(
           </div>
         )}
       </header>
-    );
+    )
   },
-);
+)
 
-export default React.memo(Header);
+export default React.memo(Header)

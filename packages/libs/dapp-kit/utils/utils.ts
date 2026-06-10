@@ -1,10 +1,10 @@
-import { SuiChain } from "@mysten/wallet-standard";
+import type { SuiChain } from '@mysten/wallet-standard'
 import {
   Assemblies,
-  DetailedAssemblyResponse,
-  SmartAssemblyResponse,
-  AssemblyType,
-} from "../types";
+  type AssemblyType,
+  type DetailedAssemblyResponse,
+  type SmartAssemblyResponse,
+} from '../types'
 
 /**
  * Abbreviate a Sui address or hex string for display.
@@ -30,11 +30,11 @@ export const abbreviateAddress = (
   precision = 5,
   expanded = false,
 ): string => {
-  if (!string) return "";
-  if (expanded) return string;
-  if (string.length <= precision * 2) return string;
-  return `${string.slice(0, precision)}...${string.slice(-precision)}`;
-};
+  if (!string) return ''
+  if (expanded) return string
+  if (string.length <= precision * 2) return string
+  return `${string.slice(0, precision)}...${string.slice(-precision)}`
+}
 
 /**
  * Check if an account is the owner of a smart assembly.
@@ -61,9 +61,9 @@ export const isOwner = (
   assembly: DetailedAssemblyResponse | SmartAssemblyResponse | null,
   account?: `0x${string}` | string,
 ): boolean => {
-  if (!assembly?.character?.address || account == "0x") return false;
-  return assembly.character.address === (account ?? "");
-};
+  if (!assembly?.character?.address || account == '0x') return false
+  return assembly.character.address === (account ?? '')
+}
 
 /**
  * Generate a Suiscan transaction URL for a given transaction hash.
@@ -80,50 +80,50 @@ export const isOwner = (
  * ```
  */
 export const getTxUrl = (suiChain: SuiChain, txHash: string): string => {
-  const network = suiChain.split(":")[1];
+  const network = suiChain.split(':')[1] ?? suiChain
 
-  return `https://suiscan.xyz/${network}/tx/${txHash}`;
-};
+  return `https://suiscan.xyz/${network}/tx/${txHash}`
+}
 
 /** Strips protocol (e.g. https://) from a URL and returns the rest. @category Utilities - Formatting */
 export const parseURL = (string: string): string => {
-  if (string.includes("://")) {
-    return string.split("://")[1];
+  if (string.includes('://')) {
+    return string.split('://')[1] ?? string
   }
-  return string;
-};
+  return string
+}
 
 /** Copies the given string to the clipboard. @category Utilities - Formatting */
 export const clickToCopy = (string: string) => {
-  return navigator.clipboard.writeText(string);
-};
+  return navigator.clipboard.writeText(string)
+}
 
 /** Returns elements that appear in both arrays. @category Utilities - Formatting */
 export const getCommonItems = (array1: any[], array2: any[]) => {
-  const commonItems: any[] = [];
-  const set: Set<any> = new Set([]);
+  const commonItems: any[] = []
+  const set: Set<any> = new Set([])
 
   for (let i = 0; i < array1.length; i++) {
-    const value = array1[i];
-    if (!set.has(value)) set.add(value);
+    const value = array1[i]
+    if (!set.has(value)) set.add(value)
   }
   for (let i = 0; i < array2.length; i++) {
-    const value = array2[i];
-    if (set.has(value)) commonItems.push(value);
+    const value = array2[i]
+    if (set.has(value)) commonItems.push(value)
   }
-  return commonItems;
-};
+  return commonItems
+}
 
 /** Removes trailing zeros after the last significant decimal. @category Utilities - Formatting */
 export const removeTrailingZeros = (number: string) => {
-  return number.replace(/(\.\d*?[1-9])0+$|\.0*$/, "$1");
-};
+  return number.replace(/(\.\d*?[1-9])0+$|\.0*$/, '$1')
+}
 
 /** Returns the env value or fallback if empty. @category Utilities - Config */
 export const getEnv = (env: string, fallback: string): string => {
-  if (!env) return fallback;
-  return env;
-};
+  if (!env) return fallback
+  return env
+}
 
 /**
  * Volume in m³ from unit quantity and volume per unit (litres, 10^3).
@@ -133,9 +133,9 @@ export const getEnv = (env: string, fallback: string): string => {
  * @category Utilities - Formatting
  */
 export const getVolumeM3 = (quantity: bigint, volume: bigint): number => {
-  const totalVolume = Number(quantity) * Number(volume);
-  return totalVolume;
-};
+  const totalVolume = Number(quantity) * Number(volume)
+  return totalVolume
+}
 
 /**
  * Format from cubic decimeters/litres (dm³\l) to cubic meters (m³).
@@ -150,8 +150,8 @@ export const getVolumeM3 = (quantity: bigint, volume: bigint): number => {
  * ```
  */
 export const formatM3 = (quantity: string | bigint): number => {
-  return Number(quantity) / 1000;
-};
+  return Number(quantity) / 1000
+}
 
 /**
  * Get the dApp URL for an assembly, ensuring it has a protocol prefix.
@@ -170,16 +170,16 @@ export const formatM3 = (quantity: string | bigint): number => {
  * ```
  */
 export const getDappUrl = (assembly: AssemblyType<Assemblies>): string => {
-  if (!assembly?.dappURL) return "";
+  if (!assembly?.dappURL) return ''
 
-  let url = assembly.dappURL.trim();
-  const hasProtocol = /^((http|https|ftp):\/\/)/i.test(url);
+  let url = assembly.dappURL.trim()
+  const hasProtocol = /^((http|https|ftp):\/\/)/i.test(url)
   if (!hasProtocol) {
-    url = "https://" + url;
+    url = 'https://' + url
   }
 
-  return url;
-};
+  return url
+}
 
 /**
  * Check if two addresses match.
@@ -193,9 +193,9 @@ export const findOwnerByAddress = (
   address1: string | undefined,
   address2: string | undefined,
 ): boolean => {
-  if (!address2 || !address1 || address1 == "" || address2 == "") return false;
-  return address1 === address2;
-};
+  if (!address2 || !address1 || address1 == '' || address2 == '') return false
+  return address1 === address2
+}
 
 /**
  * Type guard to check if an assembly is of a specific type.
@@ -221,11 +221,11 @@ export const assertAssemblyType = (
   assembly: AssemblyType<Assemblies> | null,
   assemblyType: Assemblies,
 ): assembly is AssemblyType<Assemblies> => {
-  if (typeof assembly?.type === "string") {
-    return assembly.type === assemblyType;
+  if (typeof assembly?.type === 'string') {
+    return assembly.type === assemblyType
   }
-  return false;
-};
+  return false
+}
 
 /**
  * Format a duration in seconds to a human-readable string.
@@ -244,27 +244,27 @@ export const assertAssemblyType = (
  * ```
  */
 export const formatDuration = (seconds: number): string => {
-  if (seconds === 0) return "0m 0s";
+  if (seconds === 0) return '0m 0s'
 
-  const days = Math.floor(seconds / (24 * 3600));
-  seconds %= 24 * 3600;
-  const hours = Math.floor(seconds / 3600);
-  seconds %= 3600;
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
+  const days = Math.floor(seconds / (24 * 3600))
+  seconds %= 24 * 3600
+  const hours = Math.floor(seconds / 3600)
+  seconds %= 3600
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
 
-  const formattedDays = String(days).padStart(2, "0");
-  const formattedHours = String(hours).padStart(2, "0");
-  const formattedMinutes = String(minutes).padStart(2, "0");
-  const formattedSeconds = String(remainingSeconds.toFixed(0)).padStart(2, "0");
+  const formattedDays = String(days).padStart(2, '0')
+  const formattedHours = String(hours).padStart(2, '0')
+  const formattedMinutes = String(minutes).padStart(2, '0')
+  const formattedSeconds = String(remainingSeconds.toFixed(0)).padStart(2, '0')
 
   if (days > 0) {
-    return `${formattedDays}d ${formattedHours}h ${formattedMinutes}m ${formattedSeconds}s`;
+    return `${formattedDays}d ${formattedHours}h ${formattedMinutes}m ${formattedSeconds}s`
   } else if (hours > 0) {
-    return `${formattedHours}h ${formattedMinutes}m ${formattedSeconds}s`;
+    return `${formattedHours}h ${formattedMinutes}m ${formattedSeconds}s`
   } else if (minutes > 0) {
-    return `${formattedMinutes}m ${formattedSeconds}s`;
+    return `${formattedMinutes}m ${formattedSeconds}s`
   } else {
-    return `${formattedSeconds}s`;
+    return `${formattedSeconds}s`
   }
-};
+}

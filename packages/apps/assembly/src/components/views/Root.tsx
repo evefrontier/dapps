@@ -1,33 +1,32 @@
 import {
-  AssemblyType,
   Assemblies,
+  AssemblyType,
+  CharacterInfo,
   DetailedSmartCharacterResponse,
   State,
-  CharacterInfo,
-} from "@evefrontier/dapp-kit";
-import React, { useState } from "react";
-import { useLocation, useOutletContext } from "react-router-dom";
+} from '@evefrontier/dapp-kit'
+import { AssemblyInfo, Divider, EveContainer } from '@eveworld/ui-components'
+import React, { useState } from 'react'
+import { useLocation, useOutletContext } from 'react-router-dom'
 
-import { AssemblyInfo, EveContainer, Divider } from "@eveworld/ui-components";
-
-import Actions from "../Actions";
-import AssemblyIcon from "../AssemblyIcon";
-import EditUnit from "../EditUnit";
+import Actions from '../Actions'
+import AssemblyIcon from '../AssemblyIcon'
+import EditUnit from '../EditUnit'
 
 const Root = React.memo(
   ({
     assembly,
     character,
   }: {
-    assembly: AssemblyType<Assemblies>;
-    character: DetailedSmartCharacterResponse | null;
+    assembly: AssemblyType<Assemblies>
+    character: DetailedSmartCharacterResponse | null
   }): React.JSX.Element => {
-    const [isEditing, setIsEditing] = useState<boolean>(false);
-    const context = useOutletContext<{ userCharacter: CharacterInfo }>();
+    const [isEditing, setIsEditing] = useState<boolean>(false)
+    const context = useOutletContext<{ userCharacter: CharacterInfo }>()
 
-    const isOnline = assembly.state === State.ONLINE;
+    const isOnline = assembly.state === State.ONLINE
 
-    const showContainer = !useLocation().pathname.includes("client");
+    const showContainer = !useLocation().pathname.includes('client')
 
     return (
       <EveContainer
@@ -64,8 +63,8 @@ const Root = React.memo(
           </>
         )}
       </EveContainer>
-    );
+    )
   },
-);
+)
 
-export default React.memo(Root);
+export default React.memo(Root)

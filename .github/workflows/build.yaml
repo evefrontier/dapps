@@ -4,47 +4,61 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'packages/**'
-      - 'pnpm-lock.yaml'
-      - 'package.json'
-      - 'nx.json'
-      - 'tsconfig.json'
-      - '.github/workflows/build.yaml'
+      - "packages/**"
+      - "bun.lock"
+      - "package.json"
+      - "biome.jsonc"
+      - "nx.json"
+      - "tsconfig.json"
+      - ".github/workflows/build.yaml"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v5
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          package_json_file: package.json
+          bun-version-file: "package.json"
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        timeout-minutes: 2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Lint
-        run: pnpm nx run-many -t lint --verbose --nxBail=true
+        run: bunx nx run-many -t lint --verbose --nxBail=true
         env:
           CI: true
 
       - name: Test
         run: |
-          pnpm --filter @evefrontier/dapp-kit test:run
+          bun --filter @evefrontier/dapp-kit test:coverage
         env:
           CI: true
 
+      - name: Report coverage
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: "@evefrontier/dapp-kit"
+          json-summary-path: packages/libs/dapp-kit/coverage/coverage-summary.json
+          json-final-path: packages/libs/dapp-kit/coverage/coverage-final.json
+
       - name: Build packages
         run: |
-          pnpm nx run-many -t build --verbose --nxBail=true
-          pnpm nx run assembly:ci:build --verbose --nxBail=true
+          bunx nx run-many -t build --verbose --nxBail=true
+          bunx nx run assembly:ci:build --verbose --nxBail=true
         env:
           CI: true

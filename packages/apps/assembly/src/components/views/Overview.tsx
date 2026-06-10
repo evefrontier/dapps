@@ -1,30 +1,29 @@
 import {
-  useSmartObject,
-  useNotification,
   Severity,
-} from "@evefrontier/dapp-kit";
-import React, { useEffect } from "react";
-
+  useNotification,
+  useSmartObject,
+} from '@evefrontier/dapp-kit'
 import {
   ErrorNotice,
   ErrorNoticeTypes,
   EveContainer,
-} from "@eveworld/ui-components";
+} from '@eveworld/ui-components'
+import React, { useEffect } from 'react'
 
-import Behaviour from "../Behaviour";
-import Root from "./Root";
+import Behaviour from '../Behaviour'
+import Root from './Root'
 
 const Overview = React.memo((): React.JSX.Element => {
-  const { assembly, assemblyOwner, loading } = useSmartObject();
-  const { notify, handleClose } = useNotification();
+  const { assembly, assemblyOwner, loading } = useSmartObject()
+  const { notify, handleClose } = useNotification()
 
   useEffect(() => {
     if (loading) {
-      notify({ type: Severity.Info, message: "Loading..." });
+      notify({ type: Severity.Info, message: 'Loading...' })
     } else {
-      handleClose();
+      handleClose()
     }
-  }, [loading]);
+  }, [loading])
 
   if ((!loading && !assembly) || !assembly) {
     return (
@@ -36,7 +35,7 @@ const Overview = React.memo((): React.JSX.Element => {
           <EveContainer className="m-2 h-full"> </EveContainer>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -50,7 +49,7 @@ const Overview = React.memo((): React.JSX.Element => {
         </div>
       </div>
     </>
-  );
-});
+  )
+})
 
-export default React.memo(Overview);
+export default React.memo(Overview)

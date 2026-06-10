@@ -1,13 +1,12 @@
-import { SUI_GRAPHQL_NETWORKS } from "../utils";
-import {
+import { Assemblies } from '@evefrontier/wallet-core/definitions'
+import type { SUI_GRAPHQL_NETWORKS } from '../utils'
+import type {
   DetailedAssemblyResponse,
+  GateModule,
+  NetworkNodeModule,
   StorageModule,
   TurretModule,
-  GateModule,
-  RefineryModule,
-  ManufacturingModule,
-  NetworkNodeModule,
-} from "./worldApiReturnTypes";
+} from './worldApiReturnTypes'
 
 // =========================================
 // Query Parameters
@@ -15,12 +14,12 @@ import {
 
 /** @category Types */
 export enum QueryParams {
-  ITEM_ID = "itemId",
-  TENANT = "tenant",
+  ITEM_ID = 'itemId',
+  TENANT = 'tenant',
 }
 
 /** @category Types */
-export type SuiGraphqlNetwork = (typeof SUI_GRAPHQL_NETWORKS)[number];
+export type SuiGraphqlNetwork = (typeof SUI_GRAPHQL_NETWORKS)[number]
 
 // =========================================
 // Assembly State and Actions
@@ -28,20 +27,20 @@ export type SuiGraphqlNetwork = (typeof SUI_GRAPHQL_NETWORKS)[number];
 
 /** @category Types */
 export enum State {
-  NULL = "NULL",
-  UNANCHORED = "UNANCHORED",
-  ANCHORED = "anchored", // Anchored + offline
-  ONLINE = "online", // Anchored + online
-  DESTROYED = "destroyed",
+  NULL = 'NULL',
+  UNANCHORED = 'UNANCHORED',
+  ANCHORED = 'anchored', // Anchored + offline
+  ONLINE = 'online', // Anchored + online
+  DESTROYED = 'destroyed',
 }
 
 /** @category Types */
 export enum ActionTypes {
-  UNANCHOR = "Unanchor",
-  ANCHOR = "Anchor",
-  BRING_ONLINE = "Online unit",
-  BRING_OFFLINE = "Offline unit",
-  DESTROY = "Destroy",
+  UNANCHOR = 'Unanchor',
+  ANCHOR = 'Anchor',
+  BRING_ONLINE = 'Online unit',
+  BRING_OFFLINE = 'Offline unit',
+  DESTROY = 'Destroy',
 }
 
 // =========================================
@@ -50,41 +49,36 @@ export enum ActionTypes {
 
 /** @category Types */
 export enum Severity {
-  Error = "error",
-  Warning = "warning",
-  Info = "info",
-  Success = "success",
+  Error = 'error',
+  Warning = 'warning',
+  Info = 'info',
+  Success = 'success',
 }
 
 /** @category Types */
 export interface Notify {
-  type: Severity;
-  message: string;
-  name?: string;
-  namespace?: string;
-  namespaceLabel?: string;
+  type: Severity
+  message: string
+  name?: string
+  namespace?: string
+  namespaceLabel?: string
 }
 
 // =========================================
 // Assembly Types
 // =========================================
 
-/** @category Types */
-export enum Assemblies {
-  SmartStorageUnit = "SmartStorageUnit",
-  SmartTurret = "SmartTurret",
-  SmartGate = "SmartGate",
-  NetworkNode = "NetworkNode",
-  Manufacturing = "Manufacturing",
-  Refinery = "Refinery",
-  Assembly = "Assembly",
-}
+/**
+ * @category Types
+ *
+ * TODO: This typedoc is not working when re-exported from wallet-core
+ */
+export { Assemblies } from '@evefrontier/wallet-core/definitions'
 
 /** @category Types */
-export interface AssemblyProperties<
-  T extends Assemblies,
-> extends DetailedAssemblyResponse {
-  type: T;
+export interface AssemblyProperties<T extends Assemblies>
+  extends DetailedAssemblyResponse {
+  type: T
 }
 
 /** @category Types */
@@ -97,14 +91,10 @@ export type AssemblyType<T extends Assemblies> = {
         ? AssemblyProperties<K> & { gate: GateModule }
         : K extends Assemblies.NetworkNode
           ? AssemblyProperties<K> & { networkNode: NetworkNodeModule }
-          : K extends Assemblies.Refinery
-            ? AssemblyProperties<K> & { refinery: RefineryModule }
-            : K extends Assemblies.Manufacturing
-              ? AssemblyProperties<K> & { manufacturing: ManufacturingModule }
-              : K extends Assemblies.Assembly
-                ? AssemblyProperties<K>
-                : never;
-}[T];
+          : K extends Assemblies.Assembly
+            ? AssemblyProperties<K>
+            : never
+}[T]
 
 // =========================================
 // Character Related Types
@@ -112,12 +102,12 @@ export type AssemblyType<T extends Assemblies> = {
 
 /** @category Types */
 export interface DetailedSmartCharacterResponse {
-  address: string;
-  name: string;
-  id: string;
-  tribeId: number;
-  smartAssemblies: Assemblies[];
-  portrait: string;
+  address: string
+  name: string
+  id: string
+  tribeId: number
+  smartAssemblies: Assemblies[]
+  portrait: string
 }
 
 // =========================================
@@ -134,66 +124,66 @@ export interface DetailedSmartCharacterResponse {
  */
 export interface DatahubGameInfo {
   /** The type ID (matches on-chain type_id) */
-  id: number;
+  id: number
   /** Display name of the item/type */
-  name: string;
+  name: string
   /** Description text */
-  description: string;
+  description: string
   /** Mass in kg */
-  mass: number;
+  mass: number
   /** Radius in meters */
-  radius: number;
+  radius: number
   /** Volume in cubic meters */
-  volume: number;
+  volume: number
   /** Portion size for stacking */
-  portionSize: number;
+  portionSize: number
   /** Category group name (e.g., "Structures") */
-  groupName: string;
+  groupName: string
   /** Category group ID */
-  groupId: number;
+  groupId: number
   /** Top-level category name */
-  categoryName: string;
+  categoryName: string
   /** Top-level category ID */
-  categoryId: number;
+  categoryId: number
   /** URL to the item's icon image */
-  iconUrl: string;
+  iconUrl: string
 }
 
 // =========================================
 // Logger Types
 // =========================================
 
-export type LogLevel = "silent" | "error" | "warn" | "info" | "debug";
+export type LogLevel = 'silent' | 'error' | 'warn' | 'info' | 'debug'
 
 export type GlobalProcess = {
-  env?: Record<string, string | undefined>;
-  cwd?: () => string;
-};
-
-export type GlobalWithProcess = typeof globalThis & {
-  process?: GlobalProcess;
-};
-
-export interface StackFrame {
-  filePath: string;
-  lineNumber?: number;
-  columnNumber?: number;
+  env?: Record<string, string | undefined>
+  cwd?: () => string
 }
 
-export type LoggerFn = (...args: unknown[]) => void;
+export type GlobalWithProcess = typeof globalThis & {
+  process?: GlobalProcess
+}
+
+export interface StackFrame {
+  filePath: string
+  lineNumber?: number
+  columnNumber?: number
+}
+
+export type LoggerFn = (...args: unknown[]) => void
 
 export interface Logger {
-  debug: LoggerFn;
-  info: LoggerFn;
-  warn: LoggerFn;
-  error: LoggerFn;
+  debug: LoggerFn
+  info: LoggerFn
+  warn: LoggerFn
+  error: LoggerFn
   /**
    * Create a scoped logger that inherits the current options.
    */
-  child: (scope: string) => Logger;
+  child: (scope: string) => Logger
 }
 
 export interface CreateLoggerOptions {
-  scope?: string;
-  level?: LogLevel;
+  scope?: string
+  level?: LogLevel
 }

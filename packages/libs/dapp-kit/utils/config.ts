@@ -1,27 +1,27 @@
-import { getSingletonConfigObjectByType } from "../graphql/client";
-import { getEnergyConfigType, getFuelEfficiencyConfigType } from "./constants";
+import { getSingletonConfigObjectByType } from '../graphql/client'
+import { getEnergyConfigType, getFuelEfficiencyConfigType } from './constants'
 
 /**
  * Cached energy config: type_id -> energy usage (e.g. energy_constant).
  * Populated from the on-chain EnergyConfig singleton.
  */
-let energyConfigCache: Record<number, number> | null = null;
-let fuelEfficiencyConfigCache: Record<number, number> | null = null;
+let energyConfigCache: Record<number, number> | null = null
+let fuelEfficiencyConfigCache: Record<number, number> | null = null
 
 /** In-flight promise for energy config so concurrent callers share one fetch. */
-let energyConfigInFlight: Promise<Record<number, number>> | null = null;
+let energyConfigInFlight: Promise<Record<number, number>> | null = null
 /** In-flight promise for fuel efficiency config so concurrent callers share one fetch. */
-let fuelEfficiencyConfigInFlight: Promise<Record<number, number>> | null = null;
+let fuelEfficiencyConfigInFlight: Promise<Record<number, number>> | null = null
 
 /**
  * Resets in-memory and in-flight caches. Only for use in tests.
  * @internal
  */
 export function resetConfigCachesForTesting(): void {
-  energyConfigCache = null;
-  fuelEfficiencyConfigCache = null;
-  energyConfigInFlight = null;
-  fuelEfficiencyConfigInFlight = null;
+  energyConfigCache = null
+  fuelEfficiencyConfigCache = null
+  energyConfigInFlight = null
+  fuelEfficiencyConfigInFlight = null
 }
 
 /**
@@ -33,18 +33,18 @@ export function resetConfigCachesForTesting(): void {
 function parseConfig(
   configJson: Record<string, unknown> | undefined,
 ): Record<number, number> {
-  const byTypeId: Record<number, number> = {};
+  const byTypeId: Record<number, number> = {}
   const nodes = configJson as unknown as
     | Array<{ key: { json: string }; value: { json: string } }>
-    | undefined;
-  if (!Array.isArray(nodes) || !nodes.length) return byTypeId;
+    | undefined
+  if (!Array.isArray(nodes) || !nodes.length) return byTypeId
   for (const node of nodes) {
-    const typeId = parseInt(node.key?.json ?? "", 10);
-    if (Number.isNaN(typeId)) continue;
-    const energy = parseInt(node.value?.json ?? "", 10);
-    byTypeId[typeId] = Number.isNaN(energy) ? 0 : energy;
+    const typeId = parseInt(node.key?.json ?? '', 10)
+    if (Number.isNaN(typeId)) continue
+    const energy = parseInt(node.value?.json ?? '', 10)
+    byTypeId[typeId] = Number.isNaN(energy) ? 0 : energy
   }
-  return byTypeId;
+  return byTypeId
 }
 
 /**
@@ -56,30 +56,30 @@ function parseConfig(
  */
 export async function getEnergyConfig(): Promise<Record<number, number>> {
   if (energyConfigCache) {
-    return energyConfigCache;
+    return energyConfigCache
   }
   if (energyConfigInFlight) {
-    return energyConfigInFlight;
+    return energyConfigInFlight
   }
 
   energyConfigInFlight = (async () => {
     const result = await getSingletonConfigObjectByType(
       getEnergyConfigType(),
-      "assembly_energy",
-    );
+      'assembly_energy',
+    )
 
     const energyConfigJson = result.data?.objects?.nodes[0]?.asMoveObject
       ?.contents?.extract?.extract?.asAddress?.addressAt?.dynamicFields
-      ?.nodes as Record<string, unknown> | undefined;
+      ?.nodes as Record<string, unknown> | undefined
 
-    energyConfigCache = parseConfig(energyConfigJson);
-    return energyConfigCache;
-  })();
+    energyConfigCache = parseConfig(energyConfigJson)
+    return energyConfigCache
+  })()
 
   try {
-    return await energyConfigInFlight;
+    return await energyConfigInFlight
   } finally {
-    energyConfigInFlight = null;
+    energyConfigInFlight = null
   }
 }
 
@@ -94,30 +94,30 @@ export async function getFuelEfficiencyConfig(): Promise<
   Record<number, number>
 > {
   if (fuelEfficiencyConfigCache) {
-    return fuelEfficiencyConfigCache;
+    return fuelEfficiencyConfigCache
   }
   if (fuelEfficiencyConfigInFlight) {
-    return fuelEfficiencyConfigInFlight;
+    return fuelEfficiencyConfigInFlight
   }
 
   fuelEfficiencyConfigInFlight = (async () => {
     const result = await getSingletonConfigObjectByType(
       getFuelEfficiencyConfigType(),
-      "fuel_efficiency",
-    );
+      'fuel_efficiency',
+    )
 
     const fuelEfficiencyConfigJson = result.data?.objects?.nodes[0]
       ?.asMoveObject?.contents?.extract?.extract?.asAddress?.addressAt
-      ?.dynamicFields?.nodes as Record<string, unknown> | undefined;
+      ?.dynamicFields?.nodes as Record<string, unknown> | undefined
 
-    fuelEfficiencyConfigCache = parseConfig(fuelEfficiencyConfigJson);
-    return fuelEfficiencyConfigCache;
-  })();
+    fuelEfficiencyConfigCache = parseConfig(fuelEfficiencyConfigJson)
+    return fuelEfficiencyConfigCache
+  })()
 
   try {
-    return await fuelEfficiencyConfigInFlight;
+    return await fuelEfficiencyConfigInFlight
   } finally {
-    fuelEfficiencyConfigInFlight = null;
+    fuelEfficiencyConfigInFlight = null
   }
 }
 
@@ -130,9 +130,9 @@ export async function getFuelEfficiencyConfig(): Promise<
  * @category Utilities - Config
  */
 export async function getEnergyUsageForType(typeId: number): Promise<number> {
-  const config = await getEnergyConfig();
+  const config = await getEnergyConfig()
 
-  return config[typeId] ?? 0;
+  return config[typeId] ?? 0
 }
 
 /**
@@ -146,6 +146,6 @@ export async function getEnergyUsageForType(typeId: number): Promise<number> {
 export async function getFuelEfficiencyForType(
   typeId: number,
 ): Promise<number> {
-  const config = await getFuelEfficiencyConfig();
-  return config[typeId] ?? 0;
+  const config = await getFuelEfficiencyConfig()
+  return config[typeId] ?? 0
 }

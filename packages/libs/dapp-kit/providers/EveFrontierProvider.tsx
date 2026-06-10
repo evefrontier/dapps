@@ -1,11 +1,12 @@
-import { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { DAppKitProvider } from "@mysten/dapp-kit-react";
-import { dAppKit } from "../config/dapp-kit";
+import { DAppKitProvider } from '@mysten/dapp-kit-react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
+import { dAppKit } from '../config/dapp-kit'
 
-import NotificationProvider from "./NotificationProvider";
-import SmartObjectProvider from "./SmartObjectProvider";
-import VaultProvider from "./VaultProvider";
+import NotificationProvider from './NotificationProvider'
+import SmartObjectProvider from './SmartObjectProvider'
+import VaultProvider from './VaultProvider'
+
 /**
  * EveFrontierProvider wraps the application with all necessary providers
  * for the EVE Frontier dApp kit.
@@ -22,8 +23,8 @@ const EveFrontierProvider = ({
   children,
   queryClient,
 }: {
-  children: ReactNode;
-  queryClient: QueryClient;
+  children: ReactNode
+  queryClient: QueryClient
 }) => {
   return (
     <QueryClientProvider client={queryClient}>
@@ -35,7 +36,7 @@ const EveFrontierProvider = ({
         </VaultProvider>
       </DAppKitProvider>
     </QueryClientProvider>
-  );
-};
+  )
+}
 
-export default EveFrontierProvider;
+export default EveFrontierProvider

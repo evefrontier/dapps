@@ -1,10 +1,10 @@
-import React from "react";
+import React from 'react'
 
 const Offline = React.memo(
   ({
     isParentNodeOnline,
   }: {
-    isParentNodeOnline: boolean;
+    isParentNodeOnline: boolean
   }): React.JSX.Element => {
     /** If parent node is offline, show "NETWORK NODE OFFLINE"
      * else, show "ONLINE ASSEMBLY TO ACCESS"
@@ -13,12 +13,12 @@ const Offline = React.memo(
       <div className="row-span-3">
         <div className="p-2 flex justify-center w-full bg-alert font-disket text-xs">
           {isParentNodeOnline
-            ? "ONLINE ASSEMBLY TO ACCESS"
-            : "NETWORK NODE OFFLINE"}
+            ? 'ONLINE ASSEMBLY TO ACCESS'
+            : 'NETWORK NODE OFFLINE'}
         </div>
       </div>
-    );
+    )
   },
-);
+)
 
-export default Offline;
+export default Offline

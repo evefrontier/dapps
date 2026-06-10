@@ -1,20 +1,20 @@
-import React from "react";
 import {
   FormControl,
-  FormLabel,
-  RadioGroup,
   FormControlLabel,
+  FormLabel,
   Radio,
-} from "@mui/material";
-import { pink } from "@mui/material/colors";
+  RadioGroup,
+} from '@mui/material'
+import { pink } from '@mui/material/colors'
+import React from 'react'
 
 interface EveRadioGroupProps {
-  label?: string;
+  label?: string
   options: {
-    value: string;
-    label: string;
-    onClick?: () => void;
-  }[];
+    value: string
+    label: string
+    onClick?: () => void
+  }[]
 }
 
 const EveRadioGroup = React.memo(({ label, options }: EveRadioGroupProps) => {
@@ -42,9 +42,9 @@ const EveRadioGroup = React.memo(({ label, options }: EveRadioGroupProps) => {
               <Radio
                 disableRipple
                 sx={{
-                  color: "hsla(17, 100%, 50%, 0.5)",
-                  "&.Mui-checked": {
-                    color: "hsla(17, 100%, 50%, 1)",
+                  color: 'hsla(17, 100%, 50%, 0.5)',
+                  '&.Mui-checked': {
+                    color: 'hsla(17, 100%, 50%, 1)',
                   },
                 }}
               />
@@ -55,7 +55,7 @@ const EveRadioGroup = React.memo(({ label, options }: EveRadioGroupProps) => {
         ))}
       </RadioGroup>
     </FormControl>
-  );
-});
+  )
+})
 
-export default EveRadioGroup;
+export default EveRadioGroup

@@ -17,7 +17,7 @@ This package contains the UI Component library for EVE Frontier dApps. Built wit
 To install the library, run the following command:
 
 ```bash
-pnpm install @eveworld/ui-components
+bun add @eveworld/ui-components
 ```
 
 ## Usage 🔧

@@ -1,32 +1,26 @@
-import {
+import type {
   SponsoredTransactionArgs,
   SponsoredTransactionOutput,
-} from "../wallet";
-import { Assemblies } from "./types";
+} from '../wallet'
 
 /**
  * Available sponsored transaction actions
  *
+ * @external SponsoredTransactionActions is defined in @evefrontier/wallet-core to ensure consistency between wallet and dapp-kit
  * @category Types
+ *
+ * TODO: This typedoc is not working when re-exported from wallet-core
  */
-export enum SponsoredTransactionActions {
-  BRING_ONLINE = "online",
-  BRING_OFFLINE = "offline",
-  /** @deprecated Use UPDATE_METADATA instead */
-  EDIT_UNIT = "edit-unit",
-  UPDATE_METADATA = "update-metadata",
-  LINK_SMART_GATE = "link-smart-gate",
-  UNLINK_SMART_GATE = "unlink-smart-gate",
-}
+export { SponsoredTransactionActions } from '@evefrontier/wallet-core/definitions'
 
 /** @category Types */
 export type SendSponsoredTransactionFn = (
   input: SponsoredTransactionArgs,
   options?: {
-    onSuccess?: (data: SponsoredTransactionOutput) => void;
-    onError?: (error: Error) => void;
+    onSuccess?: (data: SponsoredTransactionOutput) => void
+    onError?: (error: Error) => void
   },
-) => Promise<SponsoredTransactionOutput>;
+) => Promise<SponsoredTransactionOutput>
 
 // ============================================================================
 // Feature Identifiers
@@ -37,10 +31,13 @@ export type SendSponsoredTransactionFn = (
  * Wallets implementing this feature can request gas sponsorship from
  * the EVE Frontier sponsored-transaction backend service.
  *
+ * TODO: This typedoc is not working when re-exported from wallet-core
  * @category Wallet
  */
-export const EVEFRONTIER_SPONSORED_TRANSACTION =
-  "evefrontier:sponsoredTransaction" as const;
+export {
+  EVEFRONTIER_SPONSORED_TRANSACTION,
+  type SponsoredTransactionMetadata,
+} from '@evefrontier/wallet-core/wallet-standard-extensions'
 
 // ============================================================================
 // Sponsored Transaction Types
@@ -48,23 +45,14 @@ export const EVEFRONTIER_SPONSORED_TRANSACTION =
 
 /**
  * Map assembly types to API strings
+ *
+ * TODO: This typedoc is not working when re-exported from wallet-core
  */
-export const ASSEMBLY_TYPE_API_STRING: Record<Assemblies, string> = {
-  [Assemblies.SmartStorageUnit]: "storage-units",
-  [Assemblies.SmartTurret]: "turrets",
-  [Assemblies.SmartGate]: "gates",
-  [Assemblies.NetworkNode]: "network-nodes",
-  [Assemblies.Manufacturing]: "manufacturing",
-  [Assemblies.Refinery]: "refineries",
-  [Assemblies.Assembly]: "assemblies",
-} as const;
-
-/** API slug for assembly type in sponsored transaction payloads (e.g. "storage-units"). */
-export type SponsoredTransactionAssemblyType =
-  (typeof ASSEMBLY_TYPE_API_STRING)[Assemblies];
-
-export interface SponsoredTransactionMetadata {
-  name?: string;
-  description?: string;
-  url?: string;
-}
+/** API slug for assembly type in sponsored transaction payloads (e.g. "storage-units").
+ *
+ * TODO: This typedoc is not working when re-exported from wallet-core
+ */
+export {
+  ASSEMBLY_TYPE_API_STRING,
+  type SponsoredTransactionAssemblyType,
+} from '@evefrontier/wallet-core/definitions'

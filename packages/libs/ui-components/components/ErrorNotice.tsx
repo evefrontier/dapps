@@ -1,12 +1,12 @@
-import { DetailedAssemblyResponse } from "@evefrontier/dapp-kit";
-import EveContainer from "./EveContainer";
-import React from "react";
+import { DetailedAssemblyResponse } from '@evefrontier/dapp-kit'
+import React from 'react'
+import EveContainer from './EveContainer'
 
-import "../styles-ui.css";
+import '../styles-ui.css'
 
 export enum ErrorNoticeTypes {
-  "SMART_ASSEMBLY",
-  "MESSAGE",
+  SMART_ASSEMBLY,
+  MESSAGE,
 }
 /**
  * Renders an error notice component based on the provided type.
@@ -21,25 +21,25 @@ const ErrorNotice = React.memo(
     loading,
     assembly,
   }: {
-    type?: ErrorNoticeTypes;
-    errorMessage?: string;
-    loading?: boolean;
-    assembly?: DetailedAssemblyResponse | null;
+    type?: ErrorNoticeTypes
+    errorMessage?: string
+    loading?: boolean
+    assembly?: DetailedAssemblyResponse | null
   }) => {
-    let message;
+    let message: string | undefined
 
     switch (type) {
       case ErrorNoticeTypes.SMART_ASSEMBLY:
         // TODO: World api must differentiate between SSU undefined and SSU not found
         // Unit not found or not defined
-        message = `! Assembly not found !`;
-        break;
+        message = `! Assembly not found !`
+        break
       case ErrorNoticeTypes.MESSAGE:
-        message = errorMessage;
-        break;
+        message = errorMessage
+        break
       default:
-        message = errorMessage;
-        break;
+        message = errorMessage
+        break
     }
 
     if (type === ErrorNoticeTypes.SMART_ASSEMBLY)
@@ -47,7 +47,7 @@ const ErrorNotice = React.memo(
         <EveContainer className="flex flex-col m-2 font-disket justify-center items-center h-full">
           Assembly not found
         </EveContainer>
-      );
+      )
 
     return (
       <div className="Absolute-Center flex items-center justify-center w-full mx-0 h-full">
@@ -60,8 +60,8 @@ const ErrorNotice = React.memo(
           </div>
         </div>
       </div>
-    );
+    )
   },
-);
+)
 
-export default React.memo(ErrorNotice);
+export default React.memo(ErrorNotice)
