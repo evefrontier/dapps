@@ -1,5 +1,17 @@
 # @eveworld/assembly
 
+## 0.3.0
+
+### Minor Changes
+
+- World api url update
+
+### Patch Changes
+
+- Updated dependencies
+  - @eveworld/ui-components@0.2.0
+  - @evefrontier/dapp-kit@0.2.0
+
 ## 0.2.2
 
 ### Patch Changes
