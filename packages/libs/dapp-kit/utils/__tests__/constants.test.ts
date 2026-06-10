@@ -8,7 +8,6 @@ import {
   getFuelEfficiencyConfigType,
   getObjectRegistryType,
   getSuiGraphqlEndpoint,
-  KNOWN_EVE_COIN_TYPES,
   TenantId,
 } from '../constants'
 
@@ -151,26 +150,6 @@ describe('constants', () => {
       ],
     ])('returns the EVE coin type for tenant %s', (tenantId, expected) => {
       expect(getEveCoinType(tenantId)).toBe(expected)
-    })
-  })
-
-  // ============================================================================
-  // KNOWN_EVE_COIN_TYPES
-  // ============================================================================
-
-  describe('KNOWN_EVE_COIN_TYPES', () => {
-    it('contains the expected distinct EVE coin types', () => {
-      expect(KNOWN_EVE_COIN_TYPES).toEqual(
-        new Set([
-          '0x6407060579895a8b30f7d30d2447046eb80ecc23f0c9acde09222b2a505583c9::EVE::EVE',
-          '0xf0446b93345c1118f21239d7ac58fb82d005219b2016e100f074e4d17162a465::EVE::EVE',
-          '0x2a66a89b5a735738ffa4423ac024d23571326163f324f9051557617319e59d60::EVE::EVE',
-        ]),
-      )
-    })
-
-    it('does not contain an arbitrary coin type string', () => {
-      expect(KNOWN_EVE_COIN_TYPES.has('0x0000000000::EVE::EVE')).toBe(false)
     })
   })
 })

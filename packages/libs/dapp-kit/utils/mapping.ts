@@ -1,8 +1,9 @@
+import { TENANT_CONFIG } from '@evefrontier/wallet-core/definitions'
 import { bcs } from '@mysten/sui/bcs'
 import { deriveObjectID } from '@mysten/sui/utils'
 import { getSingletonObjectByType } from '../graphql/client'
 import { Assemblies, State } from '../types'
-import { getEveWorldPackageId, TENANT_CONFIG, TenantId } from './constants'
+import { getEveWorldPackageId, TenantId } from './constants'
 
 /**
  * Convert raw status variant string to State enum
