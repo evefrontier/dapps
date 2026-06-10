@@ -86,7 +86,7 @@ const InventoryView = React.memo(
     return (
       <>
         {assembly.state === 'online' ? (
-          <div className="text-xs flex flex-col !p-4 gap-2 min-h-full">
+          <div className="text-xs flex flex-col p-4! gap-2 min-h-full">
             <div className="flex flex-col w-full">
               <div
                 className="grid w-full font-disket text-xs text-neutral-50"
@@ -111,7 +111,7 @@ const InventoryView = React.memo(
                 inventoryItems?.map((item, index) => (
                   <InventoryItemRow
                     item={item}
-                    details={itemDetailsMap.get(item.type_id)}
+                    details={itemDetailsMap.get(Number(item.type_id))}
                     key={index}
                   />
                 ))
