@@ -4,6 +4,17 @@
 
 ### Minor Changes
 
+- World api url update
+
+### Patch Changes
+
+- Updated dependencies
+  - @evefrontier/dapp-kit@0.2.0
+
+## 0.2.0
+
+### Minor Changes
+
 - 7991953: june release ui style
 - june release
 
