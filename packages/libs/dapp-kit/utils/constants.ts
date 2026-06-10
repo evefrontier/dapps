@@ -208,7 +208,7 @@ export const TENANT_CONFIG: Record<TenantId, TenantConfig> = {
       '0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c',
     evePackageId:
       '0x2a66a89b5a735738ffa4423ac024d23571326163f324f9051557617319e59d60',
-    datahubHost: 'world-api-stillness.live.tech.evefrontier.com',
+    datahubHost: 'world-api-stillness.live.pub.evefrontier.com',
   },
 }
 
