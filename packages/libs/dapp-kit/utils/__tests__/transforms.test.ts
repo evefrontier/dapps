@@ -19,7 +19,7 @@ import type {
   DynamicFieldNode,
   MoveObjectData,
 } from '../../graphql/types'
-import { Assemblies, State } from '../../types'
+import { Assemblies, type DatahubGameInfo, State } from '../../types'
 import { getEnergyConfig, getEnergyUsageForType } from '../config'
 import { getDatahubGameInfo } from '../datahub'
 import { transformToAssembly, transformToCharacter } from '../transforms'
@@ -75,6 +75,21 @@ const GATE_TYPE = '0xpkg::gate::Gate'
 const NODE_TYPE = '0xpkg::network_node::NetworkNode'
 const DEFAULT_TYPE = '0xpkg::assembly::Assembly'
 
+const datahubInfo: DatahubGameInfo = {
+  id: 77917,
+  name: 'Smart Storage Unit',
+  description: 'A deployable storage assembly',
+  mass: 0,
+  radius: 0,
+  volume: 0,
+  portionSize: 1,
+  groupName: 'Structures',
+  groupId: 0,
+  categoryName: 'Deployables',
+  categoryId: 0,
+  iconUrl: 'https://example.com/icon.png',
+}
+
 // ============================================================================
 // Setup / teardown
 // ============================================================================
@@ -86,8 +101,8 @@ beforeEach(() => {
   )
   vi.mocked(getEnergyUsageForType).mockResolvedValue(0)
   vi.mocked(getEnergyConfig).mockResolvedValue({})
-  vi.mocked(getDatahubGameInfo).mockResolvedValue(null)
-  vi.mocked(getObjectWithJson).mockResolvedValue({ data: undefined })
+  vi.mocked(getDatahubGameInfo).mockResolvedValue(datahubInfo)
+  vi.mocked(getObjectWithJson).mockResolvedValue({})
 })
 
 afterEach(() => {
@@ -125,7 +140,7 @@ describe('transformToCharacter', () => {
 describe('transformToAssembly — null contents', () => {
   it('returns null when contents.json is undefined', async () => {
     const moveObj: MoveObjectData = {
-      contents: { json: undefined, type: { repr: SSU_TYPE } },
+      contents: { type: { repr: SSU_TYPE } },
     }
     const result = await transformToAssembly('0x1', moveObj)
     expect(result).toBeNull()

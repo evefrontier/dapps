@@ -24,7 +24,7 @@
     },
     "packages/apps/assembly": {
       "name": "@eveworld/assembly",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "dependencies": {
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
@@ -59,9 +59,9 @@
     },
     "packages/libs/dapp-kit": {
       "name": "@evefrontier/dapp-kit",
-      "version": "0.2.0",
+      "version": "0.1.10",
       "dependencies": {
-        "@evefrontier/wallet-core": "^0.0.1-alpha.8",
+        "@evefrontier/wallet-core": "^0.0.1-alpha.9",
         "@mysten/dapp-kit-core": "^1.2.2",
         "@mysten/dapp-kit-react": "^2.0.1",
         "@mysten/sui": "^2.14.1",
@@ -423,7 +423,7 @@
 
     "@evefrontier/dapp-kit": ["@evefrontier/dapp-kit@workspace:packages/libs/dapp-kit"],
 
-    "@evefrontier/wallet-core": ["@evefrontier/wallet-core@0.0.1-alpha.8", "https://npm.pkg.github.com/download/@evefrontier/wallet-core/0.0.1-alpha.8/095e96a9ba5c13ba5b09301938d973fcdeffa8f2", { "dependencies": { "@mysten/sui": "^2.16.3", "@mysten/wallet-standard": "^0.20.3", "@mysten/webcrypto-signer": "^0.1.2" } }, "sha512-1ct/cYOxbFaAvr+1YQP1jkBDUKtjkt7y3pF1NeDuZcazgpOxNZox63nKEWsbVoD3YksNTokpivXi5gGZTFTukA=="],
+    "@evefrontier/wallet-core": ["@evefrontier/wallet-core@0.0.1-alpha.9", "https://npm.pkg.github.com/download/@evefrontier/wallet-core/0.0.1-alpha.9/f0e5d5910600ce7579b8db75418ee156345c27f9", { "dependencies": { "@mysten/sui": "^2.16.3", "@mysten/wallet-standard": "^0.20.3", "@mysten/webcrypto-signer": "^0.1.2" } }, "sha512-wZ27MI2wVjQmpDr73tBo2POLwlkvs8fFFh2fJPylvu4UXDC6GHepCdE5RnR+JnuaWa6M+9JFZPKKMtDvKhOtuQ=="],
 
     "@eveworld/assembly": ["@eveworld/assembly@workspace:packages/apps/assembly"],
 
