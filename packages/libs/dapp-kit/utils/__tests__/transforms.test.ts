@@ -19,7 +19,7 @@ import type {
   DynamicFieldNode,
   MoveObjectData,
 } from '../../graphql/types'
-import { Assemblies, type DatahubGameInfo, State } from '../../types'
+import { Assemblies, type DatahubGameInfo, State, type InventoryItem } from '../../types'
 import { getEnergyConfig, getEnergyUsageForType } from '../config'
 import { getDatahubGameInfo } from '../datahub'
 import { transformToAssembly, transformToCharacter } from '../transforms'
@@ -201,6 +201,57 @@ describe('transformToAssembly — SmartStorageUnit', () => {
     expect(result?.type).toBe(Assemblies.SmartStorageUnit)
     expect(result?.storage.mainInventory.capacity).toBeUndefined()
     expect(result?.storage.mainInventory.usedCapacity).toBeUndefined()
+  })
+
+  it('orders storage inventory items by quantity from GraphQL data', async () => {
+    function createInventoryItem(typeId: number, quantity: number): InventoryItem {
+      return {
+        id: `item-${typeId}`,
+        item_id: `item-${typeId}`,
+        location: { location_hash: 'main' },
+        name: `Item ${typeId}`,
+        quantity,
+        tenant: 'stillness',
+        type_id: typeId,
+      }
+    }
+
+    const inventoryKey = 'main-inventory'
+    const inventoryDynField: DynamicFieldNode = {
+      name: { json: inventoryKey, type: { repr: '0x::String' } },
+      contents: {
+        json: {
+          key: inventoryKey,
+          value: {
+            max_capacity: '1000000',
+            used_capacity: '1000',
+            items: {
+              contents: [
+                { key: 'low', value: createInventoryItem(77810, 20) },
+                { key: 'high', value: createInventoryItem(82128, 500) },
+                { key: 'mid', value: createInventoryItem(88082, 50) },
+              ],
+            },
+          },
+        },
+        type: { layout: '' },
+      },
+    }
+
+    const moveObj = makeMoveObject(
+      makeRawJson({ inventory_keys: [inventoryKey] }),
+      SSU_TYPE,
+      [inventoryDynField],
+    )
+
+    const result = (await transformToAssembly('0x1', moveObj)) as Extract<
+      Awaited<ReturnType<typeof transformToAssembly>>,
+      { type: Assemblies.SmartStorageUnit }
+    >
+
+    expect(result?.storage.mainInventory.items.map((item) => item.type_id)).toEqual(
+      [82128, 88082, 77810],
+    )
   })
 })
 

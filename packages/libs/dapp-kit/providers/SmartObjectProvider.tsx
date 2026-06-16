@@ -17,6 +17,15 @@ import {
 } from '../utils'
 import { DEFAULT_TENANT, POLLING_INTERVAL } from '../utils/constants'
 import { getDatahubGameInfo } from '../utils/datahub'
+import { areInventoryItemListsEqual } from '../utils/inventory'
+import {
+  applyInventoryEventToAssembly,
+  createEventRefetchScheduler,
+  type EventUnsubscribe,
+  getInventoryEventTypes,
+  isRelevantAssemblyInventoryEvent,
+  subscribeToInventoryEvents,
+} from './eventRefresh'
 
 const log = createLogger()
 
@@ -36,6 +45,40 @@ export const SmartObjectContext = createContext<SmartObjectContextType>({
   error: null,
   refetch: async () => {},
 })
+
+function preserveStorageInventoryItemsWhenEqual(
+  currentAssembly: AssemblyType<Assemblies> | null,
+  nextAssembly: AssemblyType<Assemblies> | null,
+): AssemblyType<Assemblies> | null {
+  if (
+    !currentAssembly ||
+    !nextAssembly ||
+    currentAssembly.type !== Assemblies.SmartStorageUnit ||
+    nextAssembly.type !== Assemblies.SmartStorageUnit
+  ) {
+    return nextAssembly
+  }
+
+  if (
+    !areInventoryItemListsEqual(
+      currentAssembly.storage.mainInventory.items,
+      nextAssembly.storage.mainInventory.items,
+    )
+  ) {
+    return nextAssembly
+  }
+
+  return {
+    ...nextAssembly,
+    storage: {
+      ...nextAssembly.storage,
+      mainInventory: {
+        ...nextAssembly.storage.mainInventory,
+        items: currentAssembly.storage.mainInventory.items,
+      },
+    },
+  }
+}
 
 /**
  * SmartObjectProvider component provides context for smart objects data.
@@ -152,7 +195,13 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
             },
           )
 
-          setAssembly(transformed)
+          setAssembly((currentAssembly) => {
+            if (isInitialFetch) return transformed
+            return preserveStorageInventoryItemsWhenEqual(
+              currentAssembly,
+              transformed,
+            )
+          })
 
           // Transform and set assemblyOwner: owner of the assembly
           if (characterInfo) {
@@ -242,6 +291,86 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
         log.info('[DappKit] SmartObjectProvider: Stopped polling')
       }
       lastDataHashRef.current = null
+    }
+  }, [
+    selectedObjectId,
+    selectedTenant,
+    isObjectIdDirect,
+    isConnected,
+    fetchObjectData,
+  ])
+
+  // Listen for inventory events via gRPC checkpoint stream. GraphQL polling above
+  // remains the fallback/source of truth if stream events are missed or unavailable.
+  useEffect(() => {
+    if (!selectedObjectId || !isConnected) return
+
+    const input: FetchObjectDataInput = isObjectIdDirect
+      ? { objectId: selectedObjectId }
+      : { itemId: selectedObjectId, selectedTenant }
+    const eventTypes = getInventoryEventTypes()
+    const abortController = new AbortController()
+    const triggerRefetch = createEventRefetchScheduler(
+      () => fetchObjectData(input, false),
+      undefined,
+      (error) => {
+        log.warn(
+          '[DappKit] SmartObjectProvider: Event-triggered refetch failed:',
+          error,
+        )
+      },
+    )
+    let unsubscribe: EventUnsubscribe | null = null
+
+    subscribeToInventoryEvents({
+      eventTypes,
+      signal: abortController.signal,
+      onGap: () => {
+        triggerRefetch()
+      },
+      onEvents: (events) => {
+        const relevantEvents = events.filter((event) =>
+          isRelevantAssemblyInventoryEvent(event, {
+            eventTypes,
+            ...(isObjectIdDirect ? { objectId: selectedObjectId } : {}),
+            ...(!isObjectIdDirect ? { itemId: selectedObjectId } : {}),
+            tenant: selectedTenant,
+          }),
+        )
+
+        if (relevantEvents.length > 0) {
+          setAssembly((currentAssembly) =>
+            relevantEvents.reduce(
+              (updatedAssembly, event) =>
+                applyInventoryEventToAssembly(updatedAssembly, event),
+              currentAssembly,
+            ),
+          )
+          triggerRefetch()
+        }
+      },
+    })
+      .then((eventUnsubscribe) => {
+        if (abortController.signal.aborted) {
+          void eventUnsubscribe()
+          return
+        }
+        unsubscribe = eventUnsubscribe
+      })
+      .catch((error) => {
+        if (abortController.signal.aborted) return
+        log.warn(
+          '[DappKit] SmartObjectProvider: Inventory checkpoint stream unavailable; polling remains active:',
+          error,
+        )
+      })
+
+    return () => {
+      abortController.abort()
+      triggerRefetch.cancel()
+      if (unsubscribe) {
+        void unsubscribe()
+      }
     }
   }, [
     selectedObjectId,
