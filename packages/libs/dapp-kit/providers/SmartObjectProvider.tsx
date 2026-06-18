@@ -341,7 +341,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
   // Listen for inventory events via gRPC checkpoint stream. GraphQL polling above
   // remains the fallback/source of truth if stream events are missed or unavailable.
   useEffect(() => {
-    if (!selectedObjectId) return
+    if (!selectedObjectId || !isConnected) return
 
     const input: FetchObjectDataInput = isObjectIdDirect
       ? { objectId: selectedObjectId }
@@ -438,7 +438,13 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
         void unsubscribe()
       }
     }
-  }, [selectedObjectId, selectedTenant, isObjectIdDirect, fetchObjectData])
+  }, [
+    selectedObjectId,
+    selectedTenant,
+    isObjectIdDirect,
+    isConnected,
+    fetchObjectData,
+  ])
 
   const handleRefetch = useCallback(async () => {
     if (!selectedObjectId) return

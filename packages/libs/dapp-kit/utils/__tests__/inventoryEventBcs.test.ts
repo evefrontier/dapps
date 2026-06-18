@@ -1,8 +1,3 @@
-import {
-  getJsonRpcFullnodeUrl,
-  JsonRpcHTTPTransport,
-} from '@mysten/sui/jsonRpc'
-import { fromBase64 } from '@mysten/sui/utils'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -10,40 +5,42 @@ import {
   inventoryEventBcsToParsedJson,
 } from '../inventoryEventBcs'
 
-const PACKAGE_ID =
-  '0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c'
+function hexToBytes(hex: string): Uint8Array {
+  const bytes = new Uint8Array(hex.length / 2)
+  for (let index = 0; index < bytes.length; index += 1) {
+    bytes[index] = Number.parseInt(hex.slice(index * 2, index * 2 + 2), 16)
+  }
+  return bytes
+}
+
+// Real ItemMintedEvent BCS bytes captured from testnet. Mint and burn share the
+// InventoryMoveEvent struct, so this vector exercises the full decode path
+// without a live RPC call.
+const INVENTORY_MOVE_EVENT_BCS_HEX =
+  '34d08b4e1afe6a4babcc0642d6a676160df6b777b49214d5c964b4e874cc951b7a2dc1d4e8000000097374696c6c6e657373a60609a1b94ffca8ed2daf4963a2b9deffce23de76ef9f3d040d7250edb7b2c781bee37d00000000097374696c6c6e6573730000000000000000f22f010000000000f4010000'
 
 describe('inventoryEventBcs', () => {
-  it('decodes mint and burn inventory events from chain BCS bytes', async () => {
-    const transport = new JsonRpcHTTPTransport({
-      url: getJsonRpcFullnodeUrl('testnet'),
+  it('decodes an inventory move event from chain BCS bytes', () => {
+    const decoded = decodeInventoryEventBcs(
+      hexToBytes(INVENTORY_MOVE_EVENT_BCS_HEX),
+    )
+
+    expect(inventoryEventBcsToParsedJson(decoded)).toEqual({
+      assembly_id:
+        '0x34d08b4e1afe6a4babcc0642d6a676160df6b777b49214d5c964b4e874cc951b',
+      assembly_key: {
+        item_id: '1000001842554',
+        tenant: 'stillness',
+      },
+      character_id:
+        '0xa60609a1b94ffca8ed2daf4963a2b9deffce23de76ef9f3d040d7250edb7b2c7',
+      character_key: {
+        item_id: '2112077441',
+        tenant: 'stillness',
+      },
+      item_id: '0',
+      quantity: 500,
+      type_id: '77810',
     })
-
-    for (const eventName of ['ItemMintedEvent', 'ItemBurnedEvent'] as const) {
-      const result = await transport.request<{
-        data: Array<{
-          parsedJson: Record<string, unknown>
-          bcs: string
-          bcsEncoding: 'base64' | 'base58'
-        }>
-      }>({
-        method: 'suix_queryEvents',
-        params: [
-          { MoveEventType: `${PACKAGE_ID}::inventory::${eventName}` },
-          null,
-          1,
-          true,
-        ],
-      })
-
-      const event = result.data[0]
-      if (!event) {
-        throw new Error(`No ${eventName} events returned from testnet`)
-      }
-      const bytes = fromBase64(event.bcs)
-      const decoded = decodeInventoryEventBcs(bytes)
-
-      expect(inventoryEventBcsToParsedJson(decoded)).toEqual(event.parsedJson)
-    }
   })
 })

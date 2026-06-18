@@ -26,6 +26,8 @@ const CHECKPOINT_STREAM_RECONNECT_MS = 1_000
 const CHECKPOINT_STREAM_MAX_SESSION_MS = 28_000
 // Backup if a session stops yielding without closing cleanly.
 const CHECKPOINT_STREAM_IDLE_MS = 35_000
+// Bound the dedupe set so long-lived sessions don't grow it unbounded.
+const CHECKPOINT_STREAM_MAX_SEEN_EVENTS = 5_000
 const CHECKPOINT_STREAM_READ_MASK_PATHS = [
   'transactions.digest',
   'transactions.events',
@@ -351,7 +353,7 @@ function toFiniteNumber(value: unknown, fallback = 0): number {
 }
 
 function isOptimisticInventoryItem(item: InventoryItem): boolean {
-  return item.id.startsWith('optimistic-') || item.name.startsWith('Type ')
+  return item.id.startsWith('optimistic-')
 }
 
 function mergeInventoryItemsByTypeId(items: InventoryItem[]): InventoryItem[] {
@@ -593,6 +595,12 @@ function collectUnseenInventoryEvents(
     const eventId = getInventoryEventId(event, checkpointSequence)
     if (seenEventIds.has(eventId)) return false
     seenEventIds.add(eventId)
+    // Evict oldest ids (insertion order) once the set exceeds its cap.
+    while (seenEventIds.size > CHECKPOINT_STREAM_MAX_SEEN_EVENTS) {
+      const oldest = seenEventIds.values().next().value
+      if (oldest === undefined) break
+      seenEventIds.delete(oldest)
+    }
     return true
   })
 }

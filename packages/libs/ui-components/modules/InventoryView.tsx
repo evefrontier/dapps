@@ -114,7 +114,7 @@ const InventoryView = React.memo(
                   <InventoryItemRow
                     item={item}
                     details={itemDetailsMap.get(Number(item.type_id))}
-                    key={String(item.type_id)}
+                    key={item.id}
                   />
                 ))
               )}

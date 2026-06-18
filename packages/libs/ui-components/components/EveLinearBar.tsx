@@ -13,9 +13,9 @@ const EveLinearBar = React.memo(
     wholeNumbers?: boolean
   }) => {
     const percentage =
-      denominator === 0 && nominator === 0
+      denominator <= 0
         ? '0%'
-        : `${(nominator / denominator) * 100}%`
+        : `${Math.min(100, Math.max(0, (nominator / denominator) * 100))}%`
 
     const displayNominator = wholeNumbers ? Math.round(nominator) : nominator
     const displayDenominator = wholeNumbers
