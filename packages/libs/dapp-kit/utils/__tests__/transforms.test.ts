@@ -19,7 +19,12 @@ import type {
   DynamicFieldNode,
   MoveObjectData,
 } from '../../graphql/types'
-import { Assemblies, type DatahubGameInfo, State, type InventoryItem } from '../../types'
+import {
+  Assemblies,
+  type DatahubGameInfo,
+  type InventoryItem,
+  State,
+} from '../../types'
 import { getEnergyConfig, getEnergyUsageForType } from '../config'
 import { getDatahubGameInfo } from '../datahub'
 import { transformToAssembly, transformToCharacter } from '../transforms'
@@ -204,7 +209,10 @@ describe('transformToAssembly — SmartStorageUnit', () => {
   })
 
   it('orders storage inventory items by quantity from GraphQL data', async () => {
-    function createInventoryItem(typeId: number, quantity: number): InventoryItem {
+    function createInventoryItem(
+      typeId: number,
+      quantity: number,
+    ): InventoryItem {
       return {
         id: `item-${typeId}`,
         item_id: `item-${typeId}`,
@@ -249,9 +257,9 @@ describe('transformToAssembly — SmartStorageUnit', () => {
       { type: Assemblies.SmartStorageUnit }
     >
 
-    expect(result?.storage.mainInventory.items.map((item) => item.type_id)).toEqual(
-      [82128, 88082, 77810],
-    )
+    expect(
+      result?.storage.mainInventory.items.map((item) => item.type_id),
+    ).toEqual([82128, 88082, 77810])
   })
 })
 

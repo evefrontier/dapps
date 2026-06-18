@@ -1,11 +1,16 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Assemblies, type AssemblyType } from '../../types'
+import {
+  clearInventoryTypeVolumeM3Cache,
+  setInventoryTypeVolumeM3,
+} from '../../utils/inventory'
 import {
   applyInventoryEventToAssembly,
   type CheckpointStreamMessage,
   createEventRefetchScheduler,
   createInventoryCheckpointStream,
   extractInventoryEventsFromCheckpoint,
+  getInventoryEventTarget,
   getInventoryEventTypes,
   isRelevantAssemblyInventoryEvent,
 } from '../eventRefresh'
@@ -82,6 +87,10 @@ function createUnsortedStorageAssembly(): AssemblyType<Assemblies.SmartStorageUn
 }
 
 describe('event refresh helpers', () => {
+  beforeEach(() => {
+    clearInventoryTypeVolumeM3Cache()
+  })
+
   it('subscribes to inventory burn and mint events', () => {
     expect(getInventoryEventTypes(PACKAGE_ID)).toEqual([
       `${PACKAGE_ID}::inventory::ItemBurnedEvent`,
@@ -128,6 +137,75 @@ describe('event refresh helpers', () => {
         eventTypes: getInventoryEventTypes(PACKAGE_ID),
       }),
     ).toBe(true)
+  })
+
+  it('prefers the loaded assembly object id when building event targets', () => {
+    const assembly = createStorageAssembly()
+    assembly.id = ASSEMBLY_OBJECT_ID
+    assembly.item_id = 1000001842554
+
+    expect(
+      getInventoryEventTarget({
+        assembly,
+        eventTypes: getInventoryEventTypes(PACKAGE_ID),
+        isObjectIdDirect: false,
+        selectedObjectId: 'wrong-item-id',
+        selectedTenant: 'stillness',
+      }),
+    ).toEqual({
+      eventTypes: getInventoryEventTypes(PACKAGE_ID),
+      objectId: ASSEMBLY_OBJECT_ID,
+    })
+  })
+
+  it('falls back to the assembly item id and tenant when no object id is loaded', () => {
+    const assembly = createStorageAssembly()
+    assembly.item_id = 1000001842554
+
+    expect(
+      getInventoryEventTarget({
+        assembly,
+        eventTypes: getInventoryEventTypes(PACKAGE_ID),
+        isObjectIdDirect: false,
+        selectedObjectId: 'selected-item-id',
+        selectedTenant: 'stillness',
+      }),
+    ).toEqual({
+      eventTypes: getInventoryEventTypes(PACKAGE_ID),
+      itemId: '1000001842554',
+      tenant: 'stillness',
+    })
+  })
+
+  it('targets the direct object id when no assembly is loaded yet', () => {
+    expect(
+      getInventoryEventTarget({
+        assembly: null,
+        eventTypes: getInventoryEventTypes(PACKAGE_ID),
+        isObjectIdDirect: true,
+        selectedObjectId: ASSEMBLY_OBJECT_ID,
+        selectedTenant: 'stillness',
+      }),
+    ).toEqual({
+      eventTypes: getInventoryEventTypes(PACKAGE_ID),
+      objectId: ASSEMBLY_OBJECT_ID,
+    })
+  })
+
+  it('targets the selected item id and tenant when no assembly is loaded yet', () => {
+    expect(
+      getInventoryEventTarget({
+        assembly: null,
+        eventTypes: getInventoryEventTypes(PACKAGE_ID),
+        isObjectIdDirect: false,
+        selectedObjectId: '1000001842554',
+        selectedTenant: 'stillness',
+      }),
+    ).toEqual({
+      eventTypes: getInventoryEventTypes(PACKAGE_ID),
+      itemId: '1000001842554',
+      tenant: 'stillness',
+    })
   })
 
   it('matches minted inventory events for deposits', () => {
@@ -221,6 +299,24 @@ describe('event refresh helpers', () => {
       expect.objectContaining({ type_id: 77810, quantity: 520 }),
     ])
     expect(assembly.storage.mainInventory.items[0]?.quantity).toBe(20)
+  })
+
+  it('optimistically updates used capacity when type volume is cached', () => {
+    setInventoryTypeVolumeM3(77810, 0.1)
+    const assembly = createStorageAssembly()
+    const event = {
+      type: `${PACKAGE_ID}::inventory::ItemMintedEvent`,
+      parsedJson: {
+        quantity: 10,
+        type_id: '77810',
+      },
+    }
+
+    const updated = expectStorageAssembly(
+      applyInventoryEventToAssembly(assembly, event),
+    )
+
+    expect(updated.storage.mainInventory.usedCapacity).toBe('2000')
   })
 
   it('merges duplicate rows when minting an existing item type', () => {

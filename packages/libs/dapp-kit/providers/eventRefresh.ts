@@ -7,7 +7,10 @@ import {
   getEveWorldPackageId,
   getSuiGrpcBaseUrl,
 } from '../utils/constants'
-import { sortInventoryItemsByQuantity } from '../utils/inventory'
+import {
+  adjustInventoryUsedCapacity,
+  sortInventoryItemsByQuantity,
+} from '../utils/inventory'
 import {
   decodeInventoryEventBcs,
   inventoryEventBcsToParsedJson,
@@ -260,10 +263,51 @@ export function isRelevantAssemblyInventoryEvent(
 
   if (!target.itemId || !target.tenant) return false
 
+  const eventItemId = String(payload.assembly_key?.item_id ?? '')
+  const targetItemId = String(target.itemId)
+
   return (
-    String(payload.assembly_key?.item_id ?? '') === target.itemId &&
+    eventItemId === targetItemId &&
     payload.assembly_key?.tenant === target.tenant
   )
+}
+
+export function getInventoryEventTarget({
+  assembly,
+  eventTypes,
+  isObjectIdDirect,
+  selectedObjectId,
+  selectedTenant,
+}: {
+  assembly: AssemblyType<Assemblies> | null
+  eventTypes: readonly string[]
+  isObjectIdDirect: boolean
+  selectedObjectId: string
+  selectedTenant: string
+}): AssemblyEventTarget {
+  if (assembly?.type === Assemblies.SmartStorageUnit) {
+    if (assembly.id) {
+      return { eventTypes, objectId: assembly.id }
+    }
+
+    if (assembly.item_id) {
+      return {
+        eventTypes,
+        itemId: String(assembly.item_id),
+        tenant: selectedTenant,
+      }
+    }
+  }
+
+  if (isObjectIdDirect) {
+    return { eventTypes, objectId: selectedObjectId }
+  }
+
+  return {
+    eventTypes,
+    itemId: selectedObjectId,
+    tenant: selectedTenant,
+  }
 }
 
 function parseInventoryEventDelta(
@@ -408,6 +452,12 @@ export function applyInventoryEventToAssembly(
       ...assembly.storage,
       mainInventory: {
         ...assembly.storage.mainInventory,
+        usedCapacity: adjustInventoryUsedCapacity(
+          assembly.storage.mainInventory.usedCapacity,
+          delta.quantity,
+          delta.typeId,
+          delta.operation,
+        ),
         items: sortInventoryItemsByQuantity(
           mergeInventoryItemsByTypeId(nextItems),
         ),

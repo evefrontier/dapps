@@ -59,7 +59,9 @@ const InventoryView = React.memo(
           getDatahubGameInfo(typeId).then((info) => [typeId, info] as const),
         ),
       ).then((results) => {
-        if (!cancelled) setItemDetailsMap(new Map(results))
+        if (!cancelled) {
+          setItemDetailsMap(new Map(results))
+        }
       })
       return () => {
         cancelled = true
@@ -108,11 +110,11 @@ const InventoryView = React.memo(
               {!inventoryItems || inventoryItems.length === 0 ? (
                 <div className="text-neutral text-sm">Empty</div>
               ) : (
-                inventoryItems?.map((item, index) => (
+                inventoryItems?.map((item) => (
                   <InventoryItemRow
                     item={item}
                     details={itemDetailsMap.get(Number(item.type_id))}
-                    key={index}
+                    key={String(item.type_id)}
                   />
                 ))
               )}
@@ -121,7 +123,8 @@ const InventoryView = React.memo(
             <EveLinearBar
               nominator={formatM3(usedCap ?? '0')}
               denominator={formatM3(storageCap ?? '0')}
-              label={`m3`}
+              label="m3"
+              wholeNumbers
             />
           </div>
         ) : (
