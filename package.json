@@ -9,8 +9,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.0",
-    "@nx/vite": "22.6.4",
-    "@nx/web": "22.6.4",
+    "@nx/vite": "^23.0.0",
+    "@nx/web": "^23.0.0",
     "@types/node": "^25.9.4",
     "@vitest/ui": "4.1.3",
     "husky": "^9.1.7",
