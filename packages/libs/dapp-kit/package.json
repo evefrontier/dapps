@@ -41,7 +41,7 @@
     }
   },
   "dependencies": {
-    "@evefrontier/wallet-core": "^0.0.1",
+    "@evefrontier/wallet-core": "^0.0.2",
     "@mysten/dapp-kit-core": "^1.2.2",
     "@mysten/dapp-kit-react": "^2.0.1",
     "@mysten/sui": "^2.14.1",
@@ -58,7 +58,7 @@
     "typedoc": "^0.28.18",
     "typedoc-plugin-markdown": "^4.11.0",
     "typescript": "^6.0.2",
-    "vite": "8.0.5",
+    "vite": "^8.0.16",
     "vite-plugin-svgr": "^5.2.0",
     "vitest": "4.1.3"
   },
