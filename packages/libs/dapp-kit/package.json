@@ -41,7 +41,7 @@
     }
   },
   "dependencies": {
-    "@evefrontier/wallet-core": "^0.0.2",
+    "@evefrontier/wallet-core": "0.0.3",
     "@mysten/dapp-kit-core": "^1.2.2",
     "@mysten/dapp-kit-react": "^2.0.1",
     "@mysten/sui": "^2.14.1",
