@@ -5,7 +5,7 @@
  * standard Sui wallet capabilities.
  */
 
-import { type SponsoredTransactionInput as WalletCoreSponsoredTransactionInput } from '@evefrontier/wallet-core/wallet-standard-extensions'
+import { type SponsoredTransactionInput as WalletCoreSponsoredTransactionInput } from '@evefrontier/wallet-core/sponsored-transaction'
 import {
   Assemblies,
   type AssemblyType,
@@ -20,7 +20,7 @@ import {
  * @category Wallet
  * TODO: This typedoc is not working when re-exported from wallet-core
  */
-export { getAssemblyTypeApiString } from '@evefrontier/wallet-core/definitions'
+export { getAssemblyTypeApiString } from '@evefrontier/wallet-core/sponsored-transaction'
 
 /**
  * Input for a sponsored transaction request
@@ -52,10 +52,10 @@ export type SponsoredTransactionArgs = Omit<
 // EveFrontierSponsoredTransactionFeature — either here once re-export doc support lands,
 // or upstream in wallet-core.
 export type {
-  EveVaultWalletFeatures as EveFrontierSponsoredTransactionFeature,
   SponsoredTransactionMethod,
   SponsoredTransactionOutput,
-} from '@evefrontier/wallet-core/wallet-standard-extensions'
+} from '@evefrontier/wallet-core/sponsored-transaction'
+export type { EveVaultWalletFeatures as EveFrontierSponsoredTransactionFeature } from '@evefrontier/wallet-core/wallet-features'
 
 // ============================================================================
 // Type Guards

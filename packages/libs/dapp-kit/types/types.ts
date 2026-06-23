@@ -1,4 +1,4 @@
-import { Assemblies } from '@evefrontier/wallet-core/definitions'
+import { Assemblies } from '@evefrontier/wallet-core/sponsored-transaction'
 import type { SUI_GRAPHQL_NETWORKS } from '../utils'
 import type {
   DetailedAssemblyResponse,
@@ -73,7 +73,7 @@ export interface Notify {
  *
  * TODO: This typedoc is not working when re-exported from wallet-core
  */
-export { Assemblies } from '@evefrontier/wallet-core/definitions'
+export { Assemblies } from '@evefrontier/wallet-core/sponsored-transaction'
 
 /** @category Types */
 export interface AssemblyProperties<T extends Assemblies>
