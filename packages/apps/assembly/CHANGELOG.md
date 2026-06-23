@@ -1,5 +1,11 @@
 # @eveworld/assembly
 
+## 0.3.2
+
+### Patch Changes
+
+- update wallet-core version
+
 ## 0.3.1
 
 ### Patch Changes
