@@ -52,10 +52,10 @@ export type SponsoredTransactionArgs = Omit<
 // EveFrontierSponsoredTransactionFeature — either here once re-export doc support lands,
 // or upstream in wallet-core.
 export type {
-  EveVaultWalletFeatures as EveFrontierSponsoredTransactionFeature,
   SponsoredTransactionMethod,
   SponsoredTransactionOutput,
-} from '@evefrontier/wallet-core/wallet-standard-extensions'
+} from '@evefrontier/wallet-core/sponsored-transaction'
+export type { EveVaultWalletFeatures as EveFrontierSponsoredTransactionFeature } from '@evefrontier/wallet-core/wallet-features'
 
 // ============================================================================
 // Type Guards
