@@ -2,18 +2,19 @@
 // Environment Variable Helpers
 // ============================================================================
 
-import type { TenantId } from '@evefrontier/wallet-core/definitions'
-import { TENANT_CONFIG } from '@evefrontier/wallet-core/definitions'
+import { TENANT_CONFIG, type TenantId } from '@evefrontier/wallet-core/tenant'
 import type { SuiGraphqlNetwork } from '../types'
 
 export {
-  DEFAULT_TENANT,
-  EVE_PACKAGE_ID_BY_TENANT,
   getEveCoinType,
   isEveCoinType,
+} from '@evefrontier/wallet-core/eve-token'
+export {
+  DEFAULT_TENANT,
+  EVE_PACKAGE_ID_BY_TENANT,
   TENANT_CONFIG,
   TenantId,
-} from '@evefrontier/wallet-core/definitions'
+} from '@evefrontier/wallet-core/tenant'
 
 /**
  * Get a required environment variable, throwing if not set.

@@ -1,4 +1,4 @@
-import { TENANT_CONFIG } from '@evefrontier/wallet-core/definitions'
+import { TENANT_CONFIG } from '@evefrontier/wallet-core/tenant'
 import { bcs } from '@mysten/sui/bcs'
 import { deriveObjectID } from '@mysten/sui/utils'
 import { getSingletonObjectByType } from '../graphql/client'

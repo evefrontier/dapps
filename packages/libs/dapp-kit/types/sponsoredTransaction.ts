@@ -11,7 +11,7 @@ import type {
  *
  * TODO: This typedoc is not working when re-exported from wallet-core
  */
-export { SponsoredTransactionActions } from '@evefrontier/wallet-core/definitions'
+export { SponsoredTransactionActions } from '@evefrontier/wallet-core/sponsored-transaction'
 
 /** @category Types */
 export type SendSponsoredTransactionFn = (
@@ -34,10 +34,9 @@ export type SendSponsoredTransactionFn = (
  * TODO: This typedoc is not working when re-exported from wallet-core
  * @category Wallet
  */
-export {
-  EVEFRONTIER_SPONSORED_TRANSACTION,
-  type SponsoredTransactionMetadata,
-} from '@evefrontier/wallet-core/wallet-standard-extensions'
+export type { SponsoredTransactionMetadata } from '@evefrontier/wallet-core/sponsored-transaction'
+
+export { EVEFRONTIER_SPONSORED_TRANSACTION } from '@evefrontier/wallet-core/wallet-features'
 
 // ============================================================================
 // Sponsored Transaction Types
@@ -55,4 +54,4 @@ export {
 export {
   ASSEMBLY_TYPE_API_STRING,
   type SponsoredTransactionAssemblyType,
-} from '@evefrontier/wallet-core/definitions'
+} from '@evefrontier/wallet-core/sponsored-transaction'
