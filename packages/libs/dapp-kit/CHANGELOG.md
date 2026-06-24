@@ -1,5 +1,11 @@
 # @evefrontier/dapp-kit
 
+## 0.1.11
+
+### Patch Changes
+
+- use optimistic updates for inventory
+
 ## 0.1.10
 
 ### Patch Changes

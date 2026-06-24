@@ -12,7 +12,6 @@ export {
 export {
   DEFAULT_TENANT,
   EVE_PACKAGE_ID_BY_TENANT,
-  TENANT_CONFIG,
   TenantId,
 } from '@evefrontier/wallet-core/tenant'
 
@@ -108,6 +107,27 @@ export const GRAPHQL_ENDPOINTS: Record<SuiGraphqlNetwork, string> = {
   testnet: 'https://graphql.testnet.sui.io/graphql',
   devnet: 'https://graphql.devnet.sui.io/graphql',
   mainnet: 'https://graphql.mainnet.sui.io/graphql',
+}
+
+/** gRPC base URLs for each Sui network.
+ *  @category Constants
+ */
+export const SUI_GRPC_URLS: Record<SuiGraphqlNetwork, string> = {
+  testnet: 'https://fullnode.testnet.sui.io:443',
+  devnet: 'https://fullnode.devnet.sui.io:443',
+  mainnet: 'https://fullnode.mainnet.sui.io:443',
+}
+
+/**
+ * Get the Sui gRPC base URL for the given network.
+ * Unknown values fall back to testnet.
+ * @category Utilities
+ */
+export function getSuiGrpcBaseUrl(
+  env: string = DEFAULT_GRAPHQL_NETWORK,
+): string {
+  const network = isSuiGraphqlNetwork(env) ? env : DEFAULT_GRAPHQL_NETWORK
+  return SUI_GRPC_URLS[network]
 }
 
 /** Polling interval in milliseconds (10 seconds).

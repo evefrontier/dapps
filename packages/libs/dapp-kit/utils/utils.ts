@@ -268,3 +268,11 @@ export const formatDuration = (seconds: number): string => {
     return `${formattedSeconds}s`
   }
 }
+
+export const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null
+}
+
+export function normalizeObjectId(value: string | undefined): string {
+  return value?.toLowerCase() ?? ''
+}

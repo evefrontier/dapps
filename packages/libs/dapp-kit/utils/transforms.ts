@@ -16,6 +16,7 @@ import {
 } from '../types'
 import { getEnergyConfig, getEnergyUsageForType } from './config'
 import { getDatahubGameInfo } from './datahub'
+import { sortInventoryItemsByQuantity } from './inventory'
 import { createLogger } from './logger'
 import { getAssemblyType, parseStatus } from './mapping'
 
@@ -156,7 +157,7 @@ export async function transformToAssembly(
           mainInventory: {
             capacity: inventoryData?.value?.max_capacity,
             usedCapacity: inventoryData?.value?.used_capacity,
-            items: inventoryItems,
+            items: sortInventoryItemsByQuantity(inventoryItems),
           },
           ephemeralInventories: [],
         },
