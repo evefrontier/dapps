@@ -25,6 +25,12 @@ import {
   subscribeToInventoryEvents,
 } from '../utils/events/eventRefresh'
 import {
+  applyFuelEventToAssembly,
+  getFuelEventTarget,
+  getFuelEventType,
+  isRelevantFuelEvent,
+} from '../utils/events/fuelEventHandlers'
+import {
   applyInventoryEventToAssembly,
   getInventoryEventTarget,
   getInventoryEventTypes,
@@ -38,16 +44,14 @@ import {
 
 const log = createLogger()
 
-function getInventoryStreamEventTypes(tenant: string): string[] {
+function getStreamEventTypes(
+  tenant: string,
+  getTypes: (packageId: string) => string[],
+): string[] {
   const packageIds = new Set([getEveWorldPackageId()])
   const tenantPackageId = TENANT_CONFIG[tenant as TenantId]?.packageId
-  if (tenantPackageId) {
-    packageIds.add(tenantPackageId)
-  }
-
-  return [...packageIds].flatMap((packageId) =>
-    getInventoryEventTypes(packageId),
-  )
+  if (tenantPackageId) packageIds.add(tenantPackageId)
+  return [...packageIds].flatMap(getTypes)
 }
 
 /** Input for fetching object data: either itemId + tenant (derive object ID) or a Sui object ID directly.
@@ -121,6 +125,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const lastDataHashRef = useRef<string | null>(null)
   const lastConfirmedInventorySignatureRef = useRef<string | null>(null)
+  const lastConfirmedFuelSignatureRef = useRef<string | null>(null)
   const assemblyRef = useRef<AssemblyType<Assemblies> | null>(null)
 
   assemblyRef.current = assembly
@@ -216,6 +221,26 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
           primeInventoryTypeVolumes(transformed)
 
           setAssembly((currentAssembly) => {
+            if (transformed?.type === Assemblies.NetworkNode) {
+              const { quantity, isBurning } = transformed.networkNode.fuel
+              const nextSignature = `${quantity}:${isBurning}`
+
+              // On a refetch, if the indexer hasn't caught up yet it returns the
+              // same quantity+isBurning we already confirmed — keep the optimistic
+              // state in that case rather than reverting it.
+              if (
+                !isInitialFetch &&
+                currentAssembly?.type === Assemblies.NetworkNode &&
+                lastConfirmedFuelSignatureRef.current !== null &&
+                nextSignature === lastConfirmedFuelSignatureRef.current
+              ) {
+                return currentAssembly
+              }
+
+              lastConfirmedFuelSignatureRef.current = nextSignature
+              return transformed
+            }
+
             if (transformed?.type !== Assemblies.SmartStorageUnit) {
               return transformed
             }
@@ -327,6 +352,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
       }
       lastDataHashRef.current = null
       lastConfirmedInventorySignatureRef.current = null
+      lastConfirmedFuelSignatureRef.current = null
     }
   }, [
     selectedObjectId,
@@ -344,7 +370,14 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
     const input: FetchObjectDataInput = isObjectIdDirect
       ? { objectId: selectedObjectId }
       : { itemId: selectedObjectId, selectedTenant }
-    const eventTypes = getInventoryStreamEventTypes(selectedTenant)
+    const inventoryEventTypes = getStreamEventTypes(
+      selectedTenant,
+      getInventoryEventTypes,
+    )
+    const fuelEventTypes = getStreamEventTypes(selectedTenant, (pkg) => [
+      getFuelEventType(pkg),
+    ])
+    const allEventTypes = [...inventoryEventTypes, ...fuelEventTypes]
     const abortController = new AbortController()
     const triggerRefetch = createEventRefetchScheduler(
       () => fetchObjectData(input, false),
@@ -359,53 +392,71 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
     let unsubscribe: EventUnsubscribe | null = null
 
     log.debug(
-      '[DappKit] SmartObjectProvider: Starting inventory checkpoint stream',
-      { eventTypes, selectedObjectId, selectedTenant },
+      '[DappKit] SmartObjectProvider: Starting assembly checkpoint stream',
+      { allEventTypes, selectedObjectId, selectedTenant },
     )
 
     subscribeToInventoryEvents({
-      eventTypes,
+      eventTypes: allEventTypes,
       signal: abortController.signal,
       onGap: () => {
         triggerRefetch()
       },
       onEvents: (events) => {
-        const eventTarget = getInventoryEventTarget({
+        const inventoryEventTarget = getInventoryEventTarget({
           assembly: assemblyRef.current,
-          eventTypes,
+          eventTypes: inventoryEventTypes,
           isObjectIdDirect,
           selectedObjectId,
           selectedTenant,
         })
-        const relevantEvents = events.filter((event) =>
-          isRelevantAssemblyInventoryEvent(event, eventTarget),
+        const fuelEventTarget = getFuelEventTarget(
+          assemblyRef.current,
+          fuelEventTypes,
         )
 
-        if (events.length > 0 && relevantEvents.length === 0) {
+        const relevantInventoryEvents = events.filter((event) =>
+          isRelevantAssemblyInventoryEvent(event, inventoryEventTarget),
+        )
+        const relevantFuelEvents = fuelEventTarget
+          ? events.filter((event) =>
+              isRelevantFuelEvent(event, fuelEventTarget),
+            )
+          : []
+
+        if (
+          events.length > 0 &&
+          relevantInventoryEvents.length === 0 &&
+          relevantFuelEvents.length === 0
+        ) {
           log.debug(
-            '[DappKit] SmartObjectProvider: Ignoring inventory stream events for other assemblies',
-            { count: events.length, eventTarget },
+            '[DappKit] SmartObjectProvider: Ignoring stream events for other assemblies',
+            { count: events.length, inventoryEventTarget, fuelEventTarget },
           )
         }
 
-        if (relevantEvents.length > 0) {
+        if (
+          relevantInventoryEvents.length > 0 ||
+          relevantFuelEvents.length > 0
+        ) {
           log.info(
-            '[DappKit] SmartObjectProvider: Applying inventory stream events',
-            { count: relevantEvents.length },
+            '[DappKit] SmartObjectProvider: Applying assembly stream events',
+            {
+              inventoryCount: relevantInventoryEvents.length,
+              fuelCount: relevantFuelEvents.length,
+            },
           )
           setAssembly((currentAssembly) => {
-            if (
-              !currentAssembly ||
-              currentAssembly.type !== Assemblies.SmartStorageUnit
-            ) {
-              return currentAssembly
-            }
-
-            return relevantEvents.reduce<AssemblyType<Assemblies> | null>(
-              (updatedAssembly, event) =>
-                applyInventoryEventToAssembly(updatedAssembly, event),
-              currentAssembly,
+            let next: AssemblyType<Assemblies> | null = currentAssembly
+            next = relevantInventoryEvents.reduce(
+              (asm, event) => applyInventoryEventToAssembly(asm, event),
+              next,
             )
+            next = relevantFuelEvents.reduce(
+              (asm, event) => applyFuelEventToAssembly(asm, event),
+              next,
+            )
+            return next
           })
           triggerRefetch()
         }

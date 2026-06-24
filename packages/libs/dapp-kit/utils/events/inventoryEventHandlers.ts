@@ -6,7 +6,7 @@ import {
   adjustInventoryUsedCapacity,
   sortInventoryItemsByQuantity,
 } from '../inventory'
-import { isRecord } from '../utils'
+import { isRecord, normalizeObjectId } from '../utils'
 
 const INVENTORY_EVENT_NAMES = ['ItemBurnedEvent', 'ItemMintedEvent'] as const
 
@@ -70,10 +70,6 @@ function parseAssemblyEventPayload(
   if (assemblyKey) payload.assembly_key = assemblyKey
 
   return payload
-}
-
-function normalizeObjectId(value: string | undefined) {
-  return value?.toLowerCase()
 }
 
 function parseInventoryEventDelta(
