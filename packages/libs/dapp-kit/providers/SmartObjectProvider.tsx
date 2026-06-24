@@ -1,3 +1,4 @@
+import { TENANT_CONFIG, TenantId } from '@evefrontier/wallet-core/tenant'
 import type { ReactNode } from 'react'
 import { createContext, useCallback, useEffect, useRef, useState } from 'react'
 import { getAssemblyWithOwner, type MoveObjectData } from '../graphql'
@@ -16,27 +17,24 @@ import {
   transformToAssembly,
   transformToCharacter,
 } from '../utils'
-import {
-  DEFAULT_TENANT,
-  POLLING_INTERVAL,
-  TENANT_CONFIG,
-  TenantId,
-} from '../utils/constants'
+import { DEFAULT_TENANT, POLLING_INTERVAL } from '../utils/constants'
 import { getDatahubGameInfo } from '../utils/datahub'
+import type { EventUnsubscribe } from '../utils/events/checkpointStream'
+import {
+  createEventRefetchScheduler,
+  subscribeToInventoryEvents,
+} from '../utils/events/eventRefresh'
+import {
+  applyInventoryEventToAssembly,
+  getInventoryEventTarget,
+  getInventoryEventTypes,
+  isRelevantAssemblyInventoryEvent,
+} from '../utils/events/inventoryEventHandlers'
 import {
   getInventoryTypeVolumeM3,
   mergeSmartStorageInventoryFromRefetch,
   setInventoryTypeVolumeM3,
 } from '../utils/inventory'
-import {
-  applyInventoryEventToAssembly,
-  createEventRefetchScheduler,
-  type EventUnsubscribe,
-  getInventoryEventTarget,
-  getInventoryEventTypes,
-  isRelevantAssemblyInventoryEvent,
-  subscribeToInventoryEvents,
-} from './eventRefresh'
 
 const log = createLogger()
 

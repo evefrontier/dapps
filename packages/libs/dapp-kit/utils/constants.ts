@@ -12,7 +12,6 @@ export {
 export {
   DEFAULT_TENANT,
   EVE_PACKAGE_ID_BY_TENANT,
-  TENANT_CONFIG,
   TenantId,
 } from '@evefrontier/wallet-core/tenant'
 

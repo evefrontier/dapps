@@ -2,7 +2,6 @@ import { bcs } from '@mysten/sui/bcs'
 import { deriveObjectID } from '@mysten/sui/utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Assemblies, State } from '../../types'
-import { TENANT_CONFIG, TenantId } from '../constants'
 import { getAssemblyType, parseStatus } from '../mapping'
 
 // Mock env vars for testing
@@ -14,6 +13,7 @@ vi.mock('../../graphql/client', () => ({
   getSingletonObjectByType: vi.fn(),
 }))
 
+import { TENANT_CONFIG, TenantId } from '@evefrontier/wallet-core/tenant'
 import { getSingletonObjectByType } from '../../graphql/client'
 
 describe('mapping utilities', () => {

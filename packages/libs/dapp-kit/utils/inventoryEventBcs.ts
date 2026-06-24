@@ -21,6 +21,8 @@ const InventoryMoveEvent = bcs.struct('InventoryMoveEvent', {
   quantity: bcs.u32(),
 })
 
+// ----------------------------------------------------------------------------
+
 export type DecodedInventoryMoveEvent = {
   assembly_id: string
   assembly_key: {

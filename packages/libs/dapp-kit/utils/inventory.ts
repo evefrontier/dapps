@@ -7,76 +7,6 @@ function toFiniteNumber(value: unknown, fallback = 0): number {
   return Number.isFinite(numberValue) ? numberValue : fallback
 }
 
-/** Cache Datahub volume (m³ per unit) for optimistic used-capacity updates. */
-export function setInventoryTypeVolumeM3(typeId: number, volumeM3: number) {
-  if (!Number.isFinite(typeId) || !Number.isFinite(volumeM3) || volumeM3 < 0) {
-    return
-  }
-  typeVolumeM3ById.set(typeId, volumeM3)
-}
-
-export function getInventoryTypeVolumeM3(typeId: number): number | undefined {
-  return typeVolumeM3ById.get(typeId)
-}
-
-/** Clear cached volumes (for tests). */
-export function clearInventoryTypeVolumeM3Cache() {
-  typeVolumeM3ById.clear()
-}
-
-/** On-chain used_capacity is litres (dm³); Datahub volume is m³ per unit. */
-export function getInventoryQuantityVolumeDm3(
-  quantity: number,
-  typeId: number,
-): number | null {
-  const volumeM3 = getInventoryTypeVolumeM3(typeId)
-  if (volumeM3 === undefined) return null
-  return Math.round(quantity * volumeM3 * 1000)
-}
-
-export function adjustInventoryUsedCapacity(
-  usedCapacity: string,
-  quantity: number,
-  typeId: number,
-  operation: 'add' | 'subtract',
-): string
-export function adjustInventoryUsedCapacity(
-  usedCapacity: string | undefined,
-  quantity: number,
-  typeId: number,
-  operation: 'add' | 'subtract',
-): string | undefined
-export function adjustInventoryUsedCapacity(
-  usedCapacity: string | undefined,
-  quantity: number,
-  typeId: number,
-  operation: 'add' | 'subtract',
-): string | undefined {
-  const volumeDeltaDm3 = getInventoryQuantityVolumeDm3(quantity, typeId)
-  if (volumeDeltaDm3 === null || usedCapacity === undefined) {
-    return usedCapacity
-  }
-
-  const currentUsedCapacity = toFiniteNumber(usedCapacity)
-  const nextUsedCapacity =
-    operation === 'add'
-      ? currentUsedCapacity + volumeDeltaDm3
-      : Math.max(0, currentUsedCapacity - volumeDeltaDm3)
-
-  return String(nextUsedCapacity)
-}
-
-export function sortInventoryItemsByQuantity(
-  items: InventoryItem[] | undefined,
-): InventoryItem[] {
-  return [...(items ?? [])].sort((a, b) => {
-    const quantityDifference =
-      toFiniteNumber(b.quantity) - toFiniteNumber(a.quantity)
-    if (quantityDifference !== 0) return quantityDifference
-    return toFiniteNumber(a.type_id) - toFiniteNumber(b.type_id)
-  })
-}
-
 function getInventoryItemSignatures(items: InventoryItem[] | undefined) {
   const quantityByTypeId = new Map<number, number>()
 
@@ -99,23 +29,6 @@ function getInventoryQuantitySignature(
   items: InventoryItem[] | undefined,
 ): string {
   return JSON.stringify(getInventoryItemSignatures(items))
-}
-
-export function areInventoryItemListsEqual(
-  leftItems: InventoryItem[] | undefined,
-  rightItems: InventoryItem[] | undefined,
-): boolean {
-  const leftSignatures = getInventoryItemSignatures(leftItems)
-  const rightSignatures = getInventoryItemSignatures(rightItems)
-
-  if (leftSignatures.length !== rightSignatures.length) return false
-
-  return leftSignatures.every(([leftTypeId, leftQuantity], index) => {
-    const rightSignature = rightSignatures[index]
-    if (!rightSignature) return false
-    const [rightTypeId, rightQuantity] = rightSignature
-    return leftTypeId === rightTypeId && leftQuantity === rightQuantity
-  })
 }
 
 function preserveStorageInventoryItemsWhenEqual(
@@ -144,6 +57,87 @@ function preserveStorageInventoryItemsWhenEqual(
       },
     },
   }
+}
+
+/** Cache Datahub volume (m³ per unit) for optimistic used-capacity updates. */
+export function setInventoryTypeVolumeM3(typeId: number, volumeM3: number) {
+  if (!Number.isFinite(typeId) || !Number.isFinite(volumeM3) || volumeM3 < 0) {
+    return
+  }
+  typeVolumeM3ById.set(typeId, volumeM3)
+}
+
+export function getInventoryTypeVolumeM3(typeId: number): number | undefined {
+  return typeVolumeM3ById.get(typeId)
+}
+
+/** Clear cached volumes (for tests). */
+export function clearInventoryTypeVolumeM3Cache() {
+  typeVolumeM3ById.clear()
+}
+
+export function adjustInventoryUsedCapacity(
+  usedCapacity: string,
+  quantity: number,
+  typeId: number,
+  operation: 'add' | 'subtract',
+): string
+
+export function adjustInventoryUsedCapacity(
+  usedCapacity: string | undefined,
+  quantity: number,
+  typeId: number,
+  operation: 'add' | 'subtract',
+): string | undefined
+
+export function adjustInventoryUsedCapacity(
+  usedCapacity: string | undefined,
+  quantity: number,
+  typeId: number,
+  operation: 'add' | 'subtract',
+): string | undefined {
+  const volumeM3 = getInventoryTypeVolumeM3(typeId)
+  if (volumeM3 === undefined || usedCapacity === undefined) {
+    return usedCapacity
+  }
+  // On-chain used_capacity is dm³ (litres); Datahub volume is m³ per unit.
+  const volumeDeltaDm3 = Math.round(quantity * volumeM3 * 1000)
+
+  const currentUsedCapacity = toFiniteNumber(usedCapacity)
+  const nextUsedCapacity =
+    operation === 'add'
+      ? currentUsedCapacity + volumeDeltaDm3
+      : Math.max(0, currentUsedCapacity - volumeDeltaDm3)
+
+  return String(nextUsedCapacity)
+}
+
+export function sortInventoryItemsByQuantity(
+  items: InventoryItem[] | undefined,
+): InventoryItem[] {
+  return [...(items ?? [])].sort((a, b) => {
+    const quantityDifference =
+      toFiniteNumber(b.quantity) - toFiniteNumber(a.quantity)
+    if (quantityDifference !== 0) return quantityDifference
+    return toFiniteNumber(a.type_id) - toFiniteNumber(b.type_id)
+  })
+}
+
+export function areInventoryItemListsEqual(
+  leftItems: InventoryItem[] | undefined,
+  rightItems: InventoryItem[] | undefined,
+): boolean {
+  const leftSignatures = getInventoryItemSignatures(leftItems)
+  const rightSignatures = getInventoryItemSignatures(rightItems)
+
+  if (leftSignatures.length !== rightSignatures.length) return false
+
+  return leftSignatures.every(([leftTypeId, leftQuantity], index) => {
+    const rightSignature = rightSignatures[index]
+    if (!rightSignature) return false
+    const [rightTypeId, rightQuantity] = rightSignature
+    return leftTypeId === rightTypeId && leftQuantity === rightQuantity
+  })
 }
 
 /**

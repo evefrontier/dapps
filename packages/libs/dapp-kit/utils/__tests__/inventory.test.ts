@@ -6,7 +6,6 @@ import {
   adjustInventoryUsedCapacity,
   areInventoryItemListsEqual,
   clearInventoryTypeVolumeM3Cache,
-  getInventoryQuantityVolumeDm3,
   mergeSmartStorageInventoryFromRefetch,
   setInventoryTypeVolumeM3,
 } from '../inventory'
@@ -48,7 +47,6 @@ describe('inventory utilities', () => {
   it('adjusts used capacity from cached type volume on mint and burn', () => {
     setInventoryTypeVolumeM3(77810, 0.1)
 
-    expect(getInventoryQuantityVolumeDm3(10, 77810)).toBe(1000)
     expect(adjustInventoryUsedCapacity('1000', 10, 77810, 'add')).toBe('2000')
     expect(adjustInventoryUsedCapacity('2000', 10, 77810, 'subtract')).toBe(
       '1000',

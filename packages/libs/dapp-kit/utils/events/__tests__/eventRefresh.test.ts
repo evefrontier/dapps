@@ -1,19 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { Assemblies, type AssemblyType } from '../../types'
+import { Assemblies, type AssemblyType } from '../../../types'
 import {
   clearInventoryTypeVolumeM3Cache,
   setInventoryTypeVolumeM3,
-} from '../../utils/inventory'
+} from '../../inventory'
 import {
-  applyInventoryEventToAssembly,
   type CheckpointStreamMessage,
-  createEventRefetchScheduler,
   createInventoryCheckpointStream,
   extractInventoryEventsFromCheckpoint,
+} from '../checkpointStream'
+import { createEventRefetchScheduler } from '../eventRefresh'
+import {
+  applyInventoryEventToAssembly,
   getInventoryEventTarget,
   getInventoryEventTypes,
   isRelevantAssemblyInventoryEvent,
-} from '../eventRefresh'
+} from '../inventoryEventHandlers'
 
 const PACKAGE_ID =
   '0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c'
