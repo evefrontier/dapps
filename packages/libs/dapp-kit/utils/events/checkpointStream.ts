@@ -5,6 +5,7 @@ import {
   inventoryEventBcsToParsedJson,
 } from '../inventoryEventBcs'
 import { createLogger } from '../logger'
+import { isRecord } from '../utils'
 
 const CHECKPOINT_STREAM_RECONNECT_MS = 1_000
 // Rotate before the public fullnode ~30s stream cutoff.
@@ -102,10 +103,6 @@ function protobufStructToJson(
       protobufValueToJson(value),
     ]),
   )
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
 }
 
 function parseInventoryEventPayloadFromStream(event: {

@@ -6,6 +6,7 @@ import {
   adjustInventoryUsedCapacity,
   sortInventoryItemsByQuantity,
 } from '../inventory'
+import { isRecord } from '../utils'
 
 const INVENTORY_EVENT_NAMES = ['ItemBurnedEvent', 'ItemMintedEvent'] as const
 
@@ -27,10 +28,6 @@ export type AssemblyEventTarget = {
   itemId?: string
   objectId?: string
   tenant?: string
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
 }
 
 function toFiniteNumber(value: unknown, fallback = 0): number {
