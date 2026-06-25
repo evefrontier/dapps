@@ -415,12 +415,6 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
           fuelEventTypes,
         )
 
-        console.log(
-          '[fuel debug] raw events:',
-          events.map((e) => e.type),
-        )
-        console.log('[fuel debug] fuelEventTarget:', fuelEventTarget)
-
         const relevantInventoryEvents = events.filter((event) =>
           isRelevantAssemblyInventoryEvent(event, inventoryEventTarget),
         )
