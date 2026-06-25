@@ -146,7 +146,7 @@ describe('constants', () => {
       ],
       [
         TenantId.STILLNESS,
-        '0x2a66a89b5a735738ffa4423ac024d23571326163f324f9051557617319e59d60::EVE::EVE',
+        '0xac361aa5ceb726bd974f885c9dea9e55dc9bc98fa1f5731c5965a810707bf0b8::EVE::EVE',
       ],
     ])('returns the EVE coin type for tenant %s', (tenantId, expected) => {
       expect(getEveCoinType(tenantId)).toBe(expected)
