@@ -1,11 +1,11 @@
 import type { SuiEvent } from '@mysten/sui/jsonRpc'
-
+import { createLogger } from '../logger'
+import { isRecord } from '../utils'
+import { decodeFuelEventBcs, fuelEventBcsToParsedJson } from './fuelEventBcs'
 import {
   decodeInventoryEventBcs,
   inventoryEventBcsToParsedJson,
-} from '../inventoryEventBcs'
-import { createLogger } from '../logger'
-import { isRecord } from '../utils'
+} from './inventoryEventBcs'
 
 const CHECKPOINT_STREAM_RECONNECT_MS = 1_000
 // Rotate before the public fullnode ~30s stream cutoff.
@@ -105,10 +105,10 @@ function protobufStructToJson(
   )
 }
 
-function parseInventoryEventPayloadFromStream(event: {
-  json?: ProtobufValue
-  contents?: { value?: Uint8Array }
-}): Record<string, unknown> | null {
+function parseEventPayloadFromStream(
+  event: { json?: ProtobufValue; contents?: { value?: Uint8Array } },
+  eventType: string,
+): Record<string, unknown> | null {
   const fromProtobuf = protobufValueToJson(event.json)
   if (isRecord(fromProtobuf)) return fromProtobuf
 
@@ -116,6 +116,9 @@ function parseInventoryEventPayloadFromStream(event: {
   if (!bcsBytes) return null
 
   try {
+    if (eventType.endsWith('::fuel::FuelEvent')) {
+      return fuelEventBcsToParsedJson(decodeFuelEventBcs(bcsBytes))
+    }
     return inventoryEventBcsToParsedJson(decodeInventoryEventBcs(bcsBytes))
   } catch {
     return null
@@ -326,7 +329,7 @@ export function extractInventoryEventsFromCheckpoint(
       const type = getStreamEventType(event)
       if (!eventTypes.includes(type)) return []
 
-      const parsedJson = parseInventoryEventPayloadFromStream(event)
+      const parsedJson = parseEventPayloadFromStream(event, type)
       if (!parsedJson) return []
 
       return [
