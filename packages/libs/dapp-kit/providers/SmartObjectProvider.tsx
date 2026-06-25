@@ -511,11 +511,6 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
               (asm, event) => applyStatusEventToAssembly(asm, event),
               next,
             )
-            // Update confirmed state so the stale-refetch guard tracks the
-            // new optimistic value rather than reverting it on the next poll.
-            if (next?.state !== undefined) {
-              lastConfirmedStateRef.current = next.state
-            }
             return next
           })
           triggerRefetch()
