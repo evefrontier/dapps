@@ -10,6 +10,7 @@ import {
   extractInventoryEventsFromCheckpoint,
 } from '../checkpointStream'
 import { createEventRefetchScheduler } from '../eventRefresh'
+import { getFuelEventType } from '../fuelEventHandlers'
 import {
   applyInventoryEventToAssembly,
   getInventoryEventTarget,
@@ -1147,5 +1148,53 @@ describe('event refresh helpers', () => {
         },
       },
     ])
+  })
+
+  it('extracts fuel events from gRPC BCS bytes when json is absent', () => {
+    // Manually constructed FuelEvent BCS: assembly_id 0x34d0...951b,
+    // assembly_key { item_id: 1, tenant: "stillness" }, type_id: 77810,
+    // old_quantity: 10, new_quantity: 5, is_burning: false, action: WITHDRAWN
+    const FUEL_EVENT_BCS_HEX =
+      '34d08b4e1afe6a4babcc0642d6a676160df6b777b49214d5c964b4e874cc951b' +
+      '0100000000000000' +
+      '09' +
+      '7374696c6c6e657373' +
+      'f22f010000000000' +
+      '0a00000000000000' +
+      '0500000000000000' +
+      '00' +
+      '01'
+
+    const events = extractInventoryEventsFromCheckpoint(
+      {
+        transactions: [
+          {
+            digest: 'abc123',
+            events: {
+              events: [
+                {
+                  eventType: getFuelEventType(PACKAGE_ID),
+                  contents: {
+                    value: hexToBytes(FUEL_EVENT_BCS_HEX),
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      [getFuelEventType(PACKAGE_ID)],
+    )
+
+    expect(events).toHaveLength(1)
+    expect(events[0].type).toBe(getFuelEventType(PACKAGE_ID))
+    expect(events[0].parsedJson).toMatchObject({
+      assembly_id: ASSEMBLY_OBJECT_ID,
+      assembly_key: { item_id: '1', tenant: 'stillness' },
+      type_id: '77810',
+      old_quantity: '10',
+      new_quantity: '5',
+      is_burning: false,
+    })
   })
 })

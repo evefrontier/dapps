@@ -77,20 +77,6 @@ export function clearInventoryTypeVolumeM3Cache() {
 }
 
 export function adjustInventoryUsedCapacity(
-  usedCapacity: string,
-  quantity: number,
-  typeId: number,
-  operation: 'add' | 'subtract',
-): string
-
-export function adjustInventoryUsedCapacity(
-  usedCapacity: string | undefined,
-  quantity: number,
-  typeId: number,
-  operation: 'add' | 'subtract',
-): string | undefined
-
-export function adjustInventoryUsedCapacity(
   usedCapacity: string | undefined,
   quantity: number,
   typeId: number,

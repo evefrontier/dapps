@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   decodeInventoryEventBcs,
   inventoryEventBcsToParsedJson,
-} from '../inventoryEventBcs'
+} from '../events/inventoryEventBcs'
 
 function hexToBytes(hex: string): Uint8Array {
   const bytes = new Uint8Array(hex.length / 2)

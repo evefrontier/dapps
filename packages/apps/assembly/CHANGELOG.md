@@ -1,5 +1,11 @@
 # @eveworld/assembly
 
+## 0.3.4
+
+### Patch Changes
+
+- apply fuel optimistic update, bump wallet-core version
+
 ## 0.3.3
 
 ### Patch Changes

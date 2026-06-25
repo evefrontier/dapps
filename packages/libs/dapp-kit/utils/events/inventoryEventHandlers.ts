@@ -252,12 +252,13 @@ export function applyInventoryEventToAssembly(
       ...assembly.storage,
       mainInventory: {
         ...assembly.storage.mainInventory,
-        usedCapacity: adjustInventoryUsedCapacity(
-          assembly.storage.mainInventory.usedCapacity,
-          delta.quantity,
-          delta.typeId,
-          delta.operation,
-        ),
+        usedCapacity:
+          adjustInventoryUsedCapacity(
+            assembly.storage.mainInventory.usedCapacity,
+            delta.quantity,
+            delta.typeId,
+            delta.operation,
+          ) || '',
         items: sortInventoryItemsByQuantity(
           mergeInventoryItemsByTypeId(computeNextItems(items, delta)),
         ),
