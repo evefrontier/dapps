@@ -37,6 +37,12 @@ import {
   isRelevantAssemblyInventoryEvent,
 } from '../utils/events/inventoryEventHandlers'
 import {
+  applyStatusEventToAssembly,
+  getStatusEventTarget,
+  getStatusEventType,
+  isRelevantStatusEvent,
+} from '../utils/events/statusEventHandlers'
+import {
   getInventoryTypeVolumeM3,
   mergeSmartStorageInventoryFromRefetch,
   setInventoryTypeVolumeM3,
@@ -126,6 +132,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
   const lastDataHashRef = useRef<string | null>(null)
   const lastConfirmedInventorySignatureRef = useRef<string | null>(null)
   const lastConfirmedFuelSignatureRef = useRef<string | null>(null)
+  const lastConfirmedStateRef = useRef<string | null>(null)
   const assemblyRef = useRef<AssemblyType<Assemblies> | null>(null)
 
   assemblyRef.current = assembly
@@ -221,8 +228,26 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
           primeInventoryTypeVolumes(transformed)
 
           setAssembly((currentAssembly) => {
-            if (transformed?.type === Assemblies.NetworkNode) {
-              const { quantity, isBurning } = transformed.networkNode.fuel
+            if (transformed === null) return null
+
+            // State stale-refetch protection (all assembly types).
+            // If the indexer returns the same state we last confirmed, keep
+            // the optimistic state rather than reverting it.
+            let next: typeof transformed = transformed
+            const nextState = next.state
+            if (
+              !isInitialFetch &&
+              currentAssembly !== null &&
+              lastConfirmedStateRef.current !== null &&
+              nextState === lastConfirmedStateRef.current
+            ) {
+              next = { ...next, state: currentAssembly.state }
+            } else {
+              lastConfirmedStateRef.current = nextState
+            }
+
+            if (next?.type === Assemblies.NetworkNode) {
+              const { quantity, isBurning } = next.networkNode.fuel
               const nextSignature = `${quantity}:${isBurning}`
 
               // On a refetch, if the indexer hasn't caught up yet it returns the
@@ -238,11 +263,11 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
               }
 
               lastConfirmedFuelSignatureRef.current = nextSignature
-              return transformed
+              return next
             }
 
-            if (transformed?.type !== Assemblies.SmartStorageUnit) {
-              return transformed
+            if (next?.type !== Assemblies.SmartStorageUnit) {
+              return next
             }
 
             // Merge against the prior storage state only on refetches; an
@@ -256,7 +281,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
             const { assembly, inventorySignature } =
               mergeSmartStorageInventoryFromRefetch(
                 previousStorage,
-                transformed,
+                next,
                 lastConfirmedInventorySignatureRef.current,
               )
             lastConfirmedInventorySignatureRef.current = inventorySignature
@@ -353,6 +378,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
       lastDataHashRef.current = null
       lastConfirmedInventorySignatureRef.current = null
       lastConfirmedFuelSignatureRef.current = null
+      lastConfirmedStateRef.current = null
     }
   }, [
     selectedObjectId,
@@ -377,7 +403,15 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
     const fuelEventTypes = getStreamEventTypes(selectedTenant, (pkg) => [
       getFuelEventType(pkg),
     ])
-    const allEventTypes = [...inventoryEventTypes, ...fuelEventTypes]
+    const statusEventTypes = getStreamEventTypes(selectedTenant, (pkg) => [
+      getStatusEventType(pkg),
+    ])
+
+    const allEventTypes = [
+      ...inventoryEventTypes,
+      ...fuelEventTypes,
+      ...statusEventTypes,
+    ]
     const abortController = new AbortController()
     const triggerRefetch = createEventRefetchScheduler(
       () => fetchObjectData(input, false),
@@ -414,6 +448,10 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
           assemblyRef.current,
           fuelEventTypes,
         )
+        const statusEventTarget = getStatusEventTarget(
+          assemblyRef.current,
+          statusEventTypes,
+        )
 
         const relevantInventoryEvents = events.filter((event) =>
           isRelevantAssemblyInventoryEvent(event, inventoryEventTarget),
@@ -423,27 +461,40 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
               isRelevantFuelEvent(event, fuelEventTarget),
             )
           : []
+        const relevantStatusEvents = statusEventTarget
+          ? events.filter((event) =>
+              isRelevantStatusEvent(event, statusEventTarget),
+            )
+          : []
 
         if (
           events.length > 0 &&
           relevantInventoryEvents.length === 0 &&
-          relevantFuelEvents.length === 0
+          relevantFuelEvents.length === 0 &&
+          relevantStatusEvents.length === 0
         ) {
           log.debug(
             '[DappKit] SmartObjectProvider: Ignoring stream events for other assemblies',
-            { count: events.length, inventoryEventTarget, fuelEventTarget },
+            {
+              count: events.length,
+              inventoryEventTarget,
+              fuelEventTarget,
+              statusEventTarget,
+            },
           )
         }
 
         if (
           relevantInventoryEvents.length > 0 ||
-          relevantFuelEvents.length > 0
+          relevantFuelEvents.length > 0 ||
+          relevantStatusEvents.length > 0
         ) {
           log.info(
             '[DappKit] SmartObjectProvider: Applying assembly stream events',
             {
               inventoryCount: relevantInventoryEvents.length,
               fuelCount: relevantFuelEvents.length,
+              statusCount: relevantStatusEvents.length,
             },
           )
           setAssembly((currentAssembly) => {
@@ -456,6 +507,15 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
               (asm, event) => applyFuelEventToAssembly(asm, event),
               next,
             )
+            next = relevantStatusEvents.reduce(
+              (asm, event) => applyStatusEventToAssembly(asm, event),
+              next,
+            )
+            // Update confirmed state so the stale-refetch guard tracks the
+            // new optimistic value rather than reverting it on the next poll.
+            if (next?.state !== undefined) {
+              lastConfirmedStateRef.current = next.state
+            }
             return next
           })
           triggerRefetch()

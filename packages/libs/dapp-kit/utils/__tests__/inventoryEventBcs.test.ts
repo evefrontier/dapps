@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  decodeInventoryEventBcs,
-  inventoryEventBcsToParsedJson,
-} from '../events/inventoryEventBcs'
+import { decodeInventoryEventBcsToJson } from '../events/inventoryEventBcs'
 
 function hexToBytes(hex: string): Uint8Array {
   const bytes = new Uint8Array(hex.length / 2)
@@ -21,11 +18,9 @@ const INVENTORY_MOVE_EVENT_BCS_HEX =
 
 describe('inventoryEventBcs', () => {
   it('decodes an inventory move event from chain BCS bytes', () => {
-    const decoded = decodeInventoryEventBcs(
-      hexToBytes(INVENTORY_MOVE_EVENT_BCS_HEX),
-    )
-
-    expect(inventoryEventBcsToParsedJson(decoded)).toEqual({
+    expect(
+      decodeInventoryEventBcsToJson(hexToBytes(INVENTORY_MOVE_EVENT_BCS_HEX)),
+    ).toEqual({
       assembly_id:
         '0x34d08b4e1afe6a4babcc0642d6a676160df6b777b49214d5c964b4e874cc951b',
       assembly_key: {

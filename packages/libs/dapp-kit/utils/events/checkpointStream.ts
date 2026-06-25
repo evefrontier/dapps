@@ -1,11 +1,7 @@
 import type { SuiEvent } from '@mysten/sui/jsonRpc'
 import { createLogger } from '../logger'
 import { isRecord } from '../utils'
-import { decodeFuelEventBcs, fuelEventBcsToParsedJson } from './fuelEventBcs'
-import {
-  decodeInventoryEventBcs,
-  inventoryEventBcsToParsedJson,
-} from './inventoryEventBcs'
+import { decodeEventBcsToJson } from './eventBcsRegistry'
 
 const CHECKPOINT_STREAM_RECONNECT_MS = 1_000
 // Rotate before the public fullnode ~30s stream cutoff.
@@ -115,14 +111,7 @@ function parseEventPayloadFromStream(
   const bcsBytes = event.contents?.value
   if (!bcsBytes) return null
 
-  try {
-    if (eventType.endsWith('::fuel::FuelEvent')) {
-      return fuelEventBcsToParsedJson(decodeFuelEventBcs(bcsBytes))
-    }
-    return inventoryEventBcsToParsedJson(decodeInventoryEventBcs(bcsBytes))
-  } catch {
-    return null
-  }
+  return decodeEventBcsToJson(bcsBytes, eventType)
 }
 
 function wait(ms: number, signal?: AbortSignal) {
