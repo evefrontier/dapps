@@ -1187,8 +1187,9 @@ describe('event refresh helpers', () => {
     )
 
     expect(events).toHaveLength(1)
-    expect(events[0].type).toBe(getFuelEventType(PACKAGE_ID))
-    expect(events[0].parsedJson).toMatchObject({
+    const fuelEvent = events[0]!
+    expect(fuelEvent.type).toBe(getFuelEventType(PACKAGE_ID))
+    expect(fuelEvent.parsedJson).toMatchObject({
       assembly_id: ASSEMBLY_OBJECT_ID,
       assembly_key: { item_id: '1', tenant: 'stillness' },
       type_id: '77810',
