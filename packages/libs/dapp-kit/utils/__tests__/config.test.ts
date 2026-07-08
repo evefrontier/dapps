@@ -20,6 +20,10 @@ import { getEnergyConfigType, getFuelEfficiencyConfigType } from '../constants'
 /** Builds the response shape that config reads: data.objects.nodes[0].asMoveObject.contents.extract...dynamicFields.nodes */
 function mockConfigResponse(
   nodes: Array<{ key: { json: string }; value: { json: string } }>,
+  pageInfo: { hasNextPage: boolean; endCursor: string | null } = {
+    hasNextPage: false,
+    endCursor: null,
+  },
 ) {
   return {
     data: {
@@ -34,7 +38,7 @@ function mockConfigResponse(
                     asAddress: {
                       addressAt: {
                         dynamicFields: {
-                          pageInfo: { hasNextPage: false, endCursor: null },
+                          pageInfo,
                           nodes,
                         },
                       },
@@ -197,6 +201,7 @@ describe('config utilities', () => {
       expect(getSingletonConfigObjectByType).toHaveBeenCalledWith(
         getEnergyConfigType(),
         'assembly_energy',
+        undefined,
       )
       expect(first).toBe(second)
       expect(second).toEqual({ 77917: 500 })
@@ -238,6 +243,7 @@ describe('config utilities', () => {
       expect(getSingletonConfigObjectByType).toHaveBeenCalledWith(
         getFuelEfficiencyConfigType(),
         'fuel_efficiency',
+        undefined,
       )
       expect(first).toBe(second)
       expect(second).toEqual({ 12345: 75 })
@@ -314,7 +320,6 @@ describe('config utilities', () => {
   // ============================================================================
   describe('pagination behavior', () => {
     it('parses first page of nodes and does not zero out returned entries', async () => {
-      // Simulates response where dynamicFields has one page of nodes (hasNextPage may be true on backend)
       vi.mocked(getSingletonConfigObjectByType).mockResolvedValue(
         mockConfigResponse([
           { key: { json: '77917' }, value: { json: '500' } },
@@ -327,6 +332,48 @@ describe('config utilities', () => {
       expect(result).toEqual({ 77917: 500, 88067: 100 })
       expect(result[77917]).toBe(500)
       expect(result[88067]).toBe(100)
+    })
+
+    it('follows hasNextPage/endCursor and merges nodes across multiple pages', async () => {
+      vi.mocked(getSingletonConfigObjectByType)
+        .mockResolvedValueOnce(
+          mockConfigResponse([{ key: { json: '1' }, value: { json: '10' } }], {
+            hasNextPage: true,
+            endCursor: 'cursor-1',
+          }),
+        )
+        .mockResolvedValueOnce(
+          mockConfigResponse([{ key: { json: '2' }, value: { json: '20' } }], {
+            hasNextPage: true,
+            endCursor: 'cursor-2',
+          }),
+        )
+        .mockResolvedValueOnce(
+          mockConfigResponse([{ key: { json: '3' }, value: { json: '30' } }]),
+        )
+
+      const result = await getEnergyConfig()
+
+      expect(result).toEqual({ 1: 10, 2: 20, 3: 30 })
+      expect(getSingletonConfigObjectByType).toHaveBeenCalledTimes(3)
+      expect(getSingletonConfigObjectByType).toHaveBeenNthCalledWith(
+        1,
+        getEnergyConfigType(),
+        'assembly_energy',
+        undefined,
+      )
+      expect(getSingletonConfigObjectByType).toHaveBeenNthCalledWith(
+        2,
+        getEnergyConfigType(),
+        'assembly_energy',
+        { after: 'cursor-1' },
+      )
+      expect(getSingletonConfigObjectByType).toHaveBeenNthCalledWith(
+        3,
+        getEnergyConfigType(),
+        'assembly_energy',
+        { after: 'cursor-2' },
+      )
     })
 
     it('returns empty object when first object has no nodes (missing path) without throwing', async () => {

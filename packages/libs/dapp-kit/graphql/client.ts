@@ -378,23 +378,33 @@ export async function getSingletonObjectByType(objectType: string) {
  * @category GraphQL Client
  * @param objectType - The full Move type string (e.g. from getEnergyConfigType())
  * @param tableName - The table path for extract (e.g. "assembly_energy", "fuel_efficiency")
- * @returns Promise resolving to the GraphQL response with objects.nodes[0] and dynamicFields.nodes
+ * @param options - Pagination options
+ * @param options.after - Cursor for the next page of dynamicFields (table can grow unbounded)
+ * @returns Promise resolving to the GraphQL response with objects.nodes[0] and dynamicFields.nodes/pageInfo
  *
- * @example
+ * @example Paginated fetch
  * ```typescript
- * const result = await getSingletonConfigObjectByType(getEnergyConfigType(), "assembly_energy");
- * const nodes = result.data?.objects?.nodes[0]?.asMoveObject?.contents?.extract?.extract?.asAddress?.addressAt?.dynamicFields?.nodes;
+ * let cursor: string | undefined;
+ * const nodes = [];
+ * do {
+ *   const result = await getSingletonConfigObjectByType(getEnergyConfigType(), "assembly_energy", { after: cursor });
+ *   const dynamicFields = result.data?.objects?.nodes[0]?.asMoveObject?.contents?.extract?.extract?.asAddress?.addressAt?.dynamicFields;
+ *   nodes.push(...(dynamicFields?.nodes ?? []));
+ *   cursor = dynamicFields?.pageInfo?.hasNextPage ? dynamicFields?.pageInfo?.endCursor : undefined;
+ * } while (cursor);
  * ```
  */
 export async function getSingletonConfigObjectByType(
   objectType: string,
   tableName: string,
+  options?: { after?: string },
 ) {
   return executeGraphQLQuery<GetSingletonConfigObjectByTypeResponse>(
     GET_SINGLETON_CONFIG_OBJECT_BY_TYPE,
     {
       object_type: objectType,
       table_name: tableName,
+      after: options?.after,
     },
   )
 }

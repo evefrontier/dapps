@@ -1,4 +1,5 @@
 import { getSingletonConfigObjectByType } from '../graphql/client'
+import type { ConfigExtractDynamicFieldNode } from '../graphql/types'
 import { getEnergyConfigType, getFuelEfficiencyConfigType } from './constants'
 
 /**
@@ -48,6 +49,48 @@ function parseConfig(
 }
 
 /**
+ * Fetches every dynamic field entry of an on-chain config table, following
+ * cursor-based pagination until all pages have been retrieved. These tables
+ * grow as new type_ids are added, so a single page is not guaranteed to
+ * cover the full set.
+ *
+ * TODO: this loop is sequential (one request per page, awaited in order)
+ * and unbounded (no max-page/max-node cap). Fine while these tables stay
+ * in the tens-to-low-hundreds of entries and results are cached after the
+ * first fetch, but if a table grows large this will issue many serial
+ * round-trips and could run long. Revisit with a page cap and/or
+ * parallel fetch (if the API ever supports a total count or stable
+ * cursor-range fetch) if that happens.
+ */
+async function fetchAllConfigDynamicFieldNodes(
+  objectType: string,
+  tableName: string,
+): Promise<ConfigExtractDynamicFieldNode[]> {
+  const nodes: ConfigExtractDynamicFieldNode[] = []
+  let cursor: string | undefined
+
+  do {
+    const result = await getSingletonConfigObjectByType(
+      objectType,
+      tableName,
+      cursor ? { after: cursor } : undefined,
+    )
+
+    const dynamicFields =
+      result.data?.objects?.nodes[0]?.asMoveObject?.contents?.extract?.extract
+        ?.asAddress?.addressAt?.dynamicFields
+
+    nodes.push(...(dynamicFields?.nodes ?? []))
+    cursor =
+      (dynamicFields?.pageInfo?.hasNextPage
+        ? dynamicFields?.pageInfo?.endCursor
+        : undefined) ?? undefined
+  } while (cursor)
+
+  return nodes
+}
+
+/**
  * Fetches the EnergyConfig singleton via GraphQL (using getEnergyConfigType), parses it,
  * caches the result, and returns the map of type_id -> energy usage.
  * Subsequent calls return the cached map.
@@ -63,16 +106,12 @@ export async function getEnergyConfig(): Promise<Record<number, number>> {
   }
 
   energyConfigInFlight = (async () => {
-    const result = await getSingletonConfigObjectByType(
+    const nodes = await fetchAllConfigDynamicFieldNodes(
       getEnergyConfigType(),
       'assembly_energy',
     )
 
-    const energyConfigJson = result.data?.objects?.nodes[0]?.asMoveObject
-      ?.contents?.extract?.extract?.asAddress?.addressAt?.dynamicFields
-      ?.nodes as Record<string, unknown> | undefined
-
-    energyConfigCache = parseConfig(energyConfigJson)
+    energyConfigCache = parseConfig(nodes as unknown as Record<string, unknown>)
     return energyConfigCache
   })()
 
@@ -101,16 +140,14 @@ export async function getFuelEfficiencyConfig(): Promise<
   }
 
   fuelEfficiencyConfigInFlight = (async () => {
-    const result = await getSingletonConfigObjectByType(
+    const nodes = await fetchAllConfigDynamicFieldNodes(
       getFuelEfficiencyConfigType(),
       'fuel_efficiency',
     )
 
-    const fuelEfficiencyConfigJson = result.data?.objects?.nodes[0]
-      ?.asMoveObject?.contents?.extract?.extract?.asAddress?.addressAt
-      ?.dynamicFields?.nodes as Record<string, unknown> | undefined
-
-    fuelEfficiencyConfigCache = parseConfig(fuelEfficiencyConfigJson)
+    fuelEfficiencyConfigCache = parseConfig(
+      nodes as unknown as Record<string, unknown>,
+    )
     return fuelEfficiencyConfigCache
   })()
 
