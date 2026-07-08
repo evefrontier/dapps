@@ -376,6 +376,20 @@ describe('config utilities', () => {
       )
     })
 
+    it('throws instead of looping forever when endCursor does not advance', async () => {
+      vi.mocked(getSingletonConfigObjectByType).mockResolvedValue(
+        mockConfigResponse([{ key: { json: '1' }, value: { json: '10' } }], {
+          hasNextPage: true,
+          endCursor: 'stuck-cursor',
+        }),
+      )
+
+      await expect(getEnergyConfig()).rejects.toThrow(/did not advance/)
+      // First call has no cursor (undefined) and the second call resolves the
+      // same 'stuck-cursor' again, so the guard should trip on the 2nd page.
+      expect(getSingletonConfigObjectByType).toHaveBeenCalledTimes(2)
+    })
+
     it('returns empty object when first object has no nodes (missing path) without throwing', async () => {
       vi.mocked(getSingletonConfigObjectByType).mockResolvedValue({
         data: {
