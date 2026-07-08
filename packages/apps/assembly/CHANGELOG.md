@@ -1,5 +1,11 @@
 # @eveworld/assembly
 
+## 0.3.5
+
+### Patch Changes
+
+- add pagination
+
 ## 0.3.4
 
 ### Patch Changes

@@ -459,7 +459,7 @@ export const GET_SINGLETON_OBJECT_BY_TYPE = `
  * @category GraphQL Queries
  */
 export const GET_SINGLETON_CONFIG_OBJECT_BY_TYPE = `
-  query GetSingletonConfigObjectByType($object_type: String!, $table_name: String!) {
+  query GetSingletonConfigObjectByType($object_type: String!, $table_name: String!, $after: String) {
     objects(filter: { type: $object_type }, first: 1) {
         nodes {
             address
@@ -469,7 +469,7 @@ export const GET_SINGLETON_CONFIG_OBJECT_BY_TYPE = `
                         extract(path: "id") {
                             asAddress {
                                 addressAt {
-                                    dynamicFields {
+                                    dynamicFields(first: 50, after: $after) {
                                         pageInfo {
                                             hasNextPage
                                             endCursor

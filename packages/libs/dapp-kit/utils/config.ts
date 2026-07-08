@@ -1,4 +1,5 @@
 import { getSingletonConfigObjectByType } from '../graphql/client'
+import type { ConfigExtractDynamicFieldNode } from '../graphql/types'
 import { getEnergyConfigType, getFuelEfficiencyConfigType } from './constants'
 
 /**
@@ -31,12 +32,9 @@ export function resetConfigCachesForTesting(): void {
  * - contents.json with a table/map of type_id -> value
  */
 function parseConfig(
-  configJson: Record<string, unknown> | undefined,
+  nodes: ConfigExtractDynamicFieldNode[] | undefined,
 ): Record<number, number> {
   const byTypeId: Record<number, number> = {}
-  const nodes = configJson as unknown as
-    | Array<{ key: { json: string }; value: { json: string } }>
-    | undefined
   if (!Array.isArray(nodes) || !nodes.length) return byTypeId
   for (const node of nodes) {
     const typeId = parseInt(node.key?.json ?? '', 10)
@@ -45,6 +43,69 @@ function parseConfig(
     byTypeId[typeId] = Number.isNaN(energy) ? 0 : energy
   }
   return byTypeId
+}
+
+/**
+ * Fetches every dynamic field entry of an on-chain config table, following
+ * cursor-based pagination until all pages have been retrieved. These tables
+ * grow as new type_ids are added, so a single page is not guaranteed to
+ * cover the full set.
+ *
+ * TODO: this loop is sequential (one request per page, awaited in order).
+ * Fine while these tables stay in the tens-to-low-hundreds of entries and
+ * results are cached after the first fetch, but if a table grows large
+ * this will issue many serial round-trips and could run long. Revisit
+ * with parallel fetch (if the API ever supports a total count or stable
+ * cursor-range fetch) if that happens.
+ *
+ * Bounded by MAX_CONFIG_PAGES and a cursor-advance check as a backstop
+ * against a misbehaving backend (e.g. hasNextPage: true paired with a
+ * missing/unchanged endCursor).
+ */
+const MAX_CONFIG_PAGES = 200
+
+async function fetchAllConfigDynamicFieldNodes(
+  objectType: string,
+  tableName: string,
+): Promise<ConfigExtractDynamicFieldNode[]> {
+  const nodes: ConfigExtractDynamicFieldNode[] = []
+  let cursor: string | undefined
+  let page = 0
+
+  do {
+    const result = await getSingletonConfigObjectByType(
+      objectType,
+      tableName,
+      cursor ? { after: cursor } : undefined,
+    )
+
+    const dynamicFields =
+      result.data?.objects?.nodes[0]?.asMoveObject?.contents?.extract?.extract
+        ?.asAddress?.addressAt?.dynamicFields
+
+    nodes.push(...(dynamicFields?.nodes ?? []))
+    page += 1
+
+    const nextCursor =
+      (dynamicFields?.pageInfo?.hasNextPage
+        ? dynamicFields?.pageInfo?.endCursor
+        : undefined) ?? undefined
+
+    if (nextCursor && nextCursor === cursor) {
+      throw new Error(
+        `Config pagination cursor did not advance for ${objectType} (${tableName}); aborting to avoid an infinite loop.`,
+      )
+    }
+    cursor = nextCursor
+
+    if (cursor && page >= MAX_CONFIG_PAGES) {
+      throw new Error(
+        `Config pagination for ${objectType} (${tableName}) exceeded ${MAX_CONFIG_PAGES} pages; aborting.`,
+      )
+    }
+  } while (cursor)
+
+  return nodes
 }
 
 /**
@@ -63,16 +124,12 @@ export async function getEnergyConfig(): Promise<Record<number, number>> {
   }
 
   energyConfigInFlight = (async () => {
-    const result = await getSingletonConfigObjectByType(
+    const nodes = await fetchAllConfigDynamicFieldNodes(
       getEnergyConfigType(),
       'assembly_energy',
     )
 
-    const energyConfigJson = result.data?.objects?.nodes[0]?.asMoveObject
-      ?.contents?.extract?.extract?.asAddress?.addressAt?.dynamicFields
-      ?.nodes as Record<string, unknown> | undefined
-
-    energyConfigCache = parseConfig(energyConfigJson)
+    energyConfigCache = parseConfig(nodes)
     return energyConfigCache
   })()
 
@@ -101,16 +158,12 @@ export async function getFuelEfficiencyConfig(): Promise<
   }
 
   fuelEfficiencyConfigInFlight = (async () => {
-    const result = await getSingletonConfigObjectByType(
+    const nodes = await fetchAllConfigDynamicFieldNodes(
       getFuelEfficiencyConfigType(),
       'fuel_efficiency',
     )
 
-    const fuelEfficiencyConfigJson = result.data?.objects?.nodes[0]
-      ?.asMoveObject?.contents?.extract?.extract?.asAddress?.addressAt
-      ?.dynamicFields?.nodes as Record<string, unknown> | undefined
-
-    fuelEfficiencyConfigCache = parseConfig(fuelEfficiencyConfigJson)
+    fuelEfficiencyConfigCache = parseConfig(nodes)
     return fuelEfficiencyConfigCache
   })()
 
