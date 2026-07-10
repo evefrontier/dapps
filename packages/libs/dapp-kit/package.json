@@ -1,6 +1,6 @@
 {
   "name": "@evefrontier/dapp-kit",
-  "version": "0.1.10",
+  "version": "0.1.10-alpha-1",
   "description": "React SDK for EVE Frontier dApps on Sui",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -41,7 +41,7 @@
     }
   },
   "dependencies": {
-    "@evefrontier/wallet-core": "0.0.4",
+    "@evefrontier/wallet-core": "0.0.5",
     "@mysten/dapp-kit-core": "^1.2.2",
     "@mysten/dapp-kit-react": "^2.0.1",
     "@mysten/sui": "^2.14.1",
