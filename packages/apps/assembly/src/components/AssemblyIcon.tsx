@@ -14,7 +14,7 @@ interface BannerProps {
 
 const Banner: React.FC<BannerProps> = ({ message, variant }) => (
   <div
-    className={`col-span-2 font-disket flex justify-center items-center text-xs px-2 py-1.5 bg-${variant} ${variant === 'martianred' ? 'text-crude' : ''}`}
+    className={`col-span-2 font-disket flex justify-center items-center text-xs px-2 py-1.5 ${variant === 'martianred' ? 'bg-martianred text-crude' : 'bg-alert'}`}
   >
     {message}
   </div>
@@ -34,6 +34,9 @@ const AssemblyIcon = ({
     : null
 
   const offline = !isOnline
+
+  const src =
+    iconUrl || `https://artifacts.evefrontier.com/types/${typeDetails?.id}.png`
 
   const getNetworkNodeBanner = () => {
     if (!isNetworkNode) return null
@@ -75,14 +78,11 @@ const AssemblyIcon = ({
       <div className={getNetworkNodeBorder()}>
         <div className="relative">
           <img
-            src={
-              iconUrl ||
-              `https://artifacts.evefrontier.com/types/${typeDetails?.id}.png`
-            }
+            src={src}
             alt={name}
             className={`w-full h-full object-cover ${className}`}
-            min-width={size}
-            min-height={size}
+            width={size}
+            height={size}
           />
           {offline && <div className={`absolute inset-0 ${getBlurClass()}`} />}
         </div>
@@ -92,11 +92,11 @@ const AssemblyIcon = ({
   ) : (
     <div className="relative">
       <img
-        src={iconUrl}
+        src={src}
         alt={name}
         className={`w-full h-full object-cover ${className}`}
-        min-width={size}
-        min-height={size}
+        width={size}
+        height={size}
       />
       {offline && <div className={`absolute inset-0 ${getBlurClass()}`} />}
     </div>
