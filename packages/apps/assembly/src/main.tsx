@@ -10,6 +10,7 @@ import BehaviourView from './components/views/BehaviourView'
 import MonitorView from './components/views/MonitorView'
 import Overview from './components/views/Overview'
 import RootView from './components/views/RootView'
+import { FlagsProvider } from './flags'
 
 const darkTheme = createTheme({
   palette: {
@@ -75,10 +76,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       />
     }
   >
-    <EveFrontierProvider queryClient={queryClient}>
-      <ThemeProvider theme={darkTheme}>
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </EveFrontierProvider>
+    <FlagsProvider>
+      <EveFrontierProvider queryClient={queryClient}>
+        <ThemeProvider theme={darkTheme}>
+          <RouterProvider router={router} />
+        </ThemeProvider>
+      </EveFrontierProvider>
+    </FlagsProvider>
   </ErrorBoundary>,
 )

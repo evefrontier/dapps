@@ -24,7 +24,7 @@
     },
     "packages/apps/assembly": {
       "name": "@eveworld/assembly",
-      "version": "0.3.5",
+      "version": "0.3.6",
       "dependencies": {
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
@@ -33,6 +33,8 @@
         "@mui/material": "^7.3.9",
         "@mysten/dapp-kit-core": "^1.2.2",
         "@mysten/dapp-kit-react": "^2.0.1",
+        "@openfeature/react-sdk": "^1.4.1",
+        "@openfeature/web-sdk": "^1.9.0",
         "@tanstack/react-query": "^5.96.2",
         "react": "^19.2.4",
         "react-dom": "^19.2.4",
@@ -59,7 +61,7 @@
     },
     "packages/libs/dapp-kit": {
       "name": "@evefrontier/dapp-kit",
-      "version": "0.1.10-alpha-1",
+      "version": "0.1.10-alpha.1",
       "dependencies": {
         "@evefrontier/wallet-core": "0.0.5",
         "@mysten/dapp-kit-core": "^1.2.2",
@@ -552,6 +554,12 @@
     "@nx/web": ["@nx/web@23.0.1", "", { "dependencies": { "@nx/devkit": "23.0.1", "@nx/js": "23.0.1", "detect-port": "^2.1.0", "http-server": "^14.1.0", "picocolors": "^1.1.0", "tslib": "^2.3.0" }, "peerDependencies": { "@nx/cypress": "23.0.1", "@nx/eslint": "23.0.1", "@nx/jest": "23.0.1", "@nx/playwright": "23.0.1", "@nx/vite": "23.0.1", "@nx/webpack": "23.0.1" }, "optionalPeers": ["@nx/cypress", "@nx/eslint", "@nx/jest", "@nx/playwright", "@nx/vite", "@nx/webpack"] }, "sha512-0iwqCPJ5A27/XzqF6637dcRmJO3/TY7nQrEobS0yJ4W2xhvCIRwsWmPkuUAZgjd4622yQauHAwPQAnkIEILPiQ=="],
 
     "@nx/workspace": ["@nx/workspace@23.0.1", "", { "dependencies": { "@nx/devkit": "23.0.1", "@zkochan/js-yaml": "0.0.7", "chalk": "^4.1.0", "enquirer": "~2.3.6", "nx": "23.0.1", "picomatch": "4.0.4", "semver": "^7.6.3", "tslib": "^2.3.0", "yargs-parser": "21.1.1" } }, "sha512-VdbvMTSEzp3ONZwiy83XEu8ktykC8aEI7M4mqKs5RNKHBFg3jtao2NFo3wDqHqnn1q9Fdaj8EbyUn08BUR5L3w=="],
+
+    "@openfeature/core": ["@openfeature/core@1.11.0", "", {}, "sha512-P0u3/ht/oZCQT89fOed+laLk0kZR529a825cS02uPDglxXbE97irWYpDAeRGGVETIzKfuy+H2g8c3Ccv/tXJNQ=="],
+
+    "@openfeature/react-sdk": ["@openfeature/react-sdk@1.4.1", "", { "peerDependencies": { "@openfeature/web-sdk": "^1.9.0", "react": ">=16.8.0" } }, "sha512-xKpXBXVT0w9CIrhl6IzGkIuxmsqy7At+eYUW1XtaZbk+odKW424ZnmmjqiQMrbu31pfAhQrzww36QokTQaIf7g=="],
+
+    "@openfeature/web-sdk": ["@openfeature/web-sdk@1.9.0", "", { "peerDependencies": { "@openfeature/core": "^1.11.0" } }, "sha512-FCrNfqvE/thHVfCNU0KKx1SD7rk+1wE2UaR5B5OPZl917QJv6AsKRwaI3N+SVgwXWI07GgtXP6hNlTVb49PGhg=="],
 
     "@oxc-project/types": ["@oxc-project/types@0.137.0", "", {}, "sha512-WT+Gb24i8hmvo85AIv2oEYouEXkRlKAlT9WaCa3TfLgNCN+GhrJOGZuIlMouAh38Qe4QOx26eUOVsq70qXrywA=="],
 
