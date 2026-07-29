@@ -12,13 +12,13 @@ import { FlagDevPanel } from './FlagDevPanel'
 /**
  * Offline feature-flag setup.
  *
- * Flags are evaluated in-process by OpenFeature's InMemoryProvider — there is
- * no flag backend yet. Values come from the registry in `config.ts`, overridden
- * at runtime by the internal dev panel (persisted to localStorage).
+ * Flags are evaluated in-process by OpenFeature's InMemoryProvider.
+ * Values come from the registry in `config.ts`, overridden at runtime
+ * by the internal dev panel (persisted to localStorage).
  *
  * When a GO Feature Flag relay proxy becomes available, swap the provider
  * instance below for `GoFeatureFlagWebProvider` (from
- * `@openfeature/go-feature-flag-web-provider`) — nothing else in the app
+ * `@openfeature/go-feature-flag-web-provider`). Nothing else in the app
  * changes, since everything consumes flags through the OpenFeature client.
  */
 
@@ -62,9 +62,9 @@ export async function resetFlagOverrides(): Promise<void> {
 }
 
 /**
- * App-root feature-flag provider. Wrap the tree in this; it exposes the
- * OpenFeature React context and renders the internal dev panel (dev builds /
- * `?flags` only).
+ * App-root feature-flag provider. Wraps the tree; it exposes the
+ * OpenFeature React context and renders the internal dev panel (only when
+ * VITE_SHOW_FLAG_PANEL is "true").
  */
 export function FlagsProvider({ children }: { children: ReactNode }) {
   return (

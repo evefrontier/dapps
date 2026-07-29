@@ -11,7 +11,7 @@ import { FLAG_DEFINITIONS, type FlagKey } from './config'
  */
 export function useFlagVariant<K extends FlagKey>(key: K): string {
   const def = FLAG_DEFINITIONS[key]
-  const variants: Record<string, string | boolean | number> = def.variants
-  const fallback = String(variants[def.defaultVariant] ?? def.defaultVariant)
+  const variants: Record<string, string> = def.variants
+  const fallback = variants[def.defaultVariant] ?? def.defaultVariant
   return useStringFlagValue(key, fallback)
 }

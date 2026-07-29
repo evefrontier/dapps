@@ -20,8 +20,12 @@ export type InMemoryFlagConfiguration = Record<
 export type FlagDefinition = {
   /** Human-readable description shown in the dev panel. */
   description: string
-  /** Variant name → value. Values are usually strings; booleans/numbers allowed. */
-  variants: Record<string, string | boolean | number>
+  /**
+   * Variant name → value. String-valued for now, since flags are read as
+   * strings (`useFlagVariant` / the dev panel). Add typed boolean/number
+   * helpers alongside a wider type here if a non-string flag is needed.
+   */
+  variants: Record<string, string>
   /** Variant resolved by default (static evaluation). */
   defaultVariant: string
 }

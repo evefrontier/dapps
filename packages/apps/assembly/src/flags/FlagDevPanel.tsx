@@ -5,7 +5,7 @@ import styles from './FlagDevPanel.module.css'
 import { resetFlagOverrides, setFlagVariant } from './provider'
 
 /**
- * Internal, offline flag-management UI. Lets you flip flags at runtime while
+ * Internal flag-management UI. Lets you flip flags at runtime while
  * there is no flag backend; changes persist to localStorage and re-render any
  * consumer immediately.
  *
@@ -18,7 +18,13 @@ function isPanelEnabled(): boolean {
 }
 
 function FlagRow({ flagKey, def }: { flagKey: FlagKey; def: FlagDefinition }) {
-  const current = useStringFlagValue(flagKey, def.defaultVariant)
+  // Fall back to the default variant's *value* (matching useFlagVariant), not
+  // its name, so the active-variant comparison below is correct even when a
+  // variant's value differs from its name.
+  const current = useStringFlagValue(
+    flagKey,
+    def.variants[def.defaultVariant] ?? def.defaultVariant,
+  )
   const variantNames = Object.keys(def.variants)
 
   return (
@@ -27,7 +33,7 @@ function FlagRow({ flagKey, def }: { flagKey: FlagKey; def: FlagDefinition }) {
       <div className={styles.rowDescription}>{def.description}</div>
       <div className={styles.variants}>
         {variantNames.map((variant) => {
-          const active = String(def.variants[variant]) === String(current)
+          const active = def.variants[variant] === current
           return (
             <button
               type="button"
