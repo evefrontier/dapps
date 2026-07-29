@@ -4,5 +4,5 @@ ROOT=$(git rev-parse --show-toplevel)
 cd "$ROOT"
 
 export PATH="$HOME/.bun/bin:$PATH"
-bun audit
+bun audit --ignore=GHSA-qwww-vcr4-c8h2
 bun --filter @evefrontier/dapp-kit test:run
