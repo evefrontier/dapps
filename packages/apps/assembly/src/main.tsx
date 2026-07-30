@@ -1,4 +1,4 @@
-import { EveFrontierProvider } from '@evefrontier/dapp-kit'
+import { createLogger, EveFrontierProvider } from '@evefrontier/dapp-kit'
 import { ErrorNotice, ErrorNoticeTypes } from '@eveworld/ui-components'
 import { createTheme, ThemeProvider } from '@mui/material'
 import { QueryClient } from '@tanstack/react-query'
@@ -67,6 +67,8 @@ const router = createBrowserRouter([
 
 const queryClient = new QueryClient()
 
+const log = createLogger()
+
 /**
  * Reads the event-transport feature flag (inside FlagsProvider) and injects it
  * into the dapp-kit providers. Flipping the flag in the dev panel re-subscribes
@@ -74,6 +76,7 @@ const queryClient = new QueryClient()
  */
 function AppProviders() {
   const eventTransport = useEventTransport()
+  log.info('[Dapp] Event transport resolved to:', eventTransport)
   return (
     <EveFrontierProvider
       queryClient={queryClient}

@@ -22,6 +22,7 @@ import {
   DEFAULT_TENANT,
   type EventTransport,
   getPollingInterval,
+  setActiveEventTransport,
 } from '../utils/constants'
 import { getDatahubGameInfo } from '../utils/datahub'
 import {
@@ -129,6 +130,10 @@ const SmartObjectProvider = ({
   /** Real-time event transport for optimistic updates (grpc | sse). */
   eventTransport?: EventTransport
 }) => {
+  // Align the GraphQL query endpoint with the active transport (grpc → standard,
+  // sse → cockroach) before any fetch effect runs. Idempotent per render.
+  setActiveEventTransport(eventTransport)
+
   const [assembly, setAssembly] = useState<AssemblyType<Assemblies> | null>(
     null,
   )
