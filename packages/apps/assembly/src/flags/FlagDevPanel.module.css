@@ -1,0 +1,72 @@
+/* Styles for the internal feature-flag dev panel. Deliberately theme-independent
+   (fixed colors, monospace) so the panel stays legible regardless of the app
+   theme. Scoped via CSS modules — not shared with app styles. */
+
+.panel {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  z-index: 2147483647;
+  max-width: 340px;
+  background: rgba(15, 15, 15, 0.95);
+  color: #e6e6e6;
+  border: 1px solid #444;
+  border-radius: 6px;
+  font: 12px / 1.4 monospace;
+}
+
+.toggle {
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  background: transparent;
+  color: #9ff;
+  border: none;
+  font-weight: 700;
+}
+
+.row {
+  padding: 8px 10px;
+  border-top: 1px solid #333;
+}
+
+.rowKey {
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.rowDescription {
+  opacity: 0.7;
+  margin: 2px 0 6px;
+}
+
+.variants {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.variant {
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: transparent;
+  color: #ccc;
+}
+
+.variantActive {
+  border-color: #7cc;
+  background: #0a3a3a;
+  color: #9ff;
+}
+
+.reset {
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: transparent;
+  color: #ccc;
+}

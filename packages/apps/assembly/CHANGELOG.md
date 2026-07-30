@@ -1,5 +1,11 @@
 # @eveworld/assembly
 
+## 0.3.7
+
+### Patch Changes
+
+- add feature flags
+
 ## 0.3.6
 
 ### Patch Changes

@@ -16,3 +16,7 @@ VITE_EVE_WORLD_PACKAGE_ID="0x2be1876fb55dc89dc1f309fa6efc7bff680a2857f734b2dd0f5
 # Change the following to the preferred smart assembly
 # If defined, this will take priority over Smart Assembly IDs passed via URL query param
 VITE_OBJECT_ID="0x50c403cd61904deeed39a0b9e401dbdcf4e81dbb99dccb3590536e7fbd2ffe30"
+
+# Set to "true" to render the internal feature-flag dev panel in this build.
+# Leave unset for normal/production builds.
+# VITE_SHOW_FLAG_PANEL="true"

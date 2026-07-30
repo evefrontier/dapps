@@ -4,5 +4,10 @@ ROOT=$(git rev-parse --show-toplevel)
 cd "$ROOT"
 
 export PATH="$HOME/.bun/bin:$PATH"
-bun audit
+
+# Ignore GHSA-qwww-vcr4-c8h2 (react-router RSC-mode CSRF): no fixed release exists
+# yet (latest react-router-dom 7.x is still < 8.3.0), and this app is a client-side
+# SPA that does not use RSC mode, so it is not exploitable here.
+# Remove this ignore once a patched react-router-dom ships.
+bun audit --ignore=GHSA-qwww-vcr4-c8h2
 bun --filter @evefrontier/dapp-kit test:run
