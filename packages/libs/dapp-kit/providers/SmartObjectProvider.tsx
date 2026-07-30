@@ -17,12 +17,16 @@ import {
   transformToAssembly,
   transformToCharacter,
 } from '../utils'
-import { DEFAULT_TENANT, POLLING_INTERVAL } from '../utils/constants'
+import {
+  DEFAULT_EVENT_TRANSPORT,
+  DEFAULT_TENANT,
+  type EventTransport,
+  getPollingInterval,
+} from '../utils/constants'
 import { getDatahubGameInfo } from '../utils/datahub'
-import type { EventUnsubscribe } from '../utils/events/checkpointStream'
 import {
   createEventRefetchScheduler,
-  subscribeToInventoryEvents,
+  subscribeToAssemblyEvents,
 } from '../utils/events/eventRefresh'
 import {
   applyFuelEventToAssembly,
@@ -30,6 +34,7 @@ import {
   getFuelEventType,
   isRelevantFuelEvent,
 } from '../utils/events/fuelEventHandlers'
+import type { EventUnsubscribe } from '../utils/events/graphqlEventStream'
 import {
   applyInventoryEventToAssembly,
   getInventoryEventTarget,
@@ -116,7 +121,14 @@ function primeInventoryTypeVolumes(assembly: AssemblyType<Assemblies> | null) {
  *
  * @category Providers
  */
-const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
+const SmartObjectProvider = ({
+  children,
+  eventTransport = DEFAULT_EVENT_TRANSPORT,
+}: {
+  children: ReactNode
+  /** Real-time event transport for optimistic updates (grpc | sse). */
+  eventTransport?: EventTransport
+}) => {
   const [assembly, setAssembly] = useState<AssemblyType<Assemblies> | null>(
     null,
   )
@@ -359,15 +371,26 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
     // Initial fetch
     fetchObjectData(input, true)
 
-    // Set up polling
-    pollingRef.current = setInterval(() => {
-      fetchObjectData(input, false)
-    }, POLLING_INTERVAL)
+    // Set up the polling backstop. Real-time updates come from the event
+    // subscription; this interval only catches changes a tracked event didn't
+    // cover. A configured interval of 0 disables it entirely.
+    const pollingInterval = getPollingInterval()
+    if (pollingInterval > 0) {
+      pollingRef.current = setInterval(() => {
+        fetchObjectData(input, false)
+      }, pollingInterval)
 
-    log.info(
-      '[DappKit] SmartObjectProvider: Started polling for object:',
-      selectedObjectId,
-    )
+      log.info(
+        '[DappKit] SmartObjectProvider: Started polling for object:',
+        selectedObjectId,
+        { pollingInterval },
+      )
+    } else {
+      log.info(
+        '[DappKit] SmartObjectProvider: Polling backstop disabled (VITE_POLLING_INTERVAL=0)',
+        selectedObjectId,
+      )
+    }
 
     return () => {
       if (pollingRef.current) {
@@ -430,8 +453,9 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
       { allEventTypes, selectedObjectId, selectedTenant },
     )
 
-    subscribeToInventoryEvents({
+    subscribeToAssemblyEvents({
       eventTypes: allEventTypes,
+      transport: eventTransport,
       signal: abortController.signal,
       onGap: () => {
         triggerRefetch()
@@ -548,6 +572,7 @@ const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
     isObjectIdDirect,
     isConnected,
     fetchObjectData,
+    eventTransport,
   ])
 
   const handleRefetch = useCallback(async () => {

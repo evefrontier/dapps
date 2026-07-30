@@ -104,10 +104,18 @@ export const SUI_GRAPHQL_NETWORKS = ['testnet', 'devnet', 'mainnet'] as const
  *  @category Constants
  */
 export const GRAPHQL_ENDPOINTS: Record<SuiGraphqlNetwork, string> = {
-  testnet: 'https://graphql.testnet.sui.io/graphql',
+  testnet: 'https://graphql-cockroach.testnet.sui.io/graphql',
   devnet: 'https://graphql.devnet.sui.io/graphql',
   mainnet: 'https://graphql.mainnet.sui.io/graphql',
 }
+
+/**
+ * Fixed client identifier sent as the `X-Client-ID` header on GraphQL requests
+ * (query fetch and the SSE subscription). A stable random value that identifies
+ * this app to the endpoint.
+ * @category Constants
+ */
+export const GRAPHQL_CLIENT_ID = '2b1a5c74-9f3d-4e86-bd21-7c0a6e4f9d18'
 
 /** gRPC base URLs for each Sui network.
  *  @category Constants
@@ -130,10 +138,64 @@ export function getSuiGrpcBaseUrl(
   return SUI_GRPC_URLS[network]
 }
 
-/** Polling interval in milliseconds (10 seconds).
+/**
+ * Real-time event transport feeding optimistic updates.
+ * - `grpc`: Sui fullnode gRPC checkpoint stream.
+ * - `sse`: GraphQL subscription over SSE.
+ * Selected per-app via the `eventTransport` provider prop (typically driven by
+ * a feature flag). Defaults to `grpc`.
+ * @category Types
+ */
+export type EventTransport = 'grpc' | 'sse'
+
+/** Default event transport when none is provided. @category Constants */
+export const DEFAULT_EVENT_TRANSPORT: EventTransport = 'grpc'
+
+/**
+ * HTTP(S) URL of the GraphQL subscription endpoint (SSE / graphql-sse) — the
+ * real-time event source for optimistic updates. Sui serves subscriptions on a
+ * dedicated `/subscriptions` path appended to the query endpoint.
+ * @returns The subscription endpoint URL.
+ * @category Utilities - Config
+ */
+export function getGraphqlSubscriptionEndpoint(): string {
+  return `${getSuiGraphqlEndpoint()}/subscriptions`
+}
+
+/**
+ * Optional bearer token sent as an Authorization header on the SSE subscription
+ * when the endpoint requires authentication. Configured via
+ * VITE_GRAPHQL_SUBSCRIPTION_AUTH_TOKEN. Returns undefined when unset.
+ * @category Utilities - Config
+ */
+export function getGraphqlSubscriptionAuthToken(): string | undefined {
+  const token = import.meta.env.VITE_GRAPHQL_SUBSCRIPTION_AUTH_TOKEN
+  return typeof token === 'string' && token.length > 0 ? token : undefined
+}
+
+/** Default polling interval in milliseconds.
+ *
+ * Real-time updates come from the event subscription; this interval is only a
+ * slow backstop that catches state changes not covered by a tracked event (or
+ * an event the endpoint silently never sent). Override with VITE_POLLING_INTERVAL;
+ * set it to 0 to disable the backstop entirely.
  *  @category Constants
  */
-export const POLLING_INTERVAL = 10000
+export const POLLING_INTERVAL = 60000
+
+/**
+ * Resolve the polling-backstop interval in milliseconds.
+ * Reads VITE_POLLING_INTERVAL when set (0 disables the backstop), otherwise
+ * falls back to POLLING_INTERVAL.
+ * @returns Interval in ms; 0 means the periodic poll is disabled.
+ * @category Utilities - Config
+ */
+export function getPollingInterval(): number {
+  const raw = import.meta.env.VITE_POLLING_INTERVAL
+  if (raw === undefined || raw === '') return POLLING_INTERVAL
+  const parsed = Number(raw)
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : POLLING_INTERVAL
+}
 
 /** Local storage keys.
  *  @category Constants

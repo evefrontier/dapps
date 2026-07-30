@@ -6,6 +6,7 @@ import {
   getEveCoinType,
   getEveWorldPackageId,
   getFuelEfficiencyConfigType,
+  getGraphqlSubscriptionEndpoint,
   getObjectRegistryType,
   getSuiGraphqlEndpoint,
   TenantId,
@@ -30,7 +31,7 @@ describe('constants', () => {
   describe('getSuiGraphqlEndpoint', () => {
     it("returns testnet URL for 'testnet'", () => {
       expect(getSuiGraphqlEndpoint('testnet')).toBe(
-        'https://graphql.testnet.sui.io/graphql',
+        'https://graphql-cockroach.testnet.sui.io/graphql',
       )
     })
 
@@ -48,13 +49,25 @@ describe('constants', () => {
 
     it('defaults to testnet URL when called with no argument', () => {
       expect(getSuiGraphqlEndpoint()).toBe(
-        'https://graphql.testnet.sui.io/graphql',
+        'https://graphql-cockroach.testnet.sui.io/graphql',
       )
     })
 
     it('falls back to testnet URL for an unknown network string', () => {
       expect(getSuiGraphqlEndpoint('unknown-net')).toBe(
-        'https://graphql.testnet.sui.io/graphql',
+        'https://graphql-cockroach.testnet.sui.io/graphql',
+      )
+    })
+  })
+
+  // ============================================================================
+  // getGraphqlSubscriptionEndpoint
+  // ============================================================================
+
+  describe('getGraphqlSubscriptionEndpoint', () => {
+    it('appends /subscriptions to the query endpoint', () => {
+      expect(getGraphqlSubscriptionEndpoint()).toBe(
+        'https://graphql-cockroach.testnet.sui.io/graphql/subscriptions',
       )
     })
   })

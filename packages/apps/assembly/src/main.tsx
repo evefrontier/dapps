@@ -10,7 +10,7 @@ import BehaviourView from './components/views/BehaviourView'
 import MonitorView from './components/views/MonitorView'
 import Overview from './components/views/Overview'
 import RootView from './components/views/RootView'
-import { FlagsProvider } from './flags'
+import { FlagsProvider, useEventTransport } from './flags'
 
 const darkTheme = createTheme({
   palette: {
@@ -67,6 +67,25 @@ const router = createBrowserRouter([
 
 const queryClient = new QueryClient()
 
+/**
+ * Reads the event-transport feature flag (inside FlagsProvider) and injects it
+ * into the dapp-kit providers. Flipping the flag in the dev panel re-subscribes
+ * on the chosen transport.
+ */
+function AppProviders() {
+  const eventTransport = useEventTransport()
+  return (
+    <EveFrontierProvider
+      queryClient={queryClient}
+      eventTransport={eventTransport}
+    >
+      <ThemeProvider theme={darkTheme}>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </EveFrontierProvider>
+  )
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <ErrorBoundary
     fallback={
@@ -77,11 +96,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     }
   >
     <FlagsProvider>
-      <EveFrontierProvider queryClient={queryClient}>
-        <ThemeProvider theme={darkTheme}>
-          <RouterProvider router={router} />
-        </ThemeProvider>
-      </EveFrontierProvider>
+      <AppProviders />
     </FlagsProvider>
   </ErrorBoundary>,
 )

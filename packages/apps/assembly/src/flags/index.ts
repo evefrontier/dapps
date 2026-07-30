@@ -5,4 +5,4 @@ export {
   type FlagOverrides,
 } from './config'
 export { FlagsProvider, resetFlagOverrides, setFlagVariant } from './provider'
-export { useFlagVariant } from './useFlags'
+export { useEventTransport, useFlagVariant } from './useFlags'
