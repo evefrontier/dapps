@@ -46,7 +46,7 @@ function isSuiGraphqlNetwork(value: string): value is SuiGraphqlNetwork {
  * subscription-capable ("cockroach") endpoint for its queries too, while `grpc`
  * (and the default) use the standard endpoint.
  *
- * foUnknown networks fall back to
+ * Unknown networks fall back to
  * testnet to avoid returning undefined.
  * @param env - Network identifier (testnet, devnet, mainnet). Defaults to testnet.
  * @returns The GraphQL endpoint URL

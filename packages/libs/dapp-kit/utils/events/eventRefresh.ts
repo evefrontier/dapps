@@ -143,17 +143,19 @@ function createGraphqlSseEventStreamClient(
 /** Subscribe to assembly Move events via the GraphQL SSE subscription endpoint. */
 function subscribeViaSse({
   eventTypes,
+  network,
   onEvents,
   onGap,
   signal,
 }: {
   eventTypes: readonly string[]
+  network: string
   onEvents?: StreamEventBatchHandler
   onGap?: StreamGapHandler
   signal?: AbortSignal
 }): EventUnsubscribe {
   const client = createGraphqlSseEventStreamClient(
-    getGraphqlSubscriptionEndpoint(),
+    getGraphqlSubscriptionEndpoint(network),
     getGraphqlSubscriptionAuthToken(),
   )
 
@@ -180,8 +182,6 @@ function subscribeViaSse({
  * Real-time source for the optimistic updates; the polling backstop remains the
  * fallback if the stream can't connect. Both transports deliver the same
  * `{ id, type, parsedJson }` event batches, so the consumer is transport-blind.
- * The name is kept for backwards compatibility; it now also carries fuel and
- * status events (filtered by `eventTypes`).
  */
 export async function subscribeToAssemblyEvents({
   eventTypes,
@@ -202,6 +202,7 @@ export async function subscribeToAssemblyEvents({
   if (transport === 'sse') {
     return subscribeViaSse({
       eventTypes,
+      network,
       ...(onEvents !== undefined ? { onEvents } : {}),
       ...(onGap !== undefined ? { onGap } : {}),
       ...(signal !== undefined ? { signal } : {}),

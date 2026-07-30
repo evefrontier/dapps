@@ -131,8 +131,11 @@ const SmartObjectProvider = ({
   eventTransport?: EventTransport
 }) => {
   // Align the GraphQL query endpoint with the active transport (grpc → standard,
-  // sse → cockroach) before any fetch effect runs. Idempotent per render.
-  setActiveEventTransport(eventTransport)
+  // sse → cockroach). Kept in an effect so render stays pure (no module-global
+  // mutation during render, which misbehaves under strict/concurrent mode).
+  useEffect(() => {
+    setActiveEventTransport(eventTransport)
+  }, [eventTransport])
 
   const [assembly, setAssembly] = useState<AssemblyType<Assemblies> | null>(
     null,

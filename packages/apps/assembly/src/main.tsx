@@ -10,7 +10,7 @@ import BehaviourView from './components/views/BehaviourView'
 import MonitorView from './components/views/MonitorView'
 import Overview from './components/views/Overview'
 import RootView from './components/views/RootView'
-import { FlagsProvider, useEventTransport } from './flags'
+import { FlagsProvider, isPanelEnabled, useEventTransport } from './flags'
 
 const darkTheme = createTheme({
   palette: {
@@ -76,7 +76,10 @@ const log = createLogger()
  */
 function AppProviders() {
   const eventTransport = useEventTransport()
-  log.info('[Dapp] Event transport resolved to:', eventTransport)
+  // Only log while the flag panel is enabled via env (VITE_SHOW_FLAG_PANEL)
+  if (isPanelEnabled()) {
+    log.info('[Dapp] Event transport resolved to:', eventTransport)
+  }
   return (
     <EveFrontierProvider
       queryClient={queryClient}
