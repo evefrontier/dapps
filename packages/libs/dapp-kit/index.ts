@@ -52,9 +52,12 @@ export {
 // Constants & Configuration
 // =========================================
 export {
+  DEFAULT_EVENT_TRANSPORT,
+  type EventTransport,
   getCharacterOwnerCapType,
   getEveWorldPackageId,
   getObjectRegistryType,
+  getPollingInterval,
   getSuiGraphqlEndpoint,
   POLLING_INTERVAL,
   STORAGE_KEYS,

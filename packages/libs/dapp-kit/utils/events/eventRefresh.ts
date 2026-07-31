@@ -1,14 +1,27 @@
 import { SuiGrpcClient } from '@mysten/sui/grpc'
+import { createClient } from 'graphql-sse'
 
-import { DEFAULT_GRAPHQL_NETWORK, getSuiGrpcBaseUrl } from '../constants'
+import {
+  DEFAULT_EVENT_TRANSPORT,
+  DEFAULT_GRAPHQL_NETWORK,
+  type EventTransport,
+  GRAPHQL_CLIENT_ID,
+  getGraphqlSubscriptionAuthToken,
+  getGraphqlSubscriptionEndpoint,
+  getSuiGrpcBaseUrl,
+} from '../constants'
 import { createLogger } from '../logger'
 import {
-  type CheckpointGapHandler,
   type CheckpointStreamMessage,
   createInventoryCheckpointStream,
   type EventUnsubscribe,
-  type InventoryEventBatchHandler,
 } from './checkpointStream'
+import {
+  createGraphqlEventStream,
+  type EventStreamClient,
+  type StreamEventBatchHandler,
+  type StreamGapHandler,
+} from './graphqlEventStream'
 
 const log = createLogger()
 
@@ -45,23 +58,28 @@ export function createEventRefetchScheduler(
   return scheduledRefetch
 }
 
-export async function subscribeToInventoryEvents({
+/**
+ * Subscribe to assembly Move events via the Sui fullnode gRPC checkpoint stream.
+ * The checkpoint stream's `onGap` passes sequence numbers, which the consumer
+ * ignores — so we adapt to the shared bare `() => void` gap signal.
+ */
+function subscribeViaGrpc({
   eventTypes,
-  network = DEFAULT_GRAPHQL_NETWORK,
+  network,
   onEvents,
   onGap,
   signal,
 }: {
   eventTypes: readonly string[]
-  network?: string
-  onEvents?: InventoryEventBatchHandler
-  onGap?: CheckpointGapHandler
+  network: string
+  onEvents?: StreamEventBatchHandler
+  onGap?: StreamGapHandler
   signal?: AbortSignal
-}): Promise<EventUnsubscribe> {
+}): EventUnsubscribe {
   const unsubscribe = createInventoryCheckpointStream({
     eventTypes,
     ...(onEvents !== undefined ? { onEvents } : {}),
-    ...(onGap !== undefined ? { onGap } : {}),
+    ...(onGap !== undefined ? { onGap: () => onGap() } : {}),
     ...(signal !== undefined ? { signal } : {}),
     onError: (error) => {
       log.warn('[DappKit] Inventory checkpoint stream error:', error)
@@ -73,11 +91,7 @@ export async function subscribeToInventoryEvents({
         baseUrl: getSuiGrpcBaseUrl(network),
       })
       const call = grpcClient.subscriptionService.subscribeCheckpoints(
-        {
-          readMask: {
-            paths: [...request.readMask.paths],
-          },
-        },
+        { readMask: { paths: [...request.readMask.paths] } },
         { abort: abortController.signal },
       )
 
@@ -95,4 +109,110 @@ export async function subscribeToInventoryEvents({
   })
 
   return unsubscribe
+}
+
+/**
+ * Adapt a `graphql-sse` client to the transport-agnostic EventStreamClient the
+ * stream consumes. Uses "distinct connections" mode (one SSE request per
+ * subscription); the per-subscription `connected(reconnected)` listener drives
+ * the gap signal. SSE runs over `fetch`, so X-Client-ID is a real header.
+ */
+function createGraphqlSseEventStreamClient(
+  url: string,
+  authToken: string | undefined,
+): EventStreamClient & { dispose: () => void } {
+  const client = createClient({
+    url,
+    headers: {
+      'X-Client-ID': GRAPHQL_CLIENT_ID,
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    },
+  })
+
+  return {
+    subscribe: (payload, sink, onConnected) =>
+      client.subscribe(payload, sink, {
+        connected: (reconnected) => onConnected?.(reconnected),
+      }),
+    dispose: () => {
+      client.dispose()
+    },
+  }
+}
+
+/** Subscribe to assembly Move events via the GraphQL SSE subscription endpoint. */
+function subscribeViaSse({
+  eventTypes,
+  network,
+  onEvents,
+  onGap,
+  signal,
+}: {
+  eventTypes: readonly string[]
+  network: string
+  onEvents?: StreamEventBatchHandler
+  onGap?: StreamGapHandler
+  signal?: AbortSignal
+}): EventUnsubscribe {
+  const client = createGraphqlSseEventStreamClient(
+    getGraphqlSubscriptionEndpoint(network),
+    getGraphqlSubscriptionAuthToken(),
+  )
+
+  const stop = createGraphqlEventStream({
+    client,
+    eventTypes,
+    ...(onEvents !== undefined ? { onEvents } : {}),
+    ...(onGap !== undefined ? { onGap } : {}),
+    ...(signal !== undefined ? { signal } : {}),
+    onError: (error) => {
+      log.warn('[DappKit] GraphQL event subscription error:', error)
+    },
+  })
+
+  return async () => {
+    await stop()
+    client.dispose()
+  }
+}
+
+/**
+ * Subscribe to assembly Move events, selecting the transport at runtime.
+ *
+ * Real-time source for the optimistic updates; the polling backstop remains the
+ * fallback if the stream can't connect. Both transports deliver the same
+ * `{ id, type, parsedJson }` event batches, so the consumer is transport-blind.
+ */
+export async function subscribeToAssemblyEvents({
+  eventTypes,
+  transport = DEFAULT_EVENT_TRANSPORT,
+  network = DEFAULT_GRAPHQL_NETWORK,
+  onEvents,
+  onGap,
+  signal,
+}: {
+  eventTypes: readonly string[]
+  transport?: EventTransport
+  network?: string
+  onEvents?: StreamEventBatchHandler
+  onGap?: StreamGapHandler
+  signal?: AbortSignal
+}): Promise<EventUnsubscribe> {
+  log.info('[DappKit] Subscribing to assembly events', { transport })
+  if (transport === 'sse') {
+    return subscribeViaSse({
+      eventTypes,
+      network,
+      ...(onEvents !== undefined ? { onEvents } : {}),
+      ...(onGap !== undefined ? { onGap } : {}),
+      ...(signal !== undefined ? { signal } : {}),
+    })
+  }
+  return subscribeViaGrpc({
+    eventTypes,
+    network,
+    ...(onEvents !== undefined ? { onEvents } : {}),
+    ...(onGap !== undefined ? { onGap } : {}),
+    ...(signal !== undefined ? { signal } : {}),
+  })
 }

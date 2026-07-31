@@ -1,5 +1,6 @@
 import { parseCharacterFromJson } from '../utils/character'
 import {
+  GRAPHQL_CLIENT_ID,
   getCharacterOwnerCapType,
   getCharacterPlayerProfileType,
   getSuiGraphqlEndpoint,
@@ -76,6 +77,7 @@ export async function executeGraphQLQuery<T = unknown>(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'X-Client-ID': GRAPHQL_CLIENT_ID,
     },
     body: JSON.stringify({
       query,

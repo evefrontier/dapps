@@ -1,6 +1,6 @@
 {
   "name": "@evefrontier/dapp-kit",
-  "version": "0.1.10-alpha.1",
+  "version": "0.1.10-alpha.2/gqlsub",
   "description": "React SDK for EVE Frontier dApps on Sui",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -47,7 +47,8 @@
     "@mysten/sui": "^2.22.1",
     "@mysten/wallet-standard": "^0.20.3",
     "@tanstack/react-query": "^5.101.4",
-    "react": "^19.2.8"
+    "react": "^19.2.8",
+    "graphql-sse": "^2.6.0"
   },
   "devDependencies": {
     "@types/node": "^25.9.5",

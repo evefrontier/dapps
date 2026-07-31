@@ -33,7 +33,7 @@ export type FlagDefinition = {
 export const FLAG_DEFINITIONS = {
   'eve-frontier-assembly-event-transport': {
     description:
-      'Real-time event transport feeding optimistic updates (grpc | sse). Consumption wired in a later PR.',
+      'Real-time event transport feeding optimistic updates: grpc (fullnode checkpoint stream) or sse (GraphQL subscription).',
     variants: { grpc: 'grpc', sse: 'sse' },
     defaultVariant: 'grpc',
   },

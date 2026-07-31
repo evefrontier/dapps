@@ -6,8 +6,10 @@ import {
   getEveCoinType,
   getEveWorldPackageId,
   getFuelEfficiencyConfigType,
+  getGraphqlSubscriptionEndpoint,
   getObjectRegistryType,
   getSuiGraphqlEndpoint,
+  setActiveEventTransport,
   TenantId,
 } from '../constants'
 
@@ -28,7 +30,13 @@ describe('constants', () => {
   // ============================================================================
 
   describe('getSuiGraphqlEndpoint', () => {
-    it("returns testnet URL for 'testnet'", () => {
+    // Endpoint selection depends on the active transport; reset to the default
+    // (grpc → standard endpoint) after each case.
+    afterEach(() => {
+      setActiveEventTransport('grpc')
+    })
+
+    it("returns the standard testnet URL for 'testnet' (grpc default)", () => {
       expect(getSuiGraphqlEndpoint('testnet')).toBe(
         'https://graphql.testnet.sui.io/graphql',
       )
@@ -46,15 +54,34 @@ describe('constants', () => {
       )
     })
 
-    it('defaults to testnet URL when called with no argument', () => {
+    it('defaults to the standard testnet URL when called with no argument', () => {
       expect(getSuiGraphqlEndpoint()).toBe(
         'https://graphql.testnet.sui.io/graphql',
       )
     })
 
-    it('falls back to testnet URL for an unknown network string', () => {
+    it('falls back to the standard testnet URL for an unknown network string', () => {
       expect(getSuiGraphqlEndpoint('unknown-net')).toBe(
         'https://graphql.testnet.sui.io/graphql',
+      )
+    })
+
+    it('uses the cockroach endpoint when the active transport is sse', () => {
+      setActiveEventTransport('sse')
+      expect(getSuiGraphqlEndpoint('testnet')).toBe(
+        'https://graphql-cockroach.testnet.sui.io/graphql',
+      )
+    })
+  })
+
+  // ============================================================================
+  // getGraphqlSubscriptionEndpoint
+  // ============================================================================
+
+  describe('getGraphqlSubscriptionEndpoint', () => {
+    it('appends /subscriptions to the query endpoint', () => {
+      expect(getGraphqlSubscriptionEndpoint()).toBe(
+        'https://graphql-cockroach.testnet.sui.io/graphql/subscriptions',
       )
     })
   })

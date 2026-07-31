@@ -1,3 +1,4 @@
+import type { EventTransport } from '@evefrontier/dapp-kit'
 import { useStringFlagValue } from '@openfeature/react-sdk'
 import { FLAG_DEFINITIONS, type FlagKey } from './config'
 
@@ -14,4 +15,15 @@ export function useFlagVariant<K extends FlagKey>(key: K): string {
   const variants: Record<string, string> = def.variants
   const fallback = variants[def.defaultVariant] ?? def.defaultVariant
   return useStringFlagValue(key, fallback)
+}
+
+/**
+ * The real-time event transport selected by the
+ * `eve-frontier-assembly-event-transport` flag, narrowed to dapp-kit's
+ * `EventTransport`. Anything other than `sse` resolves to `grpc`.
+ */
+export function useEventTransport(): EventTransport {
+  return useFlagVariant('eve-frontier-assembly-event-transport') === 'sse'
+    ? 'sse'
+    : 'grpc'
 }

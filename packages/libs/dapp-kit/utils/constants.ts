@@ -40,8 +40,14 @@ function isSuiGraphqlNetwork(value: string): value is SuiGraphqlNetwork {
 }
 
 /**
- * Get the Sui GraphQL endpoint URL for the given network.
- * Unknown values fall back to testnet to avoid returning undefined.
+ * Get the Sui GraphQL query endpoint URL for the given network.
+ *
+ * Resolves against the active event transport: the `sse` transport uses the
+ * subscription-capable ("cockroach") endpoint for its queries too, while `grpc`
+ * (and the default) use the standard endpoint.
+ *
+ * Unknown networks fall back to
+ * testnet to avoid returning undefined.
  * @param env - Network identifier (testnet, devnet, mainnet). Defaults to testnet.
  * @returns The GraphQL endpoint URL
  * @category Utilities - Config
@@ -50,7 +56,11 @@ export function getSuiGraphqlEndpoint(
   env: string = DEFAULT_GRAPHQL_NETWORK,
 ): string {
   const network = isSuiGraphqlNetwork(env) ? env : DEFAULT_GRAPHQL_NETWORK
-  return GRAPHQL_ENDPOINTS[network]
+  const endpoints =
+    activeEventTransport === 'sse'
+      ? GRAPHQL_SUBSCRIPTION_ENDPOINTS
+      : GRAPHQL_ENDPOINTS
+  return endpoints[network]
 }
 
 /**
@@ -100,7 +110,8 @@ export const DEFAULT_GRAPHQL_NETWORK: SuiGraphqlNetwork = 'testnet'
  */
 export const SUI_GRAPHQL_NETWORKS = ['testnet', 'devnet', 'mainnet'] as const
 
-/** GraphQL endpoint URLs for each Sui network.
+/** Standard Sui GraphQL query endpoints per network. Used by the `grpc`
+ *  transport (fullnode checkpoint stream + standard GraphQL queries).
  *  @category Constants
  */
 export const GRAPHQL_ENDPOINTS: Record<SuiGraphqlNetwork, string> = {
@@ -108,6 +119,27 @@ export const GRAPHQL_ENDPOINTS: Record<SuiGraphqlNetwork, string> = {
   devnet: 'https://graphql.devnet.sui.io/graphql',
   mainnet: 'https://graphql.mainnet.sui.io/graphql',
 }
+
+/** Subscription-capable ("cockroach") Sui GraphQL endpoints per network. Used
+ *  by the `sse` transport for BOTH its queries and its SSE subscription, since
+ *  only this endpoint serves GraphQL subscriptions. Only testnet has a known
+ *  cockroach host; other networks fall back to the standard endpoint.
+ *  @category Constants
+ */
+export const GRAPHQL_SUBSCRIPTION_ENDPOINTS: Record<SuiGraphqlNetwork, string> =
+  {
+    testnet: 'https://graphql-cockroach.testnet.sui.io/graphql',
+    devnet: 'https://graphql.devnet.sui.io/graphql',
+    mainnet: 'https://graphql.mainnet.sui.io/graphql',
+  }
+
+/**
+ * Client identifier sent as the `X-Client-ID` header on GraphQL requests
+ * (query fetch and the SSE subscription). Random per client, generated once and
+ * cached for the module lifetime — used for session affinity during pagination.
+ * @category Constants
+ */
+export const GRAPHQL_CLIENT_ID = globalThis.crypto.randomUUID()
 
 /** gRPC base URLs for each Sui network.
  *  @category Constants
@@ -130,10 +162,84 @@ export function getSuiGrpcBaseUrl(
   return SUI_GRPC_URLS[network]
 }
 
-/** Polling interval in milliseconds (10 seconds).
+/**
+ * Real-time event transport feeding optimistic updates.
+ * - `grpc`: Sui fullnode gRPC checkpoint stream.
+ * - `sse`: GraphQL subscription over SSE.
+ * Selected per-app via the `eventTransport` provider prop (typically driven by
+ * a feature flag). Defaults to `grpc`.
+ * @category Types
+ */
+export type EventTransport = 'grpc' | 'sse'
+
+/** Default event transport when none is provided. @category Constants */
+export const DEFAULT_EVENT_TRANSPORT: EventTransport = 'grpc'
+
+// Active transport (single writer: SmartObjectProvider). Lets the query
+// endpoint follow it — grpc → standard, sse → cockroach — without threading
+// `transport` through every query helper.
+let activeEventTransport: EventTransport = DEFAULT_EVENT_TRANSPORT
+
+/** Set the transport that governs which GraphQL query endpoint is used.
+ *  @category Utilities - Config */
+export function setActiveEventTransport(transport: EventTransport): void {
+  activeEventTransport = transport
+}
+
+/** The transport currently governing GraphQL endpoint selection.
+ *  @category Utilities - Config */
+export function getActiveEventTransport(): EventTransport {
+  return activeEventTransport
+}
+
+/**
+ * HTTP(S) URL of the GraphQL subscription endpoint (SSE / graphql-sse) — the
+ * real-time event source for optimistic updates. Sui serves subscriptions on a
+ * dedicated `/subscriptions` path appended to the query endpoint.
+ * @returns The subscription endpoint URL.
+ * @category Utilities - Config
+ */
+export function getGraphqlSubscriptionEndpoint(
+  env: string = DEFAULT_GRAPHQL_NETWORK,
+): string {
+  const network = isSuiGraphqlNetwork(env) ? env : DEFAULT_GRAPHQL_NETWORK
+  return `${GRAPHQL_SUBSCRIPTION_ENDPOINTS[network]}/subscriptions`
+}
+
+/**
+ * Optional bearer token sent as an Authorization header on the SSE subscription
+ * when the endpoint requires authentication. Configured via
+ * VITE_GRAPHQL_SUBSCRIPTION_AUTH_TOKEN. Returns undefined when unset.
+ * @category Utilities - Config
+ */
+export function getGraphqlSubscriptionAuthToken(): string | undefined {
+  const token = import.meta.env.VITE_GRAPHQL_SUBSCRIPTION_AUTH_TOKEN
+  return typeof token === 'string' && token.length > 0 ? token : undefined
+}
+
+/** Default polling interval in milliseconds.
+ *
+ * Real-time updates come from the event subscription; this interval is only a
+ * slow backstop that catches state changes not covered by a tracked event (or
+ * an event the endpoint silently never sent). Override with VITE_POLLING_INTERVAL;
+ * set it to 0 to disable the backstop entirely.
  *  @category Constants
  */
-export const POLLING_INTERVAL = 10000
+export const POLLING_INTERVAL = 60000
+
+/**
+ * Resolve the polling-backstop interval in milliseconds.
+ * Reads VITE_POLLING_INTERVAL when set (0 disables the backstop), otherwise
+ * falls back to POLLING_INTERVAL.
+ * @returns Interval in ms; 0 means the periodic poll is disabled.
+ * @category Utilities - Config
+ */
+export function getPollingInterval(): number {
+  const raw = import.meta.env.VITE_POLLING_INTERVAL
+  if (raw === undefined || raw === '') return POLLING_INTERVAL
+  const parsed = Number(raw)
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : POLLING_INTERVAL
+}
 
 /** Local storage keys.
  *  @category Constants

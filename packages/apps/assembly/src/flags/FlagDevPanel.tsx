@@ -13,7 +13,7 @@ import { resetFlagOverrides, setFlagVariant } from './provider'
  * the builds where you want the panel (e.g. local `.env`), leave it unset
  * everywhere else so it never ships in a normal production build.
  */
-function isPanelEnabled(): boolean {
+export function isPanelEnabled(): boolean {
   return import.meta.env.VITE_SHOW_FLAG_PANEL === 'true'
 }
 

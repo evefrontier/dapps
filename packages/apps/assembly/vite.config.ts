@@ -60,6 +60,8 @@ export default defineConfig({
       ),
     },
     dedupe: [
+      'react',
+      'react-dom',
       '@evefrontier/dapp-kit',
       '@eveworld/ui-components',
       '@mysten/dapp-kit-react',
