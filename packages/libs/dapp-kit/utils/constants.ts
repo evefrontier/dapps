@@ -134,12 +134,12 @@ export const GRAPHQL_SUBSCRIPTION_ENDPOINTS: Record<SuiGraphqlNetwork, string> =
   }
 
 /**
- * Fixed client identifier sent as the `X-Client-ID` header on GraphQL requests
- * (query fetch and the SSE subscription). A stable random value that identifies
- * this app to the endpoint.
+ * Client identifier sent as the `X-Client-ID` header on GraphQL requests
+ * (query fetch and the SSE subscription). Random per client, generated once and
+ * cached for the module lifetime — used for session affinity during pagination.
  * @category Constants
  */
-export const GRAPHQL_CLIENT_ID = '2b1a5c74-9f3d-4e86-bd21-7c0a6e4f9d18'
+export const GRAPHQL_CLIENT_ID = globalThis.crypto.randomUUID()
 
 /** gRPC base URLs for each Sui network.
  *  @category Constants
