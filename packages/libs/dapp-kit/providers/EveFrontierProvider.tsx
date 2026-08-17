@@ -7,6 +7,7 @@ import type { EventTransport } from '../utils/constants'
 import NotificationProvider from './NotificationProvider'
 import SmartObjectProvider from './SmartObjectProvider'
 import VaultProvider from './VaultProvider'
+import WorldPackageGate from './WorldPackageGate'
 
 /**
  * EveFrontierProvider wraps the application with all necessary providers
@@ -33,11 +34,16 @@ const EveFrontierProvider = ({
     <QueryClientProvider client={queryClient}>
       <DAppKitProvider dAppKit={dAppKit}>
         <VaultProvider>
-          <SmartObjectProvider
-            {...(eventTransport !== undefined ? { eventTransport } : {})}
-          >
-            <NotificationProvider>{children}</NotificationProvider>
-          </SmartObjectProvider>
+          {/* TODO: thread the active network into WorldPackageGate ->
+              resolveWorldPackageId(network) once mainnet is supported; it
+              currently resolves against DEFAULT_GRAPHQL_NETWORK (testnet). */}
+          <WorldPackageGate>
+            <SmartObjectProvider
+              {...(eventTransport !== undefined ? { eventTransport } : {})}
+            >
+              <NotificationProvider>{children}</NotificationProvider>
+            </SmartObjectProvider>
+          </WorldPackageGate>
         </VaultProvider>
       </DAppKitProvider>
     </QueryClientProvider>

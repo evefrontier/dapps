@@ -8,3 +8,4 @@ export {
   SmartObjectContext,
 } from './SmartObjectProvider'
 export { default as VaultProvider, VaultContext } from './VaultProvider'
+export { default as WorldPackageGate } from './WorldPackageGate'

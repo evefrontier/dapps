@@ -7,7 +7,7 @@ VITE_PORT=3000
 
 # EVE World package ID on Sui (required)
 # This is the deployed EVE Frontier smart contract package address
-VITE_EVE_WORLD_PACKAGE_ID="0x2be1876fb55dc89dc1f309fa6efc7bff680a2857f734b2dd0f58d968354ee17e"
+VITE_EVE_WORLD_PACKAGE_ID="@evefrontier/world-test"
 
 # ============================================================================
 # Optional Configuration

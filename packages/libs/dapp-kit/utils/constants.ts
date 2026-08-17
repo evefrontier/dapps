@@ -63,14 +63,72 @@ export function getSuiGraphqlEndpoint(
   return endpoints[network]
 }
 
+/** Matches a 0x-prefixed hex Sui address. @category Utilities - Config */
+export const HEX_ADDRESS = /^0x[0-9a-fA-F]+$/
+
 /**
- * Get the EVE World package ID from environment.
- * @returns The package ID (0x-prefixed address)
+ * Cached, fully-resolved EVE World package id — the ORIGINAL (version 1) address,
+ * i.e. the type-origin used by every on-chain object type tag and GraphQL/gRPC
+ * type filter. Populated once at bootstrap by `resolveWorldPackageId()` (see
+ * `utils/mvrPackageResolution.ts`), which is why this lives here rather than in that
+ * module: it lets `getEveWorldPackageId()` stay synchronous without a circular
+ * import (constants must not import the resolver).
+ */
+let resolvedWorldPackageId: string | null = null
+
+/**
+ * Store the resolved original world package id. Called by `resolveWorldPackageId()`.
+ * @category Utilities - Config
+ */
+export const setResolvedWorldPackageId = (id: string): void => {
+  resolvedWorldPackageId = id
+}
+
+/**
+ * Read the cached resolved original world package id, or `null` if bootstrap has
+ * not run yet.
+ * @category Utilities - Config
+ */
+export const getResolvedWorldPackageId = (): string | null =>
+  resolvedWorldPackageId
+
+/**
+ * Raw `VITE_EVE_WORLD_PACKAGE_ID` value. May be either a 0x address or an MVR
+ * name such as `@evefrontier/world-test`.
  * @throws {Error} If VITE_EVE_WORLD_PACKAGE_ID is not set
  * @category Utilities - Config
  */
-export const getEveWorldPackageId = (): string =>
+export const getEveWorldPackageRef = (): string =>
   getEnvVar('VITE_EVE_WORLD_PACKAGE_ID')
+
+/**
+ * Get the EVE World package id used to build type strings for GraphQL/gRPC
+ * queries — the ORIGINAL (type-origin) address. A raw 0x env value is returned
+ * verbatim and assumed to already be the origin; MVR names are mapped to the
+ * origin by `resolveWorldPackageId()` before this reads them.
+ *
+ * Resolution order:
+ * 1. If bootstrap has cached a resolved id, return it.
+ * 2. If the env value is a raw 0x address, use it verbatim (assumed original).
+ * 3. Otherwise the env value is an MVR name that has not been resolved yet —
+ *    throw, since interpolating a name into a type filter would silently match
+ *    nothing. `resolveWorldPackageId()` (run by `EveFrontierProvider`) must
+ *    complete first.
+ *
+ * @returns The original 0x package id
+ * @throws {Error} If VITE_EVE_WORLD_PACKAGE_ID is unset, or is an unresolved MVR name
+ * @category Utilities - Config
+ */
+export const getEveWorldPackageId = (): string => {
+  if (resolvedWorldPackageId) return resolvedWorldPackageId
+  const raw = getEveWorldPackageRef()
+  if (HEX_ADDRESS.test(raw)) return raw
+  throw new Error(
+    `VITE_EVE_WORLD_PACKAGE_ID is an MVR name ("${raw}") that has not been resolved yet. ` +
+      `Ensure resolveWorldPackageId() has completed (EveFrontierProvider bootstraps it) ` +
+      `before reading the package id.`,
+  )
+}
 
 /** Type string for Character OwnerCap from the EVE World package. @category Utilities - Config */
 export const getCharacterOwnerCapType = (): string => {

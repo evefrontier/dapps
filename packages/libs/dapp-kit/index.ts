@@ -32,6 +32,7 @@ export {
   SmartObjectProvider,
   VaultContext,
   VaultProvider,
+  WorldPackageGate,
 } from './providers'
 // =========================================
 // Types (re-exported from ./types)

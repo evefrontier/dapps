@@ -22,6 +22,7 @@ export {
   getRegistryAddress,
   parseStatus,
 } from './mapping'
+export { resolveWorldPackageId } from './mvrPackageResolution'
 export type { TransformOptions } from './transforms'
 export { transformToAssembly, transformToCharacter } from './transforms'
 // General utilities
