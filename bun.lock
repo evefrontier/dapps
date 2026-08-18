@@ -24,7 +24,7 @@
     },
     "packages/apps/assembly": {
       "name": "@eveworld/assembly",
-      "version": "0.3.7",
+      "version": "0.3.6",
       "dependencies": {
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
@@ -61,9 +61,9 @@
     },
     "packages/libs/dapp-kit": {
       "name": "@evefrontier/dapp-kit",
-      "version": "0.1.10-alpha.1",
+      "version": "0.1.10-alpha.2",
       "dependencies": {
-        "@evefrontier/wallet-core": "0.0.5",
+        "@evefrontier/wallet-core": "^0.0.7",
         "@mysten/dapp-kit-core": "^1.6.9",
         "@mysten/dapp-kit-react": "^2.1.11",
         "@mysten/sui": "^2.22.1",
@@ -425,7 +425,7 @@
 
     "@evefrontier/dapp-kit": ["@evefrontier/dapp-kit@workspace:packages/libs/dapp-kit"],
 
-    "@evefrontier/wallet-core": ["@evefrontier/wallet-core@0.0.5", "https://npm.pkg.github.com/download/@evefrontier/wallet-core/0.0.5/7c40463a7a961c1539438c24f3df82dd26ca77df", { "dependencies": { "@mysten/sui": "^2.19.0", "@mysten/wallet-standard": "^0.20.3", "@mysten/webcrypto-signer": "^0.1.2" } }, "sha512-6SXCz49Gn7pCsF+9zIlo1E46pmMaFzN5BB04g7aN1Zf2AgVM1EbagRtjcVDYz52PJ00tqoMdnpeLkBJ9oOeKtA=="],
+    "@evefrontier/wallet-core": ["@evefrontier/wallet-core@0.0.7", "https://npm.pkg.github.com/download/@evefrontier/wallet-core/0.0.7/dd639b3666713b8d16ba95268c6d7f236d06bdf5", { "dependencies": { "@mysten/sui": "^2.23.1", "@mysten/wallet-standard": "^0.20.3", "@mysten/webcrypto-signer": "^0.1.2" } }, "sha512-gS01vGvUekj/ok7QbAgtl1/3x3nu60hiXjFZs9d9ieaq44sruvkcPcQToGktDMd3meuIzU17uoVqZBNgdWsg+A=="],
 
     "@eveworld/assembly": ["@eveworld/assembly@workspace:packages/apps/assembly"],
 
@@ -1600,6 +1600,8 @@
     "@emotion/babel-plugin/convert-source-map": ["convert-source-map@1.9.0", "", {}, "sha512-ASFBup0Mz1uyiIjANan1jzLQami9z1PoYSZCiiYW2FczPbenXc45FZdBZLzOT+r6+iciuEModtmCti+hjaAk0A=="],
 
     "@emotion/babel-plugin/escape-string-regexp": ["escape-string-regexp@4.0.0", "", {}, "sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA=="],
+
+    "@evefrontier/wallet-core/@mysten/sui": ["@mysten/sui@2.26.1", "", { "dependencies": { "@graphql-typed-document-node/core": "^3.2.0", "@mysten/bcs": "^2.1.0", "@mysten/utils": "^0.4.0", "@noble/curves": "^2.2.0", "@noble/hashes": "^2.2.0", "@protobuf-ts/grpcweb-transport": "^2.11.1", "@protobuf-ts/runtime": "^2.11.1", "@protobuf-ts/runtime-rpc": "^2.11.1", "@scure/base": "^2.2.0", "@scure/bip32": "^2.2.0", "@scure/bip39": "^2.2.0", "gql.tada": "^1.10.1", "graphql": "^16.14.2", "poseidon-lite": "0.2.1", "valibot": "^1.4.2" } }, "sha512-0LficGJJH0+62HqfGBbQ/SN42srpJSC0MLoE+2OjO/qTQMez6juD1tMRvFet36lN9QSOavu7qp/NebOvphSTwA=="],
 
     "@manypkg/find-root/@types/node": ["@types/node@12.20.55", "", {}, "sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ=="],
 

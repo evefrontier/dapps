@@ -99,7 +99,7 @@ export class AssemblyIdRequiredError extends Error {
 function resolveAssemblyId(
   assemblyItemId: number | undefined,
   queryItemId: string | null,
-): number {
+): string {
   const fromAssembly =
     typeof assemblyItemId === 'number' &&
     Number.isInteger(assemblyItemId) &&
@@ -108,7 +108,7 @@ function resolveAssemblyId(
       : undefined
 
   if (fromAssembly !== undefined) {
-    return fromAssembly
+    return fromAssembly.toString()
   }
 
   if (queryItemId != null && queryItemId.trim() !== '') {
@@ -118,7 +118,7 @@ function resolveAssemblyId(
         `Query param itemId must be a non-negative integer; got "${queryItemId}"`,
       )
     }
-    return parsed
+    return parsed.toString()
   }
 
   throw new AssemblyIdRequiredError()
@@ -214,8 +214,8 @@ export type UseSponsoredTransactionMutationOptions = Omit<
  *
  * **Output** (on success, in `data` or resolved from `mutateAsync`):
  * - `digest` (required) – Transaction digest.
- * - `effects` (optional) – Transaction effects, BCS encoded.
- * - `rawEffects` (optional) – Raw effects bytes.
+ * - `executionStatus` (required) – On-chain execution status reported by the gateway (e.g. `"success"`).
+ * - `executionErrorMessage` (optional) – Error message when the on-chain execution failed; absent on success.
  *
  * @category Hooks - Sponsored Transaction
  * @param options - React Query mutation options (optional)

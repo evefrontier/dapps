@@ -4,7 +4,7 @@ import type { SponsoredTransactionMethod } from '../features'
 
 export const SIGN_FN: SponsoredTransactionMethod = async () => ({
   digest: '0xtest',
-  effects: '0xeffects',
+  executionStatus: 'success',
 })
 
 /** Wallet whose `features` is an array of feature name strings (UiWallet shape). */
