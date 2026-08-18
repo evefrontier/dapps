@@ -93,8 +93,9 @@ export class AssemblyIdRequiredError extends Error {
 // ============================================================================
 
 /**
- * Resolves assembly ID to a non-negative integer from the assembly object or query param.
- * Fails fast with {@link AssemblyIdRequiredError} if neither source provides a valid id.
+ * Resolves assembly ID to the string representation of a non-negative integer from the
+ * assembly object or query param. Fails fast with {@link AssemblyIdRequiredError}
+ * if neither source provides a valid id.
  */
 function resolveAssemblyId(
   assemblyItemId: number | undefined,
