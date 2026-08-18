@@ -1,7 +1,7 @@
+import { executeGraphQLQuery } from '../graphql/client'
 import type { SuiGraphqlNetwork } from '../types'
 import {
   DEFAULT_GRAPHQL_NETWORK,
-  GRAPHQL_ENDPOINTS,
   getEveWorldPackageRef,
   getResolvedWorldPackageId,
   HEX_ADDRESS,
@@ -21,12 +21,24 @@ const sleep = (ms: number): Promise<void> =>
 
 /**
  * MVR resolution service base URL for a network. MVR only serves mainnet and
- * testnet; anything else falls back to testnet.
+ * testnet; any other network (e.g. devnet) has no MVR service, so we throw a
+ * permanent error rather than silently resolve against the wrong network — that
+ * would return a plausible-but-wrong id. Called once before the retry loop so
+ * the throw is not retried.
  */
-const mvrBaseUrl = (network: SuiGraphqlNetwork): string =>
-  network === 'mainnet'
-    ? 'https://mainnet.mvr.mystenlabs.com'
-    : 'https://testnet.mvr.mystenlabs.com'
+const mvrBaseUrl = (network: SuiGraphqlNetwork): string => {
+  switch (network) {
+    case 'mainnet':
+      return 'https://mainnet.mvr.mystenlabs.com'
+    case 'testnet':
+      return 'https://testnet.mvr.mystenlabs.com'
+    default:
+      throw new Error(
+        `MVR name resolution is not supported on "${network}"; ` +
+          `set VITE_EVE_WORLD_PACKAGE_ID to a raw 0x address on this network.`,
+      )
+  }
+}
 
 /**
  * Resolve an MVR name (e.g. `@evefrontier/world-test`) to its LATEST published
@@ -46,9 +58,9 @@ const mvrBaseUrl = (network: SuiGraphqlNetwork): string =>
  */
 async function resolveMvrLatest(
   name: string,
-  network: SuiGraphqlNetwork,
+  baseUrl: string,
 ): Promise<string> {
-  const res = await fetch(`${mvrBaseUrl(network)}/v1/resolution/bulk`, {
+  const res = await fetch(`${baseUrl}/v1/resolution/bulk`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ names: [name] }),
@@ -76,28 +88,16 @@ async function resolveMvrLatest(
  * interpolated into GraphQL/gRPC `type:` filters, and it matches what
  * `@mysten/mvr-static`'s `types` map (and the Go resolution list) encode.
  */
-async function resolveOriginalPackageId(
-  anyVersionId: string,
-  network: SuiGraphqlNetwork,
-): Promise<string> {
-  const res = await fetch(GRAPHQL_ENDPOINTS[network], {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      query:
-        'query($a: SuiAddress!) { package(address: $a) { packageAt(version: 1) { address } } }',
-      variables: { a: anyVersionId },
-    }),
-  })
-  if (!res.ok) {
-    throw new Error(
-      `GraphQL package lookup failed for ${anyVersionId}: HTTP ${res.status}`,
-    )
-  }
-  const json = (await res.json()) as {
-    data?: { package?: { packageAt?: { address?: string } | null } | null }
-    errors?: Array<{ message: string }>
-  }
+async function resolveOriginalPackageId(anyVersionId: string): Promise<string> {
+  // Route through the shared GraphQL client so endpoint selection (incl. the
+  // sse/cockroach transport) and the X-Client-ID header stay consistent with
+  // every other GraphQL call in the package.
+  const json = await executeGraphQLQuery<{
+    package?: { packageAt?: { address?: string } | null } | null
+  }>(
+    'query($a: SuiAddress!) { package(address: $a) { packageAt(version: 1) { address } } }',
+    { a: anyVersionId },
+  )
   const original = json.data?.package?.packageAt?.address
   if (!original) {
     const detail = json.errors?.map((e) => e.message).join('; ') ?? 'no data'
@@ -145,11 +145,14 @@ export async function resolveWorldPackageId(
     return raw
   }
 
+  // Permanent errors (unsupported network) throw here, before the loop.
+  const baseUrl = mvrBaseUrl(network)
+
   let lastError: unknown
   for (let attempt = 1; attempt <= MAX_RESOLVE_ATTEMPTS; attempt++) {
     try {
-      const latest = await resolveMvrLatest(raw, network)
-      const original = await resolveOriginalPackageId(latest, network)
+      const latest = await resolveMvrLatest(raw, baseUrl)
+      const original = await resolveOriginalPackageId(latest)
       log.info('[DappKit] Resolved world package', {
         name: raw,
         latest,
