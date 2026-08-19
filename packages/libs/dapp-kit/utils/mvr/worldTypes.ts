@@ -35,6 +35,20 @@ const worldMvrCache = (
   }
 
 /**
+ * The `@evefrontier/world*` MVR names are currently only registered on testnet;
+ * the mainnet snapshot maps are empty. When resolution is attempted on a network
+ * with no entries, surface that clearly instead of a "regenerate the cache"
+ * message — regenerating cannot help until the names exist on that network. This
+ * is data-driven, so it stops firing automatically once the snapshot has entries
+ * for the network.
+ */
+const unsupportedNetworkMessage = (network: SuiGraphqlNetwork): string =>
+  `World MVR names are not resolvable on "${mvrNetwork(network)}": the embedded ` +
+  `snapshot has no entries for it (the @evefrontier/world* names are not ` +
+  `registered on ${mvrNetwork(network)}). Use testnet, or set ` +
+  `VITE_EVE_WORLD_PACKAGE_ID to a raw 0x address.`
+
+/**
  * Resolve a world Move type to its fully-qualified, type-origin-correct tag.
  *
  * - A raw `0x…` env value is treated as already-canonical and interpolated
@@ -58,8 +72,12 @@ export const getWorldType = (
   if (HEX_ADDRESS.test(raw)) return `${raw}::${key}`
 
   const name = `${raw}::${key}`
-  const tag = worldMvrCache(network).types[name]
+  const { types } = worldMvrCache(network)
+  const tag = types[name]
   if (!tag) {
+    if (Object.keys(types).length === 0) {
+      throw new Error(unsupportedNetworkMessage(network))
+    }
     throw new Error(
       `No MVR resolution for "${name}". The embedded cache is stale or missing ` +
         `this type/tier — regenerate it with \`bun run gen:mvr\` after adding the ` +
@@ -88,8 +106,12 @@ export const getEveWorldPackageId = (
   const raw = getEveWorldPackageRef()
   if (HEX_ADDRESS.test(raw)) return raw
 
-  const id = worldMvrCache(network).packages[raw]
+  const { packages } = worldMvrCache(network)
+  const id = packages[raw]
   if (!id) {
+    if (Object.keys(packages).length === 0) {
+      throw new Error(unsupportedNetworkMessage(network))
+    }
     throw new Error(
       `No MVR package resolution for "${raw}". Regenerate the embedded cache ` +
         `with \`bun run gen:mvr\`.`,

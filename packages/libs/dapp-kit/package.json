@@ -51,7 +51,7 @@
     "react": "^19.2.8"
   },
   "devDependencies": {
-    "@mysten/mvr-static": "^0.4.17",
+    "@mysten/mvr-static": "0.4.17",
     "@types/node": "^25.9.5",
     "@types/react": "^19.2.17",
     "@vitejs/plugin-react-swc": "^4.3.2",
