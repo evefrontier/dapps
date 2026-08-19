@@ -64,37 +64,31 @@ export function getSuiGraphqlEndpoint(
 }
 
 /**
- * Get the EVE World package ID from environment.
- * @returns The package ID (0x-prefixed address)
+ * Raw `VITE_EVE_WORLD_PACKAGE_ID` value. May be either a 0x address or an MVR
+ * name such as `@evefrontier/world-test`.
  * @throws {Error} If VITE_EVE_WORLD_PACKAGE_ID is not set
  * @category Utilities - Config
  */
-export const getEveWorldPackageId = (): string =>
+export const getEveWorldPackageRef = (): string =>
   getEnvVar('VITE_EVE_WORLD_PACKAGE_ID')
 
-/** Type string for Character OwnerCap from the EVE World package. @category Utilities - Config */
-export const getCharacterOwnerCapType = (): string => {
-  const pkg = getEveWorldPackageId()
-  return `${pkg}::access::OwnerCap<${pkg}::character::Character>`
-}
+/** Matches a 0x-prefixed hex Sui address. @category Utilities - Config */
+export const HEX_ADDRESS = /^0x[0-9a-fA-F]+$/
 
-/** Type string for Character PlayerProfile from the EVE World package. @category Utilities - Config */
-export const getCharacterPlayerProfileType = (): string => {
-  const pkg = getEveWorldPackageId()
-  return `${pkg}::character::PlayerProfile`
-}
-
-/** Type string for ObjectRegistry from the EVE World package. @category Utilities - Config */
-export const getObjectRegistryType = (): string =>
-  `${getEveWorldPackageId()}::object_registry::ObjectRegistry`
-
-/** Type string for EnergyConfig from the EVE World package. @category Utilities - Config */
-export const getEnergyConfigType = (): string =>
-  `${getEveWorldPackageId()}::energy::EnergyConfig`
-
-/** Type string for FuelConfig from the EVE World package. @category Utilities - Config */
-export const getFuelEfficiencyConfigType = (): string =>
-  `${getEveWorldPackageId()}::fuel::FuelConfig`
+// World type/package resolution lives in `mvr/worldTypes.ts` (it depends on the
+// generated MVR snapshot). Re-exported here so existing `utils/constants`
+// importers keep working. The cycle constants → worldTypes → constants is safe:
+// worldTypes only reads `HEX_ADDRESS`/`getEveWorldPackageRef` inside function
+// bodies, never at module-eval time.
+export {
+  getCharacterOwnerCapType,
+  getCharacterPlayerProfileType,
+  getEnergyConfigType,
+  getEveWorldPackageId,
+  getFuelEfficiencyConfigType,
+  getObjectRegistryType,
+  getWorldType,
+} from './mvr/worldTypes'
 
 // ============================================================================
 // Constants
