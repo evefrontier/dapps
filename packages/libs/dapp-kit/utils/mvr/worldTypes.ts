@@ -69,9 +69,10 @@ export const getWorldType = (
   network: SuiGraphqlNetwork = DEFAULT_GRAPHQL_NETWORK,
 ): string => {
   const raw = getEveWorldPackageRef()
-  if (HEX_ADDRESS.test(raw)) return `${raw}::${key}`
-
   const name = `${raw}::${key}`
+  // A raw 0x env is already canonical — interpolate verbatim.
+  if (HEX_ADDRESS.test(raw)) return name
+
   const { types } = worldMvrCache(network)
   const tag = types[name]
   if (!tag) {
