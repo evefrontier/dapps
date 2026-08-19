@@ -1,7 +1,7 @@
 import type { SuiEvent } from '@mysten/sui/jsonRpc'
 
 import { Assemblies, type AssemblyType, type InventoryItem } from '../../types'
-import { getEveWorldPackageId } from '../constants'
+import { getWorldType } from '../constants'
 import {
   adjustInventoryUsedCapacity,
   sortInventoryItemsByQuantity,
@@ -172,11 +172,17 @@ function computeNextItems(
   })
 }
 
-export function getInventoryEventTypes(
-  packageId = getEveWorldPackageId(),
-): string[] {
-  return INVENTORY_EVENT_NAMES.map(
-    (eventName) => `${packageId}::inventory::${eventName}`,
+/**
+ * Inventory event type tags to subscribe to. With no argument, each type is
+ * resolved to its type-origin tag via {@link getWorldType} (correct across
+ * upgrades). Pass a raw `packageId` (e.g. a tenant package) to interpolate it
+ * verbatim instead.
+ */
+export function getInventoryEventTypes(packageId?: string): string[] {
+  return INVENTORY_EVENT_NAMES.map((eventName) =>
+    packageId
+      ? `${packageId}::inventory::${eventName}`
+      : getWorldType(`inventory::${eventName}`),
   )
 }
 

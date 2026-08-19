@@ -7,7 +7,11 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!**/packages/libs/ui-components/assets/logo.svg"]
+    "includes": [
+      "**",
+      "!**/packages/libs/ui-components/assets/logo.svg",
+      "!**/utils/mvr/mvrCache.generated.ts"
+    ]
   },
   "formatter": {
     "enabled": true,

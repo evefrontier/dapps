@@ -1,7 +1,7 @@
 import type { SuiEvent } from '@mysten/sui/jsonRpc'
 
 import { Assemblies, type AssemblyType, State } from '../../types'
-import { getEveWorldPackageId } from '../constants'
+import { getWorldType } from '../constants'
 import { isRecord, normalizeObjectId } from '../utils'
 
 type StatusEventPayload = {
@@ -31,8 +31,10 @@ function statusKindToState(status: unknown): State | null {
   return null
 }
 
-export function getStatusEventType(packageId = getEveWorldPackageId()): string {
-  return `${packageId}::status::StatusChangedEvent`
+export function getStatusEventType(packageId?: string): string {
+  return packageId
+    ? `${packageId}::status::StatusChangedEvent`
+    : getWorldType('status::StatusChangedEvent')
 }
 
 export function getStatusEventTarget(

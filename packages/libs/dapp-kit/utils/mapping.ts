@@ -3,7 +3,7 @@ import { bcs } from '@mysten/sui/bcs'
 import { deriveObjectID } from '@mysten/sui/utils'
 import { getSingletonObjectByType } from '../graphql/client'
 import { Assemblies, State } from '../types'
-import { getEveWorldPackageId, TenantId } from './constants'
+import { getWorldType, TenantId } from './constants'
 
 /**
  * Convert raw status variant string to State enum
@@ -77,9 +77,12 @@ export async function getRegistryAddress(
     return objectRegistryAddressCache[tenant]
   }
 
-  const packageId =
-    TENANT_CONFIG[tenant as TenantId]?.packageId ?? getEveWorldPackageId()
-  const registryType = `${packageId}::object_registry::ObjectRegistry`
+  // A configured tenant uses its own package id verbatim; otherwise (e.g. local
+  // dev) resolve the world type to its type-origin tag.
+  const tenantPackageId = TENANT_CONFIG[tenant as TenantId]?.packageId
+  const registryType = tenantPackageId
+    ? `${tenantPackageId}::object_registry::ObjectRegistry`
+    : getWorldType('object_registry::ObjectRegistry')
 
   const result = await getSingletonObjectByType(registryType)
 
@@ -117,7 +120,10 @@ export async function getObjectId(
 
   const tenant = selectedTenant as TenantId
   const registryAddress = await getRegistryAddress(tenant)
-  const packageId = TENANT_CONFIG[tenant]?.packageId ?? getEveWorldPackageId()
+  const tenantPackageId = TENANT_CONFIG[tenant]?.packageId
+  const tenantItemIdType = tenantPackageId
+    ? `${tenantPackageId}::in_game_id::TenantItemId`
+    : getWorldType('in_game_id::TenantItemId')
 
   const bcsType = bcs.struct('TenantItemId', {
     item_id: bcs.u64(),
@@ -125,11 +131,7 @@ export async function getObjectId(
   })
   const key = bcsType.serialize({ item_id: BigInt(itemId), tenant }).toBytes()
 
-  const objectId = deriveObjectID(
-    registryAddress,
-    `${packageId}::in_game_id::TenantItemId`,
-    key,
-  )
+  const objectId = deriveObjectID(registryAddress, tenantItemIdType, key)
 
   return objectId
 }

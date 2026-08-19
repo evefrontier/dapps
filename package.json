@@ -40,5 +40,8 @@
     "js-yaml": ">=4.3.0",
     "valibot": ">=1.4.2",
     "vite": "^8.0.15"
+  },
+  "patchedDependencies": {
+    "@mysten/mvr-static@0.4.17": "patches/@mysten%2Fmvr-static@0.4.17.patch"
   }
 }

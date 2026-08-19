@@ -12,7 +12,6 @@ import {
 } from '../types'
 import {
   createLogger,
-  getEveWorldPackageId,
   getObjectId,
   transformToAssembly,
   transformToCharacter,
@@ -58,12 +57,14 @@ const log = createLogger()
 
 function getStreamEventTypes(
   tenant: string,
-  getTypes: (packageId: string) => string[],
+  getTypes: (packageId?: string) => string[],
 ): string[] {
-  const packageIds = new Set([getEveWorldPackageId()])
+  // World events: no packageId arg → each type resolved to its type-origin tag.
+  const types = new Set(getTypes())
+  // Tenant events (if any): the tenant's own package id, interpolated verbatim.
   const tenantPackageId = TENANT_CONFIG[tenant as TenantId]?.packageId
-  if (tenantPackageId) packageIds.add(tenantPackageId)
-  return [...packageIds].flatMap(getTypes)
+  if (tenantPackageId) for (const t of getTypes(tenantPackageId)) types.add(t)
+  return [...types]
 }
 
 /** Input for fetching object data: either itemId + tenant (derive object ID) or a Sui object ID directly.

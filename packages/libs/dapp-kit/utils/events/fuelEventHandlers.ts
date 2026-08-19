@@ -1,7 +1,7 @@
 import type { SuiEvent } from '@mysten/sui/jsonRpc'
 
 import { Assemblies, type AssemblyType } from '../../types'
-import { getEveWorldPackageId } from '../constants'
+import { getWorldType } from '../constants'
 import { isRecord, normalizeObjectId } from '../utils'
 
 type FuelEventPayload = {
@@ -26,8 +26,10 @@ function parseFuelEventPayload(
   return event.parsedJson as FuelEventPayload
 }
 
-export function getFuelEventType(packageId = getEveWorldPackageId()): string {
-  return `${packageId}::fuel::FuelEvent`
+export function getFuelEventType(packageId?: string): string {
+  return packageId
+    ? `${packageId}::fuel::FuelEvent`
+    : getWorldType('fuel::FuelEvent')
 }
 
 export function getFuelEventTarget(
