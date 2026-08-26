@@ -2,6 +2,7 @@ import {
   Assemblies,
   AssemblyType,
   getDappUrl,
+  QueryParams,
   useSmartObject,
 } from '@evefrontier/dapp-kit'
 import {
@@ -16,14 +17,32 @@ import { useCurrentAccount } from '@mysten/dapp-kit-react'
 import React, { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
-interface DappIframeProps {
-  assembly: AssemblyType<Assemblies>
+const DAPP_INDEX_URL = import.meta.env.VITE_DAPP_INDEX_URL
+
+function withAssemblyContext(url: string, tenant: string): string {
+  const itemId = new URLSearchParams(window.location.search).get(
+    QueryParams.ITEM_ID,
+  )
+  if (!itemId) return url
+
+  try {
+    const target = new URL(url)
+    target.searchParams.set(QueryParams.ITEM_ID, itemId)
+    target.searchParams.set(QueryParams.TENANT, tenant)
+    return target.toString()
+  } catch {
+    return url
+  }
 }
 
-const DappIframe: React.FC<DappIframeProps> = ({ assembly }) => (
+interface DappIframeProps {
+  url: string
+}
+
+const DappIframe: React.FC<DappIframeProps> = ({ url }) => (
   <div className="flex flex-col gap-4">
     <iframe
-      src={getDappUrl(assembly)}
+      src={url}
       id="dapp-iframe"
       title="Operation Config"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -33,7 +52,7 @@ const DappIframe: React.FC<DappIframeProps> = ({ assembly }) => (
     <EveButton
       variant="secondary"
       onClick={() => {
-        window.open(getDappUrl(assembly), '_blank')
+        window.open(url, '_blank')
       }}
     >
       Open in new tab
@@ -47,18 +66,27 @@ interface ModuleRendererProps {
   selectedSmartGate: string | undefined
   setSelectedSmartGate: (id: string) => void
   showContainer: boolean
+  tenant: string
 }
 
 const ModuleRenderer: React.FC<ModuleRendererProps> = ({
   assembly,
   currentAddress,
   showContainer = true,
+  tenant,
 }) => {
   const isNetworkNode = assembly.type === Assemblies.NetworkNode
-  const hasDappUrl = assembly.dappURL && !isNetworkNode
+  const dappUrl = isNetworkNode
+    ? ''
+    : getDappUrl(
+        assembly,
+        DAPP_INDEX_URL && withAssemblyContext(DAPP_INDEX_URL, tenant),
+      )
+  // Dapp Index is first-party, so only a player-set dappURL gets the warning.
+  const isExternalDapp = !!dappUrl && !!assembly.dappURL?.trim()
 
   const getContainerVariant = () => {
-    if (hasDappUrl) return 'warning' as const
+    if (isExternalDapp) return 'warning' as const
     return 'default' as const
   }
 
@@ -68,7 +96,7 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
     variant: getContainerVariant(),
     showBorder: showContainer,
     showHeader: showContainer,
-    ...(hasDappUrl && {
+    ...(isExternalDapp && {
       statusTextTop: 'BEHAVIOR',
       statusTextBottom:
         'ATT. Pilot, you are interacting with an interface outside of Frontier.',
@@ -132,7 +160,7 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
   const { component, headerText } = renderModule()
   return (
     <EveContainer {...getContainerProps()} headerText={headerText}>
-      {hasDappUrl ? <DappIframe assembly={assembly} /> : component}
+      {dappUrl ? <DappIframe url={dappUrl} /> : component}
     </EveContainer>
   )
 }
@@ -141,7 +169,7 @@ const Behaviour = React.memo((): React.JSX.Element => {
   const [selectedSmartGate, setSelectedSmartGate] = useState<
     string | undefined
   >(undefined)
-  const { assembly } = useSmartObject()
+  const { assembly, tenant } = useSmartObject()
   const currentAccount = useCurrentAccount()
   const showContainer = !useLocation().pathname.includes('client')
 
@@ -156,6 +184,7 @@ const Behaviour = React.memo((): React.JSX.Element => {
       selectedSmartGate={selectedSmartGate}
       setSelectedSmartGate={setSelectedSmartGate}
       showContainer={showContainer}
+      tenant={tenant}
     />
   )
 })
