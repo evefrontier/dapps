@@ -16,6 +16,7 @@ import {
 import { useCurrentAccount } from '@mysten/dapp-kit-react'
 import React, { useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import { useFlagVariant } from '../flags'
 
 const DAPP_INDEX_URL = import.meta.env.VITE_DAPP_INDEX_URL
 
@@ -77,12 +78,13 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
   tenant,
 }) => {
   const isNetworkNode = assembly.type === Assemblies.NetworkNode
-  const dappUrl = isNetworkNode
-    ? ''
-    : getDappUrl(
-        assembly,
-        DAPP_INDEX_URL && withAssemblyContext(DAPP_INDEX_URL, tenant),
-      )
+  const dappIndexEnabled =
+    useFlagVariant('assembly-dapp-index-fallback') === 'on'
+  const fallbackUrl =
+    dappIndexEnabled && DAPP_INDEX_URL
+      ? withAssemblyContext(DAPP_INDEX_URL, tenant)
+      : undefined
+  const dappUrl = isNetworkNode ? '' : getDappUrl(assembly, fallbackUrl)
   // Dapp Index is first-party, so only a player-set dappURL gets the warning.
   const isExternalDapp = !!dappUrl && !!assembly.dappURL?.trim()
 
