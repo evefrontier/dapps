@@ -25,8 +25,9 @@ function withAssemblyContext(url: string, tenant: string): string {
   )
   if (!itemId) return url
 
+  const hasProtocol = /^((http|https|ftp):\/\/)/i.test(url)
   try {
-    const target = new URL(url)
+    const target = new URL(hasProtocol ? url : `https://${url}`)
     target.searchParams.set(QueryParams.ITEM_ID, itemId)
     target.searchParams.set(QueryParams.TENANT, tenant)
     return target.toString()
@@ -52,7 +53,7 @@ const DappIframe: React.FC<DappIframeProps> = ({ url }) => (
     <EveButton
       variant="secondary"
       onClick={() => {
-        window.open(url, '_blank')
+        window.open(url, '_blank', 'noopener,noreferrer')
       }}
     >
       Open in new tab
