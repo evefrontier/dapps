@@ -20,3 +20,9 @@ VITE_OBJECT_ID="0x50c403cd61904deeed39a0b9e401dbdcf4e81dbb99dccb3590536e7fbd2ffe
 # Set to "true" to render the internal feature-flag dev panel in this build.
 # Leave unset for normal/production builds.
 # VITE_SHOW_FLAG_PANEL="true"
+
+# Dapp Index deployment for this environment (must include the scheme).
+# Leave unset to keep each assembly's built-in view. The
+# assembly-dapp-index-fallback flag can disable the fallback
+# without unsetting this.
+# VITE_DAPP_INDEX_URL="https://dev.dapp-index.evefrontier.com"

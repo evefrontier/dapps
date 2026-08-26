@@ -37,6 +37,12 @@ export const FLAG_DEFINITIONS = {
     variants: { grpc: 'grpc', sse: 'sse' },
     defaultVariant: 'grpc',
   },
+  'assembly-dapp-index-fallback': {
+    description:
+      'Fall back to Dapp Index for an assembly with no custom dapp of its own. No effect unless VITE_DAPP_INDEX_URL is set for this environment.',
+    variants: { on: 'on', off: 'off' },
+    defaultVariant: 'off',
+  },
 } satisfies Record<string, FlagDefinition>
 
 export type FlagKey = keyof typeof FLAG_DEFINITIONS

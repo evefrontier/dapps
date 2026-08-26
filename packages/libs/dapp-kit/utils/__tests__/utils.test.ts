@@ -227,6 +227,36 @@ describe('getDappUrl', () => {
       'https://example.com/path',
     )
   })
+
+  it('returns empty string when there is no dappURL and no fallback', () => {
+    expect(getDappUrl({} as any, undefined)).toBe('')
+    expect(getDappUrl({} as any, '')).toBe('')
+    expect(getDappUrl({ dappURL: '' } as any, '   ')).toBe('')
+  })
+
+  it('uses the fallback when the assembly has no dappURL', () => {
+    expect(
+      getDappUrl({} as any, 'https://dev.dapp-index.evefrontier.com'),
+    ).toBe('https://dev.dapp-index.evefrontier.com')
+    expect(
+      getDappUrl({ dappURL: '' } as any, 'https://dapp-index.evefrontier.com'),
+    ).toBe('https://dapp-index.evefrontier.com')
+  })
+
+  it('prefers the assembly dappURL over the fallback', () => {
+    expect(
+      getDappUrl(
+        { dappURL: 'https://player-dapp.example' } as any,
+        'https://dev.dapp-index.evefrontier.com',
+      ),
+    ).toBe('https://player-dapp.example')
+  })
+
+  it('normalizes the fallback the same way as dappURL', () => {
+    expect(getDappUrl({} as any, 'dapp-index.evefrontier.com')).toBe(
+      'https://dapp-index.evefrontier.com',
+    )
+  })
 })
 
 describe('findOwnerByAddress', () => {

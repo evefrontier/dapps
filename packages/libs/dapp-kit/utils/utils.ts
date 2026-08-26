@@ -158,6 +158,7 @@ export const formatM3 = (quantity: string | bigint): number => {
  *
  * @category Utilities - Assembly
  * @param assembly - The assembly object
+ * @param fallbackUrl - Used when the assembly has no `dappURL` of its own.
  * @returns The full dApp URL with https:// prefix if needed
  *
  * @example
@@ -169,16 +170,15 @@ export const formatM3 = (quantity: string | bigint): number => {
  * }
  * ```
  */
-export const getDappUrl = (assembly: AssemblyType<Assemblies>): string => {
-  if (!assembly?.dappURL) return ''
+export const getDappUrl = (
+  assembly: AssemblyType<Assemblies>,
+  fallbackUrl?: string,
+): string => {
+  const url = assembly?.dappURL?.trim() || fallbackUrl?.trim()
+  if (!url) return ''
 
-  let url = assembly.dappURL.trim()
   const hasProtocol = /^((http|https|ftp):\/\/)/i.test(url)
-  if (!hasProtocol) {
-    url = 'https://' + url
-  }
-
-  return url
+  return hasProtocol ? url : 'https://' + url
 }
 
 /**
