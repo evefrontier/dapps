@@ -4,6 +4,12 @@
 
 ### Patch Changes
 
+- feature flag: dapp index
+
+## 0.3.7
+
+### Patch Changes
+
 - add feature flags
 
 ## 0.3.6
