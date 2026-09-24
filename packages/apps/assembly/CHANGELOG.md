@@ -1,5 +1,13 @@
 # @eveworld/assembly
 
+## 0.3.8
+
+### Patch Changes
+
+- Updated dependencies
+  - @evefrontier/dapp-kit@0.1.10
+  - @eveworld/ui-components@0.2.1
+
 ## 0.3.7
 
 ### Patch Changes
