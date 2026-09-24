@@ -12,12 +12,12 @@
     "@nx/vite": "^23.1.0",
     "@nx/web": "^23.1.0",
     "@types/node": "^25.9.5",
-    "@vitest/ui": "4.1.3",
+    "@vitest/ui": "4.1.11",
     "husky": "^9.1.7",
     "nx": "^23.1.0",
     "typescript": "^6.0.3",
     "vite": "^8.1.5",
-    "vitest": "4.1.3"
+    "vitest": "4.1.11"
   },
   "files": [
     "index.js"
@@ -41,7 +41,8 @@
     "nanoid": "^3.3.18",
     "react-router": "^7.18.2",
     "valibot": ">=1.4.2",
-    "vite": "^8.0.15"
+    "vite": "^8.0.15",
+    "smol-toml": "^1.6.2"
   },
   "patchedDependencies": {
     "@mysten/mvr-static@0.4.17": "patches/@mysten%2Fmvr-static@0.4.17.patch"
