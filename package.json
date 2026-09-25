@@ -43,8 +43,5 @@
     "valibot": ">=1.4.2",
     "vite": "^8.0.15",
     "smol-toml": "^1.6.2"
-  },
-  "patchedDependencies": {
-    "@mysten/mvr-static@0.4.17": "patches/@mysten%2Fmvr-static@0.4.17.patch"
   }
 }

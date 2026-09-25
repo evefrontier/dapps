@@ -1,11 +1,10 @@
+import { getMvrCache, type WorldTypeKey } from '@evefrontier/wallet-core/tenant'
 import type { SuiGraphqlNetwork } from '../../types'
 import {
   DEFAULT_GRAPHQL_NETWORK,
   getEveWorldPackageRef,
   HEX_ADDRESS,
 } from '../constants'
-import { getMvrCache } from './mvrCache.generated'
-import type { WorldTypeKey } from './worldTypeKeys'
 
 /**
  * A Move type's identity is pinned to the package version in which the type was
@@ -80,9 +79,9 @@ export const getWorldType = (
       throw new Error(unsupportedNetworkMessage(network))
     }
     throw new Error(
-      `No MVR resolution for "${name}". The embedded cache is stale or missing ` +
-        `this type/tier — regenerate it with \`bun run gen:mvr\` after adding the ` +
-        `key to utils/mvr/worldTypeKeys.ts.`,
+      `No MVR resolution for "${name}". The shared cache (in @evefrontier/wallet-core) ` +
+        `is stale or missing this type/tier — regenerate it with \`bun run gen:mvr\` ` +
+        `in wallet-core after adding the key to its src/tenant/mvr/worldTypeKeys.ts.`,
     )
   }
   return tag

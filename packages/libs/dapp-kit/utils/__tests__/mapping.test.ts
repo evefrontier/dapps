@@ -329,6 +329,9 @@ describe('mapping utilities', () => {
       )
     })
 
+    // Uses the MVR-derived utopia package id (0x28eab6…). The parent id and
+    // expected output are computed values, not a real on-chain object.
+    // TODO: replace with a real (itemId → objectId) utopia sample.
     it('works with new SSUID Utopia', () => {
       const key = TenantItemIdBcs.serialize({
         item_id: 1000000012391,
@@ -342,7 +345,7 @@ describe('mapping utilities', () => {
       )
 
       expect(result).toBe(
-        '0xce8db35dbf8c86319814ade280b5c54d6d8e9778b5cfe7b32ec160f5fb699dc3',
+        '0xefc742ab6eb520823251ae53738bec605214ead6b95a441b170d27b488328ca2',
       )
     })
 
