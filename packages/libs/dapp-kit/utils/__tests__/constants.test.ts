@@ -169,11 +169,11 @@ describe('constants', () => {
       ],
       [
         TenantId.UTOPIA,
-        '0xf0446b93345c1118f21239d7ac58fb82d005219b2016e100f074e4d17162a465::EVE::EVE',
+        '0x5a575ae8d55c0ee9a4486a5a7d227e682679ef3e34fe19ff3cac6bd17a04ccd6::EVE::EVE',
       ],
       [
         TenantId.STILLNESS,
-        '0xac361aa5ceb726bd974f885c9dea9e55dc9bc98fa1f5731c5965a810707bf0b8::EVE::EVE',
+        '0xc663658ff707985246bc7b5c605a458ec2caea28bfc35c253eb526dcf961643e::EVE::EVE',
       ],
     ])('returns the EVE coin type for tenant %s', (tenantId, expected) => {
       expect(getEveCoinType(tenantId)).toBe(expected)

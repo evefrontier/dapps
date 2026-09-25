@@ -1,4 +1,7 @@
-import { TENANT_CONFIG } from '@evefrontier/wallet-core/tenant'
+import {
+  getTenantWorldType,
+  TENANT_CONFIG,
+} from '@evefrontier/wallet-core/tenant'
 import { bcs } from '@mysten/sui/bcs'
 import { deriveObjectID } from '@mysten/sui/utils'
 import { getSingletonObjectByType } from '../graphql/client'
@@ -77,11 +80,10 @@ export async function getRegistryAddress(
     return objectRegistryAddressCache[tenant]
   }
 
-  // A configured tenant uses its own package id verbatim; otherwise (e.g. local
-  // dev) resolve the world type to its type-origin tag.
-  const tenantPackageId = TENANT_CONFIG[tenant as TenantId]?.packageId
-  const registryType = tenantPackageId
-    ? `${tenantPackageId}::object_registry::ObjectRegistry`
+  // Configured tenants resolve the type tag from the MVR cache; unconfigured
+  // (local) tenants use the env-driven world type.
+  const registryType = TENANT_CONFIG[tenant as TenantId]
+    ? getTenantWorldType(tenant as TenantId, 'object_registry::ObjectRegistry')
     : getWorldType('object_registry::ObjectRegistry')
 
   const result = await getSingletonObjectByType(registryType)
@@ -97,8 +99,8 @@ export async function getRegistryAddress(
 
 /**
  * Derives an object ID from an in-game item ID using the AssemblyRegistry.
- * Uses the tenant-specific package ID from TENANT_CONFIG for the registry
- * lookup and the TenantItemId type tag.
+ * Resolves the registry and TenantItemId type tags to their type-origin-correct
+ * values via the shared MVR cache (wallet-core `getTenantWorldType`).
  *
  * If the tenant is not a predefined tenant such as in local development,
  * fallback to the local Eve World package ID.
@@ -120,9 +122,10 @@ export async function getObjectId(
 
   const tenant = selectedTenant as TenantId
   const registryAddress = await getRegistryAddress(tenant)
-  const tenantPackageId = TENANT_CONFIG[tenant]?.packageId
-  const tenantItemIdType = tenantPackageId
-    ? `${tenantPackageId}::in_game_id::TenantItemId`
+  // TenantItemId key type tag: MVR cache for configured tenants, env-driven
+  // world type otherwise.
+  const tenantItemIdType = TENANT_CONFIG[tenant]
+    ? getTenantWorldType(tenant, 'in_game_id::TenantItemId')
     : getWorldType('in_game_id::TenantItemId')
 
   const bcsType = bcs.struct('TenantItemId', {

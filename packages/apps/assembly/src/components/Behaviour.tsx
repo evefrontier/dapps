@@ -84,7 +84,7 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
     dappIndexEnabled && DAPP_INDEX_URL
       ? withAssemblyContext(DAPP_INDEX_URL, tenant)
       : undefined
-  const dappUrl = isNetworkNode ? '' : getDappUrl(assembly, fallbackUrl)
+  const dappUrl = isNetworkNode ? '' : getDappUrl(assembly)
   // Dapp Index is first-party, so only a player-set dappURL gets the warning.
   const isExternalDapp = !!dappUrl && !!assembly.dappURL?.trim()
 

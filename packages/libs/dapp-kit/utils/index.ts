@@ -1,5 +1,9 @@
 // Transform utilities
 
+export {
+  WORLD_TYPE_KEYS,
+  type WorldTypeKey,
+} from '@evefrontier/wallet-core/tenant'
 export { type AdjustedBurnRate, getAdjustedBurnRate } from './burnRate'
 export { parseCharacterFromJson } from './character'
 export {
@@ -22,11 +26,6 @@ export {
   getRegistryAddress,
   parseStatus,
 } from './mapping'
-export {
-  MVR_SCAN_SEED,
-  WORLD_TYPE_KEYS,
-  type WorldTypeKey,
-} from './mvr/worldTypeKeys'
 export type { TransformOptions } from './transforms'
 export { transformToAssembly, transformToCharacter } from './transforms'
 // General utilities

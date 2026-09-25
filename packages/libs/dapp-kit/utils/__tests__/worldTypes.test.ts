@@ -1,5 +1,5 @@
+import { getMvrCache } from '@evefrontier/wallet-core/tenant'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getMvrCache } from '../mvr/mvrCache.generated'
 import { getEveWorldPackageId, getWorldType } from '../mvr/worldTypes'
 
 // The generated snapshot types its maps as `{}`; index them as records here.
