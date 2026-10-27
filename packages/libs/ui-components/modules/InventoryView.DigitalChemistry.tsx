@@ -1,4 +1,4 @@
-import { type InventoryItem } from '@evefrontier/dapp-kit'
+import { type DatahubGameInfo, type InventoryItem } from '@evefrontier/dapp-kit'
 
 const DIGITAL_CHEMISTRY_MIN_TYPE_ID_LENGTH = 6
 const VARIANT_ID_BITS = 32n
@@ -18,13 +18,25 @@ export const unpackTypeId = (packedTypeId: InventoryItem['type_id']) => {
   }
 }
 
-export const DigitalChemistryItemRow = ({ item }: { item: InventoryItem }) => {
+// The type id Datahub knows the item by: unpacked for digital chemistry items.
+export const getDatahubTypeId = (typeId: InventoryItem['type_id']) =>
+  isDigitalChemistryItem(typeId)
+    ? Number(unpackTypeId(typeId).typeId)
+    : Number(typeId)
+
+export const DigitalChemistryItemRow = ({
+  item,
+  details,
+}: {
+  item: InventoryItem
+  details?: DatahubGameInfo
+}) => {
   const { quantity, type_id } = item
-  const { typeId } = unpackTypeId(type_id)
+  const { typeId, variantId } = unpackTypeId(type_id)
 
   return (
     <>
-      <span>{`Item Type ${typeId} (variant ${unpackTypeId(type_id).variantId})`}</span>
+      <span>{`${details?.name ?? `Item Type ${typeId}`} (variant ${variantId})`}</span>
       <span>{quantity}</span>
       <span>{typeId}</span>
     </>
