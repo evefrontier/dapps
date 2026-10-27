@@ -1,0 +1,8 @@
+.git
+**/node_modules
+build_outputs
+**/dist
+coverage
+**/coverage
+**/.env
+.npmrc
