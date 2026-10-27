@@ -14,7 +14,7 @@ concurrency:
 env:
   AWS_REGION: eu-west-1
   ECR_REPOSITORY: frontier/eve-frontier-dapps
-  ECR_PUSH_ROLE_ARN: arn:aws:iam::284949645555:role/github-oidc-artifactory
+  ECR_PUSH_ROLE_ARN: arn:aws:iam::284949645555:role/github-oidc-dapps
 
 jobs:
   version:
