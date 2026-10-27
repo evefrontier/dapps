@@ -10,6 +10,10 @@ import {
 } from '@evefrontier/dapp-kit'
 import React, { useEffect, useMemo, useState } from 'react'
 import EveLinearBar from '../components/EveLinearBar'
+import {
+  DigitalChemistryItemRow,
+  isDigitalChemistryItem,
+} from './InventoryView.DigitalChemistry'
 import Offline from './Offline'
 
 const InventoryView = React.memo(
@@ -143,6 +147,10 @@ const InventoryItemRow = ({
   details?: DatahubGameInfo
 }) => {
   const { quantity, type_id } = item
+
+  if (isDigitalChemistryItem(type_id)) {
+    return <DigitalChemistryItemRow item={item} />
+  }
 
   return (
     <>
