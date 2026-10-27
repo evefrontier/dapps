@@ -12,9 +12,13 @@
 		respond "ok" 200
 	}
 
-	# Hashed build assets: a missing one is a 404, never the SPA fallback.
+	# Hashed build assets: a missing one is a 404, never the SPA fallback, and
+	# is not cached, since mid-rollout an old pod can miss a new asset.
 	handle /assets/* {
-		header Cache-Control "public, max-age=31536000, immutable"
+		@exists file
+		@missing not file
+		header @exists Cache-Control "public, max-age=31536000, immutable"
+		header @missing Cache-Control "no-store"
 		file_server
 	}
 
