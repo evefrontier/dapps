@@ -14,6 +14,7 @@ import {
   DigitalChemistryItemRow,
   getDatahubTypeId,
   isDigitalChemistryItem,
+  unpackTypeId,
 } from './InventoryView.DigitalChemistry'
 import Offline from './Offline'
 
@@ -157,11 +158,13 @@ const InventoryItemRow = ({
     return <DigitalChemistryItemRow item={item} details={details} />
   }
 
+  const { typeId } = unpackTypeId(type_id)
+
   return (
     <>
-      <span>{details?.name ?? `Item Type ${type_id}`}</span>
+      <span>{details?.name ?? `Item Type ${typeId}`}</span>
       <span>{quantity}</span>
-      <span>{type_id}</span>
+      <span>{typeId}</span>
     </>
   )
 }

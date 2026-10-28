@@ -1,28 +1,33 @@
 import { type DatahubGameInfo, type InventoryItem } from '@evefrontier/dapp-kit'
 
-const DIGITAL_CHEMISTRY_MIN_TYPE_ID_LENGTH = 6
 const VARIANT_ID_BITS = 32n
 const VARIANT_ID_MASK = 0xffffffffn
 
-// Digital chemistry items use type_ids longer than 5 digits.
-export const isDigitalChemistryItem = (typeId: InventoryItem['type_id']) =>
-  String(typeId).length >= DIGITAL_CHEMISTRY_MIN_TYPE_ID_LENGTH
-
 // Packed type_id: upper 32 bits are the real type id, lower 32 bits the variant id.
+// Plain type_ids (nothing in the upper 32 bits) are the type id itself, variant 0.
 export const unpackTypeId = (packedTypeId: InventoryItem['type_id']) => {
   const packed = BigInt(packedTypeId)
+  const upper = packed >> VARIANT_ID_BITS
+
+  if (upper === 0n) {
+    return { typeId: packed, variantId: 0n }
+  }
 
   return {
-    typeId: packed >> VARIANT_ID_BITS,
+    typeId: upper,
     variantId: packed & VARIANT_ID_MASK,
   }
 }
 
-// The type id Datahub knows the item by: unpacked for digital chemistry items.
+// Digital chemistry items carry a non-zero variant id.
+export const isDigitalChemistryItem = (typeId: InventoryItem['type_id']) => {
+  const { variantId } = unpackTypeId(typeId)
+  return variantId !== 0n
+}
+
+// The type id Datahub knows the item by.
 export const getDatahubTypeId = (typeId: InventoryItem['type_id']) =>
-  isDigitalChemistryItem(typeId)
-    ? Number(unpackTypeId(typeId).typeId)
-    : Number(typeId)
+  Number(unpackTypeId(typeId).typeId)
 
 export const DigitalChemistryItemRow = ({
   item,
