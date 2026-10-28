@@ -10,6 +10,12 @@ import {
 } from '@evefrontier/dapp-kit'
 import React, { useEffect, useMemo, useState } from 'react'
 import EveLinearBar from '../components/EveLinearBar'
+import {
+  DigitalChemistryItemRow,
+  getDatahubTypeId,
+  isDigitalChemistryItem,
+  unpackTypeId,
+} from './InventoryView.DigitalChemistry'
 import Offline from './Offline'
 
 const InventoryView = React.memo(
@@ -41,7 +47,11 @@ const InventoryView = React.memo(
     // Stable primitive: only changes when the set of type_ids changes.
     const typeIdsKey = useMemo(() => {
       if (!inventoryItems?.length) return ''
-      return [...new Set(inventoryItems.map((item) => item.type_id))]
+      return [
+        ...new Set(
+          inventoryItems.map((item) => getDatahubTypeId(item.type_id)),
+        ),
+      ]
         .sort((a, b) => a - b)
         .join(',')
     }, [inventoryItems])
@@ -113,7 +123,7 @@ const InventoryView = React.memo(
                 inventoryItems?.map((item) => (
                   <InventoryItemRow
                     item={item}
-                    details={itemDetailsMap.get(Number(item.type_id))}
+                    details={itemDetailsMap.get(getDatahubTypeId(item.type_id))}
                     key={item.id}
                   />
                 ))
@@ -144,11 +154,17 @@ const InventoryItemRow = ({
 }) => {
   const { quantity, type_id } = item
 
+  if (isDigitalChemistryItem(type_id)) {
+    return <DigitalChemistryItemRow item={item} details={details} />
+  }
+
+  const { typeId } = unpackTypeId(type_id)
+
   return (
     <>
-      <span>{details?.name ?? `Item Type ${type_id}`}</span>
+      <span>{details?.name ?? `Item Type ${typeId}`}</span>
       <span>{quantity}</span>
-      <span>{type_id}</span>
+      <span>{typeId}</span>
     </>
   )
 }
