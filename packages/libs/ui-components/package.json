@@ -1,6 +1,6 @@
 {
   "name": "@eveworld/ui-components",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "React UI components used across EVE Frontier's dApps",
   "main": "index.ts",
   "author": "",

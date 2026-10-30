@@ -1,5 +1,12 @@
 # @eveworld/assembly
 
+## 0.3.9
+
+### Patch Changes
+
+- Updated dependencies
+  - @eveworld/ui-components@0.2.1
+
 ## 0.3.8
 
 ### Patch Changes

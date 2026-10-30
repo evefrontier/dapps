@@ -1,5 +1,11 @@
 # @eveworld/ui-components
 
+## 0.2.1
+
+### Patch Changes
+
+- add digichem unpacking
+
 ## 0.2.0
 
 ### Minor Changes
