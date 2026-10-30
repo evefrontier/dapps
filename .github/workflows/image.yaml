@@ -1,0 +1,159 @@
+name: Image
+
+# One image per tier and architecture for each dapp release: the bundle bakes
+# in tier config at build time. Tags: <version>-<tier>-<arch>.
+on:
+  push:
+    tags: ["dapp/v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: image-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: eu-west-1
+  ECR_REPOSITORY: frontier/eve-frontier-dapps
+  ECR_PUSH_ROLE_ARN: arn:aws:iam::284949645555:role/github-oidc-dapps
+  # scan-action's default Grype (0.110) cannot parse bun.lock; 0.121 can.
+  GRYPE_VERSION: v0.121.0
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Verify release tag matches package version
+        id: version
+        run: |
+          if [ "$GITHUB_REF_TYPE" != "tag" ] || [[ "$GITHUB_REF_NAME" != dapp/v* ]]; then
+            echo "Run on a dapp/v* tag, not ${GITHUB_REF_NAME}" >&2
+            exit 1
+          fi
+          version="$(node -p "require('./packages/apps/assembly/package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "dapp/v${version}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match package version ${version}" >&2
+            exit 1
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Scan sources with Grype
+        uses: anchore/scan-action@v7
+        with:
+          grype-version: ${{ env.GRYPE_VERSION }}
+          path: .
+          fail-build: true
+          severity-cutoff: critical
+          output-format: table
+          cache-db: true
+
+  image:
+    name: image (${{ matrix.tier }}, ${{ matrix.arch }})
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        tier: [dev, test, uat, live]
+        arch: [amd64, arm64]
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+    steps:
+      - uses: actions/checkout@v6
+
+      # Mirrors the Amplify app "dapps" branch environment. These values end up
+      # in the public bundle; none are secrets.
+      - name: Resolve tier config
+        id: tier
+        env:
+          TIER: ${{ matrix.tier }}
+        run: |
+          dapp_index="https://dapp-index.evefrontier.com"
+          log_level="error"
+          flag_panel="false"
+          case "$TIER" in
+            dev)
+              package="@evefrontier/world-dev"
+              dapp_index="https://dev.dapp-index.evefrontier.com"
+              flag_panel="true"
+              ;;
+            test)
+              package="@evefrontier/world-test"
+              dapp_index="https://test.dapp-index.evefrontier.com"
+              log_level="debug"
+              flag_panel="true"
+              ;;
+            uat) package="@evefrontier/world-uat" ;;
+            live) package="@evefrontier/world" ;;
+            *) echo "unknown tier: $TIER" >&2; exit 1 ;;
+          esac
+          {
+            echo "tag=${{ needs.version.outputs.version }}-${TIER}-${{ matrix.arch }}"
+            echo "build-args<<EOF"
+            echo "VITE_EVE_WORLD_PACKAGE_ID=${package}"
+            echo "VITE_DAPP_INDEX_URL=${dapp_index}"
+            echo "VITE_LOG_LEVEL=${log_level}"
+            echo "VITE_SHOW_FLAG_PANEL=${flag_panel}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build image for scanning
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: packages/apps/assembly/Dockerfile
+          platforms: linux/${{ matrix.arch }}
+          push: false
+          load: true
+          tags: dapps:grype
+          build-args: ${{ steps.tier.outputs.build-args }}
+          secrets: |
+            github_token=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Scan image with Grype
+        uses: anchore/scan-action@v7
+        with:
+          grype-version: ${{ env.GRYPE_VERSION }}
+          image: dapps:grype
+          fail-build: true
+          severity-cutoff: critical
+          output-format: table
+          cache-db: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ env.ECR_PUSH_ROLE_ARN }}
+          role-session-name: gha-dapps-ecr-push
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Same inputs as the scanned build, so every layer is a cache hit and the
+      # pushed image is the one Grype passed.
+      - name: Push image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: packages/apps/assembly/Dockerfile
+          platforms: linux/${{ matrix.arch }}
+          push: true
+          provenance: false
+          tags: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.tier.outputs.tag }}
+          build-args: ${{ steps.tier.outputs.build-args }}
+          secrets: |
+            github_token=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: echo "Pushed \`${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.tier.outputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
