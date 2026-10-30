@@ -1,21 +1,15 @@
 import { type DatahubGameInfo, type InventoryItem } from '@evefrontier/dapp-kit'
 
-const VARIANT_ID_BITS = 32n
-const VARIANT_ID_MASK = 0xffffffffn
+const TYPE_ID_BITS = 32n
+const TYPE_ID_MASK = 0xffffffffn
 
-// Packed type_id: upper 32 bits are the real type id, lower 32 bits the variant id.
-// Plain type_ids (nothing in the upper 32 bits) are the type id itself, variant 0.
+// Packed type_id: upper 32 bits are the variant id, lower 32 bits the real type id.
+// Plain type_ids (nothing in the upper 32 bits) unpack to the type id itself, variant 0.
 export const unpackTypeId = (packedTypeId: InventoryItem['type_id']) => {
   const packed = BigInt(packedTypeId)
-  const upper = packed >> VARIANT_ID_BITS
-
-  if (upper === 0n) {
-    return { typeId: packed, variantId: 0n }
-  }
-
   return {
-    typeId: upper,
-    variantId: packed & VARIANT_ID_MASK,
+    typeId: packed & TYPE_ID_MASK,
+    variantId: packed >> TYPE_ID_BITS,
   }
 }
 
