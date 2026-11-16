@@ -5,6 +5,9 @@ on:
     types: [published]
   workflow_dispatch:
 
+env:
+  HUSKY: "0"
+
 jobs:
   publish-github-packages:
     runs-on: ubuntu-latest
