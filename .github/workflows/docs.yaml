@@ -11,6 +11,9 @@ on:
       - "package.json"
       - ".github/workflows/docs.yaml"
 
+env:
+  HUSKY: "0"
+
 jobs:
   build-docs:
     runs-on: ubuntu-latest
