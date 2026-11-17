@@ -38,3 +38,6 @@ packages/**/dist/**
 
 # Ignore these copied files for npm publish
 .qodo
+
+# Local Qlty CLI config and caches
+.qlty/
