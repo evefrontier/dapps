@@ -8,6 +8,10 @@ on:
 env:
   HUSKY: "0"
 
+# Release builds must not restore caches that other workflows could have
+# written (cache poisoning). This covers the setup-bun and setup-node caches.
+cache-mode: none
+
 jobs:
   publish-github-packages:
     runs-on: ubuntu-latest
@@ -58,11 +62,14 @@ jobs:
         run: bun --filter @evefrontier/dapp-kit build
 
       - name: Configure registry auth
-        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+        env:
+          GH_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "//npm.pkg.github.com/:_authToken=${GH_PACKAGES_TOKEN}" >> .npmrc
 
+      # Trusted publishing is npmjs.com-only; GitHub Packages needs a token.
       - name: Publish to GitHub Packages
         working-directory: packages/libs/dapp-kit
-        run: |
+        run: | # zizmor: ignore[use-trusted-publishing]
           bun publish --registry=https://npm.pkg.github.com --ignore-scripts
 
       - name: Remove .npmrc
