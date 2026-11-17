@@ -20,6 +20,14 @@ export const NotificationContext = createContext<NotificationContextType>({
   handleClose: () => {},
 })
 
+/** Message shown when notify() is called without one. */
+const DEFAULT_MESSAGES: Record<Severity, string> = {
+  [Severity.Success]: 'Operation completed successfully.',
+  [Severity.Error]: 'An error occurred.',
+  [Severity.Warning]: 'Warning.',
+  [Severity.Info]: 'Processing...',
+}
+
 /**
  * NotificationProvider manages notifications for transactions and messages.
  *
@@ -68,25 +76,7 @@ const NotificationProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Otherwise, show the passed message or a default based on severity
-      if (message) {
-        setMessage(message)
-      } else {
-        switch (type) {
-          case Severity.Success:
-            setMessage('Operation completed successfully.')
-            break
-          case Severity.Error:
-            setMessage('An error occurred.')
-            break
-          case Severity.Warning:
-            setMessage('Warning.')
-            break
-          case Severity.Info:
-          default:
-            setMessage('Processing...')
-            break
-        }
-      }
+      setMessage(message || (DEFAULT_MESSAGES[type] ?? 'Processing...'))
       setTxHash(txHash ?? '')
     },
     [],
