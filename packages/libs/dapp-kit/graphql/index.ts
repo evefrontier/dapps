@@ -9,6 +9,7 @@ export {
   getObjectOwnerAndOwnedObjectsWithJson,
   getObjectsByType,
   getObjectWithDynamicFields,
+  getObjectWithDynamicFieldTables,
   getObjectWithJson,
   getOwnedObjectsByPackage,
   getOwnedObjectsByType,
@@ -24,6 +25,7 @@ export {
   // Owner & ownership queries
   GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE,
   GET_OBJECT_OWNER_AND_OWNED_OBJECTS_WITH_JSON,
+  GET_OBJECT_WITH_DYNAMIC_FIELD_TABLES,
   GET_OBJECT_WITH_DYNAMIC_FIELDS,
   GET_OBJECT_WITH_JSON,
   GET_OBJECTS_BY_TYPE,

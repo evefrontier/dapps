@@ -356,6 +356,51 @@ export interface GetObjectsByTypeResponse {
 }
 
 // ============================================================================
+// Dynamic Field Table Query Response Types
+// ============================================================================
+
+/** Entry of a table nested inside a dynamic field value.
+ *  @category GraphQL Types
+ */
+export interface DynamicFieldTableEntryNode {
+  name: ContentsTypeAndJson
+  value: ContentsTypeAndJson | null
+}
+
+/** Dynamic field whose value may hold a table, resolved via `table_path`.
+ *  `table` is null when the value has no field at that path.
+ *  @category GraphQL Types
+ */
+export interface DynamicFieldWithTableNode {
+  contents: {
+    name: ContentsTypeAndJson
+    value: ContentsTypeAndJson & {
+      table: {
+        asAddress: {
+          addressAt: {
+            dynamicFields: ObjectNodes<DynamicFieldTableEntryNode> & {
+              pageInfo: PageInfo
+            }
+          } | null
+        } | null
+      } | null
+    }
+  }
+}
+
+/** @category GraphQL Types */
+export interface GetObjectWithDynamicFieldTablesResponse {
+  latestVersion: ObjectNodes<{ version: number }>
+  object: {
+    asMoveObject: { contents: ContentsTypeAndJson } | null
+    dynamicField: { contents: { value: ContentsTypeAndJson } } | null
+    dynamicFields: ObjectNodes<DynamicFieldWithTableNode> & {
+      pageInfo: PageInfo
+    }
+  } | null
+}
+
+// ============================================================================
 // EVE Frontier Specific Types
 // ============================================================================
 
