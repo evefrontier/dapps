@@ -1,7 +1,8 @@
 name: Image
 
-# One image per tier and architecture for each dapp release: the bundle bakes
-# in tier config at build time. Tags: <version>-<tier>-<arch>.
+# One multi-arch image per tier for each dapp release: the bundle bakes in tier
+# config at build time. Tags: v<version>-<tier> (the gitops values pin these),
+# assembled from the per-arch v<version>-<tier>-<arch> images.
 on:
   push:
     tags: ["dapp/v*"]
@@ -58,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tier: [dev, test, uat, live]
+        tier: [dev, test, uat, ptu, live]
         arch: [amd64, arm64]
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     permissions:
@@ -68,39 +69,24 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # Mirrors the Amplify app "dapps" branch environment. These values end up
-      # in the public bundle; none are secrets.
+      # These values end up in the public bundle; none are secrets.
       - name: Resolve tier config
         id: tier
         env:
           TIER: ${{ matrix.tier }}
         run: |
-          dapp_index="https://dapp-index.evefrontier.com"
-          log_level="error"
-          flag_panel="false"
           case "$TIER" in
-            dev)
-              package="@evefrontier/world-dev"
-              dapp_index="https://dev.dapp-index.evefrontier.com"
-              flag_panel="true"
-              ;;
-            test)
-              package="@evefrontier/world-test"
-              dapp_index="https://test.dapp-index.evefrontier.com"
-              log_level="debug"
-              flag_panel="true"
-              ;;
+            dev) package="@evefrontier/world-dev" ;;
+            test) package="@evefrontier/world-test" ;;
             uat) package="@evefrontier/world-uat" ;;
-            live) package="@evefrontier/world" ;;
+            ptu | live) package="@evefrontier/world" ;;
             *) echo "unknown tier: $TIER" >&2; exit 1 ;;
           esac
           {
-            echo "tag=${{ needs.version.outputs.version }}-${TIER}-${{ matrix.arch }}"
+            echo "tag=v${{ needs.version.outputs.version }}-${TIER}-${{ matrix.arch }}"
             echo "build-args<<EOF"
             echo "VITE_EVE_WORLD_PACKAGE_ID=${package}"
-            echo "VITE_DAPP_INDEX_URL=${dapp_index}"
-            echo "VITE_LOG_LEVEL=${log_level}"
-            echo "VITE_SHOW_FLAG_PANEL=${flag_panel}"
+            echo "VITE_DAPP_INDEX_URL=https://${TIER}.dapp-index.evefrontier.com"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
@@ -157,3 +143,40 @@ jobs:
 
       - name: Summary
         run: echo "Pushed \`${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.tier.outputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+
+  # Joins each tier's per-arch images under the tag the gitops values pin. Runs
+  # only once every image has passed its scan and been pushed.
+  manifest:
+    name: manifest (${{ matrix.tier }})
+    needs: [version, image]
+    strategy:
+      fail-fast: false
+      matrix:
+        tier: [dev, test, uat, ptu, live]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ env.ECR_PUSH_ROLE_ARN }}
+          role-session-name: gha-dapps-ecr-push
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Create multi-arch tag
+        env:
+          IMAGE: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}
+          TAG: v${{ needs.version.outputs.version }}-${{ matrix.tier }}
+        run: |
+          docker buildx imagetools create -t "${IMAGE}:${TAG}" \
+            "${IMAGE}:${TAG}-amd64" "${IMAGE}:${TAG}-arm64"
+          docker buildx imagetools inspect "${IMAGE}:${TAG}"
+          echo "Pushed \`${IMAGE}:${TAG}\` (amd64, arm64)" >> "$GITHUB_STEP_SUMMARY"

@@ -15,8 +15,6 @@ RUN --mount=type=secret,id=github_token,env=GITHUB_TOKEN \
     bun install --frozen-lockfile --ignore-scripts
 ARG VITE_EVE_WORLD_PACKAGE_ID
 ARG VITE_DAPP_INDEX_URL
-ARG VITE_LOG_LEVEL
-ARG VITE_SHOW_FLAG_PANEL
 # vite.config.ts uses base './'; root-absolute assets keep deep links such as
 # /client/networknode/monitor working behind the index.html fallback.
 RUN test -n "$VITE_EVE_WORLD_PACKAGE_ID" \
