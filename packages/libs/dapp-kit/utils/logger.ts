@@ -222,6 +222,45 @@ const shouldLog = (
 }
 
 /**
+ * Builds the "[scope] (file:line)" prefix for a log call. The scope is left
+ * out when it matches what the call site's path already shows.
+ */
+const buildLogPrefix = (
+  frame: StackFrame | undefined,
+  resolvedScope: string | undefined,
+): string => {
+  const locationScopeCandidate = deriveScopeFromPath(frame?.filePath)
+  const showScope =
+    resolvedScope &&
+    (!locationScopeCandidate || locationScopeCandidate !== resolvedScope)
+  const locationLabel = getLocationLabel(frame)
+
+  const prefixParts: string[] = []
+  if (showScope) {
+    prefixParts.push(`[${resolvedScope}]`)
+  }
+  if (locationLabel) {
+    prefixParts.push(`(${locationLabel})`)
+  }
+  return prefixParts.join(' ')
+}
+
+const prependLogPrefix = (prefix: string, args: unknown[]): unknown[] => {
+  if (!prefix) {
+    return args
+  }
+  if (args.length === 0) {
+    return [prefix]
+  }
+  // Merge prefix into the first argument when it's a string so the first
+  // arg remains the console format string (e.g. "%s …" still works).
+  if (typeof args[0] === 'string') {
+    return [`${prefix} ${args[0]}`, ...args.slice(1)]
+  }
+  return [prefix, ...args]
+}
+
+/**
  * Create a logger scoped to the current module. If no scope is provided, the
  * logger automatically derives the filename (plus parent folder) from the call
  * site so logs stay consistent without manual strings.
@@ -247,39 +286,8 @@ export const createLogger = ({
       }
 
       const frame = getCallerFrameFromStack(captureStack())
-      const locationScopeCandidate = deriveScopeFromPath(frame?.filePath)
-      const shouldShowResolvedScope =
-        resolvedScope &&
-        (!locationScopeCandidate || locationScopeCandidate !== resolvedScope)
-
-      const scopeLabel = shouldShowResolvedScope ? resolvedScope : undefined
-      const locationLabel = getLocationLabel(frame)
-
-      const prefixParts: string[] = []
-      if (scopeLabel) {
-        prefixParts.push(`[${scopeLabel}]`)
-      }
-      if (locationLabel) {
-        prefixParts.push(`(${locationLabel})`)
-      }
-
-      const prefix = prefixParts.length > 0 ? prefixParts.join(' ') : ''
-      const finalArgs: unknown[] = (() => {
-        if (!prefix) {
-          return args
-        }
-        if (args.length === 0) {
-          return [prefix]
-        }
-        // Merge prefix into the first argument when it's a string so the first
-        // arg remains the console format string (e.g. "%s …" still works).
-        if (typeof args[0] === 'string') {
-          return [`${prefix} ${args[0]}`, ...args.slice(1)]
-        }
-        return [prefix, ...args]
-      })()
-
-      method.apply(console, finalArgs)
+      const prefix = buildLogPrefix(frame, resolvedScope)
+      method.apply(console, prependLogPrefix(prefix, args))
     }
 
   return {
