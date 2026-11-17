@@ -1,0 +1,3 @@
+# Image scan gate: fail on Critical findings, except those the distro has
+# marked wont-fix. A Critical with no fix yet still fails.
+ignore-wontfix: wont-fix
