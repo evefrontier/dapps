@@ -1,5 +1,11 @@
 # @eveworld/assembly
 
+## 0.3.10
+
+### Patch Changes
+
+- 1b31d17: amplify image build
+
 ## 0.3.9
 
 ### Patch Changes
