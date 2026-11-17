@@ -64,6 +64,62 @@ export const GET_OBJECT_WITH_DYNAMIC_FIELDS = `
 `
 
 /**
+ * Object contents and latest version, one dynamic field looked up by name, and a page
+ * of all dynamic fields with each value's nested table (at `$table_path`) resolved inline.
+ *
+ * @category GraphQL Queries
+ */
+export const GET_OBJECT_WITH_DYNAMIC_FIELD_TABLES = `
+  query GetObjectWithDynamicFieldTables(
+    $address: SuiAddress!
+    $cursor: String
+    $field_type: String!
+    $field_name_bcs: Base64!
+    $table_path: String!
+    $table_first: Int!
+  ) {
+    latestVersion: objectVersions(last: 1, address: $address) {
+      nodes { version }
+    }
+    object(address: $address) {
+      asMoveObject {
+        contents { type { repr } json }
+      }
+      dynamicField(name: { type: $field_type, bcs: $field_name_bcs }) {
+        contents {
+          value: extract(path: "value") { type { repr } json }
+        }
+      }
+      dynamicFields(after: $cursor) {
+        pageInfo { hasNextPage endCursor }
+        nodes {
+          contents {
+            name: extract(path: "name") { type { repr } json }
+            value: extract(path: "value") {
+              type { repr }
+              json
+              table: extract(path: $table_path) {
+                asAddress {
+                  addressAt {
+                    dynamicFields(first: $table_first) {
+                      pageInfo { hasNextPage endCursor }
+                      nodes {
+                        name { type { repr } json }
+                        value { ... on MoveValue { type { repr } json } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`
+
+/**
  * Assembly object with owner/character extract and character-owned objects (e.g. inventory).
  *
  * @category GraphQL Queries
