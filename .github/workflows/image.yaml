@@ -18,6 +18,10 @@ env:
   # scan-action's default Grype (0.110) cannot parse bun.lock; 0.121 can.
   GRYPE_VERSION: v0.121.0
 
+# Release images must not restore caches that other workflows could have
+# written (cache poisoning). This also covers scan-action's Grype DB cache.
+cache-mode: none
+
 jobs:
   version:
     runs-on: ubuntu-latest
@@ -26,7 +30,9 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Verify release tag matches package version
         id: version
@@ -43,7 +49,7 @@ jobs:
           echo "version=${version}" >> "$GITHUB_OUTPUT"
 
       - name: Scan sources with Grype
-        uses: anchore/scan-action@v7
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
         with:
           grype-version: ${{ env.GRYPE_VERSION }}
           path: .
@@ -66,7 +72,9 @@ jobs:
       id-token: write
       packages: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       # Mirrors the Amplify app "dapps" branch environment. These values end up
       # in the public bundle; none are secrets.
@@ -74,6 +82,8 @@ jobs:
         id: tier
         env:
           TIER: ${{ matrix.tier }}
+          VERSION: ${{ needs.version.outputs.version }}
+          ARCH: ${{ matrix.arch }}
         run: |
           dapp_index="https://dapp-index.evefrontier.com"
           log_level="error"
@@ -95,7 +105,7 @@ jobs:
             *) echo "unknown tier: $TIER" >&2; exit 1 ;;
           esac
           {
-            echo "tag=${{ needs.version.outputs.version }}-${TIER}-${{ matrix.arch }}"
+            echo "tag=${VERSION}-${TIER}-${ARCH}"
             echo "build-args<<EOF"
             echo "VITE_EVE_WORLD_PACKAGE_ID=${package}"
             echo "VITE_DAPP_INDEX_URL=${dapp_index}"
@@ -104,10 +114,10 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - uses: docker/setup-buildx-action@v4
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
       - name: Build image for scanning
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           file: packages/apps/assembly/Dockerfile
@@ -120,7 +130,7 @@ jobs:
             github_token=${{ secrets.GITHUB_TOKEN }}
 
       - name: Scan image with Grype
-        uses: anchore/scan-action@v7
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
         with:
           grype-version: ${{ env.GRYPE_VERSION }}
           image: dapps:grype
@@ -130,7 +140,7 @@ jobs:
           cache-db: true
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: ${{ env.ECR_PUSH_ROLE_ARN }}
           role-session-name: gha-dapps-ecr-push
@@ -138,12 +148,12 @@ jobs:
 
       - name: Login to Amazon ECR
         id: ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
 
       # Same inputs as the scanned build, so every layer is a cache hit and the
       # pushed image is the one Grype passed.
       - name: Push image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           file: packages/apps/assembly/Dockerfile
@@ -156,4 +166,6 @@ jobs:
             github_token=${{ secrets.GITHUB_TOKEN }}
 
       - name: Summary
-        run: echo "Pushed \`${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.tier.outputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+        env:
+          IMAGE: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.tier.outputs.tag }}
+        run: echo "Pushed \`${IMAGE}\`" >> "$GITHUB_STEP_SUMMARY"
