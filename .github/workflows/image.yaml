@@ -22,6 +22,9 @@ env:
 # written (cache poisoning), including scan-action's Grype vulnerability DB.
 cache-mode: none
 
+# Jobs declare the permissions they need; anything else gets none.
+permissions: {}
+
 jobs:
   version:
     runs-on: ubuntu-latest

@@ -15,6 +15,9 @@ on:
 env:
   HUSKY: "0"
 
+# Jobs declare the permissions they need; anything else gets none.
+permissions: {}
+
 jobs:
   build:
     runs-on: ubuntu-latest

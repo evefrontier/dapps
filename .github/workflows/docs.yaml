@@ -18,6 +18,9 @@ env:
 # written (cache poisoning). This covers the setup-bun and setup-node caches.
 cache-mode: none
 
+# Jobs declare the permissions they need; anything else gets none.
+permissions: {}
+
 jobs:
   build-docs:
     runs-on: ubuntu-latest
