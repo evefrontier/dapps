@@ -19,7 +19,7 @@ env:
   GRYPE_VERSION: v0.121.0
 
 # Release images must not restore caches that other workflows could have
-# written (cache poisoning). This also covers scan-action's Grype DB cache.
+# written (cache poisoning), including scan-action's Grype vulnerability DB.
 cache-mode: none
 
 jobs:
@@ -56,7 +56,7 @@ jobs:
           fail-build: true
           severity-cutoff: critical
           output-format: table
-          cache-db: true
+          cache-db: false
 
   image:
     name: image (${{ matrix.tier }}, ${{ matrix.arch }})
@@ -137,7 +137,7 @@ jobs:
           fail-build: true
           severity-cutoff: critical
           output-format: table
-          cache-db: true
+          cache-db: false
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0

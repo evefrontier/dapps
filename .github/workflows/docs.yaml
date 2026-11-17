@@ -14,6 +14,10 @@ on:
 env:
   HUSKY: "0"
 
+# Release builds must not restore caches that other workflows could have
+# written (cache poisoning). This covers the setup-bun and setup-node caches.
+cache-mode: none
+
 jobs:
   build-docs:
     runs-on: ubuntu-latest
