@@ -3,26 +3,60 @@ import type { ConfigExtractDynamicFieldNode } from '../graphql/types'
 import { getEnergyConfigType, getFuelEfficiencyConfigType } from './constants'
 
 /**
- * Cached energy config: type_id -> energy usage (e.g. energy_constant).
- * Populated from the on-chain EnergyConfig singleton.
+ * Fetches a config singleton's table once and caches the parsed map of
+ * type_id -> value. Concurrent callers share one in-flight fetch.
  */
-let energyConfigCache: Record<number, number> | null = null
-let fuelEfficiencyConfigCache: Record<number, number> | null = null
+function createCachedConfig(getObjectType: () => string, tableName: string) {
+  let cache: Record<number, number> | null = null
+  let inFlight: Promise<Record<number, number>> | null = null
 
-/** In-flight promise for energy config so concurrent callers share one fetch. */
-let energyConfigInFlight: Promise<Record<number, number>> | null = null
-/** In-flight promise for fuel efficiency config so concurrent callers share one fetch. */
-let fuelEfficiencyConfigInFlight: Promise<Record<number, number>> | null = null
+  return {
+    async get(): Promise<Record<number, number>> {
+      if (cache) {
+        return cache
+      }
+      if (inFlight) {
+        return inFlight
+      }
+
+      inFlight = (async () => {
+        const nodes = await fetchAllConfigDynamicFieldNodes(
+          getObjectType(),
+          tableName,
+        )
+
+        cache = parseConfig(nodes)
+        return cache
+      })()
+
+      try {
+        return await inFlight
+      } finally {
+        inFlight = null
+      }
+    },
+    reset(): void {
+      cache = null
+      inFlight = null
+    },
+  }
+}
+
+/** EnergyConfig singleton: type_id -> energy usage (e.g. energy_constant). */
+const energyConfig = createCachedConfig(getEnergyConfigType, 'assembly_energy')
+/** FuelEfficiencyConfig singleton: type_id -> fuel efficiency. */
+const fuelEfficiencyConfig = createCachedConfig(
+  getFuelEfficiencyConfigType,
+  'fuel_efficiency',
+)
 
 /**
  * Resets in-memory and in-flight caches. Only for use in tests.
  * @internal
  */
 export function resetConfigCachesForTesting(): void {
-  energyConfigCache = null
-  fuelEfficiencyConfigCache = null
-  energyConfigInFlight = null
-  fuelEfficiencyConfigInFlight = null
+  energyConfig.reset()
+  fuelEfficiencyConfig.reset()
 }
 
 /**
@@ -115,29 +149,8 @@ async function fetchAllConfigDynamicFieldNodes(
  *
  * @category Utilities - Config
  */
-export async function getEnergyConfig(): Promise<Record<number, number>> {
-  if (energyConfigCache) {
-    return energyConfigCache
-  }
-  if (energyConfigInFlight) {
-    return energyConfigInFlight
-  }
-
-  energyConfigInFlight = (async () => {
-    const nodes = await fetchAllConfigDynamicFieldNodes(
-      getEnergyConfigType(),
-      'assembly_energy',
-    )
-
-    energyConfigCache = parseConfig(nodes)
-    return energyConfigCache
-  })()
-
-  try {
-    return await energyConfigInFlight
-  } finally {
-    energyConfigInFlight = null
-  }
+export function getEnergyConfig(): Promise<Record<number, number>> {
+  return energyConfig.get()
 }
 
 /**
@@ -147,31 +160,8 @@ export async function getEnergyConfig(): Promise<Record<number, number>> {
  *
  * @category Utilities - Config
  */
-export async function getFuelEfficiencyConfig(): Promise<
-  Record<number, number>
-> {
-  if (fuelEfficiencyConfigCache) {
-    return fuelEfficiencyConfigCache
-  }
-  if (fuelEfficiencyConfigInFlight) {
-    return fuelEfficiencyConfigInFlight
-  }
-
-  fuelEfficiencyConfigInFlight = (async () => {
-    const nodes = await fetchAllConfigDynamicFieldNodes(
-      getFuelEfficiencyConfigType(),
-      'fuel_efficiency',
-    )
-
-    fuelEfficiencyConfigCache = parseConfig(nodes)
-    return fuelEfficiencyConfigCache
-  })()
-
-  try {
-    return await fuelEfficiencyConfigInFlight
-  } finally {
-    fuelEfficiencyConfigInFlight = null
-  }
+export function getFuelEfficiencyConfig(): Promise<Record<number, number>> {
+  return fuelEfficiencyConfig.get()
 }
 
 /**
