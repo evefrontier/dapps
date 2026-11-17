@@ -218,7 +218,10 @@ export interface CharacterOwnerNode {
   }
 }
 
-/** @category GraphQL Types */
+/**
+ * @category GraphQL Types
+ * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with `getObjectWithDynamicFieldTables` and resolve ownership through its `AccessCap`.
+ */
 export interface GetObjectAndCharacterOwnerResponse {
   object: {
     asMoveObject: {
@@ -275,7 +278,10 @@ export interface GetOwnedObjectsByPackageResponse {
   objects: ObjectNodes<OwnedObjectFullNode>
 }
 
-/** @category GraphQL Types */
+/**
+ * @category GraphQL Types
+ * @deprecated Relies on the archived world `PlayerProfile.character_id`. A character is now an `Entity` with a `Component<Identity>`, whose ID is derived from its in-game ID and tenant.
+ */
 export interface GetWalletCharactersResponse {
   address: AddressWithObjects<ExtractAsMoveObjectNode>
 }
@@ -296,7 +302,10 @@ export interface CharacterAndOwnedObjectsNode {
   }
 }
 
-/** @category GraphQL Types */
+/**
+ * @category GraphQL Types
+ * @deprecated Relies on the archived world `PlayerProfile.character_id`. A character is now an `Entity` with a `Component<Identity>`, whose ID is derived from its in-game ID and tenant.
+ */
 export interface GetCharacterAndOwnedObjectsResponse {
   address: AddressWithObjects<CharacterAndOwnedObjectsNode>
 }
@@ -316,7 +325,10 @@ export interface ConfigExtractDynamicFieldNode {
   value: { json: string }
 }
 
-/** @category GraphQL Types */
+/**
+ * @category GraphQL Types
+ * @deprecated Relies on the archived world `EnergyConfig`/`FuelConfig` singleton tables. Fuel and energy now live per creation in the `PowerGrid` component.
+ */
 export interface GetSingletonConfigObjectByTypeResponse {
   objects: {
     nodes: Array<{
@@ -414,9 +426,15 @@ export interface RawSuiObjectData {
   type_id: string
   extension: unknown
   inventory_keys?: string[]
-  /** Linked gate ID for Smart Gates */
+  /**
+   * Linked gate ID for Smart Gates
+   * @deprecated `linked_gate_id` does not exist in the entity model.
+   */
   linked_gate_id?: string
-  /** Energy source ID for linked assemblies of network nodes */
+  /**
+   * Energy source ID for linked assemblies of network nodes
+   * @deprecated `energy_source_id` does not exist in the entity model; power lives in the `PowerGrid` component.
+   */
   energy_source_id?: string
   key?: {
     item_id: string
@@ -432,6 +450,7 @@ export interface RawSuiObjectData {
     name: string
     url: string
   }
+  /** @deprecated `owner_cap_id` does not exist in the entity model; ownership is held by an `AccessCap`. */
   owner_cap_id?: string
   status?: {
     assembly_id?: string
@@ -468,6 +487,7 @@ export interface RawSuiObjectData {
  * Contains the authorized_object_id which is the Character ID
  *
  * @category GraphQL Types
+ * @deprecated The archived world `OwnerCap` is replaced by `AccessCap { entity }`.
  */
 export interface OwnerCapData {
   authorized_object_id: string

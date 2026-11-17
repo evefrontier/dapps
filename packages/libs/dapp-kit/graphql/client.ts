@@ -244,6 +244,7 @@ export async function getObjectWithJson(address: string) {
  * );
  * const ownerAddress = result.data?.object?.owner?.address?.address;
  * ```
+ * @deprecated Walks `object.owner`, which is empty for shared `Entity` objects. Find a wallet's entities with {@link getOwnedObjectsByType} on the `AccessCap` type instead.
  */
 export async function getObjectOwnerAndOwnedObjectsByType(
   objectAddress: string,
@@ -268,6 +269,7 @@ export async function getObjectOwnerAndOwnedObjectsByType(
  * @param objectAddress - The Sui object address
  * @param ownedObjectType - Optional type filter for owned objects
  * @returns Promise resolving to owner info and owned objects (JSON format)
+ * @deprecated Walks `object.owner`, which is empty for shared `Entity` objects. Find a wallet's entities with {@link getOwnedObjectsByType} on the `AccessCap` type instead.
  */
 export async function getObjectOwnerAndOwnedObjectsWithJson(
   objectAddress: string,
@@ -292,6 +294,7 @@ export async function getObjectOwnerAndOwnedObjectsWithJson(
  * @param objectAddress - The assembly object address
  * @returns Promise resolving to assembly and character data
  * @internal
+ * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with {@link getObjectWithDynamicFieldTables} and resolve ownership through its `AccessCap`.
  */
 export async function getObjectAndCharacterOwner(objectAddress: string) {
   return executeGraphQLQuery<GetObjectAndCharacterOwnerResponse>(
@@ -374,6 +377,7 @@ export async function getOwnedObjectsByPackage(
  * Returns the most recent character owned by the wallet
  *
  * @category GraphQL Client
+ * @deprecated Relies on the archived world `PlayerProfile.character_id`. A character is now an `Entity` with a `Component<Identity>`, whose ID is derived from its in-game ID and tenant.
  */
 export async function getWalletCharacters(wallet: string) {
   return executeGraphQLQuery<GetWalletCharactersResponse>(
@@ -390,6 +394,7 @@ export async function getWalletCharacters(wallet: string) {
  * Returns the characters owned by the wallet
  *
  * @category GraphQL Client
+ * @deprecated Relies on the archived world `PlayerProfile.character_id`. A character is now an `Entity` with a `Component<Identity>`, whose ID is derived from its in-game ID and tenant.
  */
 export async function getCharacterAndOwnedObjects(wallet: string) {
   return executeGraphQLQuery<GetCharacterAndOwnedObjectsResponse>(
@@ -451,6 +456,7 @@ export async function getSingletonObjectByType(objectType: string) {
  *   cursor = dynamicFields?.pageInfo?.hasNextPage ? dynamicFields?.pageInfo?.endCursor : undefined;
  * } while (cursor);
  * ```
+ * @deprecated Relies on the archived world `EnergyConfig`/`FuelConfig` singleton tables. Fuel and energy now live per creation in the `PowerGrid` component.
  */
 export async function getSingletonConfigObjectByType(
   objectType: string,
@@ -517,19 +523,21 @@ export async function getObjectsByType(
  * @param assemblyId - The assembly's Sui object ID
  * @returns Promise resolving to:
  *   - `moveObject` - The assembly's Move object data with JSON contents and dynamic fields
- *   - `character` - The owner character info (id, name, address, tribeId, characterId)
+ *   - `assemblyOwner` - The owner character info (id, name, address, tribeId, characterId)
+ *   - `energySource` - The linked energy source object, if any
+ *   - `destinationGate` - The linked destination gate object, if any
  *
  * @example Basic usage
  * ```typescript
- * const { moveObject, character } = await getAssemblyWithOwner("0x123...");
+ * const { moveObject, assemblyOwner } = await getAssemblyWithOwner("0x123...");
  *
  * if (moveObject) {
  *   console.log("Assembly data:", moveObject.contents.json);
  *   console.log("Dynamic fields:", moveObject.dynamicFields?.nodes);
  * }
  *
- * if (character) {
- *   console.log("Owner:", character.name);
+ * if (assemblyOwner) {
+ *   console.log("Owner:", assemblyOwner.name);
  * }
  * ```
  *
@@ -537,12 +545,13 @@ export async function getObjectsByType(
  * ```typescript
  * import { transformToAssembly } from '@evefrontier/dapp-kit';
  *
- * const { moveObject, character } = await getAssemblyWithOwner(assemblyId);
- * const assembly = await transformToAssembly(assemblyId, moveObject, { character });
+ * const { moveObject, assemblyOwner } = await getAssemblyWithOwner(assemblyId);
+ * const assembly = await transformToAssembly(assemblyId, moveObject, { character: assemblyOwner });
  * console.log(assembly.name, assembly.type, assembly.state);
  * ```
  *
  * @see {@link transformToAssembly} for converting raw data to typed Assembly
+ * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with {@link getObjectWithDynamicFieldTables} and resolve ownership through its `AccessCap`.
  */
 export async function getAssemblyWithOwner(assemblyId: string): Promise<{
   moveObject: {

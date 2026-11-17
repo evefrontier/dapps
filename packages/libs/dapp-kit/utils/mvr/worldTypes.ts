@@ -120,12 +120,20 @@ export const getEveWorldPackageId = (
   return id
 }
 
-/** Type string for Character OwnerCap. Origins of the wrapper and its parameter
- * can differ, so each is resolved separately. @category Utilities - Config */
+/**
+ * Type string for Character OwnerCap. Origins of the wrapper and its parameter
+ * can differ, so each is resolved separately.
+ * @category Utilities - Config
+ * @deprecated The archived world `OwnerCap` is replaced by `AccessCap { entity }`.
+ */
 export const getCharacterOwnerCapType = (): string =>
   `${getWorldType('access::OwnerCap')}<${getWorldType('character::Character')}>`
 
-/** Type string for Character PlayerProfile. @category Utilities - Config */
+/**
+ * Type string for Character PlayerProfile.
+ * @category Utilities - Config
+ * @deprecated The archived world `PlayerProfile` no longer exists; a character is an `Entity` with a `Component<Identity>`.
+ */
 export const getCharacterPlayerProfileType = (): string =>
   getWorldType('character::PlayerProfile')
 
@@ -133,10 +141,18 @@ export const getCharacterPlayerProfileType = (): string =>
 export const getObjectRegistryType = (): string =>
   getWorldType('object_registry::ObjectRegistry')
 
-/** Type string for EnergyConfig. @category Utilities - Config */
+/**
+ * Type string for EnergyConfig.
+ * @category Utilities - Config
+ * @deprecated Relies on the archived world `EnergyConfig`/`FuelConfig` singleton tables. Fuel and energy now live per creation in the `PowerGrid` component.
+ */
 export const getEnergyConfigType = (): string =>
   getWorldType('energy::EnergyConfig')
 
-/** Type string for FuelConfig. @category Utilities - Config */
+/**
+ * Type string for FuelConfig.
+ * @category Utilities - Config
+ * @deprecated Relies on the archived world `EnergyConfig`/`FuelConfig` singleton tables. Fuel and energy now live per creation in the `PowerGrid` component.
+ */
 export const getFuelEfficiencyConfigType = (): string =>
   getWorldType('fuel::FuelConfig')
