@@ -71,6 +71,60 @@ interface ModuleRendererProps {
   tenant: string
 }
 
+/** The built-in view and header for an assembly type, used when it has no dapp URL. */
+function getAssemblyModule(
+  assembly: AssemblyType<Assemblies>,
+  currentAddress: `0x${string}`,
+): { component: React.JSX.Element; headerText: string } {
+  switch (assembly.type) {
+    case 'SmartStorageUnit':
+      return {
+        component: (
+          <InventoryView
+            assembly={assembly as AssemblyType<Assemblies.SmartStorageUnit>}
+            currentAddress={currentAddress}
+          />
+        ),
+        headerText: 'STORAGE',
+      }
+    case 'SmartGate':
+      return {
+        component: (
+          <GateView
+            assembly={assembly as AssemblyType<Assemblies.SmartGate>}
+            viewerAddress={currentAddress}
+          />
+        ),
+        headerText: 'GATE',
+      }
+    case Assemblies.SmartTurret:
+      return {
+        component: (
+          <TurretView
+            assembly={assembly as AssemblyType<Assemblies.SmartTurret>}
+          />
+        ),
+        headerText: 'TURRET',
+      }
+    case Assemblies.NetworkNode:
+      return {
+        component: (
+          <Graph
+            width={712}
+            height={500}
+            assembly={assembly as AssemblyType<Assemblies.NetworkNode>}
+          />
+        ),
+        headerText: 'GENERATOR',
+      }
+    default:
+      return {
+        component: <></>,
+        headerText: '',
+      }
+  }
+}
+
 const ModuleRenderer: React.FC<ModuleRendererProps> = ({
   assembly,
   currentAddress,
@@ -88,15 +142,10 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
   // Dapp Index is first-party, so only a player-set dappURL gets the warning.
   const isExternalDapp = !!dappUrl && !!assembly.dappURL?.trim()
 
-  const getContainerVariant = () => {
-    if (isExternalDapp) return 'warning' as const
-    return 'default' as const
-  }
-
   const getContainerProps = () => ({
     className: 'flex flex-col min-h-full',
     id: 'Eve-Assembly-Module',
-    variant: getContainerVariant(),
+    variant: isExternalDapp ? ('warning' as const) : ('default' as const),
     showBorder: showContainer,
     showHeader: showContainer,
     ...(isExternalDapp && {
@@ -106,61 +155,7 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
     }),
   })
 
-  const renderModule = () => {
-    const result = (() => {
-      switch (assembly.type) {
-        case 'SmartStorageUnit':
-          return {
-            component: (
-              <InventoryView
-                assembly={assembly as AssemblyType<Assemblies.SmartStorageUnit>}
-                currentAddress={currentAddress}
-              />
-            ),
-            headerText: 'STORAGE',
-          }
-        case 'SmartGate':
-          return {
-            component: (
-              <GateView
-                assembly={assembly as AssemblyType<Assemblies.SmartGate>}
-                viewerAddress={currentAddress}
-              />
-            ),
-            headerText: 'GATE',
-          }
-        case Assemblies.SmartTurret:
-          return {
-            component: (
-              <TurretView
-                assembly={assembly as AssemblyType<Assemblies.SmartTurret>}
-              />
-            ),
-            headerText: 'TURRET',
-          }
-        case Assemblies.NetworkNode:
-          return {
-            component: (
-              <Graph
-                width={712}
-                height={500}
-                assembly={assembly as AssemblyType<Assemblies.NetworkNode>}
-              />
-            ),
-            headerText: 'GENERATOR',
-          }
-        default:
-          return {
-            component: <></>,
-            headerText: '',
-          }
-      }
-    })()
-
-    return result
-  }
-
-  const { component, headerText } = renderModule()
+  const { component, headerText } = getAssemblyModule(assembly, currentAddress)
   return (
     <EveContainer {...getContainerProps()} headerText={headerText}>
       {dappUrl ? <DappIframe url={dappUrl} /> : component}

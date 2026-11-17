@@ -30,9 +30,8 @@
   },
   "packageManager": "bun@1.4.4",
   "workspaces": [
-    "packages/**/*",
-    "packages/**/**/*",
-    "!packages/archive"
+    "packages/apps/*",
+    "packages/libs/*"
   ],
   "overrides": {
     "axios": ">=1.18.0",

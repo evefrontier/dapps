@@ -32,6 +32,8 @@ ARG CADDY_VERSION=v2.11.7
 ARG CADDY_DEP_OVERRIDES="golang.org/x/net@v0.60.0"
 RUN zypper --non-interactive update -y
 WORKDIR /src
+# Versions are pinned via CADDY_VERSION / CADDY_DEP_OVERRIDES.
+# hadolint ignore=DL3062
 RUN printf '%s\n' \
         'package main' \
         'import (' \
@@ -42,7 +44,7 @@ RUN printf '%s\n' \
     && go mod init dapps-caddy \
     && go get github.com/caddyserver/caddy/v2@${CADDY_VERSION} ${CADDY_DEP_OVERRIDES} \
     && go mod tidy \
-    && CGO_ENABLED=0 GOARCH=$TARGETARCH go build -buildvcs=false -trimpath -ldflags="-s -w" -o /out/caddy .
+    && CGO_ENABLED=0 GOARCH="$TARGETARCH" go build -buildvcs=false -trimpath -ldflags="-s -w" -o /out/caddy .
 
 FROM registry.suse.com/bci/bci-micro:16.0 AS micro
 

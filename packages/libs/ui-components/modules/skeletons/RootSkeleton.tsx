@@ -1,17 +1,14 @@
-import { Skeleton } from '@mui/material'
-import React, { useState } from 'react'
+import React from 'react'
+import StackSkeleton from './StackSkeleton'
 
-const RootSkeleton = React.memo((): React.JSX.Element => {
-  return (
-    <div
-      className="p-4 flex flex-col gap-2 h-screen bg-crude-60"
+const RootSkeleton = React.memo(
+  (): React.JSX.Element => (
+    <StackSkeleton
       id="smartassembly-root-skeleton"
-    >
-      <Skeleton variant="rectangular" height={495} />
-      <Skeleton variant="rectangular" height={34} />
-      <Skeleton variant="rectangular" height={342} />
-    </div>
-  )
-})
+      className="p-4 gap-2"
+      blocks={[{ height: 495 }, { height: 34 }, { height: 342 }]}
+    />
+  ),
+)
 
 export default RootSkeleton

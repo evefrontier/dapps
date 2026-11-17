@@ -1,16 +1,14 @@
-import { Skeleton } from '@mui/material'
 import React from 'react'
+import StackSkeleton from './StackSkeleton'
 
-const BehaviourSkeleton = React.memo((): React.JSX.Element => {
-  return (
-    <div
-      className="p-4 flex flex-col gap-2 h-screen bg-crude-60"
+const BehaviourSkeleton = React.memo(
+  (): React.JSX.Element => (
+    <StackSkeleton
       id="smartassembly-behaviour-skeleton"
-    >
-      <Skeleton variant="rectangular" height={16} width={100} />
-      <Skeleton variant="rectangular" className="grow" />
-    </div>
-  )
-})
+      className="p-4 gap-2"
+      blocks={[{ height: 16, width: 100 }, { className: 'grow' }]}
+    />
+  ),
+)
 
 export default BehaviourSkeleton

@@ -1,0 +1,32 @@
+name: zizmor
+
+# Audits the workflows under .github/ for security issues (unpinned actions,
+# cache poisoning, credential leaks, template injection). No path filter, so
+# it can be a required status check.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions: {}
+
+jobs:
+  zizmor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        with:
+          # Pinned so a new zizmor release can't fail PRs that don't touch
+          # workflows; upgrade it on purpose.
+          version: 1.32.0
+          # Annotations show findings on the PR and fail the job; SARIF
+          # upload would never fail it.
+          advanced-security: false
+          annotations: true

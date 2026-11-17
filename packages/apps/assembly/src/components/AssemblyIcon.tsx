@@ -20,6 +20,30 @@ const Banner: React.FC<BannerProps> = ({ message, variant }) => (
   </div>
 )
 
+const NetworkNodeBanner = ({
+  assembly,
+}: {
+  assembly: AssemblyType<Assemblies.NetworkNode>
+}) => {
+  if (assembly.state === State.ANCHORED) {
+    const hasNoFuel = Number(assembly.networkNode.fuel.quantity) === 0
+    return (
+      <Banner
+        message={hasNoFuel ? 'Fuel assembly' : 'Start generating'}
+        variant="alert"
+      />
+    )
+  }
+
+  if (assembly.state === State.ONLINE) {
+    return (
+      <Banner message="Online and generating energy" variant="martianred" />
+    )
+  }
+
+  return null
+}
+
 const AssemblyIcon = ({
   assembly,
   isOnline,
@@ -29,67 +53,12 @@ const AssemblyIcon = ({
   const { typeDetails } = assembly
   const { iconUrl, name } = typeDetails ?? {}
   const isNetworkNode = assembly.type === Assemblies.NetworkNode
-  const networkNode = isNetworkNode
-    ? (assembly as AssemblyType<Assemblies.NetworkNode>)
-    : null
-
-  const offline = !isOnline
 
   const src =
     iconUrl || `https://artifacts.evefrontier.com/types/${typeDetails?.id}.png`
+  const blurClass = isNetworkNode ? 'blur-bg-alert' : 'blur-bg-sm'
 
-  const getNetworkNodeBanner = () => {
-    if (!isNetworkNode) return null
-
-    if (assembly.state === State.ANCHORED) {
-      const hasNoFuel = Number(networkNode?.networkNode.fuel.quantity) === 0
-      return (
-        <Banner
-          message={hasNoFuel ? 'Fuel assembly' : 'Start generating'}
-          variant="alert"
-        />
-      )
-    }
-
-    if (assembly.state === State.ONLINE) {
-      return (
-        <Banner message="Online and generating energy" variant="martianred" />
-      )
-    }
-
-    return null
-  }
-
-  const getNetworkNodeBorder = () => {
-    if (!isNetworkNode) return ''
-    return assembly.state === State.ONLINE
-      ? 'border border-martianred-30'
-      : 'border border-alert'
-  }
-
-  const getBlurClass = () => {
-    if (!offline) return ''
-    return isNetworkNode ? 'blur-bg-alert' : 'blur-bg-sm'
-  }
-
-  // Network node is rendered with an additional border and banner
-  return isNetworkNode ? (
-    <div className="p-1 bg-black">
-      <div className={getNetworkNodeBorder()}>
-        <div className="relative">
-          <img
-            src={src}
-            alt={name}
-            className={`w-full h-full object-cover ${className}`}
-            width={size}
-            height={size}
-          />
-          {offline && <div className={`absolute inset-0 ${getBlurClass()}`} />}
-        </div>
-        {getNetworkNodeBanner()}
-      </div>
-    </div>
-  ) : (
+  const icon = (
     <div className="relative">
       <img
         src={src}
@@ -98,7 +67,25 @@ const AssemblyIcon = ({
         width={size}
         height={size}
       />
-      {offline && <div className={`absolute inset-0 ${getBlurClass()}`} />}
+      {!isOnline && <div className={`absolute inset-0 ${blurClass}`} />}
+    </div>
+  )
+
+  if (!isNetworkNode) return icon
+
+  // Network node is rendered with an additional border and banner
+  const borderClass =
+    assembly.state === State.ONLINE
+      ? 'border border-martianred-30'
+      : 'border border-alert'
+  return (
+    <div className="p-1 bg-black">
+      <div className={borderClass}>
+        {icon}
+        <NetworkNodeBanner
+          assembly={assembly as AssemblyType<Assemblies.NetworkNode>}
+        />
+      </div>
     </div>
   )
 }

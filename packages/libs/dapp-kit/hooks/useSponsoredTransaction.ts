@@ -189,6 +189,98 @@ export type UseSponsoredTransactionMutationOptions = Omit<
 >
 
 // ============================================================================
+// Mutation steps
+// ============================================================================
+
+type SponsoredTransactionSigner = NonNullable<
+  ReturnType<typeof getSponsoredTransactionFeature>
+>
+
+/** Resolves the connected wallet at call time from the dApp Kit connection store. */
+function getConnectedWallet(
+  dAppKit: ReturnType<typeof useDAppKit>,
+): ResolvableWallet {
+  const connection =
+    typeof dAppKit.stores?.$connection?.get === 'function'
+      ? (dAppKit.stores.$connection.get() as { wallet?: ResolvableWallet })
+      : null
+  const wallet = connection?.wallet ?? null
+
+  if (!wallet) {
+    throw new WalletNotConnectedError()
+  }
+  return wallet
+}
+
+/** Returns the wallet's sponsored transaction signer, or throws if it has none. */
+function getSponsoredSigner(
+  wallet: ResolvableWallet,
+): SponsoredTransactionSigner {
+  if (!supportsSponsoredTransaction(wallet.features)) {
+    throw new WalletSponsoredTransactionNotSupportedError(wallet.name)
+  }
+
+  const signSponsoredTransaction = getSponsoredTransactionFeature(
+    wallet as unknown as Parameters<typeof getSponsoredTransactionFeature>[0],
+  )
+  if (!signSponsoredTransaction) {
+    throw new WalletSponsoredTransactionNotSupportedError(wallet.name)
+  }
+  return signSponsoredTransaction
+}
+
+/** Builds the gateway payload, resolving tenant and assembly ID from args or query params. */
+function buildSponsoredPayload(
+  args: UseSponsoredTransactionArgs,
+  queryTenant: string | null,
+  queryItemId: string | null,
+): SponsoredTransactionInput {
+  const tenant = (args.tenant ?? queryTenant ?? TenantId.UTOPIA).trim()
+  if (!tenant) {
+    throw new Error(
+      'Tenant could not be resolved; pass tenant or set the tenant query param',
+    )
+  }
+
+  const assemblyId = resolveAssemblyId(args.assembly.item_id, queryItemId)
+
+  // If the txAction is UPDATE_METADATA, it goes through the standard assembly type
+  const assemblyType = getAssemblyTypeApiString(
+    args.txAction === SponsoredTransactionActions.UPDATE_METADATA
+      ? Assemblies.Assembly
+      : args.assembly.type,
+  )
+
+  return {
+    txAction: args.txAction,
+    assembly: assemblyId,
+    assemblyType: assemblyType,
+    tenant,
+    ...(args.metadata ? { metadata: args.metadata } : {}),
+  }
+}
+
+/** Signs and submits the payload, retrying transient (502) gateway errors. */
+async function signWithRetries(
+  signSponsoredTransaction: SponsoredTransactionSigner,
+  payload: SponsoredTransactionInput,
+): Promise<SponsoredTransactionOutput> {
+  let lastError: unknown
+  const maxAttempts = DEFAULT_MAX_RETRIES + 1
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await signSponsoredTransaction(payload)
+    } catch (e) {
+      lastError = e
+      const canRetry = attempt < maxAttempts && isRetryableSponsorError(e)
+      if (!canRetry) throw e
+      await delay(DEFAULT_RETRY_DELAY_MS)
+    }
+  }
+  throw lastError
+}
+
+// ============================================================================
 // Hook Implementation
 // ============================================================================
 
@@ -321,79 +413,19 @@ export function useSponsoredTransaction({
       ...(mutationKey ?? []),
     ],
     mutationFn: async (args): Promise<SponsoredTransactionOutput> => {
-      // Resolve wallet at call time
-      const connection =
-        typeof dAppKit.stores?.$connection?.get === 'function'
-          ? (dAppKit.stores.$connection.get() as { wallet?: ResolvableWallet })
-          : null
-      const walletFromStore = connection?.wallet
-      const wallet = walletFromStore ?? null
-
-      if (!wallet) {
-        throw new WalletNotConnectedError()
-      }
+      const wallet = getConnectedWallet(dAppKit)
 
       const signerAccount = args.account ?? currentAccount?.address
       if (!signerAccount) {
         throw new WalletNoAccountSelectedError()
       }
 
-      if (!supportsSponsoredTransaction(wallet.features)) {
-        throw new WalletSponsoredTransactionNotSupportedError(
-          (wallet as ResolvableWallet).name,
-        )
-      }
-
-      const signSponsoredTransaction = getSponsoredTransactionFeature(
-        wallet as unknown as Parameters<
-          typeof getSponsoredTransactionFeature
-        >[0],
-      )
-      if (!signSponsoredTransaction) {
-        throw new WalletSponsoredTransactionNotSupportedError(
-          (wallet as ResolvableWallet).name,
-        )
-      }
-
-      const tenant = (args.tenant ?? queryTenant ?? TenantId.UTOPIA).trim()
-      if (!tenant) {
-        throw new Error(
-          'Tenant could not be resolved; pass tenant or set the tenant query param',
-        )
-      }
-
-      const assemblyId = resolveAssemblyId(args.assembly.item_id, queryItemId)
-
-      // If the txAction is UPDATE_METADATA, it goes through the standard assembly type
-      const assemblyType = getAssemblyTypeApiString(
-        args.txAction === SponsoredTransactionActions.UPDATE_METADATA
-          ? Assemblies.Assembly
-          : args.assembly.type,
-      )
-
-      const payload: SponsoredTransactionInput = {
-        txAction: args.txAction,
-        assembly: assemblyId,
-        assemblyType: assemblyType,
-        tenant,
-        ...(args.metadata ? { metadata: args.metadata } : {}),
-      }
+      const signSponsoredTransaction = getSponsoredSigner(wallet)
+      const payload = buildSponsoredPayload(args, queryTenant, queryItemId)
 
       log.info('Sponsored Transaction Payload:', payload)
 
-      let lastError: unknown
-      const maxAttempts = DEFAULT_MAX_RETRIES + 1
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-          return await signSponsoredTransaction(payload)
-        } catch (e) {
-          lastError = e
-          const canRetry = attempt < maxAttempts && isRetryableSponsorError(e)
-          if (!canRetry) throw e
-          await delay(DEFAULT_RETRY_DELAY_MS)
-        }
-      }
-      throw lastError
+      return signWithRetries(signSponsoredTransaction, payload)
     },
     ...mutationOptions,
   })
