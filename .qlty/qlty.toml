@@ -56,6 +56,11 @@ test_patterns = [
 [smells]
 mode = "comment"
 
+# Mapping functions (switch on type/status, one return per case) read best
+# as they are. Default is 6.
+[smells.return_statements]
+threshold = 9
+
 [[source]]
 name = "default"
 default = true
