@@ -1,5 +1,12 @@
 # @evefrontier/dapp-kit
 
+## 0.1.10-alpha.5
+
+### Patch Changes
+
+- add `getObjectWithDynamicFieldTables` for reading entity-model objects
+- deprecate GraphQL helpers tied to the archived world package (`getAssemblyWithOwner`, `getObjectAndCharacterOwner`, `getWalletCharacters`, `getCharacterAndOwnedObjects`, `getSingletonConfigObjectByType`, `getObjectOwnerAndOwnedObjectsByType`/`WithJson`) and the matching type-string getters
+
 ## 0.1.10
 
 ### Patch Changes

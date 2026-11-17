@@ -123,6 +123,7 @@ export const GET_OBJECT_WITH_DYNAMIC_FIELD_TABLES = `
  * Assembly object with owner/character extract and character-owned objects (e.g. inventory).
  *
  * @category GraphQL Queries
+ * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with `getObjectWithDynamicFieldTables` and resolve ownership through its `AccessCap`.
  */
 export const GET_OBJECT_DYNAMICFIELD_CHARACTER_WITH_JSON = `
 query GetObjectOwnerCharacterOwnerAndInventory(
@@ -221,6 +222,7 @@ query GetObjectOwnerCharacterOwnerAndInventory(
  * Returns BCS-encoded data only
  *
  * @category GraphQL Queries
+ * @deprecated Walks `object.owner`, which is empty for shared `Entity` objects. Find a wallet's entities with `getOwnedObjectsByType` on the `AccessCap` type instead.
  */
 export const GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE = `
   query GetObjectOwnerAndOwnedObjectByType($object: SuiAddress!, $owned_object_type: String) {
@@ -257,6 +259,7 @@ export const GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE = `
  * Returns both BCS and JSON-decoded data for easier consumption
  *
  * @category GraphQL Queries
+ * @deprecated Walks `object.owner`, which is empty for shared `Entity` objects. Find a wallet's entities with `getOwnedObjectsByType` on the `AccessCap` type instead.
  */
 export const GET_OBJECT_OWNER_AND_OWNED_OBJECTS_WITH_JSON = `
   query GetObjectOwnerAndOwnedObjectWithJson($object: SuiAddress!, $owned_object_type: String) {
@@ -389,6 +392,7 @@ export const GET_OWNED_OBJECTS_BY_PACKAGE = `
  * Returns the characters owned by the wallet
  *
  * @category GraphQL Queries
+ * @deprecated Relies on the archived world `PlayerProfile.character_id`. A character is now an `Entity` with a `Component<Identity>`, whose ID is derived from its in-game ID and tenant.
  */
 export const GET_WALLET_CHARACTERS = `
   query GetWalletCharacters($owner: SuiAddress!, $characterPlayerProfileType: String!) {
@@ -429,6 +433,7 @@ export const GET_WALLET_CHARACTERS = `
  * Returns the character and objects owned by the character
  *
  * @category GraphQL Queries
+ * @deprecated Relies on the archived world `PlayerProfile.character_id`. A character is now an `Entity` with a `Component<Identity>`, whose ID is derived from its in-game ID and tenant.
  */
 export const GET_CHARACTER_AND_OWNED_OBJECTS = `
 query GetCharacterAndOwnedObjects($owner: SuiAddress!, $characterPlayerProfileType: String!) {
@@ -513,6 +518,7 @@ export const GET_SINGLETON_OBJECT_BY_TYPE = `
  * Query to get a singleton config object by its type
  *
  * @category GraphQL Queries
+ * @deprecated Relies on the archived world `EnergyConfig`/`FuelConfig` singleton tables. Fuel and energy now live per creation in the `PowerGrid` component.
  */
 export const GET_SINGLETON_CONFIG_OBJECT_BY_TYPE = `
   query GetSingletonConfigObjectByType($object_type: String!, $table_name: String!, $after: String) {
