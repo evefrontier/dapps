@@ -60,7 +60,8 @@ const App = () => {
   }, [connected, currentAccount?.address])
 
   // Check if the user is on a client route
-  const isClient = useLocation().pathname.includes('client')
+  const { pathname } = useLocation()
+  const isClient = pathname.includes('client')
 
   /**
    * If user is on a client route AND not fully connected (missing provider, public client, or wallet client):
@@ -73,7 +74,7 @@ const App = () => {
       <SkeletonConnect
         handleConnect={handleConnect}
         hasEveVault={hasEveVault}
-        path={useLocation().pathname}
+        path={pathname}
       />
     )
   }
