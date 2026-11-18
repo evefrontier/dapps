@@ -24,7 +24,7 @@
     },
     "packages/apps/assembly": {
       "name": "@eveworld/assembly",
-      "version": "0.3.10",
+      "version": "0.4.0",
       "dependencies": {
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
@@ -61,7 +61,7 @@
     },
     "packages/libs/dapp-kit": {
       "name": "@evefrontier/dapp-kit",
-      "version": "0.1.10-alpha.5",
+      "version": "0.2.0-alpha.0",
       "dependencies": {
         "@evefrontier/wallet-core": "0.1.0",
         "@mysten/dapp-kit-core": "^1.6.9",
