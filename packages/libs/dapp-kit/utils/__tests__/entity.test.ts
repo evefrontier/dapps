@@ -280,6 +280,39 @@ describe('parseEntity', () => {
     })
   })
 
+  it('skips inventory entries without a readable balance', () => {
+    const entity = parseEntity(
+      raw([
+        component(
+          '9',
+          'inventory::Inventory',
+          { type_id: '5', capacity: '100', used: '30' },
+          [
+            {
+              name: { type: { repr: 'u64' }, json: '76' },
+              value: null,
+            } as never,
+            {
+              name: { type: { repr: 'u64' }, json: '77' } as never,
+              value: {
+                type: { repr: 'LinkedTableNode' },
+                json: {
+                  prev: null,
+                  next: null,
+                  value: { quantity: '3', volume: '10' },
+                },
+              },
+            },
+          ],
+        ),
+      ]),
+    )
+
+    expect(entity.inventories[0]?.items).toEqual([
+      { typeId: '77', quantity: '3', volume: '10' },
+    ])
+  })
+
   it('parses metadata and identity', () => {
     const entity = parseEntity(
       raw([
@@ -318,6 +351,20 @@ describe('parseEntity', () => {
     expect(entity.components).toEqual([
       expect.objectContaining({ id: '3', kind: 'killmail::Killmail' }),
     ])
+    expect(entity.inFlight).toBe(true)
+  })
+
+  it('treats the in-flight key as the lock, whatever its value', () => {
+    const entity = parseEntity(
+      raw([
+        {
+          name: { type: { repr: `${PKG}::entity::InFlight` }, json: {} },
+          value: { type: { repr: 'bool' }, json: false as never },
+          table: null,
+        },
+      ]),
+    )
+
     expect(entity.inFlight).toBe(true)
   })
 })
@@ -376,6 +423,22 @@ describe('fetchEntity', () => {
     ])
   })
 
+  it('throws when a nested table has more pages but no table id', async () => {
+    mockGraphql({
+      GetEntity: () =>
+        entityResponse('0xe', [
+          componentNode(
+            '2',
+            'layout::Layout',
+            { section_ids: { contents: [] }, shell: null },
+            { sections: tableRef([], 'tc1') },
+          ),
+        ]),
+    })
+
+    await expect(fetchEntity('0xe')).rejects.toThrow('no table id')
+  })
+
   it('returns null when there is no object', async () => {
     mockGraphql({ GetEntity: () => NO_OBJECT })
 
@@ -409,6 +472,7 @@ describe('fetchEntityOwner', () => {
     })
 
     expect(await fetchEntityOwner('0xcap')).toEqual({
+      kind: 'wallet',
       holder: '0xwallet',
       walletAddress: '0xwallet',
       character: null,
@@ -434,6 +498,7 @@ describe('fetchEntityOwner', () => {
 
     const owner = await fetchEntityOwner('0xcap')
 
+    expect(owner.kind).toBe('character')
     expect(owner.holder).toBe('0xchar')
     expect(owner.walletAddress).toBe('0xwallet')
     expect(owner.character?.id).toBe('0xchar')
@@ -448,9 +513,64 @@ describe('fetchEntityOwner', () => {
     })
 
     expect(await fetchEntityOwner('0xcap')).toEqual({
+      kind: 'none',
       holder: null,
       walletAddress: null,
       character: null,
     })
+  })
+
+  it('reports an ObjectOwner holder as an object without fetching it', async () => {
+    const fetchMock = mockGraphql({
+      GetObjectOwner: () => ({
+        data: {
+          object: {
+            owner: {
+              __typename: 'ObjectOwner',
+              address: { address: '0xwrapper' },
+            },
+          },
+        },
+      }),
+    })
+
+    expect(await fetchEntityOwner('0xcap')).toEqual({
+      kind: 'object',
+      holder: '0xwrapper',
+      walletAddress: null,
+      character: null,
+    })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('reports a non-entity object holder as an object', async () => {
+    mockGraphql({
+      GetObjectOwner: () => ownedBy('0xthing'),
+      GetEntity: () => {
+        const response = entityResponse('0xthing', [])
+        response.data.object.asMoveObject.contents.type.repr = '0x2::foo::Foo'
+        return response
+      },
+    })
+
+    expect(await fetchEntityOwner('0xcap')).toEqual({
+      kind: 'object',
+      holder: '0xthing',
+      walletAddress: null,
+      character: null,
+    })
+  })
+
+  it('resolves a character with no identity to no wallet', async () => {
+    mockGraphql({
+      GetObjectOwner: () => ownedBy('0xchar'),
+      GetEntity: ({ address }) => entityResponse(address as string, []),
+    })
+
+    const owner = await fetchEntityOwner('0xcap')
+
+    expect(owner.kind).toBe('character')
+    expect(owner.walletAddress).toBeNull()
+    expect(owner.character?.id).toBe('0xchar')
   })
 })

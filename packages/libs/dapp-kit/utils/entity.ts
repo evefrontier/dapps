@@ -117,7 +117,12 @@ async function completeTable(
 
   const entries = [...page.nodes]
   let after = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null
-  while (after && typeof tableId === 'string') {
+  if (!after) return entries
+  if (typeof tableId !== 'string') {
+    // Paging needs the table id; stopping here would return partial entries
+    throw new Error('Nested table has more pages but no table id in its JSON')
+  }
+  while (after) {
     const response = await getTableEntries(tableId, { after })
     throwOnErrors(response)
     const next = response.data?.address?.dynamicFields
@@ -131,10 +136,15 @@ async function completeTable(
  * Fetches an object as a world entity, paging through all of its dynamic
  * fields and any layout section or inventory item tables.
  *
+ * Pages after the first are read at the latest version rather than pinned to
+ * `version`, so an entity that changes mid-fetch can mix fields from two
+ * versions. Polling callers converge on the next fetch, as the newer version
+ * no longer matches.
+ *
  * @category Utilities - Entity
  * @param objectId - The Sui object ID
  * @returns The raw entity, or null if there is no Move object at that address
- * @throws If the GraphQL response has errors
+ * @throws If a GraphQL response has errors, or a nested table cannot be paged
  */
 export async function fetchEntity(objectId: string): Promise<RawEntity | null> {
   let raw: RawEntity | null = null
@@ -243,14 +253,20 @@ function parseInventory(
     typeId: inner.type_id,
     capacity: inner.capacity,
     used: inner.used,
-    // LinkedTable nodes: { prev, next, value: Balance { quantity, volume } }
-    items: (table ?? []).map((entry) => {
-      const node = entry.value?.json as unknown as LinkedTableNodeJson
-      return {
-        typeId: String(entry.name.json),
-        quantity: node.value.quantity,
-        volume: node.value.volume,
-      }
+    // LinkedTable nodes: { prev, next, value: Balance { quantity, volume } }.
+    // Entries without a readable balance are skipped rather than failing the entity.
+    items: (table ?? []).flatMap((entry) => {
+      const balance = (entry.value?.json as LinkedTableNodeJson | undefined)
+        ?.value
+      return balance
+        ? [
+            {
+              typeId: String(entry.name.json),
+              quantity: balance.quantity,
+              volume: balance.volume,
+            },
+          ]
+        : []
     }),
   }
 }
@@ -297,7 +313,8 @@ export function parseEntity(raw: RawEntity): EntityData {
       continue
     }
     if (keyType.endsWith('::entity::InFlight')) {
-      entity.inFlight = (value.json as unknown) === true
+      // The lock is `df::exists(InFlight())`; the stored bool is a placeholder
+      entity.inFlight = true
       continue
     }
     if (!keyType.endsWith('::entity::ComponentKey')) continue
@@ -352,7 +369,8 @@ export function parseEntity(raw: RawEntity): EntityData {
 /**
  * Resolves who controls an entity from the holder of its AccessCap. A cap
  * parked on a Character is held by the Character's object id; its wallet is
- * the Character's `Identity.owner`.
+ * the Character's `Identity.owner`. See {@link EntityOwner} `kind` for the
+ * cases.
  *
  * @category Utilities - Entity
  * @param accessCapId - The entity's `accessCapId`
@@ -366,16 +384,28 @@ export async function fetchEntityOwner(
   throwOnErrors(response)
   const owner = response.data?.object?.owner
   const holder = owner && 'address' in owner ? owner.address.address : null
-  if (!holder) return { holder: null, walletAddress: null, character: null }
+  if (!owner || !holder) {
+    return { kind: 'none', holder: null, walletAddress: null, character: null }
+  }
+  // An ObjectOwner holder is a dynamic-field wrapper, not the Character
+  if (owner.__typename === 'ObjectOwner') {
+    return { kind: 'object', holder, walletAddress: null, character: null }
+  }
 
   // A wallet has no object at its address; an object holder should be a Character
   const raw = await fetchEntity(holder)
-  if (!raw) return { holder, walletAddress: holder, character: null }
+  if (!raw) {
+    return { kind: 'wallet', holder, walletAddress: holder, character: null }
+  }
+  if (!isEntity(raw)) {
+    return { kind: 'object', holder, walletAddress: null, character: null }
+  }
 
-  const character = isEntity(raw) ? parseEntity(raw) : null
+  const character = parseEntity(raw)
   return {
+    kind: 'character',
     holder,
-    walletAddress: character?.identity?.owner ?? null,
+    walletAddress: character.identity?.owner ?? null,
     character,
   }
 }

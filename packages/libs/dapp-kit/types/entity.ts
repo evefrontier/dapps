@@ -131,6 +131,15 @@ export interface EntityData {
  * @category Types
  */
 export interface EntityOwner {
+  /**
+   * - `wallet`: the cap is held by an address with no object at it
+   * - `character`: the cap is parked on an Entity; `walletAddress` is null if
+   *   it has no Identity
+   * - `object`: held by some other object, e.g. an `ObjectOwner` dynamic-field
+   *   wrapper; no wallet is resolved
+   * - `none`: the cap is not address-owned (shared, immutable) or not found
+   */
+  kind: 'wallet' | 'character' | 'object' | 'none'
   /** Address holding the AccessCap: a wallet, or a Character entity's id */
   holder: string | null
   /** The holder wallet, or the Character's Identity.owner */
