@@ -167,12 +167,6 @@ export function setActiveEventTransport(transport: EventTransport): void {
   activeEventTransport = transport
 }
 
-/** The transport currently governing GraphQL endpoint selection.
- *  @category Utilities - Config */
-export function getActiveEventTransport(): EventTransport {
-  return activeEventTransport
-}
-
 /** Default polling interval in milliseconds.
  *
  * Polling is the only source of updates for the selected entity; each tick is
