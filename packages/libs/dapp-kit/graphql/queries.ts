@@ -119,6 +119,118 @@ export const GET_OBJECT_WITH_DYNAMIC_FIELD_TABLES = `
   }
 `
 
+// ============================================================================
+// Entity Queries
+// ============================================================================
+
+/**
+ * World entity: latest version, contents, and a page of its dynamic fields
+ * (components and action maps). Layout sections and inventory item tables
+ * nested in component values are resolved inline; `null` for other components.
+ *
+ * @category GraphQL Queries
+ */
+export const GET_ENTITY = `
+  query GetEntity($address: SuiAddress!, $cursor: String, $table_first: Int!) {
+    latestVersion: objectVersions(last: 1, address: $address) {
+      nodes { version }
+    }
+    object(address: $address) {
+      asMoveObject {
+        contents { type { repr } json }
+      }
+      dynamicFields(after: $cursor) {
+        pageInfo { hasNextPage endCursor }
+        nodes {
+          contents {
+            name: extract(path: "name") { type { repr } json }
+            value: extract(path: "value") {
+              type { repr }
+              json
+              sections: extract(path: "inner.sections.id") {
+                asAddress {
+                  addressAt {
+                    dynamicFields(first: $table_first) {
+                      pageInfo { hasNextPage endCursor }
+                      nodes {
+                        name { type { repr } json }
+                        value { ... on MoveValue { type { repr } json } }
+                      }
+                    }
+                  }
+                }
+              }
+              items: extract(path: "inner.items.balances.id") {
+                asAddress {
+                  addressAt {
+                    dynamicFields(first: $table_first) {
+                      pageInfo { hasNextPage endCursor }
+                      nodes {
+                        name { type { repr } json }
+                        value { ... on MoveValue { type { repr } json } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`
+
+/**
+ * One page of a Move table's entries (the dynamic fields of its UID).
+ *
+ * @category GraphQL Queries
+ */
+export const GET_TABLE_ENTRIES = `
+  query GetTableEntries($address: SuiAddress!, $first: Int!, $after: String) {
+    address(address: $address) {
+      dynamicFields(first: $first, after: $after) {
+        pageInfo { hasNextPage endCursor }
+        nodes {
+          name { type { repr } json }
+          value { ... on MoveValue { type { repr } json } }
+        }
+      }
+    }
+  }
+`
+
+/**
+ * Latest version of an object; a cheap change check before a full fetch.
+ *
+ * @category GraphQL Queries
+ */
+export const GET_OBJECT_LATEST_VERSION = `
+  query GetObjectLatestVersion($address: SuiAddress!) {
+    latestVersion: objectVersions(last: 1, address: $address) {
+      nodes { version }
+    }
+  }
+`
+
+/**
+ * Owner of an object. Objects transferred to another object's id (e.g. an
+ * AccessCap parked on a Character) report an AddressOwner of that object's id.
+ *
+ * @category GraphQL Queries
+ */
+export const GET_OBJECT_OWNER = `
+  query GetObjectOwner($address: SuiAddress!) {
+    object(address: $address) {
+      owner {
+        __typename
+        ... on AddressOwner { address { address } }
+        ... on ObjectOwner { address { address } }
+      }
+    }
+  }
+`
+
 /**
  * Assembly object with owner/character extract and character-owned objects (e.g. inventory).
  *

@@ -413,6 +413,67 @@ export interface GetObjectWithDynamicFieldTablesResponse {
 }
 
 // ============================================================================
+// Entity Query Response Types
+// ============================================================================
+
+/** A page of table entries. @category GraphQL Types */
+export type TableEntriesPage = ObjectNodes<DynamicFieldTableEntryNode> & {
+  pageInfo: PageInfo
+}
+
+/** Table resolved from an `extract` path; null when the value has no such path.
+ *  @category GraphQL Types
+ */
+export type NestedTableRef = {
+  asAddress: { addressAt: { dynamicFields: TableEntriesPage } | null } | null
+} | null
+
+/** Entity dynamic field: a component or action map, with inline tables.
+ *  @category GraphQL Types
+ */
+export interface EntityDynamicFieldNode {
+  contents: {
+    name: ContentsTypeAndJson
+    value: ContentsTypeAndJson & {
+      sections: NestedTableRef
+      items: NestedTableRef
+    }
+  }
+}
+
+/** @category GraphQL Types */
+export interface GetEntityResponse {
+  latestVersion: ObjectNodes<{ version: number }>
+  object: {
+    asMoveObject: { contents: ContentsTypeAndJson } | null
+    dynamicFields: ObjectNodes<EntityDynamicFieldNode> & { pageInfo: PageInfo }
+  } | null
+}
+
+/** @category GraphQL Types */
+export interface GetTableEntriesResponse {
+  address: { dynamicFields: TableEntriesPage } | null
+}
+
+/** @category GraphQL Types */
+export interface GetObjectLatestVersionResponse {
+  latestVersion: ObjectNodes<{ version: number }>
+}
+
+/** @category GraphQL Types */
+export interface GetObjectOwnerResponse {
+  object: {
+    owner:
+      | {
+          __typename: 'AddressOwner' | 'ObjectOwner'
+          address: { address: string }
+        }
+      | { __typename: 'Shared' | 'Immutable' | 'ConsensusAddressOwner' }
+      | null
+  } | null
+}
+
+// ============================================================================
 // EVE Frontier Specific Types
 // ============================================================================
 
