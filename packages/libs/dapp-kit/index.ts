@@ -48,11 +48,12 @@ export * from './utils'
 export {
   DEFAULT_EVENT_TRANSPORT,
   type EventTransport,
-  getCharacterOwnerCapType,
-  getEveWorldPackageId,
   getObjectRegistryType,
   getPollingInterval,
   getSuiGraphqlEndpoint,
+  getWorldPackageId,
+  getWorldTier,
+  getWorldType,
   POLLING_INTERVAL,
   STORAGE_KEYS,
 } from './utils/constants'

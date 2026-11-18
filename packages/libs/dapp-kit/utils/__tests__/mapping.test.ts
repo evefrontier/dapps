@@ -2,23 +2,23 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { State } from '../../types'
 import { parseStatus } from '../mapping'
 
-// Mock env vars for testing
-const TEST_EVE_WORLD_PACKAGE_ID =
-  '0x2ff3e06b96eb830bdcffbc6cae9b8fe43f005c3b94cef05d9ec23057df16f107'
+// Dev deployment of world-contracts core, and its ObjectRegistry on testnet
+const DEV_CORE_PACKAGE_ID =
+  '0x0a4f1548929e834800da94990c419bc1ca63a836eeed517aada08788e2f00bca'
+const DEV_REGISTRY_ADDRESS =
+  '0x100844bbe57bc5301b5d76bd27fe764bcf6d6e6df7232b405af15f41c66bc4a2'
 
 // Mock the GraphQL client (only for getObjectId/getRegistryAddress tests)
 vi.mock('../../graphql/client', () => ({
   getSingletonObjectByType: vi.fn(),
 }))
 
-import { TENANT_CONFIG, TenantId } from '@evefrontier/wallet-core/tenant'
 import { getSingletonObjectByType } from '../../graphql/client'
 
 describe('mapping utilities', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // Stub environment variables for tests
-    vi.stubEnv('VITE_EVE_WORLD_PACKAGE_ID', TEST_EVE_WORLD_PACKAGE_ID)
+    vi.stubEnv('VITE_EVE_WORLD_TIER', 'dev')
   })
 
   afterEach(() => {
@@ -63,66 +63,46 @@ describe('mapping utilities', () => {
   // getRegistryAddress Tests
   // ============================================================================
   describe('getRegistryAddress', () => {
-    const mockAssemblyRegistryAddress =
+    const mockRegistryAddress =
       '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
-    const mockCharacterRegistryAddress =
-      '0xfedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321'
-
-    const defaultTenant = TenantId.UTOPIA
+    const expectedType = `${DEV_CORE_PACKAGE_ID}::object_registry::ObjectRegistry`
 
     beforeEach(() => {
       vi.resetModules()
     })
 
-    it('fetches assembly registry address from GraphQL', async () => {
+    it('fetches the core registry address from GraphQL', async () => {
       vi.mocked(getSingletonObjectByType).mockResolvedValueOnce({
         data: {
           objects: {
-            nodes: [{ address: mockAssemblyRegistryAddress }],
+            nodes: [{ address: mockRegistryAddress }],
           },
         },
       })
 
       const { getRegistryAddress } = await import('../mapping')
-      const address = await getRegistryAddress(defaultTenant)
+      const address = await getRegistryAddress()
 
-      const expectedType = `${TENANT_CONFIG[defaultTenant].packageId}::object_registry::ObjectRegistry`
       expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType)
-      expect(address).toBe(mockAssemblyRegistryAddress)
+      expect(address).toBe(mockRegistryAddress)
     })
 
-    it('fetches character registry address from GraphQL', async () => {
+    it('caches the registry address after first fetch', async () => {
       vi.mocked(getSingletonObjectByType).mockResolvedValueOnce({
         data: {
           objects: {
-            nodes: [{ address: mockCharacterRegistryAddress }],
-          },
-        },
-      })
-
-      const { getRegistryAddress } = await import('../mapping')
-      const address = await getRegistryAddress(defaultTenant)
-
-      const expectedType = `${TENANT_CONFIG[defaultTenant].packageId}::object_registry::ObjectRegistry`
-      expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType)
-      expect(address).toBe(mockCharacterRegistryAddress)
-    })
-
-    it('caches assembly registry address after first fetch', async () => {
-      vi.mocked(getSingletonObjectByType).mockResolvedValueOnce({
-        data: {
-          objects: {
-            nodes: [{ address: mockAssemblyRegistryAddress }],
+            nodes: [{ address: mockRegistryAddress }],
           },
         },
       })
 
       const { getRegistryAddress } = await import('../mapping')
 
-      const address = await getRegistryAddress(defaultTenant)
+      await getRegistryAddress()
+      const address = await getRegistryAddress()
 
       expect(getSingletonObjectByType).toHaveBeenCalledTimes(1)
-      expect(address).toBe(mockAssemblyRegistryAddress)
+      expect(address).toBe(mockRegistryAddress)
     })
 
     it('throws error when registry address is not found', async () => {
@@ -136,8 +116,7 @@ describe('mapping utilities', () => {
 
       const { getRegistryAddress } = await import('../mapping')
 
-      const expectedType = `${TENANT_CONFIG[defaultTenant].packageId}::object_registry::ObjectRegistry`
-      await expect(getRegistryAddress(defaultTenant)).rejects.toThrow(
+      await expect(getRegistryAddress()).rejects.toThrow(
         `ObjectRegistry not found for type: ${expectedType}`,
       )
     })
@@ -147,27 +126,9 @@ describe('mapping utilities', () => {
 
       const { getRegistryAddress } = await import('../mapping')
 
-      const expectedType = `${TENANT_CONFIG[defaultTenant].packageId}::object_registry::ObjectRegistry`
-      await expect(getRegistryAddress(defaultTenant)).rejects.toThrow(
+      await expect(getRegistryAddress()).rejects.toThrow(
         `ObjectRegistry not found for type: ${expectedType}`,
       )
-    })
-
-    it('falls back to getEveWorldPackageId for an unknown tenant string', async () => {
-      vi.mocked(getSingletonObjectByType).mockResolvedValueOnce({
-        data: {
-          objects: {
-            nodes: [{ address: mockAssemblyRegistryAddress }],
-          },
-        },
-      })
-
-      const { getRegistryAddress } = await import('../mapping')
-      const address = await getRegistryAddress('my-local-tenant')
-
-      const expectedType = `${TEST_EVE_WORLD_PACKAGE_ID}::object_registry::ObjectRegistry`
-      expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType)
-      expect(address).toBe(mockAssemblyRegistryAddress)
     })
   })
 
@@ -175,49 +136,47 @@ describe('mapping utilities', () => {
   // getObjectId Tests (mocked)
   // ============================================================================
   describe('getObjectId', () => {
-    const mockRegistryAddress =
-      '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
-
     beforeEach(() => {
       vi.resetModules()
 
       vi.mocked(getSingletonObjectByType).mockResolvedValue({
         data: {
           objects: {
-            nodes: [{ address: mockRegistryAddress }],
+            nodes: [{ address: DEV_REGISTRY_ADDRESS }],
           },
         },
       })
     })
 
-    it('fetches registry address and derives object ID', async () => {
+    it('derives a real entity id from its EntityKey', async () => {
       const { getObjectId } = await import('../mapping')
-      const itemId = '12345'
 
-      const objectId = await getObjectId(itemId, 'tauceti')
+      const objectId = await getObjectId('1000000070926', 'johannk-ws-ccp')
 
-      const expectedType = `${TENANT_CONFIG[TenantId.TAUCETI].packageId}::object_registry::ObjectRegistry`
-      expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType)
-      expect(typeof objectId).toBe('string')
-      expect(objectId.startsWith('0x')).toBe(true)
+      expect(getSingletonObjectByType).toHaveBeenCalledWith(
+        `${DEV_CORE_PACKAGE_ID}::object_registry::ObjectRegistry`,
+      )
+      expect(objectId).toBe(
+        '0x08c7bf9636c37ecff92482a62340e5a1a2e8561da687a1c0a6e97758e67ae331',
+      )
     })
 
-    it('uses the tenant-specific package ID for the registry lookup', async () => {
+    it('produces different ids for different tenants', async () => {
+      const { getObjectId } = await import('../mapping')
+
+      const a = await getObjectId('12345', 'tauceti')
+      const b = await getObjectId('12345', 'utopia')
+
+      expect(a).not.toBe(b)
+    })
+
+    it('caches the registry address per tier', async () => {
       const { getObjectId } = await import('../mapping')
 
       await getObjectId('12345', 'tauceti')
+      await getObjectId('67890', 'utopia')
 
-      const expectedType = `${TENANT_CONFIG[TenantId.TAUCETI].packageId}::object_registry::ObjectRegistry`
-      expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType)
-    })
-
-    it('uses utopia package ID for utopia tenant', async () => {
-      const { getObjectId } = await import('../mapping')
-
-      await getObjectId('12345', 'utopia')
-
-      const expectedType = `${TENANT_CONFIG[TenantId.UTOPIA].packageId}::object_registry::ObjectRegistry`
-      expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType)
+      expect(getSingletonObjectByType).toHaveBeenCalledTimes(1)
     })
 
     it('propagates errors when registry address not found', async () => {
@@ -231,54 +190,19 @@ describe('mapping utilities', () => {
 
       const { getObjectId } = await import('../mapping')
 
-      const expectedType = `${TENANT_CONFIG[TenantId.TAUCETI].packageId}::object_registry::ObjectRegistry`
       await expect(getObjectId('12345', 'tauceti')).rejects.toThrow(
-        `ObjectRegistry not found for type: ${expectedType}`,
+        `ObjectRegistry not found for type: ${DEV_CORE_PACKAGE_ID}::object_registry::ObjectRegistry`,
       )
     })
 
-    it('caches registry address per tenant across multiple calls', async () => {
+    it("uses the tenant's tier when VITE_EVE_WORLD_TIER is unset", async () => {
+      vi.stubEnv('VITE_EVE_WORLD_TIER', '')
       const { getObjectId } = await import('../mapping')
 
-      await getObjectId('12345', 'tauceti')
-      await getObjectId('67890', 'tauceti')
-      await getObjectId('11111', 'tauceti')
-
-      // Should only fetch registry once per tenant (cached)
-      expect(getSingletonObjectByType).toHaveBeenCalledTimes(1)
-    })
-
-    it('warns and uses fallback package ID for an unknown tenant string', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-
-      const { getObjectId } = await import('../mapping')
-      const objectId = await getObjectId('12345', 'my-local-tenant')
-
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('my-local-tenant'),
+      // stillness runs the live tier, which has no world packages registered yet
+      await expect(getObjectId('12345', 'stillness')).rejects.toThrow(
+        'MVR cache has no type-origin entry',
       )
-      const expectedType = `${TEST_EVE_WORLD_PACKAGE_ID}::object_registry::ObjectRegistry`
-      expect(getSingletonObjectByType).toHaveBeenCalledWith(expectedType)
-      expect(typeof objectId).toBe('string')
-      expect(objectId.startsWith('0x')).toBe(true)
-    })
-
-    it('fetches registry separately for different tenants', async () => {
-      vi.mocked(getSingletonObjectByType).mockResolvedValue({
-        data: {
-          objects: {
-            nodes: [{ address: mockRegistryAddress }],
-          },
-        },
-      })
-
-      const { getObjectId } = await import('../mapping')
-
-      await getObjectId('12345', 'tauceti')
-      await getObjectId('12345', 'utopia')
-
-      // Each tenant fetches its own registry
-      expect(getSingletonObjectByType).toHaveBeenCalledTimes(2)
     })
   })
 })

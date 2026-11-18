@@ -1,29 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import {
-  getCharacterOwnerCapType,
-  getCharacterPlayerProfileType,
-  getEnergyConfigType,
   getEveCoinType,
-  getEveWorldPackageId,
-  getFuelEfficiencyConfigType,
-  getObjectRegistryType,
   getSuiGraphqlEndpoint,
   setActiveEventTransport,
   TenantId,
 } from '../constants'
 
-const TEST_PKG =
-  '0x2ff3e06b96eb830bdcffbc6cae9b8fe43f005c3b94cef05d9ec23057df16f107'
-
 describe('constants', () => {
-  beforeEach(() => {
-    vi.stubEnv('VITE_EVE_WORLD_PACKAGE_ID', TEST_PKG)
-  })
-
-  afterEach(() => {
-    vi.unstubAllEnvs()
-  })
-
   // ============================================================================
   // getSuiGraphqlEndpoint
   // ============================================================================
@@ -69,65 +52,6 @@ describe('constants', () => {
       setActiveEventTransport('sse')
       expect(getSuiGraphqlEndpoint('testnet')).toBe(
         'https://graphql-cockroach.testnet.sui.io/graphql',
-      )
-    })
-  })
-
-  // ============================================================================
-  // getEveWorldPackageId
-  // ============================================================================
-
-  describe('getEveWorldPackageId', () => {
-    it('returns the VITE_EVE_WORLD_PACKAGE_ID env var value', () => {
-      expect(getEveWorldPackageId()).toBe(TEST_PKG)
-    })
-
-    it('throws a helpful error when the env var is unset', () => {
-      vi.unstubAllEnvs()
-      expect(() => getEveWorldPackageId()).toThrow(
-        'Missing required environment variable: VITE_EVE_WORLD_PACKAGE_ID',
-      )
-    })
-  })
-
-  // ============================================================================
-  // Type string generators
-  // ============================================================================
-
-  describe('getCharacterOwnerCapType', () => {
-    it('returns the correct type string format', () => {
-      expect(getCharacterOwnerCapType()).toBe(
-        `${TEST_PKG}::access::OwnerCap<${TEST_PKG}::character::Character>`,
-      )
-    })
-  })
-
-  describe('getCharacterPlayerProfileType', () => {
-    it('returns the correct type string format', () => {
-      expect(getCharacterPlayerProfileType()).toBe(
-        `${TEST_PKG}::character::PlayerProfile`,
-      )
-    })
-  })
-
-  describe('getObjectRegistryType', () => {
-    it('returns the correct type string format', () => {
-      expect(getObjectRegistryType()).toBe(
-        `${TEST_PKG}::object_registry::ObjectRegistry`,
-      )
-    })
-  })
-
-  describe('getEnergyConfigType', () => {
-    it('returns the correct type string format', () => {
-      expect(getEnergyConfigType()).toBe(`${TEST_PKG}::energy::EnergyConfig`)
-    })
-  })
-
-  describe('getFuelEfficiencyConfigType', () => {
-    it('returns the correct type string format', () => {
-      expect(getFuelEfficiencyConfigType()).toBe(
-        `${TEST_PKG}::fuel::FuelConfig`,
       )
     })
   })
