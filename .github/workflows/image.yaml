@@ -92,24 +92,21 @@ jobs:
           flag_panel="false"
           case "$TIER" in
             dev)
-              package="@evefrontier/world-dev"
               dapp_index="https://dev.dapp-index.evefrontier.com"
               flag_panel="true"
               ;;
             test)
-              package="@evefrontier/world-test"
               dapp_index="https://test.dapp-index.evefrontier.com"
               log_level="debug"
               flag_panel="true"
               ;;
-            uat) package="@evefrontier/world-uat" ;;
-            live) package="@evefrontier/world" ;;
+            uat | live) ;;
             *) echo "unknown tier: $TIER" >&2; exit 1 ;;
           esac
           {
             echo "tag=${VERSION}-${TIER}-${ARCH}"
             echo "build-args<<EOF"
-            echo "VITE_EVE_WORLD_PACKAGE_ID=${package}"
+            echo "VITE_EVE_WORLD_TIER=${TIER}"
             echo "VITE_DAPP_INDEX_URL=${dapp_index}"
             echo "VITE_LOG_LEVEL=${log_level}"
             echo "VITE_SHOW_FLAG_PANEL=${flag_panel}"

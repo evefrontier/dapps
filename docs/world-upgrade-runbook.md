@@ -7,15 +7,15 @@ or an `@evefrontier/world*` / `@evefrontier/currency*` MVR name is re-pointed.
 
 ## Key facts
 
-- `wallet-core` owns the MVR cache. `TENANT_CONFIG` package ids are derived from
-  it via each tenant's `mvrName` / `currencyMvrName` in `src/tenant/tenants.ts`.
+- `wallet-core` owns the MVR cache. World packages are registered per package
+  and tier as `@evefrontier/world-<package>-<tier>`; each tenant's `worldTier` and
+  `currencyMvrName` live in `src/tenant/tenants.ts`.
 - `gen:mvr` returns whatever the MVR registry currently resolves. Update the
   registration first, or regeneration is a no-op.
 - Type tags (`type:` filters, `deriveObjectID` keys) use the type-origin package:
   `getTenantWorldType(tenant, key)`. `moveCall` targets use the latest package.
-- dapp-kit resolves by tenant (`utils/mapping.ts`) and by the
-  `VITE_EVE_WORLD_PACKAGE_ID` env value (`utils/mvr/worldTypes.ts`). Both read
-  wallet-core's cache.
+- dapp-kit resolves against `VITE_EVE_WORLD_TIER` when set, otherwise the
+  tenant's `worldTier` (`utils/mvr/worldTypes.ts`), through wallet-core's cache.
 - All tiers resolve on Sui testnet.
 
 ## Steps
@@ -66,12 +66,12 @@ cd packages/libs/dapp-kit
 npx tsc --noEmit && npx vitest run && npm run build
 ```
 
-Update expected ids in `utils/__tests__/mapping.test.ts` and
-`utils/__tests__/constants.test.ts`.
+Update expected ids in `utils/__tests__/mapping.test.ts`,
+`utils/__tests__/worldTypes.test.ts` and `utils/__tests__/constants.test.ts`.
 
 **7. Check the app** — `bun run dev` in `packages/apps/assembly`, load the
-affected tenant (`?tenant=<id>`), and confirm `.env`'s
-`VITE_EVE_WORLD_PACKAGE_ID` names the intended tier.
+affected tenant (`?tenant=<id>`), and confirm `.env`'s `VITE_EVE_WORLD_TIER`
+is the intended tier (or unset, to follow the tenant).
 
 **8. Commit** the regenerated cache and version bumps in both repos.
 
@@ -100,6 +100,6 @@ bun install --force
 | --- | --- |
 | Regen only reorders keys | MVR registration not updated |
 | App shows the old package | Cached same-version tgz; force reinstall |
-| Tenant and env paths disagree | Tenant's tier ≠ `VITE_EVE_WORLD_PACKAGE_ID` |
+| Tenant and env paths disagree | `VITE_EVE_WORLD_TIER` overrides the tenant's tier |
 | "no type-origin entry for …" | Type/tier missing from the scan seeds |
 | Derived id ≠ on-chain object | Mismatched `tenant` string, type-origin package, registry parent, or network |

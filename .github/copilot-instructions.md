@@ -229,16 +229,16 @@ Configuration values are accessed via getter functions in `utils/constants.ts` t
 
 ```tsx
 // Environment-based configuration (requires VITE_* env vars)
-import { 
-  getSuiGraphqlEndpoint,    // reads VITE_SUI_GRAPHQL_ENDPOINT
-  getEveWorldPackageId,     // reads VITE_EVE_WORLD_PACKAGE_ID
-  getCharacterOwnerCapType, // derived from package ID
-  getObjectRegistryType,    // derived from package ID
+import {
+  getSuiGraphqlEndpoint,    // GraphQL endpoint for the network
+  getWorldTier,             // VITE_EVE_WORLD_TIER, else the tenant's tier
+  getWorldType,             // e.g. getWorldType('core::entity_key::EntityKey', tenant)
+  getWorldPackageId,        // e.g. getWorldPackageId('core', tenant)
 } from "@evefrontier/dapp-kit";
 
 // Usage
 const endpoint = getSuiGraphqlEndpoint();
-const packageId = getEveWorldPackageId();
+const corePackageId = getWorldPackageId('core', tenant);
 
 // In-game item type IDs (static constants)
 export enum TYPEIDS {
@@ -253,7 +253,7 @@ export enum TYPEIDS {
 ```bash
 # .env
 VITE_SUI_GRAPHQL_ENDPOINT=https://graphql.testnet.sui.io/graphql
-VITE_EVE_WORLD_PACKAGE_ID=0x...
+VITE_EVE_WORLD_TIER=dev               # Optional: overrides the tenant's world tier
 VITE_OBJECT_ID=                      # Optional: override assembly Sui object ID from env
 ```
 

@@ -3,7 +3,7 @@
 # Build context is the repository root:
 #   docker build -f packages/apps/assembly/Dockerfile \
 #     --secret id=github_token,env=GITHUB_TOKEN \
-#     --build-arg VITE_EVE_WORLD_PACKAGE_ID=@evefrontier/world-uat .
+#     --build-arg VITE_EVE_WORLD_TIER=uat .
 
 # The bundle is architecture-independent: build it once on the build platform.
 FROM --platform=$BUILDPLATFORM node:25.8.1-slim AS build
@@ -13,13 +13,13 @@ COPY . .
 # @evefrontier packages come from GitHub Packages (bunfig.toml reads $GITHUB_TOKEN).
 RUN --mount=type=secret,id=github_token,env=GITHUB_TOKEN \
     bun install --frozen-lockfile --ignore-scripts
-ARG VITE_EVE_WORLD_PACKAGE_ID
+ARG VITE_EVE_WORLD_TIER
 ARG VITE_DAPP_INDEX_URL
 ARG VITE_LOG_LEVEL
 ARG VITE_SHOW_FLAG_PANEL
 # vite.config.ts uses base './'; root-absolute assets keep deep links such as
 # /client/networknode/monitor working behind the index.html fallback.
-RUN test -n "$VITE_EVE_WORLD_PACKAGE_ID" \
+RUN test -n "$VITE_EVE_WORLD_TIER" \
     && CI=true bun nx run assembly:ci:build -- --base=/
 
 # Caddy is built as a dependency of a wrapper module (as xcaddy does), so
