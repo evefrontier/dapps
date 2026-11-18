@@ -1,4 +1,5 @@
 import type { WalletAccount } from '@mysten/wallet-standard'
+import type { EntityData, EntityOwner } from './entity'
 import {
   Assemblies,
   type AssemblyType,
@@ -25,12 +26,18 @@ export enum SupportedWallets {
 }
 
 /**
- * Smart object context: assembly, owner, loading, error, and refetch.
+ * Smart object context: entity, owner, loading, error, and refetch.
  * @category Types
  */
 export interface SmartObjectContextType {
   tenant: string
+  /** The selected world entity and its components */
+  entity: EntityData | null
+  /** Who controls the entity, resolved from its AccessCap */
+  entityOwner: EntityOwner | null
+  /** @deprecated Always null; the provider now reads world entities. Use `entity`. */
   assembly: AssemblyType<Assemblies> | null
+  /** @deprecated Always null; the provider now reads world entities. Use `entityOwner`. */
   assemblyOwner: DetailedSmartCharacterResponse | null
   loading: boolean
   error: string | null

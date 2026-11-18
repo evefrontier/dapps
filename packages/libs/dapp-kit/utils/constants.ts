@@ -213,10 +213,9 @@ export function getGraphqlSubscriptionAuthToken(): string | undefined {
 
 /** Default polling interval in milliseconds.
  *
- * Real-time updates come from the event subscription; this interval is only a
- * slow backstop that catches state changes not covered by a tracked event (or
- * an event the endpoint silently never sent). Override with VITE_POLLING_INTERVAL;
- * set it to 0 to disable the backstop entirely.
+ * Polling is the only source of updates for the selected entity; each tick is
+ * a cheap version check until the object changes. Override with
+ * VITE_POLLING_INTERVAL; set it to 0 to disable polling entirely.
  *  @category Constants
  */
 export const POLLING_INTERVAL = 60000
