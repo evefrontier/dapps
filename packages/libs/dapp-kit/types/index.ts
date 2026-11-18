@@ -1,4 +1,5 @@
 export * from './contexts'
+export * from './entity'
 export * from './sponsoredTransaction'
 export * from './types'
 export * from './worldApiReturnTypes'
