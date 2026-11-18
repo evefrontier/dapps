@@ -5,5 +5,10 @@ cd "$ROOT"
 
 export PATH="$HOME/.bun/bin:$PATH"
 
-bun audit
+# GHSA-fc5q-39xc-vjpf: high ReDoS in picomatch <=4.0.7, no patched release yet
+# (4.0.7 is latest on npm). picomatch only arrives through build/test/lint tooling
+# (vite, vitest, tinyglobby/fdir, ...), never in shipped code. Remove this ignore
+# once a fixed picomatch is out, past minimumReleaseAge and in the lockfile, i.e.
+# when a plain `bun audit` passes.
+bun audit --ignore=GHSA-fc5q-39xc-vjpf
 bun --filter @evefrontier/dapp-kit test:run
