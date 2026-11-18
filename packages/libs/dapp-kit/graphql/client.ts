@@ -1,16 +1,7 @@
-import { parseCharacterFromJson } from '../utils/character'
+import { GRAPHQL_CLIENT_ID, getSuiGraphqlEndpoint } from '../utils/constants'
 import {
-  GRAPHQL_CLIENT_ID,
-  getCharacterOwnerCapType,
-  getCharacterPlayerProfileType,
-  getSuiGraphqlEndpoint,
-} from '../utils/constants'
-import { createLogger } from '../utils/logger'
-import {
-  GET_CHARACTER_AND_OWNED_OBJECTS,
   GET_ENTITY,
   GET_OBJECT_BY_ADDRESS,
-  GET_OBJECT_DYNAMICFIELD_CHARACTER_WITH_JSON,
   GET_OBJECT_LATEST_VERSION,
   GET_OBJECT_OWNER,
   GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE,
@@ -20,17 +11,11 @@ import {
   GET_OBJECTS_BY_TYPE,
   GET_OWNED_OBJECTS_BY_PACKAGE,
   GET_OWNED_OBJECTS_BY_TYPE,
-  GET_SINGLETON_CONFIG_OBJECT_BY_TYPE,
   GET_SINGLETON_OBJECT_BY_TYPE,
   GET_TABLE_ENTRIES,
-  GET_WALLET_CHARACTERS,
 } from './queries'
 import type {
-  CharacterInfo,
-  DynamicFieldNode,
-  GetCharacterAndOwnedObjectsResponse,
   GetEntityResponse,
-  GetObjectAndCharacterOwnerResponse,
   GetObjectByAddressResponse,
   GetObjectLatestVersionResponse,
   GetObjectOwnerAndOwnedObjectsResponse,
@@ -41,15 +26,10 @@ import type {
   GetObjectWithJsonResponse,
   GetOwnedObjectsByPackageResponse,
   GetOwnedObjectsByTypeResponse,
-  GetSingletonConfigObjectByTypeResponse,
   GetSingletonObjectByTypeResponse,
   GetTableEntriesResponse,
-  GetWalletCharactersResponse,
   GraphQLResponse,
-  RawSuiObjectData,
 } from './types'
-
-const log = createLogger()
 
 /**
  * Execute a GraphQL query against the Sui blockchain endpoint.
@@ -311,28 +291,6 @@ export async function getObjectOwnerAndOwnedObjectsWithJson(
 }
 
 /**
- * Get an assembly object and resolve its owner character.
- *
- * This is a specialized query for EVE Frontier assemblies that
- * follows the owner_cap_id to resolve the owning character.
- *
- * @category GraphQL Client
- * @param objectAddress - The assembly object address
- * @returns Promise resolving to assembly and character data
- * @internal
- * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with {@link getEntity} and resolve ownership through its `AccessCap`.
- */
-export async function getObjectAndCharacterOwner(objectAddress: string) {
-  return executeGraphQLQuery<GetObjectAndCharacterOwnerResponse>(
-    GET_OBJECT_DYNAMICFIELD_CHARACTER_WITH_JSON,
-    {
-      objectId: objectAddress,
-      characterOwnerType: getCharacterOwnerCapType(),
-    },
-  )
-}
-
-/**
  * Get all objects of a specific type owned by an address.
  *
  * Returns only object addresses (lightweight). Use this when you need
@@ -399,40 +357,6 @@ export async function getOwnedObjectsByPackage(
 }
 
 /**
- * Get all characters owned by a wallet
- * Returns the most recent character owned by the wallet
- *
- * @category GraphQL Client
- * @deprecated Relies on the archived world `PlayerProfile.character_id`. A character is now an `Entity` with a `Component<Identity>`, whose ID is derived from its in-game ID and tenant.
- */
-export async function getWalletCharacters(wallet: string) {
-  return executeGraphQLQuery<GetWalletCharactersResponse>(
-    GET_WALLET_CHARACTERS,
-    {
-      owner: wallet,
-      characterPlayerProfileType: getCharacterPlayerProfileType(),
-    },
-  )
-}
-
-/**
- * Get all characters owned by a wallet
- * Returns the characters owned by the wallet
- *
- * @category GraphQL Client
- * @deprecated Relies on the archived world `PlayerProfile.character_id`. A character is now an `Entity` with a `Component<Identity>`, whose ID is derived from its in-game ID and tenant.
- */
-export async function getCharacterAndOwnedObjects(wallet: string) {
-  return executeGraphQLQuery<GetCharacterAndOwnedObjectsResponse>(
-    GET_CHARACTER_AND_OWNED_OBJECTS,
-    {
-      owner: wallet,
-      characterPlayerProfileType: getCharacterPlayerProfileType(),
-    },
-  )
-}
-
-/**
  * Get a singleton object by its Move type.
  *
  * Useful for global/singleton objects where there's only one instance
@@ -453,48 +377,6 @@ export async function getSingletonObjectByType(objectType: string) {
     GET_SINGLETON_OBJECT_BY_TYPE,
     {
       object_type: objectType,
-    },
-  )
-}
-
-/**
- * Get a singleton config object by its Move type and table name, with dynamic fields.
- *
- * Used for on-chain config singletons (e.g. EnergyConfig, FuelConfig) that expose
- * a table of key/value entries via dynamic fields. Returns the first object's full
- * response including contents.extract...addressAt.dynamicFields.nodes.
- *
- * @category GraphQL Client
- * @param objectType - The full Move type string (e.g. from getEnergyConfigType())
- * @param tableName - The table path for extract (e.g. "assembly_energy", "fuel_efficiency")
- * @param options - Pagination options
- * @param options.after - Cursor for the next page of dynamicFields (table can grow unbounded)
- * @returns Promise resolving to the GraphQL response with objects.nodes[0] and dynamicFields.nodes/pageInfo
- *
- * @example Paginated fetch
- * ```typescript
- * let cursor: string | undefined;
- * const nodes = [];
- * do {
- *   const result = await getSingletonConfigObjectByType(getEnergyConfigType(), "assembly_energy", { after: cursor });
- *   const dynamicFields = result.data?.objects?.nodes[0]?.asMoveObject?.contents?.extract?.extract?.asAddress?.addressAt?.dynamicFields;
- *   nodes.push(...(dynamicFields?.nodes ?? []));
- *   cursor = dynamicFields?.pageInfo?.hasNextPage ? dynamicFields?.pageInfo?.endCursor : undefined;
- * } while (cursor);
- * ```
- * @deprecated Relies on the archived world `EnergyConfig`/`FuelConfig` singleton tables. Fuel and energy now live per creation in the `PowerGrid` component.
- */
-export async function getSingletonConfigObjectByType(
-  objectType: string,
-  tableName: string,
-  options?: { after?: string },
-) {
-  return executeGraphQLQuery<GetSingletonConfigObjectByTypeResponse>(
-    GET_SINGLETON_CONFIG_OBJECT_BY_TYPE,
-    {
-      object_type: objectType,
-      table_name: tableName,
-      after: options?.after,
     },
   )
 }
@@ -536,148 +418,4 @@ export async function getObjectsByType(
     first: options?.first ?? 50,
     after: options?.after,
   })
-}
-
-/**
- * Fetch an EVE Frontier assembly and its owner character in one call.
- *
- * This is the primary function for loading assembly data in dApps.
- * It fetches the assembly's Move object data, dynamic fields, and
- * resolves the owner character through the ownership chain.
- *
- * @category GraphQL Client
- * @param assemblyId - The assembly's Sui object ID
- * @returns Promise resolving to:
- *   - `moveObject` - The assembly's Move object data with JSON contents and dynamic fields
- *   - `assemblyOwner` - The owner character info (id, name, address, tribeId, characterId)
- *   - `energySource` - The linked energy source object, if any
- *   - `destinationGate` - The linked destination gate object, if any
- *
- * @example Basic usage
- * ```typescript
- * const { moveObject, assemblyOwner } = await getAssemblyWithOwner("0x123...");
- *
- * if (moveObject) {
- *   console.log("Assembly data:", moveObject.contents.json);
- *   console.log("Dynamic fields:", moveObject.dynamicFields?.nodes);
- * }
- *
- * if (assemblyOwner) {
- *   console.log("Owner:", assemblyOwner.name);
- * }
- * ```
- *
- * @example Transform to typed Assembly
- * ```typescript
- * import { transformToAssembly } from '@evefrontier/dapp-kit';
- *
- * const { moveObject, assemblyOwner } = await getAssemblyWithOwner(assemblyId);
- * const assembly = await transformToAssembly(assemblyId, moveObject, { character: assemblyOwner });
- * console.log(assembly.name, assembly.type, assembly.state);
- * ```
- *
- * @see {@link transformToAssembly} for converting raw data to typed Assembly
- * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with {@link getEntity} and resolve ownership through its `AccessCap`.
- */
-export async function getAssemblyWithOwner(assemblyId: string): Promise<{
-  moveObject: {
-    contents: {
-      json: Record<string, unknown>
-      type?: { repr: string }
-    }
-    dynamicFields?: {
-      nodes: DynamicFieldNode[]
-    }
-  } | null
-  assemblyOwner: CharacterInfo | null
-  energySource: RawSuiObjectData | null
-  destinationGate: RawSuiObjectData | null
-}> {
-  try {
-    const result = await getObjectAndCharacterOwner(assemblyId)
-
-    if (!result.data?.object?.asMoveObject) {
-      log.warn('[DappKit] getAssemblyWithOwner: Assembly not found')
-      return {
-        moveObject: null,
-        assemblyOwner: null,
-        energySource: null,
-        destinationGate: null,
-      }
-    }
-
-    const moveObject = result.data.object.asMoveObject
-
-    const dynamicFields = moveObject.dynamicFields
-
-    // Extract character info from the owner chain
-    let characterInfo: CharacterInfo | null = null
-
-    const characterMoveObject =
-      moveObject.contents.extract?.asAddress?.asObject?.asMoveObject?.owner
-        ?.address?.objects?.nodes[0]?.contents?.authorizedObj?.asAddress
-        ?.asObject?.asMoveObject
-
-    if (!characterMoveObject?.contents?.json) {
-      log.warn('[DappKit] getAssemblyWithOwner: Character not found')
-      return {
-        moveObject: result.data?.object?.asMoveObject,
-        assemblyOwner: null,
-        energySource: null,
-        destinationGate: null,
-      }
-    }
-
-    const characterJson = characterMoveObject?.contents.json
-    characterInfo = parseCharacterFromJson(characterJson)
-    if (!characterInfo) {
-      log.warn(
-        '[DappKit] getAssemblyWithOwner: Could not extract character JSON from owner chain',
-      )
-    }
-
-    const energySourceMoveObject =
-      moveObject.contents.energySource?.asAddress?.asObject?.asMoveObject
-
-    if (!energySourceMoveObject?.contents?.json) {
-      log.warn('[DappKit] getAssemblyWithOwner: Energy source not found')
-    }
-
-    const destinationGateMoveObject =
-      moveObject.contents.destinationGate?.asAddress?.asObject?.asMoveObject
-
-    const energySourceJson = energySourceMoveObject?.contents
-      ?.json as unknown as RawSuiObjectData | null
-    const destinationGateJson = destinationGateMoveObject?.contents
-      ?.json as unknown as RawSuiObjectData | null
-
-    if (!energySourceJson) {
-      log.warn(
-        '[DappKit] getAssemblyWithOwner: Energy source not found. Object might be a network node.',
-      )
-    }
-
-    const moveObjectWithDynamicFields = {
-      contents: {
-        json: moveObject.contents.json,
-        type: moveObject.contents.type,
-      },
-      ...(dynamicFields ? { dynamicFields } : {}),
-    }
-
-    return {
-      moveObject: moveObjectWithDynamicFields,
-      assemblyOwner: characterInfo,
-      energySource: energySourceJson ?? null,
-      destinationGate: destinationGateJson ?? null,
-    }
-  } catch (error) {
-    log.error('[DappKit] getAssemblyWithOwner error:', error)
-    return {
-      moveObject: null,
-      assemblyOwner: null,
-      energySource: null,
-      destinationGate: null,
-    }
-  }
 }

@@ -209,35 +209,6 @@ export interface GetObjectOwnerAndOwnedObjectsWithJsonResponse {
   object?: { owner?: { address?: AddressOwnerWithJson['address'] } }
 }
 
-/** Node shape for owner's objects in GetObjectAndCharacterOwner (authorizedObj → character).
- *  @category GraphQL Types
- */
-export interface CharacterOwnerNode {
-  contents: {
-    authorizedObj: MoveObjectRefWithJson<RawCharacterData>
-  }
-}
-
-/**
- * @category GraphQL Types
- * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with `getEntity` and resolve ownership through its `AccessCap`.
- */
-export interface GetObjectAndCharacterOwnerResponse {
-  object: {
-    asMoveObject: {
-      contents: ContentsTypeJsonAndBcs & {
-        extract?: AsMoveObjectRef<{
-          owner: { address: AddressWithObjects<CharacterOwnerNode> }
-          contents?: ContentsJsonOnly
-        }> | null
-        energySource?: AsMoveObjectRef<{ contents?: ContentsJsonOnly }>
-        destinationGate?: AsMoveObjectRef<{ contents?: ContentsJsonOnly }>
-      }
-      dynamicFields?: ObjectNodes<DynamicFieldNode>
-    }
-  }
-}
-
 /** @category GraphQL Types */
 export interface GetObjectWithJsonResponse {
   object?: {
@@ -278,38 +249,6 @@ export interface GetOwnedObjectsByPackageResponse {
   objects: ObjectNodes<OwnedObjectFullNode>
 }
 
-/**
- * @category GraphQL Types
- * @deprecated Relies on the archived world `PlayerProfile.character_id`. A character is now an `Entity` with a `Component<Identity>`, whose ID is derived from its in-game ID and tenant.
- */
-export interface GetWalletCharactersResponse {
-  address: AddressWithObjects<ExtractAsMoveObjectNode>
-}
-
-/** @category GraphQL Types */
-export interface CharacterAndOwnedObjectsNode {
-  contents: {
-    extract: {
-      asAddress: {
-        asObject?: {
-          asMoveObject?: {
-            contents: ContentsTypeAndJson
-          }
-        }
-        objects: ObjectNodes<ExtractAsMoveObjectNode>
-      }
-    }
-  }
-}
-
-/**
- * @category GraphQL Types
- * @deprecated Relies on the archived world `PlayerProfile.character_id`. A character is now an `Entity` with a `Component<Identity>`, whose ID is derived from its in-game ID and tenant.
- */
-export interface GetCharacterAndOwnedObjectsResponse {
-  address: AddressWithObjects<CharacterAndOwnedObjectsNode>
-}
-
 // ============================================================================
 // Singleton & Type-based Query Response Types
 // ============================================================================
@@ -317,40 +256,6 @@ export interface GetCharacterAndOwnedObjectsResponse {
 /** @category GraphQL Types */
 export interface GetSingletonObjectByTypeResponse {
   objects: ObjectNodes<OwnedObjectAddressNode>
-}
-
-/** @category GraphQL Types */
-export interface ConfigExtractDynamicFieldNode {
-  key: { json: string }
-  value: { json: string }
-}
-
-/**
- * @category GraphQL Types
- * @deprecated Relies on the archived world `EnergyConfig`/`FuelConfig` singleton tables. Fuel and energy now live per creation in the `PowerGrid` component.
- */
-export interface GetSingletonConfigObjectByTypeResponse {
-  objects: {
-    nodes: Array<{
-      address: string
-      asMoveObject: {
-        contents: {
-          extract: {
-            extract: {
-              asAddress: {
-                addressAt: {
-                  dynamicFields: {
-                    pageInfo: PageInfo
-                    nodes: ConfigExtractDynamicFieldNode[]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }>
-  }
 }
 
 /** @category GraphQL Types */
@@ -511,42 +416,6 @@ export interface RawSuiObjectData {
 }
 
 /**
- * OwnerCap JSON structure - returned from Character OwnerCap query
- * Contains the authorized_object_id which is the Character ID
- *
- * @category GraphQL Types
- * @deprecated The archived world `OwnerCap` is replaced by `AccessCap { entity }`.
- */
-export interface OwnerCapData {
-  authorized_object_id: string
-  id: string
-}
-
-/**
- * Raw Character data structure from the EVE Frontier package
- *
- * @category GraphQL Types
- */
-export interface RawCharacterData {
-  id: `0x${string}`
-  key: {
-    item_id: string
-    tenant: string
-  }
-  tribe_id: number
-  character_address: `0x${string}`
-  metadata: {
-    assembly_id: `0x${string}`
-    name: string
-    description: string
-    url: string
-  }
-  owner_cap_id: `0x${string}`
-  // Additional fields that may be present
-  [key: string]: unknown
-}
-
-/**
  * Processed character/owner information
  *
  * @category GraphQL Types
@@ -557,5 +426,4 @@ export interface CharacterInfo {
   name: string
   tribeId: number
   characterId: number
-  _raw?: RawCharacterData
 }

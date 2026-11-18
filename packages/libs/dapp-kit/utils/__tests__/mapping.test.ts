@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { Assemblies, State } from '../../types'
-import { getAssemblyType, parseStatus } from '../mapping'
+import { State } from '../../types'
+import { parseStatus } from '../mapping'
 
 // Mock env vars for testing
 const TEST_EVE_WORLD_PACKAGE_ID =
@@ -56,51 +56,6 @@ describe('mapping utilities', () => {
 
     it('returns State.NULL for empty string', () => {
       expect(parseStatus('')).toBe(State.NULL)
-    })
-  })
-
-  // ============================================================================
-  // getAssemblyType Tests
-  // ============================================================================
-  describe('getAssemblyType', () => {
-    it('returns SmartStorageUnit for storage_unit type', () => {
-      expect(
-        getAssemblyType(
-          `${TEST_EVE_WORLD_PACKAGE_ID}::storage_unit::StorageUnit<...>`,
-        ),
-      ).toBe(Assemblies.SmartStorageUnit)
-    })
-
-    it('returns SmartTurret for turret type', () => {
-      expect(
-        getAssemblyType(`${TEST_EVE_WORLD_PACKAGE_ID}::turret::Turret<...>`),
-      ).toBe(Assemblies.SmartTurret)
-    })
-
-    it('returns SmartGate for gate type', () => {
-      expect(
-        getAssemblyType(`${TEST_EVE_WORLD_PACKAGE_ID}::gate::Gate<...>`),
-      ).toBe(Assemblies.SmartGate)
-    })
-
-    it('returns NetworkNode for network_node type', () => {
-      expect(
-        getAssemblyType(
-          `${TEST_EVE_WORLD_PACKAGE_ID}::network_node::NetworkNode<...>`,
-        ),
-      ).toBe(Assemblies.NetworkNode)
-    })
-
-    it('returns Assembly as default for unknown type', () => {
-      expect(getAssemblyType('unknown::type::Unknown')).toBe(
-        Assemblies.Assembly,
-      )
-    })
-
-    it('handles type strings with different package IDs', () => {
-      expect(
-        getAssemblyType('0xabc123::storage_unit::StorageUnit<SomeType>'),
-      ).toBe(Assemblies.SmartStorageUnit)
     })
   })
 

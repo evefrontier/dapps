@@ -41,12 +41,6 @@ export * from './types'
 // Utils (re-exported from ./utils)
 // =========================================
 export * from './utils'
-export {
-  getEnergyConfig,
-  getEnergyUsageForType,
-  getFuelEfficiencyConfig,
-  getFuelEfficiencyForType,
-} from './utils/config'
 
 // =========================================
 // Constants & Configuration
