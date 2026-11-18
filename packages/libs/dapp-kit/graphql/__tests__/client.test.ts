@@ -6,7 +6,6 @@ import {
   getObjectLatestVersion,
   getObjectOwner,
   getObjectWithDynamicFields,
-  getObjectWithDynamicFieldTables,
   getObjectWithJson,
   getTableEntries,
 } from '../client'
@@ -14,7 +13,6 @@ import {
   GET_ENTITY,
   GET_OBJECT_LATEST_VERSION,
   GET_OBJECT_OWNER,
-  GET_OBJECT_WITH_DYNAMIC_FIELD_TABLES,
   GET_OBJECT_WITH_DYNAMIC_FIELDS,
   GET_OBJECT_WITH_JSON,
   GET_TABLE_ENTRIES,
@@ -252,52 +250,6 @@ describe('getObjectWithDynamicFields', () => {
     const body = JSON.parse(init.body)
     expect(body.query).toBe(GET_OBJECT_WITH_DYNAMIC_FIELDS)
     expect(body.variables).toEqual({ objectId: '0xdef' })
-  })
-})
-
-// ============================================================================
-// getObjectWithDynamicFieldTables
-// ============================================================================
-
-describe('getObjectWithDynamicFieldTables', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals()
-    vi.unstubAllEnvs()
-  })
-
-  const field = { type: `${TEST_PKG}::entity::AdminActionsKey`, bcs: 'AA==' }
-
-  it('passes GET_OBJECT_WITH_DYNAMIC_FIELD_TABLES query and default variables to fetch', async () => {
-    const fetchMock = mockFetch({ data: {} })
-    vi.stubGlobal('fetch', fetchMock)
-
-    await getObjectWithDynamicFieldTables('0xabc', field, 'inner.sections.id')
-
-    const [, init] = fetchMock.mock.calls[0]!
-    const body = JSON.parse(init.body)
-    expect(body.query).toBe(GET_OBJECT_WITH_DYNAMIC_FIELD_TABLES)
-    expect(body.variables).toEqual({
-      address: '0xabc',
-      cursor: null,
-      field_type: field.type,
-      field_name_bcs: 'AA==',
-      table_path: 'inner.sections.id',
-      table_first: 50,
-    })
-  })
-
-  it('passes cursor and tableFirst options through', async () => {
-    const fetchMock = mockFetch({ data: {} })
-    vi.stubGlobal('fetch', fetchMock)
-
-    await getObjectWithDynamicFieldTables('0xabc', field, 'inner.sections.id', {
-      cursor: 'next',
-      tableFirst: 10,
-    })
-
-    const [, init] = fetchMock.mock.calls[0]!
-    const body = JSON.parse(init.body)
-    expect(body.variables).toMatchObject({ cursor: 'next', table_first: 10 })
   })
 })
 

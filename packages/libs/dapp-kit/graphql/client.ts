@@ -15,7 +15,6 @@ import {
   GET_OBJECT_OWNER,
   GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE,
   GET_OBJECT_OWNER_AND_OWNED_OBJECTS_WITH_JSON,
-  GET_OBJECT_WITH_DYNAMIC_FIELD_TABLES,
   GET_OBJECT_WITH_DYNAMIC_FIELDS,
   GET_OBJECT_WITH_JSON,
   GET_OBJECTS_BY_TYPE,
@@ -39,7 +38,6 @@ import type {
   GetObjectOwnerResponse,
   GetObjectResponse,
   GetObjectsByTypeResponse,
-  GetObjectWithDynamicFieldTablesResponse,
   GetObjectWithJsonResponse,
   GetOwnedObjectsByPackageResponse,
   GetOwnedObjectsByTypeResponse,
@@ -153,60 +151,6 @@ export async function getObjectWithDynamicFields(objectId: string) {
   return executeGraphQLQuery<GetObjectResponse>(
     GET_OBJECT_WITH_DYNAMIC_FIELDS,
     { objectId },
-  )
-}
-
-/**
- * Fetch an object with one named dynamic field and a page of all dynamic fields,
- * resolving a table nested in each field's value in the same request.
- *
- * Each nested table returns at most `tableFirst` entries; when its
- * `pageInfo.hasNextPage` is true the remaining entries must be fetched separately.
- *
- * @category GraphQL Client
- * @param address - The Sui object address
- * @param field - Dynamic field name to look up: its Move type and BCS-encoded value (base64)
- * @param tablePath - Path within each dynamic field value to the table's UID (e.g. "inner.sections.id")
- * @param options - Pagination options
- * @param options.cursor - Cursor for the next page of the object's dynamicFields
- * @param options.tableFirst - Max entries per nested table (default: 50)
- * @returns Promise resolving to latest version, contents, named field and dynamic fields with tables
- *
- * @example Paginated fetch
- * ```typescript
- * let cursor: string | undefined;
- * do {
- *   const result = await getObjectWithDynamicFieldTables(
- *     "0x123...",
- *     { type: "0xpkg::entity::AdminActionsKey", bcs: "AA==" },
- *     "inner.sections.id",
- *     { cursor },
- *   );
- *   const dynamicFields = result.data?.object?.dynamicFields;
- *   dynamicFields?.nodes.forEach(node => {
- *     const entries = node.contents.value.table?.asAddress?.addressAt?.dynamicFields?.nodes;
- *     console.log(node.contents.name.json, entries);
- *   });
- *   cursor = dynamicFields?.pageInfo?.hasNextPage ? dynamicFields?.pageInfo?.endCursor ?? undefined : undefined;
- * } while (cursor);
- * ```
- */
-export async function getObjectWithDynamicFieldTables(
-  address: string,
-  field: { type: string; bcs: string },
-  tablePath: string,
-  options?: { cursor?: string; tableFirst?: number },
-) {
-  return executeGraphQLQuery<GetObjectWithDynamicFieldTablesResponse>(
-    GET_OBJECT_WITH_DYNAMIC_FIELD_TABLES,
-    {
-      address,
-      cursor: options?.cursor ?? null,
-      field_type: field.type,
-      field_name_bcs: field.bcs,
-      table_path: tablePath,
-      table_first: options?.tableFirst ?? 50,
-    },
   )
 }
 
@@ -376,7 +320,7 @@ export async function getObjectOwnerAndOwnedObjectsWithJson(
  * @param objectAddress - The assembly object address
  * @returns Promise resolving to assembly and character data
  * @internal
- * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with {@link getObjectWithDynamicFieldTables} and resolve ownership through its `AccessCap`.
+ * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with {@link getEntity} and resolve ownership through its `AccessCap`.
  */
 export async function getObjectAndCharacterOwner(objectAddress: string) {
   return executeGraphQLQuery<GetObjectAndCharacterOwnerResponse>(
@@ -633,7 +577,7 @@ export async function getObjectsByType(
  * ```
  *
  * @see {@link transformToAssembly} for converting raw data to typed Assembly
- * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with {@link getObjectWithDynamicFieldTables} and resolve ownership through its `AccessCap`.
+ * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with {@link getEntity} and resolve ownership through its `AccessCap`.
  */
 export async function getAssemblyWithOwner(assemblyId: string): Promise<{
   moveObject: {

@@ -220,7 +220,7 @@ export interface CharacterOwnerNode {
 
 /**
  * @category GraphQL Types
- * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with `getObjectWithDynamicFieldTables` and resolve ownership through its `AccessCap`.
+ * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with `getEntity` and resolve ownership through its `AccessCap`.
  */
 export interface GetObjectAndCharacterOwnerResponse {
   object: {
@@ -368,7 +368,7 @@ export interface GetObjectsByTypeResponse {
 }
 
 // ============================================================================
-// Dynamic Field Table Query Response Types
+// Table Entry Types
 // ============================================================================
 
 /** Entry of a table nested inside a dynamic field value.
@@ -377,39 +377,6 @@ export interface GetObjectsByTypeResponse {
 export interface DynamicFieldTableEntryNode {
   name: ContentsTypeAndJson
   value: ContentsTypeAndJson | null
-}
-
-/** Dynamic field whose value may hold a table, resolved via `table_path`.
- *  `table` is null when the value has no field at that path.
- *  @category GraphQL Types
- */
-export interface DynamicFieldWithTableNode {
-  contents: {
-    name: ContentsTypeAndJson
-    value: ContentsTypeAndJson & {
-      table: {
-        asAddress: {
-          addressAt: {
-            dynamicFields: ObjectNodes<DynamicFieldTableEntryNode> & {
-              pageInfo: PageInfo
-            }
-          } | null
-        } | null
-      } | null
-    }
-  }
-}
-
-/** @category GraphQL Types */
-export interface GetObjectWithDynamicFieldTablesResponse {
-  latestVersion: ObjectNodes<{ version: number }>
-  object: {
-    asMoveObject: { contents: ContentsTypeAndJson } | null
-    dynamicField: { contents: { value: ContentsTypeAndJson } } | null
-    dynamicFields: ObjectNodes<DynamicFieldWithTableNode> & {
-      pageInfo: PageInfo
-    }
-  } | null
 }
 
 // ============================================================================
