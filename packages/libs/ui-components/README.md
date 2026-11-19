@@ -12,7 +12,7 @@ This package contains the UI Component library for EVE Frontier dApps. Built wit
 4. [Components](#components) 🧩
 5. [License](#license) 📜
 
-## Installation 📦
+## Installation
 
 To install the library, run the following command:
 
@@ -20,7 +20,7 @@ To install the library, run the following command:
 bun add @eveworld/ui-components
 ```
 
-## Usage 🔧
+## Usage
 
 To use a component from this library, import it into your project:
 
@@ -34,7 +34,7 @@ Then use it in your React component:
 <SmartAssemblyInfo />
 ```
 
-## Styling with Tailwind CSS 🎨
+## Styling with Tailwind CSS
 
 This library utilizes Tailwind CSS for styling. To ensure that the styles are properly applied, the `tailwind.config.js` file must be configured to include the path to this component library.
 
@@ -54,7 +54,7 @@ module.exports = {
 
 This step is necessary for Tailwind to process the classes used in the library.
 
-## Components 🧩
+## Components
 
 The library includes a variety of components designed for EVE Frontier dApps. Some of the key components are:
 
@@ -94,7 +94,7 @@ const App = () => (
 );
 ```
 
-## Static Assets 🖼️
+## Static Assets
 
 The library also includes static SVG assets that can be accessed from `@eveworld/ui-components/assets`. These assets can be used for icons, logos, and other visual elements in your application.
 
@@ -110,6 +110,6 @@ const App = () => (
 );
 ```
 
-## License 📜
+## License
 
 This project is licensed under the MIT License. See the [LICENSE](../../../LICENSE) file for details.
