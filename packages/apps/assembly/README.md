@@ -7,21 +7,19 @@ EVE Frontier Smart Assembly Base is a client-only dapp framework designed for se
 1. [Project Overview](#project-overview) 🌟
 2. [Dependencies](#dependencies) 🔗
 3. [Getting Started](#getting-started) 🚀
-4. [Testing](#testing) 🧪
-5. [Documentation](#documentation) 📚
-6. [License](#license) 📜
+4. [Documentation](#documentation) 📚
+5. [License](#license) 📜
 
-## Project Overview 🌟
+## Project Overview
 
 EVE Frontier Smart Assembly Base is a client-only dapp framework designed for seamless integration with the EVE Frontier game. It provides blockchain functionality via Dapp Kit and manages blockchain-based data states efficiently. The project is built with TypeScript, Material UI, Tailwind CSS, and Vite.
 
-### Dependencies 🔗
+### Dependencies
 
-- Node.js (v18+)
-- Bun v1.3+
-- OneKey or EVE Vault wallet connected to `https://devnet-data-sync.nursery.reitnorf.com`
+- Node.js 26.13.1 and Bun 1.4.4, plus a `GITHUB_TOKEN` for GitHub Packages (see the [root README](../../../README.md#prerequisites))
+- OneKey or EVE Vault wallet connected to Sui testnet
 
-## Getting Started 🚀
+## Getting Started
 
 To get a local copy of the project up and running, follow these simple steps.
 
@@ -73,24 +71,12 @@ bun run lint:fix      # Fix issues automatically
 
 **Deployment**
 
-This project is automatically deployed to AWS Amplify. The deployment is configured to build from the latest commit on each of the following branches:
+Pushing a `dapp/v<version>` tag builds a container image per tier and architecture. See [Releasing](../../../README.md#releasing) in the root README.
 
-- `live` - Production / Live tier environment
-- `uat` - Staging environment
-- `test` - Test environment
-- `dev`
-
-Each branch will automatically trigger a new build and deployment when changes are pushed. The build process includes:
-
-1. Installing dependencies
-2. Running tests
-3. Building the application
-4. Deploying to the corresponding AWS Amplify environment
-
-### Documentation 📚
+### Documentation
 
 Further documentation on the Smart Assembly Base dApp is available at the [EVE Frontier Docs](https://docs.evefrontier.com/Dapp/quick-start).
 
-## License 📜
+## License
 
 This project is licensed under the MIT License. See the [LICENSE](../../../LICENSE) file for details.

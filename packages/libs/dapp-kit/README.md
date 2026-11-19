@@ -2,7 +2,7 @@
 
 React SDK for building EVE Frontier dApps on the Sui blockchain.
 
-**Full API documentation (TypeDoc): [http://sui-docs.evefrontier.com/](http://sui-docs.evefrontier.com/)**
+**Full API documentation (TypeDoc): [https://sui-docs.evefrontier.com/](https://sui-docs.evefrontier.com/)**
 
 ## Install
 
@@ -62,7 +62,7 @@ Install the package once; then import only what you need via subpaths.
 
 ## More
 
-Hooks, types, GraphQL helpers, utilities, and wallet APIs are documented at **[http://sui-docs.evefrontier.com/](http://sui-docs.evefrontier.com/)**.
+Hooks, types, GraphQL helpers, utilities, and wallet APIs are documented at **[https://sui-docs.evefrontier.com/](https://sui-docs.evefrontier.com/)**.
 
 ## License
 

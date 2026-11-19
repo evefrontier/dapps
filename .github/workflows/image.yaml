@@ -79,8 +79,7 @@ jobs:
         with:
           persist-credentials: false
 
-      # Mirrors the Amplify app "dapps" branch environment. These values end up
-      # in the public bundle; none are secrets.
+      # These values end up in the public bundle; none are secrets.
       - name: Resolve tier config
         id: tier
         env:
