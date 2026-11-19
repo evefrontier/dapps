@@ -27,7 +27,7 @@ This monorepo contains the decentralized applications (dApps) of EVE Frontier, a
 Further reading:
 
 - [World upgrade runbook](./docs/world-upgrade-runbook.md): what to do when the EVE Frontier world contracts are upgraded.
-- [dapp-kit API documentation](http://sui-docs.evefrontier.com/) (TypeDoc).
+- [dapp-kit API documentation](https://sui-docs.evefrontier.com/) (TypeDoc).
 
 ## Prerequisites
 
@@ -81,13 +81,13 @@ bun audit                                    # Check dependencies for known vuln
 
 ## Creating an EVE Frontier Dapp
 
-Build your dApp on [`@evefrontier/dapp-kit`](./packages/libs/dapp-kit/README.md). Its README covers installation, providers and hooks, and the full API reference is at [sui-docs.evefrontier.com](http://sui-docs.evefrontier.com/). The [assembly dApp](./packages/apps/assembly) is a working example.
+Build your dApp on [`@evefrontier/dapp-kit`](./packages/libs/dapp-kit/README.md). Its README covers installation, providers and hooks, and the full API reference is at [sui-docs.evefrontier.com](https://sui-docs.evefrontier.com/). The [assembly dApp](./packages/apps/assembly) is a working example.
 
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for how to open issues and pull requests.
 
-**Commit messages and PR titles** must follow [Conventional Commits](https://www.conventionalcommits.org/), for example `feat(dapp-kit): add entity parser` or `fix: icon fallback`. The `commitlint` workflow checks both on pull requests into `main`.
+**PR titles** must follow [Conventional Commits](https://www.conventionalcommits.org/), for example `feat(dapp-kit): add entity parser` or `fix: icon fallback`. PRs are squash-merged with the PR title as the commit message, and the Semantic Pull Request workflow checks titles on pull requests into `main`. Following the same format for individual commit messages is encouraged.
 
 **Git hooks** are installed by Husky on `bun install`:
 
