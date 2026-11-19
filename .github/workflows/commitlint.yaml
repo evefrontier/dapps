@@ -9,8 +9,6 @@ permissions: {}
 
 jobs:
   commitlint:
-    # Editing the title or body doesn't change the commits.
-    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     permissions:
       contents: read
