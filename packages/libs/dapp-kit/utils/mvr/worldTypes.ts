@@ -1,158 +1,76 @@
-import { getMvrCache, type WorldTypeKey } from '@evefrontier/wallet-core/tenant'
-import type { SuiGraphqlNetwork } from '../../types'
+import { type ApiTier, VALID_TIERS } from '@evefrontier/wallet-core/jwt'
 import {
-  DEFAULT_GRAPHQL_NETWORK,
-  getEveWorldPackageRef,
-  HEX_ADDRESS,
-} from '../constants'
+  TENANT_CONFIG,
+  type TenantId,
+  type WorldPackage,
+  type WorldTypeKey,
+  getWorldPackageId as walletCoreGetWorldPackageId,
+  getWorldType as walletCoreGetWorldType,
+} from '@evefrontier/wallet-core/tenant'
 
 /**
- * A Move type's identity is pinned to the package version in which the type was
- * first defined (its type-origin). On-chain object/event type tags always carry
- * that origin id, so `type:` filters and event subscriptions must use it.
- * Each type is resolved individually against the embedded {@link getMvrCache}
- * snapshot.
- *
- * @see worldTypeKeys.ts for how the snapshot is generated/regenerated.
+ * World types and package ids are resolved by @evefrontier/wallet-core from its
+ * embedded MVR snapshot, per world tier (`@evefrontier/world-<package>-<tier>`).
+ * Each type is pinned to the package version in which it was first defined (its
+ * type-origin), which is what on-chain type tags carry.
  */
 
-/** `@mysten/mvr-static` only distinguishes mainnet vs testnet. */
-const mvrNetwork = (network: SuiGraphqlNetwork): 'mainnet' | 'testnet' =>
-  network === 'mainnet' ? 'mainnet' : 'testnet'
+const isApiTier = (value: string): value is ApiTier =>
+  (VALID_TIERS as readonly string[]).includes(value)
 
 /**
- * The generated `getMvrCache` types its `packages`/`types` as empty object
- * literals (mvr-static emits untyped consts and the mainnet maps are `{}`), so
- * index access needs a record view. Shape is stable across regeneration.
- */
-const worldMvrCache = (
-  network: SuiGraphqlNetwork,
-): { packages: Record<string, string>; types: Record<string, string> } =>
-  getMvrCache(mvrNetwork(network)) as {
-    packages: Record<string, string>
-    types: Record<string, string>
-  }
-
-/**
- * The `@evefrontier/world*` MVR names are currently only registered on testnet;
- * the mainnet snapshot maps are empty. When resolution is attempted on a network
- * with no entries, surface that clearly instead of a "regenerate the cache"
- * message — regenerating cannot help until the names exist on that network. This
- * is data-driven, so it stops firing automatically once the snapshot has entries
- * for the network.
- */
-const unsupportedNetworkMessage = (network: SuiGraphqlNetwork): string =>
-  `World MVR names are not resolvable on "${mvrNetwork(network)}": the embedded ` +
-  `snapshot has no entries for it (the @evefrontier/world* names are not ` +
-  `registered on ${mvrNetwork(network)}). Use testnet, or set ` +
-  `VITE_EVE_WORLD_PACKAGE_ID to a raw 0x address.`
-
-/**
- * Resolve a world Move type to its fully-qualified, type-origin-correct tag.
+ * The world tier to resolve against: VITE_EVE_WORLD_TIER when set, otherwise the
+ * tenant's tier from TENANT_CONFIG.
  *
- * - A raw `0x…` env value is treated as already-canonical and interpolated
- *   verbatim (`${addr}::${key}`), preserving legacy single-package behavior.
- * - An MVR name (`@evefrontier/world-<tier>`) is looked up in the embedded
- *   resolution snapshot. A missing entry throws — it means the snapshot is stale
- *   (a new type/tier was added without regenerating) rather than silently
- *   building a filter that matches nothing.
- *
- * @param key - Short `module::Type` key (see {@link WorldTypeKey})
- * @param network - Network to resolve against. Defaults to the app default.
- * @returns The fully-qualified type tag, e.g. `0x…::character::Character`
- * @throws If the env var is unset, or an MVR name has no snapshot entry
+ * @param tenant - Tenant id (e.g. from `?tenant=`); used when no env tier is set
+ * @returns The world tier
+ * @throws If VITE_EVE_WORLD_TIER is not a valid tier, or there is no env tier
+ *   and the tenant is unknown
  * @category Utilities - Config
  */
-export const getWorldType = (
-  key: WorldTypeKey,
-  network: SuiGraphqlNetwork = DEFAULT_GRAPHQL_NETWORK,
-): string => {
-  const raw = getEveWorldPackageRef()
-  const name = `${raw}::${key}`
-  // A raw 0x env is already canonical — interpolate verbatim.
-  if (HEX_ADDRESS.test(raw)) return name
-
-  const { types } = worldMvrCache(network)
-  const tag = types[name]
-  if (!tag) {
-    if (Object.keys(types).length === 0) {
-      throw new Error(unsupportedNetworkMessage(network))
+export function getWorldTier(tenant?: string): ApiTier {
+  const envTier = import.meta.env.VITE_EVE_WORLD_TIER
+  if (envTier) {
+    if (!isApiTier(envTier)) {
+      throw new Error(
+        `Invalid VITE_EVE_WORLD_TIER "${envTier}". Expected one of: ${VALID_TIERS.join(', ')}.`,
+      )
     }
+    return envTier
+  }
+
+  const config = tenant ? TENANT_CONFIG[tenant as TenantId] : undefined
+  if (!config) {
     throw new Error(
-      `No MVR resolution for "${name}". The shared cache (in @evefrontier/wallet-core) ` +
-        `is stale or missing this type/tier — regenerate it with \`bun run gen:mvr\` ` +
-        `in wallet-core after adding the key to its src/tenant/mvr/worldTypeKeys.ts.`,
+      `No world tier for tenant "${tenant ?? ''}". Set VITE_EVE_WORLD_TIER or use a known tenant.`,
     )
   }
-  return tag
+  return config.worldTier
 }
 
 /**
- * The world's LATEST package id — for callers that need a package address rather
- * than a type tag (e.g. deriving object ids from a tenant registry, or the
- * legacy `getEveWorldPackageId` consumers). NOTE: this is the latest upgrade, so
- * it is correct for `moveCall` targets but MUST NOT be interpolated into a
- * `type:` filter — use {@link getWorldType} for those.
+ * Resolve a world Move type to its fully-qualified, type-origin tag.
  *
- * A raw `0x…` env value is returned verbatim; an MVR name is mapped to its
- * latest package id from the embedded snapshot.
+ * @param key - Package-qualified key, e.g. `core::entity_key::EntityKey`
+ * @param tenant - Tenant whose tier to use when VITE_EVE_WORLD_TIER is unset
+ * @returns The type tag, e.g. `0x…::entity_key::EntityKey`
+ * @throws If the tier cannot be determined or has no MVR resolution
+ * @category Utilities - Config
+ */
+export const getWorldType = (key: WorldTypeKey, tenant?: string): string =>
+  walletCoreGetWorldType(getWorldTier(tenant), key)
+
+/**
+ * A world package's id (type-origin) for the resolved tier.
  *
- * @throws If the env var is unset, or an MVR name has no snapshot entry
+ * @param pkg - World package, e.g. `core` or `inventory`
+ * @param tenant - Tenant whose tier to use when VITE_EVE_WORLD_TIER is unset
+ * @throws If the tier cannot be determined or has no MVR resolution
  * @category Utilities - Config
  */
-export const getEveWorldPackageId = (
-  network: SuiGraphqlNetwork = DEFAULT_GRAPHQL_NETWORK,
-): string => {
-  const raw = getEveWorldPackageRef()
-  if (HEX_ADDRESS.test(raw)) return raw
+export const getWorldPackageId = (pkg: WorldPackage, tenant?: string): string =>
+  walletCoreGetWorldPackageId(getWorldTier(tenant), pkg)
 
-  const { packages } = worldMvrCache(network)
-  const id = packages[raw]
-  if (!id) {
-    if (Object.keys(packages).length === 0) {
-      throw new Error(unsupportedNetworkMessage(network))
-    }
-    throw new Error(
-      `No MVR package resolution for "${raw}". Regenerate the embedded cache ` +
-        `with \`bun run gen:mvr\`.`,
-    )
-  }
-  return id
-}
-
-/**
- * Type string for Character OwnerCap. Origins of the wrapper and its parameter
- * can differ, so each is resolved separately.
- * @category Utilities - Config
- * @deprecated The archived world `OwnerCap` is replaced by `AccessCap { entity }`.
- */
-export const getCharacterOwnerCapType = (): string =>
-  `${getWorldType('access::OwnerCap')}<${getWorldType('character::Character')}>`
-
-/**
- * Type string for Character PlayerProfile.
- * @category Utilities - Config
- * @deprecated The archived world `PlayerProfile` no longer exists; a character is an `Entity` with a `Component<Identity>`.
- */
-export const getCharacterPlayerProfileType = (): string =>
-  getWorldType('character::PlayerProfile')
-
-/** Type string for ObjectRegistry. @category Utilities - Config */
-export const getObjectRegistryType = (): string =>
-  getWorldType('object_registry::ObjectRegistry')
-
-/**
- * Type string for EnergyConfig.
- * @category Utilities - Config
- * @deprecated Relies on the archived world `EnergyConfig`/`FuelConfig` singleton tables. Fuel and energy now live per creation in the `PowerGrid` component.
- */
-export const getEnergyConfigType = (): string =>
-  getWorldType('energy::EnergyConfig')
-
-/**
- * Type string for FuelConfig.
- * @category Utilities - Config
- * @deprecated Relies on the archived world `EnergyConfig`/`FuelConfig` singleton tables. Fuel and energy now live per creation in the `PowerGrid` component.
- */
-export const getFuelEfficiencyConfigType = (): string =>
-  getWorldType('fuel::FuelConfig')
+/** Type string for the core ObjectRegistry. @category Utilities - Config */
+export const getObjectRegistryType = (tenant?: string): string =>
+  getWorldType('core::object_registry::ObjectRegistry', tenant)

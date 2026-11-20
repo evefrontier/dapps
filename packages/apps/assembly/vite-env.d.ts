@@ -1,8 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  /** EVE World package ID on Sui (required) */
-  readonly VITE_EVE_WORLD_PACKAGE_ID: string
+  /** World tier (dev | test | uat | ptu | live); overrides the tenant's tier */
+  readonly VITE_EVE_WORLD_TIER?: string
   /** Optional smart assembly item ID override */
   readonly VITE_OBJECT_ID?: string
   /** Optional port for dev server */

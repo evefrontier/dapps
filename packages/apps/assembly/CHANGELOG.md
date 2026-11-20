@@ -1,5 +1,15 @@
 # @eveworld/assembly
 
+## 0.4.0
+
+### Minor Changes
+
+- Breaking: `VITE_EVE_WORLD_TIER` (dev | test | uat | ptu | live) replaces `VITE_EVE_WORLD_PACKAGE_ID` in `.env`, the Docker build arg and the image workflow
+- the app reads world-contracts entities through dapp-kit; assembly views show their empty state until they move to `entity`
+- the wallet's character is no longer looked up, and the network node monitor no longer applies fuel efficiency
+- Updated dependencies
+  - @evefrontier/dapp-kit@0.2.0-alpha.0
+
 ## 0.3.10
 
 ### Patch Changes

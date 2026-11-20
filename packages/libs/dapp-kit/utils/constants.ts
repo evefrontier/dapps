@@ -13,23 +13,9 @@ export {
   DEFAULT_TENANT,
   EVE_PACKAGE_ID_BY_TENANT,
   TenantId,
+  WORLD_PACKAGES,
+  type WorldPackage,
 } from '@evefrontier/wallet-core/tenant'
-
-/**
- * Get a required environment variable, throwing if not set.
- * @param name - The environment variable name (e.g., "VITE_SUI_GRAPHQL_ENDPOINT")
- * @throws {Error} If the environment variable is not set
- */
-function getEnvVar(name: string): string {
-  const value = import.meta.env[name]
-  if (!value) {
-    throw new Error(
-      `Missing required environment variable: ${name}. ` +
-        `Please set it in your .env file.`,
-    )
-  }
-  return value
-}
 
 // ============================================================================
 // Environment-Based Configuration
@@ -63,30 +49,12 @@ export function getSuiGraphqlEndpoint(
   return endpoints[network]
 }
 
-/**
- * Raw `VITE_EVE_WORLD_PACKAGE_ID` value. May be either a 0x address or an MVR
- * name such as `@evefrontier/world-test`.
- * @throws {Error} If VITE_EVE_WORLD_PACKAGE_ID is not set
- * @category Utilities - Config
- */
-export const getEveWorldPackageRef = (): string =>
-  getEnvVar('VITE_EVE_WORLD_PACKAGE_ID')
-
-/** Matches a 0x-prefixed hex Sui address. @category Utilities - Config */
-export const HEX_ADDRESS = /^0x[0-9a-fA-F]+$/
-
-// World type/package resolution lives in `mvr/worldTypes.ts` (it depends on the
-// generated MVR snapshot). Re-exported here so existing `utils/constants`
-// importers keep working. The cycle constants → worldTypes → constants is safe:
-// worldTypes only reads `HEX_ADDRESS`/`getEveWorldPackageRef` inside function
-// bodies, never at module-eval time.
+// World type/package resolution lives in `mvr/worldTypes.ts`. Re-exported here
+// so existing `utils/constants` importers keep working.
 export {
-  getCharacterOwnerCapType,
-  getCharacterPlayerProfileType,
-  getEnergyConfigType,
-  getEveWorldPackageId,
-  getFuelEfficiencyConfigType,
   getObjectRegistryType,
+  getWorldPackageId,
+  getWorldTier,
   getWorldType,
 } from './mvr/worldTypes'
 
@@ -224,7 +192,7 @@ export const EXCLUDED_TYPEIDS = [
   TYPEIDS.REFUGE,
 ]
 
-/** Per-tenant config: EVE token package ID (Sui) and Datahub API host. v0.0.18
+/** Per-tenant config: world tier, EVE token package ID (Sui) and Datahub API host.
  * @category Constants
  */
 export type TenantConfig = (typeof TENANT_CONFIG)[TenantId]

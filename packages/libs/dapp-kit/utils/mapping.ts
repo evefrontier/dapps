@@ -1,12 +1,8 @@
-import {
-  getTenantWorldType,
-  TENANT_CONFIG,
-} from '@evefrontier/wallet-core/tenant'
 import { bcs } from '@mysten/sui/bcs'
 import { deriveObjectID } from '@mysten/sui/utils'
 import { getSingletonObjectByType } from '../graphql/client'
 import { State } from '../types'
-import { getWorldType, TenantId } from './constants'
+import { getObjectRegistryType, getWorldType, type TenantId } from './constants'
 
 /**
  * Convert raw status variant string to State enum
@@ -32,31 +28,23 @@ export function parseStatus(statusVariant: string | undefined): State {
   }
 }
 
-// Cache for the Registry address, keyed by tenant
+// Cache for the ObjectRegistry address, keyed by its type tag
 const objectRegistryAddressCache: Record<string, string> = {}
 
 /**
- * Fetches the ObjectRegistry singleton address from the chain for a given tenant.
- * Uses the tenant's package ID from TENANT_CONFIG to look up the correct registry.
- * Caches the result per tenant to avoid repeated queries.
+ * Fetches the core ObjectRegistry singleton address from the chain.
+ * Each world tier has its own core package and registry; the tier comes from
+ * VITE_EVE_WORLD_TIER or the tenant (see {@link getWorldTier}).
+ * Caches the result per registry type to avoid repeated queries.
  *
- * If the tenant is not a predefined tenant such as in local development,
- * fallback to the local Eve World package ID.
- *
+ * @param tenant - Tenant whose tier to use when VITE_EVE_WORLD_TIER is unset
  * @category Utilities - Mapping
  */
-export async function getRegistryAddress(
-  tenant: string | TenantId,
-): Promise<string> {
-  if (objectRegistryAddressCache[tenant]) {
-    return objectRegistryAddressCache[tenant]
+export async function getRegistryAddress(tenant?: string): Promise<string> {
+  const registryType = getObjectRegistryType(tenant)
+  if (objectRegistryAddressCache[registryType]) {
+    return objectRegistryAddressCache[registryType]
   }
-
-  // Configured tenants resolve the type tag from the MVR cache; unconfigured
-  // (local) tenants use the env-driven world type.
-  const registryType = TENANT_CONFIG[tenant as TenantId]
-    ? getTenantWorldType(tenant as TenantId, 'object_registry::ObjectRegistry')
-    : getWorldType('object_registry::ObjectRegistry')
 
   const result = await getSingletonObjectByType(registryType)
 
@@ -65,48 +53,37 @@ export async function getRegistryAddress(
     throw new Error(`ObjectRegistry not found for type: ${registryType}`)
   }
 
-  objectRegistryAddressCache[tenant] = address
+  objectRegistryAddressCache[registryType] = address
   return address
 }
 
 /**
- * Derives an object ID from an in-game item ID using the AssemblyRegistry.
- * Resolves the registry and TenantItemId type tags to their type-origin-correct
- * values via the shared MVR cache (wallet-core `getTenantWorldType`).
- *
- * If the tenant is not a predefined tenant such as in local development,
- * fallback to the local Eve World package ID.
+ * Derives an entity's object ID from its in-game ID and tenant, mirroring core
+ * `object_registry::derive_id` (a derived object over `EntityKey { id, tenant }`).
  *
  * @param itemId - The in-game item ID
- * @param selectedTenant - The tenant identifier (e.g. "utopia", "stillness")
+ * @param tenant - The tenant identifier (e.g. "utopia", "stillness")
  * @returns The derived Sui object ID
  *
  * @category Utilities - Mapping
  */
 export async function getObjectId(
   itemId: string,
-  selectedTenant: string | TenantId,
+  tenant: string | TenantId,
 ): Promise<string> {
-  const validTenantIds = Object.values(TenantId) as string[]
-  if (!validTenantIds.includes(selectedTenant)) {
-    console.warn(`Tenant "${selectedTenant}" might be a local tenant.`)
-  }
-
-  const tenant = selectedTenant as TenantId
   const registryAddress = await getRegistryAddress(tenant)
-  // TenantItemId key type tag: MVR cache for configured tenants, env-driven
-  // world type otherwise.
-  const tenantItemIdType = TENANT_CONFIG[tenant]
-    ? getTenantWorldType(tenant, 'in_game_id::TenantItemId')
-    : getWorldType('in_game_id::TenantItemId')
 
-  const bcsType = bcs.struct('TenantItemId', {
-    item_id: bcs.u64(),
-    tenant: bcs.string(),
-  })
-  const key = bcsType.serialize({ item_id: BigInt(itemId), tenant }).toBytes()
+  const key = bcs
+    .struct('EntityKey', {
+      id: bcs.u64(),
+      tenant: bcs.string(),
+    })
+    .serialize({ id: BigInt(itemId), tenant })
+    .toBytes()
 
-  const objectId = deriveObjectID(registryAddress, tenantItemIdType, key)
-
-  return objectId
+  return deriveObjectID(
+    registryAddress,
+    getWorldType('core::entity_key::EntityKey', tenant),
+    key,
+  )
 }
