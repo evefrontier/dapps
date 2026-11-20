@@ -8,6 +8,7 @@ import {
 
 import { hostOf, mw } from './format'
 import { gridLamp } from './model'
+import { useControllerRows } from './useControllerRows'
 
 /** The shell's character name, or its wallet when the character has none. */
 const shellLabel = (owner: EntityOwner | null): string =>
@@ -31,6 +32,7 @@ const IdentityPanel = ({
   role: EntityRole
   summary: GridSummary | null
 }) => {
+  const { rows } = useControllerRows(role !== 'visitor')
   const metadata = entity.metadata
   const state = gridLamp(summary)
   const url = metadata?.url?.trim()
@@ -68,7 +70,7 @@ const IdentityPanel = ({
         {role !== 'visitor' && (
           <>
             <dt>Controllers</dt>
-            <dd>{entity.controllers?.length ?? 0}</dd>
+            <dd>{rows.length}</dd>
           </>
         )}
         {url && (

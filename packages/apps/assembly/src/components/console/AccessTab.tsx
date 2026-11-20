@@ -4,7 +4,6 @@ import {
   resolveNewController,
   Severity,
   sameAddress,
-  useCharacterDirectory,
   useCharacterSearch,
   useNotification,
   useSmartObject,
@@ -14,6 +13,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useFlagVariant, useViewRole } from '../../flags'
 import { addController, removeController } from '../../functions/controllers'
+import { useControllerRows } from './useControllerRows'
 
 const ADD_ERRORS = {
   invalidAddress: 'Enter a full 0x address: 0x and 64 hex digits.',
@@ -38,13 +38,13 @@ const MAX_RESULTS = 8
  * @returns React.JSX.Element, or null for visitors
  */
 const AccessTab = React.memo((): React.JSX.Element | null => {
-  const { entity, entityOwner, refetch } = useSmartObject()
+  const { entity, refetch } = useSmartObject()
   const { role, characterId: viewerId } = useViewRole()
   const { notify } = useNotification()
   const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction()
 
   const canManage = role === 'shell' || role === 'controller'
-  const directory = useCharacterDirectory({ enabled: canManage })
+  const { rows, shellId, characters, isLoading } = useControllerRows(canManage)
 
   const [addOpen, setAddOpen] = useState(false)
   const [address, setAddress] = useState('')
@@ -70,18 +70,10 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
   }, [addOpen])
 
   const controllerIds = useMemo(() => entity?.controllers ?? [], [entity])
-  const characters = directory.data ?? []
-  const characterOf = (id: string) =>
-    characters.find((c) => sameAddress(c.characterId, id))
-
-  // The shell's character: the cap's holder when it is parked on a
-  // character, otherwise the character bound to the holding wallet
-  const shellId =
-    entityOwner?.kind === 'character'
-      ? entityOwner.holder
-      : (characters.find((c) =>
-          sameAddress(c.walletAddress, entityOwner?.walletAddress),
-        )?.characterId ?? null)
+  // Already a controller: on the access list, or the shell itself
+  const isController = (characterId: string) =>
+    sameAddress(characterId, shellId) ||
+    controllerIds.some((id) => sameAddress(id, characterId))
 
   if (!entity || !canManage) return null
 
@@ -140,11 +132,11 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
 
   const handleAdd = (event: React.FormEvent) => {
     event.preventDefault()
-    if (locked || !directory.data) return
+    if (locked || !characters) return
     // A picked search result is added exactly: one wallet can be bound to
     // several characters, and resolving the wallet again would pick the first
     if (picked && sameAddress(query, picked.walletAddress)) {
-      if (controllerIds.some((id) => sameAddress(id, picked.characterId))) {
+      if (isController(picked.characterId)) {
         setAddError(ADD_ERRORS.alreadyController)
         return
       }
@@ -156,12 +148,16 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
       )
       return
     }
-    const result = resolveNewController(address, directory.data, controllerIds)
+    const result = resolveNewController(address, characters, controllerIds)
     if (!result.ok) {
       setAddError(ADD_ERRORS[result.error])
       return
     }
     const { character } = result
+    if (isController(character.characterId)) {
+      setAddError(ADD_ERRORS.alreadyController)
+      return
+    }
     send(
       addController,
       character.characterId,
@@ -174,37 +170,39 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
     <div className="acc" id="SmartObject-Controllers">
       <div className="stack">
         <div className="bar-h">
-          Controllers<span>{controllerIds.length}</span>
+          Controllers<span>{rows.length}</span>
         </div>
 
-        {controllerIds.length === 0 ? (
-          <p className="none-note">Only the shell controls this assembly.</p>
+        {rows.length === 0 ? (
+          <p className="none-note">
+            {isLoading ? 'Loading controllers…' : 'No controllers.'}
+          </p>
         ) : (
           <div className="plist">
-            {controllerIds.map((id) => {
-              const character = characterOf(id)
-              const isShell = sameAddress(id, shellId)
+            {rows.map((row) => {
               const isYou =
-                sameAddress(id, viewerId) || (isShell && role === 'shell')
-              const label = character?.name || 'Unknown character'
+                sameAddress(row.characterId, viewerId) ||
+                (row.isShell && role === 'shell')
+              const label = row.name || 'Unknown character'
+              const { characterId } = row
               return (
-                <div key={id} className="person">
+                <div key={row.key} className="person">
                   <span className="pn">
                     <b>{label}</b>
-                    {isShell && <span className="tag on">Shell</span>}
+                    {row.isShell && <span className="tag on">Shell</span>}
                     {isYou && <span className="tag pend">You</span>}
                   </span>
-                  <span className="pm" title={id}>
-                    {abbreviateAddress(character?.walletAddress ?? id)}
+                  <span className="pm" title={row.address ?? undefined}>
+                    {abbreviateAddress(row.address ?? '')}
                   </span>
-                  {!isShell && (
+                  {!row.isShell && characterId && (
                     <span className="act">
                       <button
                         type="button"
                         className="rm"
                         disabled={locked}
                         onClick={() =>
-                          send(removeController, id, label, 'remove')
+                          send(removeController, characterId, label, 'remove')
                         }
                       >
                         Remove
@@ -301,7 +299,7 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
                 <button
                   type="submit"
                   className="gbtn"
-                  disabled={!address.trim() || locked || directory.isLoading}
+                  disabled={!address.trim() || locked || isLoading}
                 >
                   Add · 1 transaction
                 </button>
