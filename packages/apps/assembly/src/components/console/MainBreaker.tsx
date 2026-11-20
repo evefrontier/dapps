@@ -1,14 +1,9 @@
-import {
-  type EntityData,
-  Severity,
-  useNotification,
-  useSmartObject,
-  useSponsoredTransaction,
-} from '@evefrontier/dapp-kit'
+import type { EntityData } from '@evefrontier/dapp-kit'
 import { useState } from 'react'
 
 import { setGridPower } from '../../functions/setGridPower'
 import HoldButton from './HoldButton'
+import { useSponsoredAction } from './useSponsoredAction'
 
 /**
  * The main breaker. The shell and controllers get a lever: switching on is a
@@ -25,42 +20,18 @@ const MainBreaker = ({
   on: boolean
   writable: boolean
 }) => {
-  const { refetch } = useSmartObject()
-  const { notify } = useNotification()
-  const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction()
+  const { run, pending } = useSponsoredAction()
   const [confirming, setConfirming] = useState(false)
-  const [pending, setPending] = useState(false)
 
   const locked = pending || entity.inFlight
 
-  const send = async (next: boolean) => {
+  const send = (next: boolean) => {
     setConfirming(false)
-    setPending(true)
-    try {
-      const result = await setGridPower({
-        entity,
-        on: next,
-        sendSponsoredTransaction,
-      })
-      if (result?.digest) {
-        notify({
-          type: Severity.Success,
-          txHash: result.digest,
-          onSuccess: async () => {
-            await refetch()
-          },
-        })
-      }
-    } catch (error) {
-      notify({
-        type: Severity.Error,
-        message: `Failed to switch the main breaker ${next ? 'on' : 'off'}: ${
-          error instanceof Error ? error.message : 'Unknown error'
-        }`,
-      })
-    } finally {
-      setPending(false)
-    }
+    run(
+      `switch the main breaker ${next ? 'on' : 'off'}`,
+      (sendSponsoredTransaction) =>
+        setGridPower({ entity, on: next, sendSponsoredTransaction }),
+    )
   }
 
   if (writable && confirming) {

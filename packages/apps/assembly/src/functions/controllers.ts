@@ -1,14 +1,11 @@
-import {
-  createLogger,
-  type EntityData,
-  type SendSponsoredTransactionFn,
-  type SponsoredTransactionActions,
-  type SponsoredTransactionOutput,
+import type {
+  EntityData,
+  SendSponsoredTransactionFn,
+  SponsoredTransactionActions,
+  SponsoredTransactionOutput,
 } from '@evefrontier/dapp-kit'
 
-import { toSponsoredAssembly } from './sponsoredAssembly'
-
-const log = createLogger()
+import { sendEntityAction } from './sponsoredAssembly'
 
 // TODO(wallet-core): replace with SponsoredTransactionActions values once
 // wallet-core and the sponsor backend support assembly controllers.
@@ -25,41 +22,24 @@ export interface ControllerTransaction {
   sendSponsoredTransaction: SendSponsoredTransactionFn
 }
 
-const sendControllerTransaction = async ({
-  txAction,
-  entity,
-  characterId,
-  sendSponsoredTransaction,
-}: ControllerTransaction & {
-  txAction: SponsoredTransactionActions
-}): Promise<SponsoredTransactionOutput> => {
-  log.info(`${txAction}: sending sponsored transaction`, { characterId })
-  try {
-    const result = await sendSponsoredTransaction({
-      txAction,
-      assembly: toSponsoredAssembly(entity),
-      // TODO(wallet-core): SponsoredTransactionMetadata has no characterId yet
-      metadata: { characterId } as never,
-    })
-
-    log.info('sponsored transaction result', result)
-
-    return result
-  } catch (error) {
-    log.error('sponsored transaction error', error)
-
-    throw error
-  }
-}
-
 /** ADD ASSEMBLY CONTROLLER SPONSORED TRANSACTION FUNCTION */
-export const addController = (
-  args: ControllerTransaction,
-): Promise<SponsoredTransactionOutput> =>
-  sendControllerTransaction({ txAction: ADD_ASSEMBLY_CONTROLLER, ...args })
+export const addController = ({
+  characterId,
+  ...rest
+}: ControllerTransaction): Promise<SponsoredTransactionOutput> =>
+  sendEntityAction({
+    txAction: ADD_ASSEMBLY_CONTROLLER,
+    metadata: { characterId },
+    ...rest,
+  })
 
 /** REMOVE ASSEMBLY CONTROLLER SPONSORED TRANSACTION FUNCTION */
-export const removeController = (
-  args: ControllerTransaction,
-): Promise<SponsoredTransactionOutput> =>
-  sendControllerTransaction({ txAction: REMOVE_ASSEMBLY_CONTROLLER, ...args })
+export const removeController = ({
+  characterId,
+  ...rest
+}: ControllerTransaction): Promise<SponsoredTransactionOutput> =>
+  sendEntityAction({
+    txAction: REMOVE_ASSEMBLY_CONTROLLER,
+    metadata: { characterId },
+    ...rest,
+  })

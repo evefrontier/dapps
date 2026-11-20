@@ -1,14 +1,11 @@
 import {
-  createLogger,
   type EntityData,
   type SendSponsoredTransactionFn,
   type SponsoredTransactionActions,
   type SponsoredTransactionOutput,
 } from '@evefrontier/dapp-kit'
 
-import { toSponsoredAssembly } from './sponsoredAssembly'
-
-const log = createLogger()
+import { sendEntityAction } from './sponsoredAssembly'
 
 // TODO(wallet-core): replace with a SponsoredTransactionActions value once
 // wallet-core and the sponsor backend support power_grid::set_power_grid.
@@ -23,7 +20,7 @@ const SET_POWER_GRID =
  * `power_grid::OperateGrid`. Module breakers keep their settings, so switching
  * back on brings back exactly what was on.
  */
-export const setGridPower = async ({
+export const setGridPower = ({
   entity,
   on,
   sendSponsoredTransaction,
@@ -31,19 +28,10 @@ export const setGridPower = async ({
   entity: EntityData
   on: boolean
   sendSponsoredTransaction: SendSponsoredTransactionFn
-}): Promise<SponsoredTransactionOutput> => {
-  log.info(`${SET_POWER_GRID}: sending sponsored transaction`, { on })
-  try {
-    const result = await sendSponsoredTransaction({
-      txAction: SET_POWER_GRID,
-      assembly: toSponsoredAssembly(entity),
-      // TODO(wallet-core): SponsoredTransactionMetadata has no `on` yet
-      metadata: { on } as never,
-    })
-    log.info('sponsored transaction result', result)
-    return result
-  } catch (error) {
-    log.error('sponsored transaction error', error)
-    throw error
-  }
-}
+}): Promise<SponsoredTransactionOutput> =>
+  sendEntityAction({
+    txAction: SET_POWER_GRID,
+    entity,
+    metadata: { on },
+    sendSponsoredTransaction,
+  })
