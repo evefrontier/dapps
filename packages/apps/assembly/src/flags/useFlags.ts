@@ -7,7 +7,7 @@ import { FLAG_DEFINITIONS, type FlagKey } from './config'
  * The default is taken from the registry so a component always renders sensibly
  * even before the provider is ready. This is the one-liner future flags reuse:
  *
- *   const controllers = useFlagVariant('assembly-controllers') === 'on'
+ *   const viewAs = useFlagVariant('assembly-view-as')
  */
 export function useFlagVariant<K extends FlagKey>(key: K): string {
   const def = FLAG_DEFINITIONS[key]
