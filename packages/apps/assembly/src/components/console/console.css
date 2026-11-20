@@ -982,10 +982,6 @@ html #root {
     grid-row: 1 / span 2;
     align-self: end;
   }
-  .gc .ident > .kv.more {
-    grid-row: 3;
-    align-self: start;
-  }
   .gc .cols {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1035,12 +1031,10 @@ html #root {
     padding-bottom: 0;
     border-bottom: 0;
   }
+  /* Identity shrinks to a header: code, name and state */
   .gc .ident .desc,
-  .gc .ident .kv.more {
-    display: none;
-  }
   .gc .ident > .kv {
-    align-self: stretch;
+    display: none;
   }
   .gc .name-row h2 {
     font-size: 22px;

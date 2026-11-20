@@ -6,7 +6,7 @@ import {
   type GridSummary,
 } from '@evefrontier/dapp-kit'
 
-import { ago, hostOf, mw } from './format'
+import { hostOf, mw } from './format'
 import { gridLamp } from './model'
 
 /** The shell's character name, or its wallet when the character has none. */
@@ -17,31 +17,23 @@ const shellLabel = (owner: EntityOwner | null): string =>
 
 /**
  * The Assembly at a glance, on every tab: code, name, whether it is running,
- * description, shell, controller count, dapp link, sections, fuel and when the
- * grid last settled. Read-only; editing the details comes later.
+ * description, shell, controller count and dapp link. Read-only; editing the
+ * details comes later.
  */
 const IdentityPanel = ({
   entity,
   entityOwner,
   role,
   summary,
-  nowMs,
 }: {
   entity: EntityData
   entityOwner: EntityOwner | null
   role: EntityRole
   summary: GridSummary | null
-  nowMs: number
 }) => {
   const metadata = entity.metadata
   const state = gridLamp(summary)
   const url = metadata?.url?.trim()
-  const fuelPct =
-    summary && summary.fuelCapacity > 0n
-      ? Math.round(
-          (Number(summary.fuelNow) / Number(summary.fuelCapacity)) * 100,
-        )
-      : null
 
   return (
     <aside className="ident">
@@ -58,7 +50,7 @@ const IdentityPanel = ({
 
       <div className="state-big" data-state={state.lamp}>
         <span className="led" />
-        <b>{state.word}</b>
+        <b>{state.label}</b>
         {summary && (
           <span>
             {summary.modulesOnline} of {summary.modulesTotal} online
@@ -92,23 +84,6 @@ const IdentityPanel = ({
                 {hostOf(url)}
               </a>
             </dd>
-          </>
-        )}
-      </dl>
-
-      <dl className="kv more">
-        <dt>Sections</dt>
-        <dd>{entity.layout?.sections.length ?? 0}</dd>
-        {fuelPct !== null && (
-          <>
-            <dt>Fuel</dt>
-            <dd>{fuelPct}%</dd>
-          </>
-        )}
-        {entity.powerGrid && (
-          <>
-            <dt>Settled</dt>
-            <dd>{ago(nowMs - Number(entity.powerGrid.lastSettledMs))}</dd>
           </>
         )}
       </dl>

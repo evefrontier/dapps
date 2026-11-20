@@ -2,12 +2,13 @@ import {
   type EntityData,
   type EntityPowerGrid,
   type GridSummary,
+  type NoPowerReason,
   useTypeNames,
 } from '@evefrontier/dapp-kit'
 import { useMemo } from 'react'
 
 import { ago, hoursMinutes, mw, shortCode, units } from './format'
-import { type BoardCard, buildBoard } from './model'
+import { type BoardCard, buildBoard, NO_POWER_LABEL } from './model'
 
 const FUEL_SEGMENTS = 30
 const LOW_FUEL = 0.1
@@ -81,14 +82,16 @@ const Readouts = ({ summary }: { summary: GridSummary }) => (
   </>
 )
 
+/** What each no-power banner adds under its title (the title is NO_POWER_LABEL). */
+const NO_POWER_BODY: Partial<Record<NoPowerReason, string>> = {
+  outOfFuel:
+    'The generator has stopped. Modules that are switched on resume when fuel is added in the game.',
+  generatorOff:
+    'No generator is switched on. Modules that are switched on resume when one is.',
+}
+
 /** At most one banner: why the grid is not running, or that fuel is low. */
-const Banner = ({
-  summary,
-  fuelPct,
-}: {
-  summary: GridSummary
-  fuelPct: number
-}) => {
+const Banner = ({ summary }: { summary: GridSummary }) => {
   if (summary.status === 'off') {
     return (
       <p className="banner red">
@@ -97,23 +100,16 @@ const Banner = ({
       </p>
     )
   }
-  if (summary.reason === 'outOfFuel') {
+  const body = summary.reason ? NO_POWER_BODY[summary.reason] : undefined
+  if (summary.reason && body) {
     return (
       <p className="banner amber">
-        <b>No power · out of fuel</b>The generator has stopped. Modules that are
-        switched on resume when fuel is added in the game.
+        <b>{NO_POWER_LABEL[summary.reason]}</b>
+        {body}
       </p>
     )
   }
-  if (summary.reason === 'generatorOff') {
-    return (
-      <p className="banner amber">
-        <b>No power · generator off</b>No generator is switched on. Modules that
-        are switched on resume when one is.
-      </p>
-    )
-  }
-  if (fuelPct < LOW_FUEL && summary.msUntilEmpty !== null) {
+  if (summary.fuelFraction < LOW_FUEL && summary.msUntilEmpty !== null) {
     return (
       <p className="banner amber">
         <b>Fuel low · ≈ {hoursMinutes(summary.msUntilEmpty)} left</b>
@@ -128,14 +124,13 @@ const Banner = ({
 const FuelPanel = ({
   grid,
   summary,
-  fuelPct,
   nowMs,
 }: {
   grid: EntityPowerGrid
   summary: GridSummary
-  fuelPct: number
   nowMs: number
 }) => {
+  const fuelPct = summary.fuelFraction
   const filled = Math.round(fuelPct * FUEL_SEGMENTS)
   const estimate =
     summary.msUntilEmpty !== null && summary.fuelNow > 0n ? (
@@ -193,11 +188,11 @@ const BreakerCard = ({ card, name }: { card: BoardCard; name: string }) => (
           {name}
           <i>{card.code}</i>
         </b>
-        <span>{card.word}</span>
+        <span>{card.statusLabel}</span>
       </span>
       <span className="card-u">
-        <span>{card.use[0]}</span>
-        <span>{card.use[1]}</span>
+        <span>{card.spec.label}</span>
+        <span>{card.spec.value}</span>
       </span>
       {card.detail && <span className="card-s">{card.detail}</span>}
     </span>
@@ -233,23 +228,13 @@ const GridTab = ({
     return <p className="none-note">This Assembly has no power grid.</p>
   }
 
-  const fuelPct =
-    summary.fuelCapacity > 0n
-      ? Number(summary.fuelNow) / Number(summary.fuelCapacity)
-      : 0
-
   return (
     <div className="cols">
       <div className="stack ctl">
         <MainBreaker on={grid.on} />
         <Readouts summary={summary} />
-        <Banner summary={summary} fuelPct={fuelPct} />
-        <FuelPanel
-          grid={grid}
-          summary={summary}
-          fuelPct={fuelPct}
-          nowMs={nowMs}
-        />
+        <Banner summary={summary} />
+        <FuelPanel grid={grid} summary={summary} nowMs={nowMs} />
       </div>
       <div className="stack">
         {board.length ? (

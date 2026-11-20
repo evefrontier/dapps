@@ -1,13 +1,8 @@
-import { type EntityRole, useEntityRole } from '@evefrontier/dapp-kit'
+import { useEntityRole } from '@evefrontier/dapp-kit'
 
 import { isPanelEnabled } from './FlagDevPanel'
 import { useFlagVariant } from './useFlags'
-
-const FORCED: ReadonlySet<string> = new Set<EntityRole>([
-  'visitor',
-  'controller',
-  'shell',
-])
+import { resolveViewRole } from './viewRole'
 
 /**
  * The role the console renders for: the connected wallet's real role, or the
@@ -24,7 +19,8 @@ export function useViewRole(): ReturnType<typeof useEntityRole> & {
 } {
   const actual = useEntityRole()
   const variant = useFlagVariant('assembly-view-as')
-  const forced =
-    isPanelEnabled() && FORCED.has(variant) ? (variant as EntityRole) : null
-  return { ...actual, role: forced ?? actual.role, preview: forced !== null }
+  return {
+    ...actual,
+    ...resolveViewRole(actual.role, variant, isPanelEnabled()),
+  }
 }
