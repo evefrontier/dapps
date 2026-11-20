@@ -8,8 +8,7 @@ import {
   type EventTransport,
   setActiveEventTransport,
 } from '../utils/constants'
-import { useAssemblyData } from './smartObject/useAssemblyData'
-import { useAssemblyEventStream } from './smartObject/useAssemblyEventStream'
+import { useEntityData } from './smartObject/useEntityData'
 import { useObjectSelection } from './smartObject/useObjectSelection'
 import { usePollingBackstop } from './smartObject/usePollingBackstop'
 
@@ -18,6 +17,8 @@ export type { FetchObjectDataInput } from '../utils/smartObject'
 /** @category Providers */
 export const SmartObjectContext = createContext<SmartObjectContextType>({
   tenant: DEFAULT_TENANT,
+  entity: null,
+  entityOwner: null,
   assembly: null,
   assemblyOwner: null,
   loading: true,
@@ -26,14 +27,14 @@ export const SmartObjectContext = createContext<SmartObjectContextType>({
 })
 
 /**
- * SmartObjectProvider component provides context for smart objects data.
- * It uses GraphQL queries to fetch objects on the Sui blockchain
- * from the EVE Frontier package, with optional polling for updates.
+ * SmartObjectProvider component provides context for the selected world entity.
+ * It uses GraphQL queries to fetch the entity on the Sui blockchain, polling
+ * for updates.
  *
- * The provider fetches both the assembly data and its owner (assemblyOwner) information:
- * 1. Fetches assembly data with dynamic fields
- * 2. Uses owner_cap_id to resolve the Character OwnerCap
- * 3. Fetches full assemblyOwner data from the Character ID
+ * The provider fetches both the entity and its owner (entityOwner):
+ * 1. Fetches the entity with its components and action maps
+ * 2. Reads the holder of the entity's AccessCap
+ * 3. When the cap is parked on a Character, fetches that Character entity
  *
  * @category Providers
  */
@@ -42,7 +43,7 @@ const SmartObjectProvider = ({
   eventTransport = DEFAULT_EVENT_TRANSPORT,
 }: {
   children: ReactNode
-  /** Real-time event transport for optimistic updates (grpc | sse). */
+  /** Event transport (grpc | sse); selects the matching GraphQL query endpoint. */
   eventTransport?: EventTransport
 }) => {
   // Align the GraphQL query endpoint with the active transport (grpc → standard,
@@ -55,15 +56,14 @@ const SmartObjectProvider = ({
   const { isConnected } = useConnection()
   const { selection, input } = useObjectSelection()
   const {
-    assembly,
-    setAssembly,
-    assemblyOwner,
+    entity,
+    entityOwner,
     loading,
     setLoading,
     error,
     fetchObjectData,
     resetTracking,
-  } = useAssemblyData()
+  } = useEntityData()
 
   usePollingBackstop({
     input,
@@ -71,15 +71,6 @@ const SmartObjectProvider = ({
     fetchObjectData,
     setLoading,
     resetTracking,
-  })
-  useAssemblyEventStream({
-    selection,
-    input,
-    isConnected,
-    eventTransport,
-    assembly,
-    setAssembly,
-    fetchObjectData,
   })
 
   // Refetch with retries after a mutation (e.g. metadata save)
@@ -97,8 +88,10 @@ const SmartObjectProvider = ({
     <SmartObjectContext.Provider
       value={{
         tenant: selection?.tenant ?? '',
-        assembly,
-        assemblyOwner,
+        entity,
+        entityOwner,
+        assembly: null,
+        assemblyOwner: null,
         loading,
         error,
         refetch,

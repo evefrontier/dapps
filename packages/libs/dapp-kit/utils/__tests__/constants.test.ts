@@ -6,7 +6,6 @@ import {
   getEveCoinType,
   getEveWorldPackageId,
   getFuelEfficiencyConfigType,
-  getGraphqlSubscriptionEndpoint,
   getObjectRegistryType,
   getSuiGraphqlEndpoint,
   setActiveEventTransport,
@@ -70,18 +69,6 @@ describe('constants', () => {
       setActiveEventTransport('sse')
       expect(getSuiGraphqlEndpoint('testnet')).toBe(
         'https://graphql-cockroach.testnet.sui.io/graphql',
-      )
-    })
-  })
-
-  // ============================================================================
-  // getGraphqlSubscriptionEndpoint
-  // ============================================================================
-
-  describe('getGraphqlSubscriptionEndpoint', () => {
-    it('appends /subscriptions to the query endpoint', () => {
-      expect(getGraphqlSubscriptionEndpoint()).toBe(
-        'https://graphql-cockroach.testnet.sui.io/graphql/subscriptions',
       )
     })
   })

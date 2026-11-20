@@ -6,10 +6,9 @@ import type { FetchObjectDataInput } from '../../utils/smartObject'
 const log = createLogger()
 
 /**
- * Fetches the selected object once connected, then polls it as a backstop.
- * Real-time updates come from the event subscription; this interval only
- * catches changes a tracked event didn't cover. A configured interval of 0
- * disables it entirely.
+ * Fetches the selected object once connected, then polls it for updates.
+ * Polling is the only update source; each tick is a cheap version check
+ * until the object changes. A configured interval of 0 disables it entirely.
  */
 export function usePollingBackstop({
   input,

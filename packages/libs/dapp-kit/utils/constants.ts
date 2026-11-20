@@ -114,9 +114,8 @@ export const GRAPHQL_ENDPOINTS: Record<SuiGraphqlNetwork, string> = {
   mainnet: 'https://graphql.mainnet.sui.io/graphql',
 }
 
-/** Subscription-capable ("cockroach") Sui GraphQL endpoints per network. Used
- *  by the `sse` transport for BOTH its queries and its SSE subscription, since
- *  only this endpoint serves GraphQL subscriptions. Only testnet has a known
+/** Subscription-capable ("cockroach") Sui GraphQL endpoints per network, used
+ *  for queries when the `sse` transport is active. Only testnet has a known
  *  cockroach host; other networks fall back to the standard endpoint.
  *  @category Constants
  */
@@ -128,8 +127,8 @@ export const GRAPHQL_SUBSCRIPTION_ENDPOINTS: Record<SuiGraphqlNetwork, string> =
   }
 
 /**
- * Client identifier sent as the `X-Client-ID` header on GraphQL requests
- * (query fetch and the SSE subscription). Random per client, generated once and
+ * Client identifier sent as the `X-Client-ID` header on GraphQL requests.
+ * Random per client, generated once and
  * cached for the module lifetime — used for session affinity during pagination.
  * @category Constants
  */
@@ -145,21 +144,9 @@ export const SUI_GRPC_URLS: Record<SuiGraphqlNetwork, string> = {
 }
 
 /**
- * Get the Sui gRPC base URL for the given network.
- * Unknown values fall back to testnet.
- * @category Utilities
- */
-export function getSuiGrpcBaseUrl(
-  env: string = DEFAULT_GRAPHQL_NETWORK,
-): string {
-  const network = isSuiGraphqlNetwork(env) ? env : DEFAULT_GRAPHQL_NETWORK
-  return SUI_GRPC_URLS[network]
-}
-
-/**
- * Real-time event transport feeding optimistic updates.
- * - `grpc`: Sui fullnode gRPC checkpoint stream.
- * - `sse`: GraphQL subscription over SSE.
+ * Event transport, which selects the GraphQL query endpoint.
+ * - `grpc`: the standard endpoint.
+ * - `sse`: the subscription-capable ("cockroach") endpoint.
  * Selected per-app via the `eventTransport` provider prop (typically driven by
  * a feature flag). Defaults to `grpc`.
  * @category Types
@@ -180,46 +167,14 @@ export function setActiveEventTransport(transport: EventTransport): void {
   activeEventTransport = transport
 }
 
-/** The transport currently governing GraphQL endpoint selection.
- *  @category Utilities - Config */
-export function getActiveEventTransport(): EventTransport {
-  return activeEventTransport
-}
-
-/**
- * HTTP(S) URL of the GraphQL subscription endpoint (SSE / graphql-sse) — the
- * real-time event source for optimistic updates. Sui serves subscriptions on a
- * dedicated `/subscriptions` path appended to the query endpoint.
- * @returns The subscription endpoint URL.
- * @category Utilities - Config
- */
-export function getGraphqlSubscriptionEndpoint(
-  env: string = DEFAULT_GRAPHQL_NETWORK,
-): string {
-  const network = isSuiGraphqlNetwork(env) ? env : DEFAULT_GRAPHQL_NETWORK
-  return `${GRAPHQL_SUBSCRIPTION_ENDPOINTS[network]}/subscriptions`
-}
-
-/**
- * Optional bearer token sent as an Authorization header on the SSE subscription
- * when the endpoint requires authentication. Configured via
- * VITE_GRAPHQL_SUBSCRIPTION_AUTH_TOKEN. Returns undefined when unset.
- * @category Utilities - Config
- */
-export function getGraphqlSubscriptionAuthToken(): string | undefined {
-  const token = import.meta.env.VITE_GRAPHQL_SUBSCRIPTION_AUTH_TOKEN
-  return typeof token === 'string' && token.length > 0 ? token : undefined
-}
-
 /** Default polling interval in milliseconds.
  *
- * Real-time updates come from the event subscription; this interval is only a
- * slow backstop that catches state changes not covered by a tracked event (or
- * an event the endpoint silently never sent). Override with VITE_POLLING_INTERVAL;
- * set it to 0 to disable the backstop entirely.
+ * Polling is the only source of updates for the selected entity; each tick is
+ * a cheap version check until the object changes. Override with
+ * VITE_POLLING_INTERVAL; set it to 0 to disable polling entirely.
  *  @category Constants
  */
-export const POLLING_INTERVAL = 60000
+export const POLLING_INTERVAL = 15000
 
 /**
  * Resolve the polling-backstop interval in milliseconds.
