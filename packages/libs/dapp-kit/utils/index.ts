@@ -3,8 +3,8 @@ export {
   type WorldTypeKey,
 } from '@evefrontier/wallet-core/tenant'
 export { type AdjustedBurnRate, getAdjustedBurnRate } from './burnRate'
-// Character directory
-export { fetchCharacterDirectory } from './characters'
+// Characters: the directory from world events, and search over it
+export { fetchCharacterDirectory, searchCharacters } from './characters'
 // Constants
 export * from './constants'
 // Datahub utilities

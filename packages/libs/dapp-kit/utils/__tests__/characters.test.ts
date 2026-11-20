@@ -5,7 +5,8 @@ vi.mock('../../graphql/client', () => ({
 }))
 
 import { getEventsByType } from '../../graphql/client'
-import { fetchCharacterDirectory } from '../characters'
+import type { CharacterSummary } from '../../types'
+import { fetchCharacterDirectory, searchCharacters } from '../characters'
 
 // ============================================================================
 // GraphQL client mock helpers
@@ -125,5 +126,66 @@ describe('fetchCharacterDirectory', () => {
     } as Awaited<ReturnType<typeof getEventsByType>>)
 
     await expect(fetchCharacterDirectory()).rejects.toThrow('boom')
+  })
+})
+
+// ============================================================================
+// searchCharacters
+// ============================================================================
+
+const WALLET_A = `0x${'a1'.repeat(32)}`
+const WALLET_B = `0x${'b2'.repeat(32)}`
+const CHAR_A = `0x${'c3'.repeat(32)}`
+const CHAR_B = `0x${'d4'.repeat(32)}`
+
+const characters: CharacterSummary[] = [
+  {
+    characterId: CHAR_A,
+    name: 'Nova Prime',
+    walletAddress: WALLET_A,
+  },
+  {
+    characterId: CHAR_B,
+    name: 'Supernova',
+    walletAddress: WALLET_B,
+  },
+  {
+    characterId: `0x${'e5'.repeat(32)}`,
+    name: '',
+    walletAddress: `0x${'f6'.repeat(32)}`,
+  },
+]
+
+describe('searchCharacters', () => {
+  it('matches names case-insensitively, prefix matches first', () => {
+    expect(searchCharacters(characters, 'NOVA').map((c) => c.name)).toEqual([
+      'Nova Prime',
+      'Supernova',
+    ])
+  })
+
+  it('matches a full wallet address', () => {
+    expect(searchCharacters(characters, WALLET_B)).toEqual([characters[1]])
+  })
+
+  it('never matches a character id', () => {
+    expect(searchCharacters(characters, CHAR_A)).toEqual([])
+    expect(searchCharacters(characters, CHAR_A.slice(0, 8))).toEqual([])
+  })
+
+  it('matches the start of an address, ignoring case and whitespace', () => {
+    expect(searchCharacters(characters, '  0xA1A1 ')).toEqual([characters[0]])
+  })
+
+  it('searches only names without the 0x prefix', () => {
+    expect(searchCharacters(characters, 'a1a1')).toEqual([])
+  })
+
+  it('returns nothing for an empty query', () => {
+    expect(searchCharacters(characters, '   ')).toEqual([])
+  })
+
+  it('caps the number of results', () => {
+    expect(searchCharacters(characters, 'nova', 1)).toHaveLength(1)
   })
 })
