@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { createContext, useCallback, useEffect } from 'react'
-import { useConnection } from '../hooks/useConnection'
 import type { SmartObjectContextType } from '../types'
 import {
   DEFAULT_EVENT_TRANSPORT,
@@ -31,6 +30,8 @@ export const SmartObjectContext = createContext<SmartObjectContextType>({
  * It uses GraphQL queries to fetch the entity on the Sui blockchain, polling
  * for updates.
  *
+ * The entity loads whether or not a wallet is connected; reads are public.
+ *
  * The provider fetches both the entity and its owner (entityOwner):
  * 1. Fetches the entity with its components and action maps
  * 2. Reads the holder of the entity's AccessCap
@@ -53,7 +54,6 @@ const SmartObjectProvider = ({
     setActiveEventTransport(eventTransport)
   }, [eventTransport])
 
-  const { isConnected } = useConnection()
   const { selection, input } = useObjectSelection()
   const {
     entity,
@@ -67,7 +67,6 @@ const SmartObjectProvider = ({
 
   usePollingBackstop({
     input,
-    isConnected,
     fetchObjectData,
     setLoading,
     resetTracking,
