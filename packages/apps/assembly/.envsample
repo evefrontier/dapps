@@ -19,6 +19,14 @@ VITE_EVE_WORLD_TIER="dev"
 # If defined, this will take priority over item IDs passed via URL query param
 VITE_OBJECT_ID="0x08c7bf9636c37ecff92482a62340e5a1a2e8561da687a1c0a6e97758e67ae331"
 
+# Log level: silent | error | warn | info | debug. Defaults to error in production
+# builds and debug in development.
+# VITE_LOG_LEVEL="debug"
+
+# How often to poll the selected entity for changes, in ms (default 15000).
+# 0 turns polling off; the entity is then only read once on load.
+# VITE_POLLING_INTERVAL="15000"
+
 # Set to "true" to render the internal feature-flag dev panel in this build.
 # Leave unset for normal/production builds.
 # VITE_SHOW_FLAG_PANEL="true"
