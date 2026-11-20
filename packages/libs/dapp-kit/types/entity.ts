@@ -18,17 +18,30 @@ export interface EntityIdentity {
   owner: string
 }
 
+/**
+ * How a module takes power: `Firm` modules all get their full requirement or
+ * none do; `Elastic` modules share what is left, in connect order.
+ *
+ * @category Types
+ */
+export type EntityDrawKind = 'Firm' | 'Elastic'
+
 /** @category Types */
 export interface EntityPowerModule {
   desiredOnline: boolean
   activeDraw: string
   powerReq: string
+  drawKind: EntityDrawKind
 }
 
 /** @category Types */
 export interface EntityGenerator {
   online: boolean
   maxOutputMw: string
+  /** Fixed point at 10^4; divides the fuel's containment burden */
+  containmentReduction: string
+  /** Fuel per second, at 10^4, burned while the grid has no fuel impulse */
+  baseFuelRate: string
 }
 
 /**
@@ -43,7 +56,11 @@ export interface EntityPowerGrid {
   fuelCapacity: string
   capacityMw: string
   lastSettledMs: string
-  /** Keyed by module component id */
+  /** Pooled fuel impulse, at 10^4; 0 means generators burn their base rate */
+  fuelImpulse: string
+  /** Pooled fuel containment burden, at 10^4 */
+  fuelContainmentBurden: string
+  /** Keyed by module component id, in connect order */
   modules: Record<string, EntityPowerModule>
   /** Keyed by generator component id */
   generators: Record<string, EntityGenerator>
@@ -102,6 +119,22 @@ export interface EntityComponent {
   json: unknown
 }
 
+/** One requirement an action checks before it runs. @category Types */
+export interface EntityActionRequirement {
+  /** Move type of the requirement, e.g. `<package>::power_grid::OperateGrid` */
+  typeName: string
+  /** Component the requirement is checked against */
+  componentId: string
+}
+
+/** An action registered on the entity, with what it requires. @category Types */
+export interface EntityAction {
+  name: string
+  /** Which action map it is in: admin or owner */
+  scope: 'admin' | 'owner'
+  requirements: EntityActionRequirement[]
+}
+
 /** @category Types */
 export interface EntityData {
   id: string
@@ -117,12 +150,16 @@ export interface EntityData {
   layout: EntityLayout | null
   inventories: EntityInventory[]
   genericModules: EntityGenericModule[]
+  /** Character ids allowed to control the entity; null when it has no access list */
+  controllers: string[] | null
   /** Every installed component, including the parsed ones */
   components: EntityComponent[]
   /** Names of admin actions */
   adminActions: string[]
   /** Names of owner actions */
   ownerActions: string[]
+  /** Every admin and owner action with its requirements */
+  actions: EntityAction[]
 }
 
 /**

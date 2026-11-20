@@ -6,8 +6,10 @@ import type {
   NestedTableRef,
 } from '../graphql/types'
 import type {
+  EntityAction,
   EntityComponent,
   EntityData,
+  EntityDrawKind,
   EntityGenerator,
   EntityInventory,
   EntityLayout,
@@ -59,15 +61,25 @@ interface PowerGridJson {
   on: boolean
   fuel_quantity_at_last_settled: string
   fuel_capacity: string
+  fuel_impulse: string
+  fuel_containment_burden: string
   capacity_mw: string
   last_settled_ms: string
   modules: VecMap<{
-    module_spec: { power_req: string }
+    module_spec: { power_req: string; draw_kind: { '@variant': string } }
     desired_online: boolean
     active_draw_at_last_settled: string
   }>
-  generators: VecMap<{ online: boolean; max_output_mw: string }>
+  generators: VecMap<{
+    online: boolean
+    max_output_mw: string
+    containment_reduction: string
+    base_fuel_rate: string
+  }>
   fuel_sources: VecMap<string>
+}
+interface ActionJson {
+  requirements: Array<{ type_name: string; component_id: string }>
 }
 interface LayoutJson {
   section_ids: VecSet<string>
@@ -86,6 +98,10 @@ interface LinkedTableNodeJson {
 }
 interface GenericModuleJson {
   type_id: string
+}
+// TODO(contract): assumed shape of the access-list component, which world-contracts does not define yet
+interface AccessListJson {
+  controllers: VecSet<string>
 }
 
 const ENTITY_TYPE = /::entity::Entity$/
@@ -197,6 +213,7 @@ function parsePowerGrid(inner: PowerGridJson): EntityPowerGrid {
       desiredOnline: value.desired_online,
       activeDraw: value.active_draw_at_last_settled,
       powerReq: value.module_spec.power_req,
+      drawKind: value.module_spec.draw_kind['@variant'] as EntityDrawKind,
     }
   }
   const generators: Record<string, EntityGenerator> = {}
@@ -204,6 +221,8 @@ function parsePowerGrid(inner: PowerGridJson): EntityPowerGrid {
     generators[key] = {
       online: value.online,
       maxOutputMw: value.max_output_mw,
+      containmentReduction: value.containment_reduction,
+      baseFuelRate: value.base_fuel_rate,
     }
   }
   const fuelSources: Record<string, string> = {}
@@ -216,10 +235,26 @@ function parsePowerGrid(inner: PowerGridJson): EntityPowerGrid {
     fuelCapacity: inner.fuel_capacity,
     capacityMw: inner.capacity_mw,
     lastSettledMs: inner.last_settled_ms,
+    fuelImpulse: inner.fuel_impulse,
+    fuelContainmentBurden: inner.fuel_containment_burden,
     modules,
     generators,
     fuelSources,
   }
+}
+
+function parseActions(
+  json: VecMap<ActionJson>,
+  scope: EntityAction['scope'],
+): EntityAction[] {
+  return json.contents.map(({ key, value }) => ({
+    name: key,
+    scope,
+    requirements: value.requirements.map((requirement) => ({
+      typeName: requirement.type_name,
+      componentId: requirement.component_id,
+    })),
+  }))
 }
 
 function parseLayout(
@@ -293,23 +328,25 @@ export function parseEntity(raw: RawEntity): EntityData {
     layout: null,
     inventories: [],
     genericModules: [],
+    controllers: null,
     components: [],
     adminActions: [],
     ownerActions: [],
+    actions: [],
   }
 
   for (const { name, value, table } of raw.fields) {
     const keyType = name.type.repr
     if (keyType.endsWith('::entity::AdminActionsKey')) {
-      entity.adminActions = (value.json as VecMap<unknown>).contents.map(
-        (entry) => entry.key,
-      )
+      const actions = parseActions(value.json as VecMap<ActionJson>, 'admin')
+      entity.adminActions = actions.map((action) => action.name)
+      entity.actions.push(...actions)
       continue
     }
     if (keyType.endsWith('::entity::OwnerActionsKey')) {
-      entity.ownerActions = (value.json as VecMap<unknown>).contents.map(
-        (entry) => entry.key,
-      )
+      const actions = parseActions(value.json as VecMap<ActionJson>, 'owner')
+      entity.ownerActions = actions.map((action) => action.name)
+      entity.actions.push(...actions)
       continue
     }
     if (keyType.endsWith('::entity::InFlight')) {
@@ -359,6 +396,9 @@ export function parseEntity(raw: RawEntity): EntityData {
           name: component.name,
           typeId: (inner as GenericModuleJson).type_id,
         })
+        break
+      case 'access_list::AccessList':
+        entity.controllers = (inner as AccessListJson).controllers.contents
         break
     }
   }
