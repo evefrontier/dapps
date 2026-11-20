@@ -48,6 +48,12 @@ export const FLAG_DEFINITIONS = {
     variants: { on: 'on', off: 'off' },
     defaultVariant: 'off',
   },
+  'assembly-edit-without-metadata': {
+    description:
+      'Identity panel: show Edit details to the shell and controllers even when the Assembly has no Metadata component, starting from empty details. Saving then fails on chain, since metadata::edit needs the component.',
+    variants: { on: 'on', off: 'off' },
+    defaultVariant: 'off',
+  },
 } satisfies Record<string, FlagDefinition>
 
 export type FlagKey = keyof typeof FLAG_DEFINITIONS
