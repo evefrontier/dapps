@@ -31,11 +31,16 @@ export type FlagDefinition = {
 }
 
 export const FLAG_DEFINITIONS = {
-  'assembly-dapp-index-fallback': {
+  'assembly-view-as': {
     description:
-      'Fall back to Dapp Index for an assembly with no custom dapp of its own. No effect unless VITE_DAPP_INDEX_URL is set for this environment.',
-    variants: { on: 'on', off: 'off' },
-    defaultVariant: 'off',
+      'Dev and test builds only: show the console as a visitor, controller or shell, whatever wallet is connected. Display only; transactions still use the real wallet.',
+    variants: {
+      actual: 'actual',
+      visitor: 'visitor',
+      controller: 'controller',
+      shell: 'shell',
+    },
+    defaultVariant: 'actual',
   },
   'assembly-controllers': {
     description:

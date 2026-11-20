@@ -1,0 +1,1086 @@
+/* Grid console. Ported from the design sketch (Creation Builder language).
+   Everything is scoped under .gc; breakpoints are container queries on the
+   console's own width: desktop 1024px and up, tablet 768-1023px, mobile below. */
+/* The page around the console. `html` raises specificity above the
+   ui-components base styles, which set their own body background. */
+html,
+html body,
+html #root {
+  min-height: 100%;
+  background: #0b0b0c;
+  font-family: "Favorit", monospace;
+  font-weight: 300;
+}
+.gc-page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.gc {
+  color-scheme: dark;
+  --bg: #0b0b0c;
+  --ink: #fafae5;
+  --line: #2a2a2b;
+  --n60: rgba(250, 250, 229, 0.6);
+  --n50: rgba(250, 250, 229, 0.5);
+  --n40: rgba(250, 250, 229, 0.4);
+  --n30: rgba(250, 250, 229, 0.3);
+  --n20: rgba(250, 250, 229, 0.2);
+  --n10: rgba(250, 250, 229, 0.1);
+  --n05: rgba(250, 250, 229, 0.05);
+  --crude: rgba(11, 11, 11, 0.6);
+  --brand: #ff4700;
+  --brand-40: rgba(255, 71, 0, 0.4);
+  --brand-60: rgba(255, 71, 0, 0.6);
+  --brand-10: rgba(255, 71, 0, 0.1);
+  --power: #2350d8;
+  --fuel: #ff4700;
+  --amber: #ffb651;
+  --amber-30: rgba(255, 182, 81, 0.3);
+  --offline: #ff4d4d;
+  --offline-bg: #3a1515;
+  --relate: #4fd0da;
+  --font-display:
+    var(--font-disket, "Frontier Disket Mono"), var(--font-favorit, "Favorit"),
+    ui-monospace, monospace;
+  --font-body: var(--font-favorit, "Favorit"), ui-monospace, monospace;
+  container-type: inline-size;
+  container-name: gc;
+  position: relative;
+  width: 100%;
+  background: rgba(11, 11, 12, 0.92);
+  color: var(--ink);
+  font: 300 14px / 1.5 var(--font-body);
+  letter-spacing: -0.02em;
+  user-select: text;
+}
+.gc *,
+.gc *::before,
+.gc *::after {
+  box-sizing: border-box;
+}
+.gc button,
+.gc input,
+.gc select,
+.gc a {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+.gc :focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 2px;
+}
+.gc .eyebrow {
+  font: 400 11px / 1 var(--font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--n50);
+}
+.gc .orn {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.gc .orn svg {
+  width: 14px;
+  height: 14px;
+}
+.gc .note {
+  margin: 0;
+  padding: 24px 20px;
+  color: var(--n60);
+  font-size: 13px;
+}
+.gc .dapp-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--bg);
+}
+.gc .c-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 48px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line);
+}
+.gc .c-top .screen-title {
+  font-size: 12px;
+}
+.gc .who {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.gc .role-chip {
+  font: 400 10px / 1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 6px;
+  border: 1px solid var(--n30);
+  color: var(--n60);
+  white-space: nowrap;
+}
+.gc .role-chip.shell {
+  background: var(--brand-40);
+  border-color: var(--brand-60);
+  color: var(--ink);
+}
+.gc .role-chip.controller {
+  border-color: var(--relate);
+  color: var(--relate);
+}
+.gc .wallet {
+  font-size: 12px;
+  color: var(--n50);
+  white-space: nowrap;
+}
+.gc .strip {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--n60);
+  background: rgba(250, 250, 229, 0.03);
+}
+.gc .strip b {
+  flex: none;
+  font: 400 10.5px / 1.4 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.gc .strip.lock {
+  background: var(--brand-10);
+  color: var(--ink);
+}
+.gc .strip.lock b {
+  color: var(--brand);
+}
+.gc .strip .spin {
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--brand);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: gc-spin 0.8s linear infinite;
+  flex: none;
+  align-self: center;
+}
+@keyframes gc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.gc .c-body {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 32px;
+  padding: 20px 20px 24px;
+}
+.gc .rail {
+  display: flex;
+  gap: 14px;
+  margin: 0 0 18px -6px;
+}
+.gc .tab {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--ink);
+}
+.gc .tab svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.gc .tab .dia {
+  fill: rgba(11, 11, 12, 0.55);
+}
+.gc .tab:hover .dia {
+  fill: rgba(255, 255, 255, 0.04);
+}
+.gc .tab[aria-selected="true"] {
+  color: var(--brand);
+}
+.gc .tab .tl {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 2px);
+  transform: translateX(-50%);
+  font: 400 9.5px / 1 var(--font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--n40);
+}
+.gc .tab[aria-selected="true"] .tl {
+  color: var(--brand);
+}
+.gc .tab:focus-visible {
+  outline: none;
+}
+.gc .tab:focus-visible .dia {
+  stroke: var(--ink);
+}
+.gc .ident {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.gc .code {
+  font-size: 15px;
+  color: var(--n60);
+}
+.gc .name-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.gc .name-row h2.unnamed {
+  color: var(--n50);
+}
+.gc .name-row h2 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font: 400 28px / 1.25 var(--font-display);
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.gc .desc {
+  margin: 0;
+  color: var(--n60);
+  font-size: 13px;
+}
+.gc .kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin: 0;
+  font-size: 13px;
+}
+.gc .kv dt {
+  color: var(--n50);
+}
+.gc .kv dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.gc .lnk {
+  color: var(--ink);
+  text-decoration: underline dotted var(--n40);
+  text-underline-offset: 3px;
+}
+.gc .lnk:hover {
+  color: var(--brand);
+  text-decoration-color: var(--brand);
+}
+
+.gc .state-big {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--n20);
+}
+.gc .state-big .led {
+  width: 10px;
+  height: 10px;
+}
+.gc .state-big b {
+  font: 400 16px / 1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.gc .state-big span {
+  margin-left: auto;
+  color: var(--n50);
+  font-size: 12px;
+  text-align: right;
+}
+/* biome-ignore lint/style/noDescendingSpecificity: the base lamp; .state-big .led and .plate .led resize it on purpose */
+.gc .led {
+  flex: none;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--n20);
+}
+.gc [data-state="on"] .led,
+.gc .led.on {
+  background: var(--brand);
+  border-color: var(--brand);
+  box-shadow: 0 0 6px rgba(255, 71, 0, 0.6);
+}
+.gc [data-state="wait"] .led {
+  background: var(--amber);
+  border-color: var(--amber);
+}
+.gc [data-state="main"] .led {
+  border-color: var(--offline);
+}
+
+.gc .ro {
+  display: grid;
+  grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr));
+  border: 1px solid var(--n20);
+}
+.gc .ro > div {
+  padding: 8px 10px;
+  border-right: 1px solid var(--n10);
+  min-width: 0;
+}
+.gc .ro > div:last-child {
+  border-right: 0;
+}
+.gc .ro span {
+  display: block;
+  font: 400 9.5px / 1.2 var(--font-display);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--n50);
+}
+.gc .ro b {
+  display: block;
+  margin-top: 4px;
+  font: 400 18px / 1.2 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.gc .ro b small {
+  font: 300 11px / 1 var(--font-body);
+  color: var(--n50);
+  margin-left: 3px;
+}
+
+.gc .gauge-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gc .gauge-row > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+.gc .gauge-row > div:first-child span {
+  color: var(--n50);
+}
+.gc .gauge {
+  height: 8px;
+  background: var(--n05);
+}
+.gc .gauge i {
+  display: block;
+  height: 100%;
+  background: var(--power);
+}
+.gc .banner {
+  padding: 8px 12px;
+  border: 1px solid var(--brand);
+  font-size: 12.5px;
+  color: var(--n60);
+}
+.gc .banner b {
+  display: block;
+  font: 400 10.5px / 1.4 var(--font-display);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--brand);
+  margin-bottom: 2px;
+}
+.gc .banner.amber {
+  border-color: var(--amber-30);
+}
+.gc .banner.amber b {
+  color: var(--amber);
+}
+
+.gc .banner.red {
+  border-color: var(--offline);
+}
+.gc .banner.red b {
+  color: var(--offline);
+}
+.gc .main {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+.gc .cols {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.gc .stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.gc .mb {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid var(--n20);
+}
+.gc .mb.off {
+  border-color: var(--offline);
+}
+.gc .mb-r {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.gc .mb-r .eyebrow {
+  font-size: 10px;
+}
+.gc .mb-r b {
+  font: 400 20px / 1.2 var(--font-display);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.gc .mb.off .mb-r b {
+  color: var(--offline);
+}
+.gc .mb-r p {
+  margin: 0;
+  color: var(--n50);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.gc .plate {
+  flex: none;
+  width: 44px;
+  height: 88px;
+  border: 1px solid var(--n20);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+.gc .plate .led {
+  width: 12px;
+  height: 12px;
+}
+.gc .plate.off .led {
+  border-color: var(--offline);
+  background: var(--offline-bg);
+}
+.gc .plate i {
+  font: 400 9px / 1 var(--font-display);
+  letter-spacing: 0.08em;
+  color: var(--n50);
+  font-style: normal;
+}
+.gc .gbtn {
+  --brk: var(--n30);
+  position: relative;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--n10);
+  background: var(--brand-40);
+  cursor: pointer;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.gc .gbtn::before,
+.gc .gbtn::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: 3px;
+  border: 1px solid var(--brk);
+  pointer-events: none;
+}
+.gc .gbtn::before {
+  left: -1px;
+  border-right: 0;
+}
+.gc .gbtn::after {
+  right: -1px;
+  border-left: 0;
+}
+.gc .gbtn:hover:not(:disabled) {
+  background: var(--brand-60);
+}
+.gc .gbtn.plain {
+  --brk: var(--n10);
+  background: var(--n05);
+  border-color: var(--n05);
+}
+.gc .gbtn.plain:hover:not(:disabled) {
+  background: rgba(250, 250, 229, 0.12);
+}
+.gc .gbtn:disabled {
+  --brk: var(--n10);
+  background: var(--n05);
+  color: var(--n30);
+  cursor: default;
+}
+.gc .fuel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--n20);
+  background: var(--crude);
+}
+.gc .fuel-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.gc .fuel-h b {
+  font: 400 13px / 1 var(--font-display);
+  text-transform: uppercase;
+}
+.gc .fuel-h span {
+  font-size: 12px;
+  color: var(--n50);
+}
+.gc .segs {
+  display: flex;
+  gap: 2px;
+  height: 28px;
+}
+.gc .segs i {
+  flex: 1;
+  background: var(--n20);
+  opacity: 0.5;
+}
+.gc .segs i.f {
+  background: var(--fuel);
+  opacity: 1;
+}
+.gc .segs.low i.f {
+  background: var(--amber);
+}
+.gc .fuel-n {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.gc .fuel-n b {
+  font: 400 18px / 1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+/* biome-ignore lint/style/noDescendingSpecificity: a different element from .ro b small */
+.gc .fuel-n small {
+  color: var(--n50);
+  font-size: 12px;
+}
+.gc .est {
+  color: var(--n50);
+  font-size: 12px;
+}
+.gc .est em {
+  font-style: normal;
+  color: var(--ink);
+}
+.gc .src {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid var(--n10);
+  padding-top: 8px;
+  font-size: 12.5px;
+}
+.gc .src div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--n60);
+}
+.gc .src div b {
+  font-weight: 300;
+  color: var(--ink);
+}
+.gc .board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.gc .col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.gc .col-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  padding: 4px 8px;
+  background: var(--n10);
+}
+.gc .col-h b {
+  font: 400 12px / 1 var(--font-display);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gc .col-h span {
+  flex: none;
+  font-size: 12px;
+  color: var(--n60);
+}
+.gc .card {
+  --nm: var(--n30);
+  --bd: var(--n30);
+  --us: var(--n30);
+  --fr: var(--n10);
+  --cn: var(--n10);
+  --fl: var(--crude);
+  position: relative;
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--fr);
+  background: var(--fl);
+  text-align: left;
+  color: var(--ink);
+}
+.gc .card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--cn), var(--cn)) left top / 8px 1px no-repeat,
+    linear-gradient(var(--cn), var(--cn)) left top / 1px 8px no-repeat,
+    linear-gradient(var(--cn), var(--cn)) right top / 8px 1px no-repeat,
+    linear-gradient(var(--cn), var(--cn)) right top / 1px 8px no-repeat,
+    linear-gradient(var(--cn), var(--cn)) left bottom / 8px 1px no-repeat,
+    linear-gradient(var(--cn), var(--cn)) left bottom / 1px 8px no-repeat,
+    linear-gradient(var(--cn), var(--cn)) right bottom / 8px 1px no-repeat,
+    linear-gradient(var(--cn), var(--cn)) right bottom / 1px 8px no-repeat;
+}
+.gc .card[data-state="on"] {
+  --nm: var(--ink);
+  --bd: var(--brand);
+  --us: var(--n50);
+  --fr: var(--brand-40);
+  --cn: var(--brand-60);
+}
+.gc .card[data-state="wait"] {
+  --nm: var(--ink);
+  --bd: var(--amber);
+  --us: rgba(255, 182, 81, 0.8);
+  --fr: var(--amber-30);
+  --cn: rgba(255, 182, 81, 0.5);
+}
+.gc .card[data-state="main"] {
+  --nm: var(--n60);
+  --bd: var(--offline);
+  --us: var(--n40);
+}
+.gc .card-l {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-top: 2px;
+}
+.gc .card-b {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.gc .card-n {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+}
+.gc .card-n b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 300;
+  font-size: 13.5px;
+  color: var(--nm);
+}
+.gc .card-n b i {
+  font-style: normal;
+  color: var(--n30);
+  margin-left: 5px;
+  font-size: 11.5px;
+}
+.gc .card-n span {
+  flex: none;
+  font: 400 11px / 1 var(--font-display);
+  text-transform: uppercase;
+  color: var(--bd);
+}
+.gc .card-u {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--us);
+}
+.gc .card-u span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gc .card-s {
+  font-size: 12px;
+  color: var(--us);
+}
+.gc .none-note {
+  margin: 0;
+  color: var(--n50);
+  font-size: 12.5px;
+}
+.gc .secs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.gc .sec {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--crude);
+  border: 1px solid var(--n20);
+  min-width: 0;
+}
+.gc .sec-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--n30);
+}
+.gc .sec-h b {
+  font: 400 14px / 19px var(--font-display);
+  text-transform: uppercase;
+}
+.gc .sec-h span {
+  color: var(--n30);
+  font-size: 13px;
+}
+
+.gc .inv-r {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 8px;
+  font-size: 13px;
+}
+.gc .inv-r span {
+  color: var(--n50);
+  font-variant-numeric: tabular-nums;
+}
+.gc .meter {
+  grid-column: 1 / 3;
+  height: 4px;
+  background: var(--n10);
+}
+.gc .meter i {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+}
+.gc .inv-items {
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.gc .inv-items li {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto 64px;
+  gap: 8px;
+  align-items: center;
+  padding: 3px 6px;
+  background: var(--crude);
+  border: 1px solid var(--n10);
+  font-size: 12.5px;
+}
+.gc .inv-items .itm-ic {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--n40);
+  transform: rotate(45deg) scale(0.8);
+}
+.gc .inv-items .in {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gc .inv-items .iq {
+  font-variant-numeric: tabular-nums;
+}
+.gc .inv-items .iv {
+  text-align: right;
+  color: var(--n50);
+  font-variant-numeric: tabular-nums;
+}
+.gc .dapp {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.gc .dapp-warn {
+  margin: 0;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  padding: 6px 10px;
+  border: 1px solid var(--amber-30);
+  background: rgba(255, 182, 81, 0.06);
+  font-size: 12.5px;
+  color: var(--n60);
+}
+.gc .dapp-warn b {
+  font: 400 10.5px / 1.4 var(--font-display);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.gc .dapp-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  background: var(--n10);
+  min-width: 0;
+}
+.gc .dapp-host {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+}
+.gc .dapp-bar .gbtn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--ink);
+}
+.gc .dapp-frame {
+  position: relative;
+  min-height: 560px;
+  border: 1px solid var(--n20);
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(250, 250, 229, 0.025) 0 10px,
+      transparent 10px 20px
+    ),
+    var(--bg);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.gc .dapp-ph {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  text-align: center;
+  max-width: 46ch;
+  color: var(--n50);
+  font-size: 12.5px;
+}
+.gc .dapp-ph b {
+  font: 400 18px / 1.2 var(--font-display);
+  text-transform: uppercase;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.gc .dapp-ph code {
+  font-size: 11px;
+  color: var(--n40);
+  background: none;
+  overflow-wrap: anywhere;
+}
+@container gc (max-width: 1023.98px) {
+  .gc .c-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  .gc .ident {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 10px 32px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .gc .ident > .id-head {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .gc .ident > .state-big {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .gc .ident > .desc {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .gc .ident > .kv {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: end;
+  }
+  .gc .ident > .kv.more {
+    grid-row: 3;
+    align-self: start;
+  }
+  .gc .cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .gc .ctl {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px 16px;
+    align-items: start;
+  }
+  .gc .ctl > * {
+    grid-column: 1;
+  }
+  .gc .ctl > .fuel {
+    grid-column: 2;
+    grid-row: 1 / span 6;
+  }
+  .gc .board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container gc (max-width: 767.98px) {
+  .gc .c-top {
+    padding: 0 14px;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+  }
+  .gc .c-top .orn {
+    display: none;
+  }
+  .gc .wallet {
+    display: none;
+  }
+  .gc .strip {
+    padding: 8px 14px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+  }
+  .gc .c-body {
+    gap: 18px;
+    padding: 14px 14px 20px;
+  }
+  .gc .ident {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+  .gc .ident .desc,
+  .gc .ident .kv.more {
+    display: none;
+  }
+  .gc .ident > .kv {
+    align-self: stretch;
+  }
+  .gc .name-row h2 {
+    font-size: 22px;
+  }
+  .gc .rail {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .gc .tab {
+    width: 52px;
+    height: 52px;
+  }
+  .gc .ctl {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .gc .board {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .gc .dapp-frame {
+    min-height: 440px;
+    padding: 16px;
+  }
+  .gc .secs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .gc .ro b {
+    font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gc .strip .spin {
+    animation: none;
+  }
+}
+
+.gc .gauge-row b,
+.gc .inv-r b {
+  font-weight: 300;
+}
