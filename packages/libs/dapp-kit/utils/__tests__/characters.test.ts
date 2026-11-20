@@ -164,20 +164,17 @@ describe('searchCharacters', () => {
     ])
   })
 
-  it('matches a full wallet address', () => {
-    expect(searchCharacters(characters, WALLET_B)).toEqual([characters[1]])
+  it('ignores surrounding whitespace', () => {
+    expect(searchCharacters(characters, '  prime ')).toEqual([characters[0]])
   })
 
-  it('never matches a character id', () => {
+  it('never matches a wallet address or character id', () => {
+    expect(searchCharacters(characters, WALLET_B)).toEqual([])
+    expect(searchCharacters(characters, '0xA1A1')).toEqual([])
     expect(searchCharacters(characters, CHAR_A)).toEqual([])
-    expect(searchCharacters(characters, CHAR_A.slice(0, 8))).toEqual([])
   })
 
-  it('matches the start of an address, ignoring case and whitespace', () => {
-    expect(searchCharacters(characters, '  0xA1A1 ')).toEqual([characters[0]])
-  })
-
-  it('searches only names without the 0x prefix', () => {
+  it('searches only names, not addresses without the 0x prefix', () => {
     expect(searchCharacters(characters, 'a1a1')).toEqual([])
   })
 

@@ -4,14 +4,14 @@ import { searchCharacters } from '../utils/characters'
 import { useCharacterDirectory } from './useCharacterDirectory'
 
 /**
- * Hook for searching characters by name or wallet address (never by
- * character id). The query is deferred so typing stays responsive over a
- * large list.
+ * Hook for searching characters by name (see {@link searchCharacters}). The
+ * query is deferred so typing stays responsive over a large list.
  *
  * @category Hooks - Characters
- * @param query - Search text; `0x…` matches the start of wallet addresses
+ * @param query - Search text
  * @param options.enabled - False skips fetching the character directory.
  *   Default true.
+ * @param options.limit - Maximum number of results. Default 20.
  * @returns
  *   - `results` - Matching characters, prefix name matches first
  *   - `isLoading` - True while the character list is first being fetched
@@ -19,17 +19,18 @@ import { useCharacterDirectory } from './useCharacterDirectory'
  */
 export function useCharacterSearch(
   query: string,
-  options: { enabled?: boolean } = {},
+  options: { enabled?: boolean; limit?: number } = {},
 ): {
   results: CharacterSummary[]
   isLoading: boolean
   error: Error | null
 } {
-  const { data, isLoading, error } = useCharacterDirectory(options)
+  const { limit, ...directoryOptions } = options
+  const { data, isLoading, error } = useCharacterDirectory(directoryOptions)
   const deferredQuery = useDeferredValue(query)
   const results = useMemo(
-    () => (data ? searchCharacters(data, deferredQuery) : []),
-    [data, deferredQuery],
+    () => (data ? searchCharacters(data, deferredQuery, limit) : []),
+    [data, deferredQuery, limit],
   )
   return { results, isLoading, error }
 }
