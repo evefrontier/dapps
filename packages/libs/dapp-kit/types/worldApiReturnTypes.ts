@@ -1,5 +1,4 @@
 import type { MoveObjectData, RawSuiObjectData } from '../graphql/types'
-import type { TransformOptions } from '../utils'
 import { Assemblies, type DatahubGameInfo, State } from './types'
 
 // =========================================
@@ -128,7 +127,6 @@ export interface SmartAssemblyResponse {
   energyUsage: number
   typeId: number
   _raw?: MoveObjectData
-  _options?: TransformOptions
 }
 
 /** @category Types */

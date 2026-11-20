@@ -5,7 +5,7 @@ import {
 import { bcs } from '@mysten/sui/bcs'
 import { deriveObjectID } from '@mysten/sui/utils'
 import { getSingletonObjectByType } from '../graphql/client'
-import { Assemblies, State } from '../types'
+import { State } from '../types'
 import { getWorldType, TenantId } from './constants'
 
 /**
@@ -30,34 +30,6 @@ export function parseStatus(statusVariant: string | undefined): State {
     default:
       return State.NULL
   }
-}
-
-/**
- * Get assembly type from Move object type tag
- * @param typeRepr - The Move object type tag
- * @returns The assembly type as an enum
- *
- * @category Utilities - Mapping
- */
-export function getAssemblyType(typeRepr: string): Assemblies {
-  if (typeRepr.includes('::storage_unit::StorageUnit')) {
-    return Assemblies.SmartStorageUnit
-  }
-  if (typeRepr.includes('::turret::Turret')) {
-    return Assemblies.SmartTurret
-  }
-  if (typeRepr.includes('::gate::Gate')) {
-    return Assemblies.SmartGate
-  }
-  if (typeRepr.includes('::network_node::NetworkNode')) {
-    return Assemblies.NetworkNode
-  }
-  if (typeRepr.includes('::assembly::Assembly')) {
-    return Assemblies.Assembly
-  }
-
-  // Assembly type not found, return default Assembly
-  return Assemblies.Assembly
 }
 
 // Cache for the Registry address, keyed by tenant

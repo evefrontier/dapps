@@ -5,7 +5,6 @@ import {
   formatDuration,
   getAdjustedBurnRate,
   getDatahubGameInfo,
-  getFuelEfficiencyForType,
   State,
   TYPEIDS,
   useSmartObject,
@@ -53,7 +52,7 @@ const MonitorView = React.memo(() => {
   const [frozenTimeRemaining, setFrozenTimeRemaining] = useState<number | null>(
     null,
   )
-  // Efficiency-adjusted ms to burn one unit; set together with unitsPerHour from getAdjustedBurnRate.
+  // ms to burn one unit; set together with unitsPerHour from getAdjustedBurnRate.
   const [burnTimeInMs, setburnTimeInMs] = useState(0)
   const [unitsPerHour, setUnitsPerHour] = useState(0)
   const [timeRemaining, setTimeRemaining] = useState(0)
@@ -65,28 +64,16 @@ const MonitorView = React.memo(() => {
   const containerRef = useRef<null | HTMLDivElement>(null)
   const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction()
 
-  // Get the fuel efficiency-adjusted burn time per unit (and rate derived from it)
+  // Get the burn time per unit (and rate derived from it)
   useEffect(() => {
     if (!assembly || assembly.type !== Assemblies.NetworkNode) return
 
-    const rawBurnTimeInMs = assembly.networkNode.fuel.burnTimeInMs
-    const initial = getAdjustedBurnRate(rawBurnTimeInMs, null)
-    setburnTimeInMs(initial.burnTimePerUnitMs)
-    setUnitsPerHour(initial.unitsPerHour)
-
-    const applyEfficiency = async () => {
-      const fuelEfficiency = await getFuelEfficiencyForType(
-        assembly.networkNode.fuel.typeId,
-      )
-      const { burnTimePerUnitMs, unitsPerHour: rate } = getAdjustedBurnRate(
-        rawBurnTimeInMs,
-        fuelEfficiency,
-      )
-      setburnTimeInMs(burnTimePerUnitMs)
-      setUnitsPerHour(rate)
-    }
-
-    applyEfficiency()
+    const { burnTimePerUnitMs, unitsPerHour: rate } = getAdjustedBurnRate(
+      assembly.networkNode.fuel.burnTimeInMs,
+      null,
+    )
+    setburnTimeInMs(burnTimePerUnitMs)
+    setUnitsPerHour(rate)
   }, [assembly])
 
   // Calculate time remaining (all values in seconds)

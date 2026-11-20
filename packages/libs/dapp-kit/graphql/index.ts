@@ -1,10 +1,7 @@
 // Client & Query Execution
 export {
   executeGraphQLQuery,
-  getAssemblyWithOwner,
-  getCharacterAndOwnedObjects,
   getEntity,
-  getObjectAndCharacterOwner,
   getObjectByAddress,
   getObjectLatestVersion,
   getObjectOwner,
@@ -17,8 +14,6 @@ export {
   getOwnedObjectsByType,
   getSingletonObjectByType,
   getTableEntries,
-  // Character/owner resolution
-  getWalletCharacters,
 } from './client'
 
 // Query Strings
@@ -37,11 +32,9 @@ export {
   GET_OBJECTS_BY_TYPE,
   GET_OWNED_OBJECTS_BY_PACKAGE,
   GET_OWNED_OBJECTS_BY_TYPE,
-  GET_SINGLETON_CONFIG_OBJECT_BY_TYPE,
   // Singleton & type-based queries
   GET_SINGLETON_OBJECT_BY_TYPE,
   GET_TABLE_ENTRIES,
-  GET_WALLET_CHARACTERS,
 } from './queries'
 
 // Types

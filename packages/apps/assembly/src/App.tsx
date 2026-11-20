@@ -1,14 +1,11 @@
 import {
-  CharacterInfo,
+  type CharacterInfo,
   createLogger,
-  getWalletCharacters,
-  parseCharacterFromJson,
   useConnection,
   useNotification,
   useSmartObject,
 } from '@evefrontier/dapp-kit'
 import { useCurrentAccount } from '@mysten/dapp-kit-react'
-import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 
 import './App.css'
@@ -29,7 +26,8 @@ const log = createLogger()
  * Main App component that handles different rendering states based on connection and client status.
  */
 const App = () => {
-  const [userCharacter, setUserCharacter] = useState<CharacterInfo | null>(null)
+  // TODO: resolve the wallet's character from the entity model
+  const userCharacter: CharacterInfo | null = null
   const { handleConnect, handleDisconnect, walletAddress, hasEveVault } =
     useConnection()
   const { notification } = useNotification()
@@ -37,27 +35,6 @@ const App = () => {
 
   const currentAccount = useCurrentAccount()
   const connected = !!currentAccount
-
-  // Get the character from the wallet
-  useEffect(() => {
-    if (connected) {
-      getWalletCharacters(currentAccount?.address).then((response) => {
-        const data = response.data
-        if (!data) {
-          log.warn('[Dapp] No data returned from getWalletCharacters')
-          return
-        }
-        const json =
-          data?.address?.objects?.nodes?.[0]?.contents?.extract?.asAddress
-            ?.asObject?.asMoveObject?.contents?.json
-        const characterInfo = parseCharacterFromJson(json)
-
-        if (characterInfo) {
-          setUserCharacter(characterInfo)
-        }
-      })
-    }
-  }, [connected, currentAccount?.address])
 
   // Check if the user is on a client route
   const { pathname } = useLocation()
@@ -126,10 +103,7 @@ const App = () => {
 
       <EveLayout
         connected={connected}
-        handleDisconnect={() => {
-          handleDisconnect()
-          setUserCharacter(null)
-        }}
+        handleDisconnect={handleDisconnect}
         isClient={isClient}
         walletAddress={walletAddress || ''}
         userCharacter={userCharacter}
