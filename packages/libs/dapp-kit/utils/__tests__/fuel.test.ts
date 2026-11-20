@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { EntityPowerGrid } from '../../types'
 import {
-  effectiveCapacityMw,
   fromFixed,
   fuelBurn,
   fuelBurnPerHour,
@@ -34,6 +33,8 @@ function loadedGrid(overrides: Partial<EntityPowerGrid> = {}): EntityPowerGrid {
         activeDraw: '100000',
         powerReq: '100000',
         drawKind: 'Firm',
+        priority: '0',
+        lineLoss: '0',
       },
     },
     generators: {
@@ -115,6 +116,8 @@ describe('fuelBurn', () => {
           activeDraw: '1200000',
           powerReq: '1200000',
           drawKind: 'Firm',
+          priority: '0',
+          lineLoss: '0',
         },
       },
       generators: {
@@ -143,6 +146,8 @@ describe('fuelBurn', () => {
           activeDraw: '0',
           powerReq: '100000',
           drawKind: 'Firm',
+          priority: '0',
+          lineLoss: '0',
         },
       },
     })
@@ -170,12 +175,8 @@ describe('fuelBurn', () => {
 })
 
 describe('grid figures', () => {
-  it('sums module draws and reports capacity only while on with fuel', () => {
-    const grid = loadedGrid()
-    expect(usedMw(grid)).toBe(100_000n)
-    expect(effectiveCapacityMw(grid)).toBe(150_000n)
-    expect(effectiveCapacityMw({ ...grid, on: false })).toBe(0n)
-    expect(effectiveCapacityMw({ ...grid, fuelQuantity: '0' })).toBe(0n)
+  it('sums module draws', () => {
+    expect(usedMw(loadedGrid())).toBe(100_000n)
   })
 
   it('projects the time left from the hourly burn', () => {

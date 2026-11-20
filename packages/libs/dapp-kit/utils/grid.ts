@@ -81,6 +81,8 @@ export interface GridSummary {
   fuelSettled: bigint
   fuelNow: bigint
   fuelCapacity: bigint
+  /** Fuel now as a fraction of capacity, 0 to 1; 0 when there is no capacity */
+  fuelFraction: number
   /** At the current draw; 0 when nothing draws */
   fuelBurnPerHour: bigint
   /** Null when nothing burns */
@@ -132,9 +134,23 @@ export function moduleStates(
     if (!grid.on) return state('mainOff', 'mainOff')
     if (live.status !== 'online') return state('blocked', live.reason)
     if (powerReq === 0n || draw >= powerReq) return state('online')
-    if (draw > 0n) return state('reduced')
+    // Only Elastic modules take less than they ask for; Firm ones get all or nothing
+    if (draw > 0n) {
+      return state(module.drawKind === 'Elastic' ? 'reduced' : 'online')
+    }
     return state('blocked', 'notEnoughPower')
   })
+}
+
+function generatorStatus(
+  online: boolean,
+  gridOn: boolean,
+  fuelNow: bigint,
+): GeneratorStatus {
+  if (!online) return 'off'
+  if (!gridOn) return 'mainOff'
+  if (fuelNow === 0n) return 'stopped'
+  return 'running'
 }
 
 /**
@@ -149,13 +165,7 @@ export function generatorStates(
   const fuelNow = projectedFuel(grid, nowMs)
   return Object.entries(grid.generators).map(([componentId, generator]) => ({
     componentId,
-    status: !generator.online
-      ? 'off'
-      : !grid.on
-        ? 'mainOff'
-        : fuelNow === 0n
-          ? 'stopped'
-          : 'running',
+    status: generatorStatus(generator.online, grid.on, fuelNow),
     maxOutputMw: BigInt(generator.maxOutputMw),
   }))
 }
@@ -185,6 +195,10 @@ export function gridSummary(grid: EntityPowerGrid, nowMs: number): GridSummary {
     fuelSettled: BigInt(grid.fuelQuantity),
     fuelNow: live.fuelNow,
     fuelCapacity: BigInt(grid.fuelCapacity),
+    fuelFraction:
+      BigInt(grid.fuelCapacity) > 0n
+        ? Number(live.fuelNow) / Number(grid.fuelCapacity)
+        : 0,
     fuelBurnPerHour: live.fuelNow === 0n ? 0n : fuelBurnPerHour(grid),
     msUntilEmpty: msUntilEmpty(grid, nowMs),
   }

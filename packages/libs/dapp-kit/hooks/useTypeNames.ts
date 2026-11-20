@@ -1,6 +1,6 @@
 import { useQueries } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { getDatahubGameInfo } from '../utils/datahub'
+import { getDatahubGameInfo, typeNamesFrom } from '../utils/datahub'
 
 /**
  * Hook for display names of on-chain type ids (generic modules, airlocks,
@@ -20,12 +20,12 @@ export function useTypeNames(typeIds: string[]): Record<string, string> {
       staleTime: Number.POSITIVE_INFINITY,
     })),
   })
-  return useMemo(() => {
-    const names: Record<string, string> = {}
-    results.forEach((result, i) => {
-      const name = result.data?.name
-      if (name) names[unique[i]!] = name
-    })
-    return names
-  }, [results, unique])
+  return useMemo(
+    () =>
+      typeNamesFrom(
+        unique,
+        results.map((result) => result.data),
+      ),
+    [results, unique],
+  )
 }

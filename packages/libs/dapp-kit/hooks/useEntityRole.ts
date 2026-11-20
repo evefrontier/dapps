@@ -3,7 +3,7 @@ import {
   type EntityRole,
   findCharacterByWallet,
   getEntityRole,
-  sameAddress,
+  needsCharacterDirectory,
 } from '../utils/role'
 import { useCharacterDirectory } from './useCharacterDirectory'
 import { useConnection } from './useConnection'
@@ -37,11 +37,12 @@ export function useEntityRole(options: { characterId?: string | null } = {}): {
   const controllers = entity?.controllers ?? null
   const knownCharacterId = options.characterId ?? null
 
-  const needsDirectory =
-    !knownCharacterId &&
-    !!walletAddress &&
-    !sameAddress(walletAddress, entityOwner?.walletAddress) &&
-    (!!controllers?.length || entityOwner?.kind === 'character')
+  const needsDirectory = needsCharacterDirectory({
+    walletAddress,
+    entityOwner,
+    controllers,
+    knownCharacterId,
+  })
   const directory = useCharacterDirectory({ enabled: needsDirectory })
 
   return useMemo(() => {

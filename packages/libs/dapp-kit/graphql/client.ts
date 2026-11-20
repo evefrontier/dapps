@@ -438,7 +438,7 @@ export async function getObjectsByType(
 export async function getEventsByType(
   eventType: string,
   options?: { first?: number; after?: string },
-) {
+): Promise<GraphQLResponse<GetEventsByTypeResponse>> {
   return executeGraphQLQuery<GetEventsByTypeResponse>(GET_EVENTS_BY_TYPE, {
     event_type: eventType,
     first: options?.first ?? 50,

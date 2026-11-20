@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import type { CharacterSummary, EntityOwner } from '../../types'
 import {
+  canManage,
   findCharacterByWallet,
   getEntityRole,
+  isController,
+  isFullAddress,
+  needsCharacterDirectory,
   resolveNewController,
   sameAddress,
 } from '../role'
@@ -104,6 +108,89 @@ describe('resolveNewController', () => {
     expect(
       resolveNewController(CONTROLLER_WALLET, characters, controllers),
     ).toEqual({ ok: false, error: 'alreadyController' })
+  })
+})
+
+describe('resolveNewController and the shell', () => {
+  const characters: CharacterSummary[] = [
+    { characterId: SHELL_CHARACTER, name: 'Ilya', walletAddress: SHELL_WALLET },
+  ]
+
+  it("rejects the shell's own wallet: the shell is always a controller", () => {
+    expect(
+      resolveNewController(SHELL_WALLET, characters, [], SHELL_CHARACTER),
+    ).toEqual({ ok: false, error: 'alreadyController' })
+  })
+})
+
+describe('isFullAddress', () => {
+  it('accepts 0x and 64 hex digits, ignoring surrounding whitespace', () => {
+    expect(isFullAddress(`  ${SHELL_WALLET} `)).toBe(true)
+  })
+
+  it('rejects short, long and unprefixed addresses', () => {
+    expect(isFullAddress('0x1')).toBe(false)
+    expect(isFullAddress(`${SHELL_WALLET}0`)).toBe(false)
+    expect(isFullAddress(SHELL_WALLET.slice(2))).toBe(false)
+  })
+})
+
+describe('canManage', () => {
+  it('is true for the shell and controllers only', () => {
+    expect(canManage('shell')).toBe(true)
+    expect(canManage('controller')).toBe(true)
+    expect(canManage('visitor')).toBe(false)
+  })
+})
+
+describe('isController', () => {
+  it('is true for the shell and for characters on the list', () => {
+    expect(isController(SHELL_CHARACTER, [], SHELL_CHARACTER)).toBe(true)
+    expect(isController(CONTROLLER_CHARACTER, [CONTROLLER_CHARACTER])).toBe(
+      true,
+    )
+    expect(isController(CONTROLLER_CHARACTER, null, SHELL_CHARACTER)).toBe(
+      false,
+    )
+  })
+})
+
+describe('needsCharacterDirectory', () => {
+  const base = {
+    walletAddress: CONTROLLER_WALLET,
+    entityOwner: walletOwner,
+    controllers: [CONTROLLER_CHARACTER],
+    knownCharacterId: null,
+  }
+
+  it('is needed to tell a controller from a visitor', () => {
+    expect(needsCharacterDirectory(base)).toBe(true)
+  })
+
+  it('is not needed without a wallet, for the shell, or with a known character', () => {
+    expect(needsCharacterDirectory({ ...base, walletAddress: null })).toBe(
+      false,
+    )
+    expect(
+      needsCharacterDirectory({ ...base, walletAddress: SHELL_WALLET }),
+    ).toBe(false)
+    expect(
+      needsCharacterDirectory({
+        ...base,
+        knownCharacterId: CONTROLLER_CHARACTER,
+      }),
+    ).toBe(false)
+  })
+
+  it('is not needed when no character could change the answer', () => {
+    expect(needsCharacterDirectory({ ...base, controllers: [] })).toBe(false)
+    expect(
+      needsCharacterDirectory({
+        ...base,
+        controllers: [],
+        entityOwner: characterOwner,
+      }),
+    ).toBe(true)
   })
 })
 

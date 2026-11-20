@@ -1,29 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+vi.mock('../../graphql/client', () => ({
+  getEventsByType: vi.fn(),
+}))
+
+import { getEventsByType } from '../../graphql/client'
 import { fetchCharacterDirectory } from '../characters'
 
 // ============================================================================
-// Fetch mock helpers
+// GraphQL client mock helpers
 // ============================================================================
-
-type Responder = (variables: Record<string, unknown>) => unknown
-
-/** Stubs fetch, answering each GraphQL operation by its name. */
-function mockGraphql(responders: Record<string, Responder>) {
-  const fetchMock = vi.fn(async (_url: string, init: { body: string }) => {
-    const { query, variables } = JSON.parse(init.body)
-    const operation = Object.keys(responders).find((name) =>
-      query.includes(`query ${name}(`),
-    )
-    if (!operation) throw new Error(`Unexpected query: ${query}`)
-    return {
-      ok: true,
-      status: 200,
-      json: () => Promise.resolve(responders[operation]!(variables)),
-    }
-  })
-  vi.stubGlobal('fetch', fetchMock)
-  return fetchMock
-}
 
 const eventsPage = (jsons: unknown[], endCursor: string | null = null) => ({
   data: {
@@ -52,22 +38,18 @@ const renamed = (id: string, name: string) => ({
   url: '',
 })
 
-/** Answers GetEventsByType per event type; each type's pages keyed by cursor. */
+/** Answers getEventsByType per event type; each type's pages keyed by cursor. */
 function mockEvents(pages: {
   created: Record<string, unknown>
   renamed: Record<string, unknown>
 }) {
-  return mockGraphql({
-    GetEventsByType: (variables) => {
-      const { event_type, after } = variables as {
-        event_type: string
-        after?: string
-      }
-      const source = event_type.endsWith('::identity::CharacterCreated')
-        ? pages.created
-        : pages.renamed
-      return source[after ?? '']
-    },
+  vi.mocked(getEventsByType).mockImplementation(async (eventType, options) => {
+    const source = eventType.endsWith('::identity::CharacterCreated')
+      ? pages.created
+      : pages.renamed
+    return source[options?.after ?? ''] as Awaited<
+      ReturnType<typeof getEventsByType>
+    >
   })
 }
 
@@ -81,7 +63,7 @@ describe('fetchCharacterDirectory', () => {
   })
 
   afterEach(() => {
-    vi.unstubAllGlobals()
+    vi.mocked(getEventsByType).mockReset()
     vi.unstubAllEnvs()
   })
 
@@ -123,16 +105,14 @@ describe('fetchCharacterDirectory', () => {
   })
 
   it('resolves both event types for the world tier', async () => {
-    const fetchMock = mockEvents({
+    mockEvents({
       created: { '': eventsPage([]) },
       renamed: { '': eventsPage([]) },
     })
 
     await fetchCharacterDirectory()
 
-    const types = fetchMock.mock.calls.map(
-      ([, init]) => JSON.parse(init.body).variables.event_type,
-    )
+    const types = vi.mocked(getEventsByType).mock.calls.map(([type]) => type)
     expect(types).toEqual([
       expect.stringMatching(/^0x[0-9a-f]{64}::identity::CharacterCreated$/),
       expect.stringMatching(/^0x[0-9a-f]{64}::metadata::MetadataChanged$/),
@@ -140,9 +120,9 @@ describe('fetchCharacterDirectory', () => {
   })
 
   it('throws on GraphQL errors', async () => {
-    mockGraphql({
-      GetEventsByType: () => ({ errors: [{ message: 'boom' }] }),
-    })
+    vi.mocked(getEventsByType).mockResolvedValue({
+      errors: [{ message: 'boom' }],
+    } as Awaited<ReturnType<typeof getEventsByType>>)
 
     await expect(fetchCharacterDirectory()).rejects.toThrow('boom')
   })

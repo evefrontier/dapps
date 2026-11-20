@@ -19,6 +19,14 @@ export interface EntityIdentity {
 }
 
 /**
+ * A fixed-point number at 10^4 (`fuel_math::SCALE`), kept as the decimal
+ * string GraphQL returns so no precision is lost: `150000` is 15 MW.
+ *
+ * @category Types
+ */
+export type FixedPoint = string
+
+/**
  * How a module takes power: `Firm` modules all get their full requirement or
  * none do; `Elastic` modules share what is left, in connect order.
  *
@@ -29,19 +37,23 @@ export type EntityDrawKind = 'Firm' | 'Elastic'
 /** @category Types */
 export interface EntityPowerModule {
   desiredOnline: boolean
-  activeDraw: string
-  powerReq: string
+  activeDraw: FixedPoint
+  powerReq: FixedPoint
   drawKind: EntityDrawKind
+  /** Stored on chain; the v1 grant rules ignore it */
+  priority: string
+  /** Stored on chain; the v1 grant rules ignore it */
+  lineLoss: FixedPoint
 }
 
 /** @category Types */
 export interface EntityGenerator {
   online: boolean
-  maxOutputMw: string
-  /** Fixed point at 10^4; divides the fuel's containment burden */
-  containmentReduction: string
-  /** Fuel per second, at 10^4, burned while the grid has no fuel impulse */
-  baseFuelRate: string
+  maxOutputMw: FixedPoint
+  /** Divides the fuel's containment burden */
+  containmentReduction: FixedPoint
+  /** Fuel per second burned while the grid has no fuel impulse */
+  baseFuelRate: FixedPoint
 }
 
 /**
@@ -52,20 +64,20 @@ export interface EntityGenerator {
  */
 export interface EntityPowerGrid {
   on: boolean
-  fuelQuantity: string
-  fuelCapacity: string
-  capacityMw: string
+  fuelQuantity: FixedPoint
+  fuelCapacity: FixedPoint
+  capacityMw: FixedPoint
   lastSettledMs: string
-  /** Pooled fuel impulse, at 10^4; 0 means generators burn their base rate */
-  fuelImpulse: string
-  /** Pooled fuel containment burden, at 10^4 */
-  fuelContainmentBurden: string
+  /** Pooled fuel impulse; 0 means generators burn their base rate */
+  fuelImpulse: FixedPoint
+  /** Pooled fuel containment burden */
+  fuelContainmentBurden: FixedPoint
   /** Keyed by module component id, in connect order */
   modules: Record<string, EntityPowerModule>
   /** Keyed by generator component id */
   generators: Record<string, EntityGenerator>
   /** Fuel source component id → capacity */
-  fuelSources: Record<string, string>
+  fuelSources: Record<string, FixedPoint>
 }
 
 /** @category Types */

@@ -186,6 +186,8 @@ describe('parseEntity (testnet entity)', () => {
       activeDraw: '0',
       powerReq: '12000',
       drawKind: 'Elastic',
+      priority: '0',
+      lineLoss: '0',
     })
     expect(
       Object.values(powerGrid?.modules ?? {}).map((m) => m.drawKind),
@@ -363,6 +365,50 @@ describe('parseEntity', () => {
       url: 'u',
     })
     expect(entity.identity).toEqual({ tribeId: 98000001, owner: '0xwallet' })
+  })
+
+  it('treats an unknown draw kind as Firm instead of trusting the cast', () => {
+    const entity = parseEntity(
+      raw([
+        component('5', 'power_grid::PowerGrid', {
+          on: true,
+          fuel_quantity_at_last_settled: '0',
+          fuel_capacity: '0',
+          fuel_impulse: '0',
+          fuel_containment_burden: '0',
+          capacity_mw: '0',
+          last_settled_ms: '0',
+          modules: {
+            contents: [
+              {
+                key: '9',
+                value: {
+                  module_spec: {
+                    power_req: '1000',
+                    draw_kind: { '@variant': 'Surge' },
+                    priority: '2',
+                    line_loss: '10',
+                  },
+                  desired_online: true,
+                  active_draw_at_last_settled: '0',
+                },
+              },
+            ],
+          },
+          generators: { contents: [] },
+          fuel_sources: { contents: [] },
+        }),
+      ]),
+    )
+
+    expect(entity.powerGrid?.modules['9']).toEqual({
+      desiredOnline: true,
+      activeDraw: '0',
+      powerReq: '1000',
+      drawKind: 'Firm',
+      priority: '2',
+      lineLoss: '10',
+    })
   })
 
   it('parses the access list, or leaves it null when absent', () => {

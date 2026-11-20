@@ -13,12 +13,16 @@ const firm = (
   activeDraw,
   powerReq,
   drawKind: 'Firm',
+  priority: '0',
+  lineLoss: '0',
 })
 const elastic = (powerReq: string, activeDraw: string): EntityPowerModule => ({
   desiredOnline: true,
   activeDraw,
   powerReq,
   drawKind: 'Elastic',
+  priority: '0',
+  lineLoss: '0',
 })
 
 /** 15 MW generator on, base-rate burn (no impulse), lots of fuel, settled at 0. */
@@ -131,7 +135,32 @@ describe('generatorStates', () => {
   })
 })
 
+describe('moduleStates and draw kinds', () => {
+  it('only calls an Elastic module reduced', () => {
+    const g = grid({
+      e: elastic('120000', '50000'),
+      f: firm('100000', '50000'),
+    })
+    expect(statuses(g)).toEqual([
+      ['e', 'reduced', null],
+      ['f', 'online', null],
+    ])
+  })
+})
+
 describe('gridSummary', () => {
+  it('gives fuel as a fraction of capacity', () => {
+    const g = grid(
+      { a: firm('100000', '0', false) },
+      { fuelQuantity: '2500000' },
+    )
+    expect(gridSummary(g, 0).fuelFraction).toBe(0.25)
+    expect(
+      gridSummary({ ...g, fuelCapacity: '0', fuelQuantity: '0' }, 0)
+        .fuelFraction,
+    ).toBe(0)
+  })
+
   it('sums output, draw, headroom and modules online', () => {
     const g = grid({
       a: firm('100000', '100000'),

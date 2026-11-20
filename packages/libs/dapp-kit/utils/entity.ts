@@ -17,6 +17,7 @@ import type {
   EntityPowerGrid,
   EntityPowerModule,
 } from '../types'
+import { createLogger } from './logger'
 
 /**
  * An entity as fetched: contents plus every dynamic field, with nested
@@ -66,7 +67,12 @@ interface PowerGridJson {
   capacity_mw: string
   last_settled_ms: string
   modules: VecMap<{
-    module_spec: { power_req: string; draw_kind: { '@variant': string } }
+    module_spec: {
+      power_req: string
+      draw_kind: { '@variant': string }
+      priority: string
+      line_loss: string
+    }
     desired_online: boolean
     active_draw_at_last_settled: string
   }>
@@ -103,6 +109,8 @@ interface GenericModuleJson {
 interface AccessListJson {
   controllers: VecSet<string>
 }
+
+const log = createLogger()
 
 const ENTITY_TYPE = /::entity::Entity$/
 const COMPONENT_INNER = /::component::Component<0x[0-9a-fA-F]+::(\w+)::(\w+)/
@@ -206,6 +214,18 @@ export function isEntity(raw: RawEntity): boolean {
   return ENTITY_TYPE.test(raw.contents.type.repr)
 }
 
+/**
+ * The draw kind, checked rather than cast. An unknown variant (say, from a
+ * contract upgrade) is treated as Firm, the stricter rule, and logged.
+ */
+function parseDrawKind(variant: string, moduleId: string): EntityDrawKind {
+  if (variant === 'Firm' || variant === 'Elastic') return variant
+  log.warn(
+    `[DappKit] Unknown draw kind "${variant}" on module ${moduleId}; treating it as Firm`,
+  )
+  return 'Firm'
+}
+
 function parsePowerGrid(inner: PowerGridJson): EntityPowerGrid {
   const modules: Record<string, EntityPowerModule> = {}
   for (const { key, value } of inner.modules.contents) {
@@ -213,7 +233,9 @@ function parsePowerGrid(inner: PowerGridJson): EntityPowerGrid {
       desiredOnline: value.desired_online,
       activeDraw: value.active_draw_at_last_settled,
       powerReq: value.module_spec.power_req,
-      drawKind: value.module_spec.draw_kind['@variant'] as EntityDrawKind,
+      drawKind: parseDrawKind(value.module_spec.draw_kind['@variant'], key),
+      priority: String(value.module_spec.priority),
+      lineLoss: String(value.module_spec.line_loss),
     }
   }
   const generators: Record<string, EntityGenerator> = {}

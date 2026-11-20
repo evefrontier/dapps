@@ -8,7 +8,7 @@ export { fetchCharacterDirectory } from './characters'
 // Constants
 export * from './constants'
 // Datahub utilities
-export { getDatahubGameInfo } from './datahub'
+export { getDatahubGameInfo, typeNamesFrom } from './datahub'
 // World entity utilities
 export {
   fetchEntity,
@@ -22,7 +22,6 @@ export type { ErrorType } from './errors'
 export { ERROR_MESSAGES, ERRORS, parseErrorFromMessage } from './errors'
 // Power grid: fuel burn (port of power::fuel_math) and display state
 export {
-  effectiveCapacityMw,
   FUEL_SCALE,
   fromFixed,
   fuelBurn,
@@ -55,11 +54,16 @@ export {
 } from './mapping'
 // Roles on an entity: shell, controller, visitor
 export {
+  canManage,
+  type DirectoryNeedInput,
   type EntityRole,
   type EntityRoleInput,
   findCharacterByWallet,
   getEntityRole,
+  isController,
+  isFullAddress,
   type NewControllerResult,
+  needsCharacterDirectory,
   resolveNewController,
   sameAddress,
 } from './role'

@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
+import { type UseQueryResult, useQuery } from '@tanstack/react-query'
+import type { CharacterSummary } from '../types'
 import { fetchCharacterDirectory } from '../utils/characters'
 import { useSmartObject } from './useSmartObject'
 
@@ -14,7 +15,9 @@ const DIRECTORY_STALE_TIME_MS = 5 * 60 * 1000
  *   event), for callers that only sometimes need the list. Default true.
  * @returns The React Query result; `data` is every character
  */
-export function useCharacterDirectory(options: { enabled?: boolean } = {}) {
+export function useCharacterDirectory(
+  options: { enabled?: boolean } = {},
+): UseQueryResult<CharacterSummary[], Error> {
   const { tenant } = useSmartObject()
   return useQuery({
     queryKey: ['characterDirectory', tenant],

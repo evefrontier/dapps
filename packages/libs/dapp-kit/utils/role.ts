@@ -45,6 +45,42 @@ export function findCharacterByWallet(
 const FULL_ADDRESS = /^0x[0-9a-fA-F]{64}$/
 
 /**
+ * True for a whole Sui address: 0x and 64 hex digits, ignoring surrounding
+ * whitespace.
+ *
+ * @category Utilities - Access
+ */
+export function isFullAddress(input: string): boolean {
+  return FULL_ADDRESS.test(input.trim())
+}
+
+/**
+ * True for the roles that manage an entity: the shell and controllers.
+ *
+ * @category Utilities - Access
+ */
+export function canManage(role: EntityRole): boolean {
+  return role === 'shell' || role === 'controller'
+}
+
+/**
+ * True when a character already controls the entity: it is the shell, or it
+ * is on the access list.
+ *
+ * @category Utilities - Access
+ */
+export function isController(
+  characterId: string,
+  controllers: string[] | null | undefined,
+  shellId?: string | null,
+): boolean {
+  return (
+    sameAddress(characterId, shellId) ||
+    !!controllers?.some((id) => sameAddress(id, characterId))
+  )
+}
+
+/**
  * Result of {@link resolveNewController}.
  *
  * @category Utilities - Access
@@ -56,7 +92,7 @@ export type NewControllerResult =
       /**
        * - `invalidAddress`: not 0x and 64 hex digits
        * - `unknownCharacter`: no character is bound to this wallet
-       * - `alreadyController`: the character is already on the list
+       * - `alreadyController`: the character is the shell or already on the list
        */
       error: 'invalidAddress' | 'unknownCharacter' | 'alreadyController'
     }
@@ -70,17 +106,19 @@ export type NewControllerResult =
  * @param input - The wallet address as typed or pasted
  * @param characters - The character directory
  * @param controllers - The entity's access list (character ids), or null
+ * @param shellId - The shell's character id, when known; the shell is
+ *   always a controller, so it can't be added again
  */
 export function resolveNewController(
   input: string,
   characters: CharacterSummary[],
   controllers: string[] | null | undefined,
+  shellId?: string | null,
 ): NewControllerResult {
-  const address = input.trim()
-  if (!FULL_ADDRESS.test(address)) return { ok: false, error: 'invalidAddress' }
-  const character = findCharacterByWallet(characters, address)
+  if (!isFullAddress(input)) return { ok: false, error: 'invalidAddress' }
+  const character = findCharacterByWallet(characters, input.trim())
   if (!character) return { ok: false, error: 'unknownCharacter' }
-  if (controllers?.some((id) => sameAddress(id, character.characterId))) {
+  if (isController(character.characterId, controllers, shellId)) {
     return { ok: false, error: 'alreadyController' }
   }
   return { ok: true, character }
@@ -118,4 +156,31 @@ export function getEntityRole(input: EntityRoleInput): EntityRole {
     return 'controller'
   }
   return 'visitor'
+}
+
+/** Inputs of {@link needsCharacterDirectory}. @category Utilities - Access */
+export interface DirectoryNeedInput {
+  walletAddress: string | null | undefined
+  entityOwner: EntityOwner | null | undefined
+  controllers: string[] | null | undefined
+  /** The wallet's character id, when the caller already knows it */
+  knownCharacterId: string | null | undefined
+}
+
+/**
+ * Whether working out the wallet's role needs the character directory (every
+ * character event): only when a wallet is connected, its character isn't
+ * known, it isn't the shell's wallet, and the answer could depend on a
+ * character (the entity has controllers, or its cap is parked on one).
+ *
+ * @category Utilities - Access
+ */
+export function needsCharacterDirectory(input: DirectoryNeedInput): boolean {
+  const { walletAddress, entityOwner, controllers, knownCharacterId } = input
+  return (
+    !knownCharacterId &&
+    !!walletAddress &&
+    !sameAddress(walletAddress, entityOwner?.walletAddress) &&
+    (!!controllers?.length || entityOwner?.kind === 'character')
+  )
 }

@@ -90,18 +90,6 @@ export function usedMw(grid: EntityPowerGrid): bigint {
   return total
 }
 
-/**
- * Capacity available to grants as of the last settle: 0 while the grid is off
- * or out of fuel. Port of `power_grid::effective_capacity_mw`.
- *
- * @category Utilities - Power
- */
-export function effectiveCapacityMw(grid: EntityPowerGrid): bigint {
-  return grid.on && BigInt(grid.fuelQuantity) > 0n
-    ? BigInt(grid.capacityMw)
-    : 0n
-}
-
 /** Burn over `elapsedMs` at the load stored at the last settle, not capped by fuel. */
 function uncappedBurn(grid: EntityPowerGrid, elapsedMs: bigint): bigint {
   const capacityMw = BigInt(grid.capacityMw)

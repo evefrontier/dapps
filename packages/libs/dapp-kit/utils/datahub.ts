@@ -63,3 +63,23 @@ export async function getDatahubGameInfo(
 
   return data
 }
+
+/**
+ * Type id → display name from Datahub lookups, skipping any that failed or
+ * have no name (Datahub answers unknown ids with an error object).
+ *
+ * @category Utilities - Datahub
+ * @param typeIds - Type ids, in the same order as `infos`
+ * @param infos - Datahub answers, or undefined while one is loading
+ */
+export function typeNamesFrom(
+  typeIds: string[],
+  infos: Array<Partial<DatahubGameInfo> | undefined>,
+): Record<string, string> {
+  const names: Record<string, string> = {}
+  typeIds.forEach((typeId, i) => {
+    const name = infos[i]?.name
+    if (name) names[typeId] = name
+  })
+  return names
+}
