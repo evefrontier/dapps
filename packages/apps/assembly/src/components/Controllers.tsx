@@ -4,7 +4,6 @@ import {
   Severity,
   sameAddress,
   useCharacterDirectory,
-  useEntityRole,
   useNotification,
   useSmartObject,
   useSponsoredTransaction,
@@ -13,6 +12,7 @@ import { EveButton } from '@eveworld/ui-components'
 import { TextField } from '@mui/material'
 import React, { useMemo, useState } from 'react'
 
+import { useViewRole } from '../flags'
 import { addController, removeController } from '../functions/controllers'
 
 const ADD_ERRORS = {
@@ -37,7 +37,7 @@ const Tag = ({ children }: { children: React.ReactNode }) => (
  */
 const Controllers = React.memo((): React.JSX.Element | null => {
   const { entity, entityOwner, refetch } = useSmartObject()
-  const { role, characterId: viewerId } = useEntityRole()
+  const { role, characterId: viewerId } = useViewRole()
   const { notify } = useNotification()
   const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction()
 

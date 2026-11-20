@@ -31,6 +31,12 @@
   border-top: 1px solid #333;
 }
 
+.version {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .rowKey {
   font-weight: 700;
   word-break: break-all;
