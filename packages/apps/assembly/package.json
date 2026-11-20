@@ -28,7 +28,6 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-error-boundary": "^6.1.2",
-    "react-router-dom": "^7.18.1",
     "vite-plugin-svgr": "^5.2.0",
     "vitest": "^4.1.12"
   },
@@ -38,7 +37,6 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react-swc": "^4.3.2",
     "@vitest/ui": "4.1.12",
-    "autoprefixer": "^10.5.4",
     "babel-plugin-react-compiler": "^1.0.0",
     "postcss": "^8.5.24",
     "@tailwindcss/postcss": "^4.3.3",
