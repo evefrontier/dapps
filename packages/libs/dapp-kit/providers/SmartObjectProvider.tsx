@@ -1,12 +1,7 @@
 import type { ReactNode } from 'react'
-import { createContext, useCallback, useEffect } from 'react'
+import { createContext, useCallback } from 'react'
 import type { SmartObjectContextType } from '../types'
-import {
-  DEFAULT_EVENT_TRANSPORT,
-  DEFAULT_TENANT,
-  type EventTransport,
-  setActiveEventTransport,
-} from '../utils/constants'
+import { DEFAULT_TENANT } from '../utils/constants'
 import { useEntityData } from './smartObject/useEntityData'
 import { useObjectSelection } from './smartObject/useObjectSelection'
 import { usePollingBackstop } from './smartObject/usePollingBackstop'
@@ -39,21 +34,7 @@ export const SmartObjectContext = createContext<SmartObjectContextType>({
  *
  * @category Providers
  */
-const SmartObjectProvider = ({
-  children,
-  eventTransport = DEFAULT_EVENT_TRANSPORT,
-}: {
-  children: ReactNode
-  /** Event transport (grpc | sse); selects the matching GraphQL query endpoint. */
-  eventTransport?: EventTransport
-}) => {
-  // Align the GraphQL query endpoint with the active transport (grpc → standard,
-  // sse → cockroach). Kept in an effect so render stays pure (no module-global
-  // mutation during render, which misbehaves under strict/concurrent mode).
-  useEffect(() => {
-    setActiveEventTransport(eventTransport)
-  }, [eventTransport])
-
+const SmartObjectProvider = ({ children }: { children: ReactNode }) => {
   const { selection, input } = useObjectSelection()
   const {
     entity,

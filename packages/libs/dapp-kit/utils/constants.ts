@@ -28,10 +28,6 @@ function isSuiGraphqlNetwork(value: string): value is SuiGraphqlNetwork {
 /**
  * Get the Sui GraphQL query endpoint URL for the given network.
  *
- * Resolves against the active event transport: the `sse` transport uses the
- * subscription-capable ("cockroach") endpoint for its queries too, while `grpc`
- * (and the default) use the standard endpoint.
- *
  * Unknown networks fall back to
  * testnet to avoid returning undefined.
  * @param env - Network identifier (testnet, devnet, mainnet). Defaults to testnet.
@@ -42,11 +38,7 @@ export function getSuiGraphqlEndpoint(
   env: string = DEFAULT_GRAPHQL_NETWORK,
 ): string {
   const network = isSuiGraphqlNetwork(env) ? env : DEFAULT_GRAPHQL_NETWORK
-  const endpoints =
-    activeEventTransport === 'sse'
-      ? GRAPHQL_SUBSCRIPTION_ENDPOINTS
-      : GRAPHQL_ENDPOINTS
-  return endpoints[network]
+  return GRAPHQL_ENDPOINTS[network]
 }
 
 // World type/package resolution lives in `mvr/worldTypes.ts`. Re-exported here
@@ -72,8 +64,7 @@ export const DEFAULT_GRAPHQL_NETWORK: SuiGraphqlNetwork = 'testnet'
  */
 export const SUI_GRAPHQL_NETWORKS = ['testnet', 'devnet', 'mainnet'] as const
 
-/** Standard Sui GraphQL query endpoints per network. Used by the `grpc`
- *  transport (fullnode checkpoint stream + standard GraphQL queries).
+/** Sui GraphQL query endpoints per network.
  *  @category Constants
  */
 export const GRAPHQL_ENDPOINTS: Record<SuiGraphqlNetwork, string> = {
@@ -81,18 +72,6 @@ export const GRAPHQL_ENDPOINTS: Record<SuiGraphqlNetwork, string> = {
   devnet: 'https://graphql.devnet.sui.io/graphql',
   mainnet: 'https://graphql.mainnet.sui.io/graphql',
 }
-
-/** Subscription-capable ("cockroach") Sui GraphQL endpoints per network, used
- *  for queries when the `sse` transport is active. Only testnet has a known
- *  cockroach host; other networks fall back to the standard endpoint.
- *  @category Constants
- */
-export const GRAPHQL_SUBSCRIPTION_ENDPOINTS: Record<SuiGraphqlNetwork, string> =
-  {
-    testnet: 'https://graphql-cockroach.testnet.sui.io/graphql',
-    devnet: 'https://graphql.devnet.sui.io/graphql',
-    mainnet: 'https://graphql.mainnet.sui.io/graphql',
-  }
 
 /**
  * Client identifier sent as the `X-Client-ID` header on GraphQL requests.
@@ -109,30 +88,6 @@ export const SUI_GRPC_URLS: Record<SuiGraphqlNetwork, string> = {
   testnet: 'https://fullnode.testnet.sui.io:443',
   devnet: 'https://fullnode.devnet.sui.io:443',
   mainnet: 'https://fullnode.mainnet.sui.io:443',
-}
-
-/**
- * Event transport, which selects the GraphQL query endpoint.
- * - `grpc`: the standard endpoint.
- * - `sse`: the subscription-capable ("cockroach") endpoint.
- * Selected per-app via the `eventTransport` provider prop (typically driven by
- * a feature flag). Defaults to `grpc`.
- * @category Types
- */
-export type EventTransport = 'grpc' | 'sse'
-
-/** Default event transport when none is provided. @category Constants */
-export const DEFAULT_EVENT_TRANSPORT: EventTransport = 'grpc'
-
-// Active transport (single writer: SmartObjectProvider). Lets the query
-// endpoint follow it — grpc → standard, sse → cockroach — without threading
-// `transport` through every query helper.
-let activeEventTransport: EventTransport = DEFAULT_EVENT_TRANSPORT
-
-/** Set the transport that governs which GraphQL query endpoint is used.
- *  @category Utilities - Config */
-export function setActiveEventTransport(transport: EventTransport): void {
-  activeEventTransport = transport
 }
 
 /** Default polling interval in milliseconds.

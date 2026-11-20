@@ -6,4 +6,4 @@ export {
 } from './config'
 export { isPanelEnabled } from './FlagDevPanel'
 export { FlagsProvider, resetFlagOverrides, setFlagVariant } from './provider'
-export { useEventTransport, useFlagVariant } from './useFlags'
+export { useFlagVariant } from './useFlags'

@@ -31,12 +31,6 @@ export type FlagDefinition = {
 }
 
 export const FLAG_DEFINITIONS = {
-  'eve-frontier-assembly-event-transport': {
-    description:
-      'Real-time event transport feeding optimistic updates: grpc (fullnode checkpoint stream) or sse (GraphQL subscription).',
-    variants: { grpc: 'grpc', sse: 'sse' },
-    defaultVariant: 'grpc',
-  },
   'assembly-dapp-index-fallback': {
     description:
       'Fall back to Dapp Index for an assembly with no custom dapp of its own. No effect unless VITE_DAPP_INDEX_URL is set for this environment.',
