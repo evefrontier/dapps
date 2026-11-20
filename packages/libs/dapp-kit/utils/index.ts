@@ -15,6 +15,14 @@ export { getEnergyUsageForType, getFuelEfficiencyForType } from './config'
 export * from './constants'
 // Datahub utilities
 export { getDatahubGameInfo } from './datahub'
+// World entity utilities
+export {
+  fetchEntity,
+  fetchEntityOwner,
+  isEntity,
+  parseEntity,
+  type RawEntity,
+} from './entity'
 export type { ErrorType } from './errors'
 // Error handling
 export { ERROR_MESSAGES, ERRORS, parseErrorFromMessage } from './errors'

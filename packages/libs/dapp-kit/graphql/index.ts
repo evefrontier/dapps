@@ -3,29 +3,35 @@ export {
   executeGraphQLQuery,
   getAssemblyWithOwner,
   getCharacterAndOwnedObjects,
+  getEntity,
   getObjectAndCharacterOwner,
   getObjectByAddress,
+  getObjectLatestVersion,
+  getObjectOwner,
   getObjectOwnerAndOwnedObjectsByType,
   getObjectOwnerAndOwnedObjectsWithJson,
   getObjectsByType,
   getObjectWithDynamicFields,
-  getObjectWithDynamicFieldTables,
   getObjectWithJson,
   getOwnedObjectsByPackage,
   getOwnedObjectsByType,
   getSingletonObjectByType,
+  getTableEntries,
   // Character/owner resolution
   getWalletCharacters,
 } from './client'
 
 // Query Strings
 export {
+  // Entity queries
+  GET_ENTITY,
   // Core object queries
   GET_OBJECT_BY_ADDRESS,
+  GET_OBJECT_LATEST_VERSION,
+  GET_OBJECT_OWNER,
   // Owner & ownership queries
   GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE,
   GET_OBJECT_OWNER_AND_OWNED_OBJECTS_WITH_JSON,
-  GET_OBJECT_WITH_DYNAMIC_FIELD_TABLES,
   GET_OBJECT_WITH_DYNAMIC_FIELDS,
   GET_OBJECT_WITH_JSON,
   GET_OBJECTS_BY_TYPE,
@@ -34,6 +40,7 @@ export {
   GET_SINGLETON_CONFIG_OBJECT_BY_TYPE,
   // Singleton & type-based queries
   GET_SINGLETON_OBJECT_BY_TYPE,
+  GET_TABLE_ENTRIES,
   GET_WALLET_CHARACTERS,
 } from './queries'
 

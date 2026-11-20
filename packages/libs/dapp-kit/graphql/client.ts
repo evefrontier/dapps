@@ -8,11 +8,13 @@ import {
 import { createLogger } from '../utils/logger'
 import {
   GET_CHARACTER_AND_OWNED_OBJECTS,
+  GET_ENTITY,
   GET_OBJECT_BY_ADDRESS,
   GET_OBJECT_DYNAMICFIELD_CHARACTER_WITH_JSON,
+  GET_OBJECT_LATEST_VERSION,
+  GET_OBJECT_OWNER,
   GET_OBJECT_OWNER_AND_OWNED_OBJECTS_BY_TYPE,
   GET_OBJECT_OWNER_AND_OWNED_OBJECTS_WITH_JSON,
-  GET_OBJECT_WITH_DYNAMIC_FIELD_TABLES,
   GET_OBJECT_WITH_DYNAMIC_FIELDS,
   GET_OBJECT_WITH_JSON,
   GET_OBJECTS_BY_TYPE,
@@ -20,24 +22,28 @@ import {
   GET_OWNED_OBJECTS_BY_TYPE,
   GET_SINGLETON_CONFIG_OBJECT_BY_TYPE,
   GET_SINGLETON_OBJECT_BY_TYPE,
+  GET_TABLE_ENTRIES,
   GET_WALLET_CHARACTERS,
 } from './queries'
 import type {
   CharacterInfo,
   DynamicFieldNode,
   GetCharacterAndOwnedObjectsResponse,
+  GetEntityResponse,
   GetObjectAndCharacterOwnerResponse,
   GetObjectByAddressResponse,
+  GetObjectLatestVersionResponse,
   GetObjectOwnerAndOwnedObjectsResponse,
   GetObjectOwnerAndOwnedObjectsWithJsonResponse,
+  GetObjectOwnerResponse,
   GetObjectResponse,
   GetObjectsByTypeResponse,
-  GetObjectWithDynamicFieldTablesResponse,
   GetObjectWithJsonResponse,
   GetOwnedObjectsByPackageResponse,
   GetOwnedObjectsByTypeResponse,
   GetSingletonConfigObjectByTypeResponse,
   GetSingletonObjectByTypeResponse,
+  GetTableEntriesResponse,
   GetWalletCharactersResponse,
   GraphQLResponse,
   RawSuiObjectData,
@@ -149,57 +155,77 @@ export async function getObjectWithDynamicFields(objectId: string) {
 }
 
 /**
- * Fetch an object with one named dynamic field and a page of all dynamic fields,
- * resolving a table nested in each field's value in the same request.
+ * Fetch a world entity: latest version, contents, and a page of its dynamic
+ * fields (components and action maps).
  *
- * Each nested table returns at most `tableFirst` entries; when its
- * `pageInfo.hasNextPage` is true the remaining entries must be fetched separately.
+ * Layout sections and inventory item tables nested in component values are
+ * resolved inline, up to `tableFirst` entries each. Page the rest with
+ * {@link getTableEntries} using the table id from the component JSON.
  *
  * @category GraphQL Client
- * @param address - The Sui object address
- * @param field - Dynamic field name to look up: its Move type and BCS-encoded value (base64)
- * @param tablePath - Path within each dynamic field value to the table's UID (e.g. "inner.sections.id")
+ * @param address - The entity's Sui object ID
  * @param options - Pagination options
- * @param options.cursor - Cursor for the next page of the object's dynamicFields
+ * @param options.cursor - Cursor for the next page of the entity's dynamicFields
  * @param options.tableFirst - Max entries per nested table (default: 50)
- * @returns Promise resolving to latest version, contents, named field and dynamic fields with tables
- *
- * @example Paginated fetch
- * ```typescript
- * let cursor: string | undefined;
- * do {
- *   const result = await getObjectWithDynamicFieldTables(
- *     "0x123...",
- *     { type: "0xpkg::entity::AdminActionsKey", bcs: "AA==" },
- *     "inner.sections.id",
- *     { cursor },
- *   );
- *   const dynamicFields = result.data?.object?.dynamicFields;
- *   dynamicFields?.nodes.forEach(node => {
- *     const entries = node.contents.value.table?.asAddress?.addressAt?.dynamicFields?.nodes;
- *     console.log(node.contents.name.json, entries);
- *   });
- *   cursor = dynamicFields?.pageInfo?.hasNextPage ? dynamicFields?.pageInfo?.endCursor ?? undefined : undefined;
- * } while (cursor);
- * ```
+ * @returns Promise resolving to the entity's version, contents and dynamic fields
  */
-export async function getObjectWithDynamicFieldTables(
+export async function getEntity(
   address: string,
-  field: { type: string; bcs: string },
-  tablePath: string,
   options?: { cursor?: string; tableFirst?: number },
 ) {
-  return executeGraphQLQuery<GetObjectWithDynamicFieldTablesResponse>(
-    GET_OBJECT_WITH_DYNAMIC_FIELD_TABLES,
-    {
-      address,
-      cursor: options?.cursor ?? null,
-      field_type: field.type,
-      field_name_bcs: field.bcs,
-      table_path: tablePath,
-      table_first: options?.tableFirst ?? 50,
-    },
+  return executeGraphQLQuery<GetEntityResponse>(GET_ENTITY, {
+    address,
+    cursor: options?.cursor ?? null,
+    table_first: options?.tableFirst ?? 50,
+  })
+}
+
+/**
+ * Fetch one page of a Move table's entries by the table's UID.
+ *
+ * @category GraphQL Client
+ * @param tableId - The table's UID (e.g. a Layout's `inner.sections.id`)
+ * @param options - Pagination options
+ * @param options.first - Number of entries per page (default: 50)
+ * @param options.after - Cursor for the next page
+ * @returns Promise resolving to a page of table entries
+ */
+export async function getTableEntries(
+  tableId: string,
+  options?: { first?: number; after?: string },
+) {
+  return executeGraphQLQuery<GetTableEntriesResponse>(GET_TABLE_ENTRIES, {
+    address: tableId,
+    first: options?.first ?? 50,
+    after: options?.after ?? null,
+  })
+}
+
+/**
+ * Fetch only an object's latest version, to detect changes cheaply.
+ *
+ * @category GraphQL Client
+ * @param address - The Sui object ID
+ * @returns Promise resolving to the latest version node
+ */
+export async function getObjectLatestVersion(address: string) {
+  return executeGraphQLQuery<GetObjectLatestVersionResponse>(
+    GET_OBJECT_LATEST_VERSION,
+    { address },
   )
+}
+
+/**
+ * Fetch an object's owner.
+ *
+ * @category GraphQL Client
+ * @param address - The Sui object ID
+ * @returns Promise resolving to the owner (`__typename` plus address when owned)
+ */
+export async function getObjectOwner(address: string) {
+  return executeGraphQLQuery<GetObjectOwnerResponse>(GET_OBJECT_OWNER, {
+    address,
+  })
 }
 
 /**
@@ -294,7 +320,7 @@ export async function getObjectOwnerAndOwnedObjectsWithJson(
  * @param objectAddress - The assembly object address
  * @returns Promise resolving to assembly and character data
  * @internal
- * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with {@link getObjectWithDynamicFieldTables} and resolve ownership through its `AccessCap`.
+ * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with {@link getEntity} and resolve ownership through its `AccessCap`.
  */
 export async function getObjectAndCharacterOwner(objectAddress: string) {
   return executeGraphQLQuery<GetObjectAndCharacterOwnerResponse>(
@@ -551,7 +577,7 @@ export async function getObjectsByType(
  * ```
  *
  * @see {@link transformToAssembly} for converting raw data to typed Assembly
- * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with {@link getObjectWithDynamicFieldTables} and resolve ownership through its `AccessCap`.
+ * @deprecated Relies on the archived world `OwnerCap`/`owner_cap_id`, `energy_source_id` and `linked_gate_id` fields. Read the entity with {@link getEntity} and resolve ownership through its `AccessCap`.
  */
 export async function getAssemblyWithOwner(assemblyId: string): Promise<{
   moveObject: {
