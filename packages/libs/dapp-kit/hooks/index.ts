@@ -1,3 +1,4 @@
+export { useCharacterDirectory } from './useCharacterDirectory'
 export { useConnection } from './useConnection'
 export { useNotification } from './useNotification'
 export { useSmartObject } from './useSmartObject'

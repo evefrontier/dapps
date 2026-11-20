@@ -184,3 +184,16 @@ export interface EntityOwner {
   /** The Character entity when the cap is parked on one */
   character: EntityData | null
 }
+
+/**
+ * A character as listed by world events, for search.
+ *
+ * @category Types
+ */
+export interface CharacterSummary {
+  characterId: string
+  /** Latest metadata name; empty when the character has never been named */
+  name: string
+  /** Wallet address bound to the character */
+  walletAddress: string
+}

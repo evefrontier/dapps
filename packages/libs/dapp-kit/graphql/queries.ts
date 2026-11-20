@@ -347,8 +347,38 @@ export const GET_OWNED_OBJECTS_BY_PACKAGE = `
 `
 
 // ============================================================================
-// Character Queries
+// Event Queries
 // ============================================================================
+
+/**
+ * Query to get events of a Move event type, oldest first.
+ * Use with caution - may return many results
+ *
+ * @category GraphQL Queries
+ */
+export const GET_EVENTS_BY_TYPE = `
+  query GetEventsByType($event_type: String, $first: Int, $after: String) {
+    events(
+      filter: {
+        type: $event_type
+      }
+      first: $first
+      after: $after
+    ) {
+      nodes {
+        sequenceNumber
+        timestamp
+        contents {
+          json
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`
 
 // ============================================================================
 // Singleton & Type-based Queries

@@ -16,6 +16,7 @@ export type {
 // Hooks
 // Hook error types and sponsored transaction types
 export {
+  useCharacterDirectory,
   useConnection,
   useNotification,
   useSmartObject,
