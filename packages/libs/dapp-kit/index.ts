@@ -49,8 +49,6 @@ export * from './utils'
 // Constants & Configuration
 // =========================================
 export {
-  DEFAULT_EVENT_TRANSPORT,
-  type EventTransport,
   getObjectRegistryType,
   getPollingInterval,
   getSuiGraphqlEndpoint,
