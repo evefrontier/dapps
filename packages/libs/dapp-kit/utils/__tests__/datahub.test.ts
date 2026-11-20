@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { QueryParams } from '../../types'
 import { DATAHUB_BY_TENANT, DEFAULT_TENANT, TenantId } from '../constants'
-import { resolveDatahubHost, resolveTenantFromSearch } from '../datahub'
+import {
+  resolveDatahubHost,
+  resolveTenantFromSearch,
+  typeNamesFrom,
+} from '../datahub'
 
 const DEFAULT_HOST = DATAHUB_BY_TENANT[DEFAULT_TENANT]
 
@@ -52,5 +56,16 @@ describe('resolveDatahubHost (host fallback)', () => {
     expect(resolveDatahubHost(TenantId.TESSERACT)).toBe(
       DATAHUB_BY_TENANT.tesseract,
     )
+  })
+})
+
+describe('typeNamesFrom', () => {
+  it('maps each type id to its name, skipping missing and nameless answers', () => {
+    expect(
+      typeNamesFrom(
+        ['95323', '95315', '97517'],
+        [{ name: 'Command Pod' }, undefined, {}],
+      ),
+    ).toEqual({ '95323': 'Command Pod' })
   })
 })

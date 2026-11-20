@@ -2,6 +2,7 @@
 export {
   executeGraphQLQuery,
   getEntity,
+  getEventsByType,
   getObjectByAddress,
   getObjectLatestVersion,
   getObjectOwner,
@@ -20,6 +21,8 @@ export {
 export {
   // Entity queries
   GET_ENTITY,
+  // Event queries
+  GET_EVENTS_BY_TYPE,
   // Core object queries
   GET_OBJECT_BY_ADDRESS,
   GET_OBJECT_LATEST_VERSION,
