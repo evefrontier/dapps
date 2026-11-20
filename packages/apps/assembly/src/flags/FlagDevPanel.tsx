@@ -74,6 +74,10 @@ export function FlagDevPanel() {
       </button>
       {open && (
         <div>
+          <div className={`${styles.row} ${styles.version}`}>
+            <span className={styles.rowKey}>Dapp version</span>
+            <span>{__APP_VERSION__}</span>
+          </div>
           {flagEntries.map(([flagKey, def]) => (
             <FlagRow key={flagKey} flagKey={flagKey} def={def} />
           ))}
