@@ -42,6 +42,12 @@ export const FLAG_DEFINITIONS = {
     },
     defaultVariant: 'actual',
   },
+  'assembly-controller-search': {
+    description:
+      'Access tab: find a character to add by name (or wallet prefix) instead of pasting its wallet address. Picking a result fills in its wallet; adding still goes by wallet.',
+    variants: { on: 'on', off: 'off' },
+    defaultVariant: 'off',
+  },
 } satisfies Record<string, FlagDefinition>
 
 export type FlagKey = keyof typeof FLAG_DEFINITIONS
