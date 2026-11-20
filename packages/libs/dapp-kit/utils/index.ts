@@ -53,5 +53,15 @@ export {
   getRegistryAddress,
   parseStatus,
 } from './mapping'
+// Roles on an entity: shell, controller, visitor
+export {
+  type EntityRole,
+  type EntityRoleInput,
+  findCharacterByWallet,
+  getEntityRole,
+  type NewControllerResult,
+  resolveNewController,
+  sameAddress,
+} from './role'
 // General utilities
 export * from './utils'

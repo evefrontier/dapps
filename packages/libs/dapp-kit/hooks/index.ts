@@ -1,5 +1,6 @@
 export { useCharacterDirectory } from './useCharacterDirectory'
 export { useConnection } from './useConnection'
+export { useEntityRole } from './useEntityRole'
 export { useNotification } from './useNotification'
 export { useSmartObject } from './useSmartObject'
 export type {

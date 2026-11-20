@@ -18,6 +18,7 @@ export type {
 export {
   useCharacterDirectory,
   useConnection,
+  useEntityRole,
   useNotification,
   useSmartObject,
   useSponsoredTransaction,
