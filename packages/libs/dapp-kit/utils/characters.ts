@@ -13,8 +13,6 @@ interface MetadataChangedJson {
   name: string
 }
 
-const HEX_QUERY = /^0x[0-9a-f]{1,64}$/
-
 /** Pages in every event of a type, oldest first. */
 async function fetchAllEvents(eventType: string): Promise<EventNode[]> {
   const events: EventNode[] = []
@@ -77,10 +75,9 @@ export async function fetchCharacterDirectory(
 }
 
 /**
- * Searches characters by name or wallet address. A query starting with `0x`
- * matches the start of a wallet address, never a character id, since
- * controllers are added by wallet; anything else matches names,
- * case-insensitively, with prefix matches first.
+ * Searches characters by name, case-insensitively, with prefix matches first.
+ * A query starting with `0x` matches nothing: an address is not searched, it
+ * is entered in full.
  *
  * @category Utilities - Characters
  * @param characters - From {@link fetchCharacterDirectory}
@@ -94,15 +91,7 @@ export function searchCharacters(
   limit = 20,
 ): CharacterSummary[] {
   const needle = query.trim().toLowerCase()
-  if (!needle) return []
-
-  if (HEX_QUERY.test(needle)) {
-    return characters
-      .filter((character) =>
-        character.walletAddress.toLowerCase().startsWith(needle),
-      )
-      .slice(0, limit)
-  }
+  if (!needle || needle.startsWith('0x')) return []
 
   const prefix: CharacterSummary[] = []
   const contains: CharacterSummary[] = []
