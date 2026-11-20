@@ -1078,6 +1078,158 @@ html #root {
   }
 }
 
+/* Access tab: the Controllers list and the add-by-wallet form */
+.gc .acc {
+  max-width: 520px;
+}
+.gc .bar-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--n10);
+  font: 400 12px / 16px var(--font-display);
+  text-transform: uppercase;
+}
+.gc .bar-h span {
+  font: 300 12px / 16px var(--font-body);
+  color: var(--n60);
+  text-transform: none;
+}
+.gc .tag {
+  font: 400 10px / 1.3 var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border: 1px solid var(--n20);
+  color: var(--n50);
+  white-space: nowrap;
+}
+.gc .tag.on {
+  color: var(--ink);
+  border-color: var(--brand-60);
+  background: var(--brand-40);
+}
+.gc .tag.pend {
+  color: var(--relate);
+  border-color: var(--relate);
+}
+.gc .plist {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.gc .person {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "name act" "meta act";
+  gap: 0 8px;
+  align-items: center;
+  padding: 6px 8px;
+  background: var(--crude);
+  border: 1px solid var(--n10);
+}
+.gc .person .pn {
+  grid-area: name;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+.gc .person .pn b {
+  font-weight: 300;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gc .person .pm {
+  grid-area: meta;
+  font-size: 12px;
+  color: var(--n50);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gc .person .act {
+  grid-area: act;
+}
+.gc .rm {
+  font-size: 12px;
+  border: 1px solid var(--n20);
+  background: none;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.gc .rm:hover:not(:disabled) {
+  border-color: var(--offline);
+  color: var(--offline);
+}
+.gc .rm:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.gc .add {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gc .add-open {
+  text-align: left;
+  font-size: 13px;
+  border: 1px dashed var(--brand-60);
+  background: none;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+.gc .add-open:hover:not(:disabled) {
+  border-color: var(--brand);
+}
+.gc .add-open:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.gc .add form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gc .add label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font: 400 10px / 1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--n50);
+}
+.gc .add input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--n20);
+  padding: 6px 9px;
+  font: 300 13.5px / 1.4 var(--font-body);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+.gc .add input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+.gc .add input[aria-invalid="true"] {
+  border-color: var(--offline);
+}
+.gc .add .err {
+  margin: 0;
+  font-size: 12px;
+  color: var(--offline);
+}
+.gc .add .add-acts {
+  display: flex;
+  gap: 8px;
+}
+
 /* Main breaker lever (shell and controllers) and the hold-to-cut button */
 .gc .lever {
   appearance: none;

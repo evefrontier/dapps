@@ -42,12 +42,6 @@ export const FLAG_DEFINITIONS = {
     },
     defaultVariant: 'actual',
   },
-  'assembly-controllers': {
-    description:
-      'Show the controller list, where the shell and controllers add or remove characters allowed to use the assembly. Needs the access-list contract and sponsored actions.',
-    variants: { on: 'on', off: 'off' },
-    defaultVariant: 'off',
-  },
 } satisfies Record<string, FlagDefinition>
 
 export type FlagKey = keyof typeof FLAG_DEFINITIONS

@@ -52,14 +52,17 @@ While the entity has a transaction in flight (`entity.inFlight`), every control 
 
 The dapp does not deposit fuel. Fuel arrives through the game's inventory-in action.
 
-The dapp is a single screen, the grid console. It has no routes: whatever path it is opened at, it shows the console for the selected assembly. It is read-only for now and opens without a wallet. Its tabs are Dapp (when the assembly has a dapp URL, and then open first), Grid, Airlock (when it has an inventory) and Access (shell and controllers, with `assembly-controllers` on).
+The dapp is a single screen, the grid console. It has no routes: whatever path it is opened at, it shows the console for the selected assembly. It opens without a wallet. Its tabs are Dapp (when the assembly has a dapp URL, and then open first), Grid, Airlock (when it has an inventory) and Access (the shell and controllers only; visitors never see it).
 
-Feature flags:
+Status:
 
-- `assembly-view-as` (dev and test builds, where the flag panel shows) renders the console as a visitor, controller or shell, whatever wallet is connected; `actual` uses the wallet's real role. The role chip then reads e.g. `shell · preview`. It changes only what is shown: transactions still go through the real wallet, and the chain checks them.
-- `assembly-controllers` shows the controller list and lets the shell and controllers add and remove controllers. Off by default; it needs the access-list contract and sponsored actions.
+- Adding and removing controllers (the Access tab) needs the access-list contract and its sponsored actions; until then those transactions fail at the wallet.
 - The main breaker is a lever for the shell and controllers: switching on is one click, cutting power needs the hold button. Its sponsored action (`set-power-grid`) is a placeholder until wallet-core supports `power_grid::set_power_grid`, so the transaction fails at the wallet for now. Module and generator breakers are display only.
 - Editing the name, description and dapp URL is planned: one `UPDATE_METADATA` transaction for all three, open to the shell and controllers.
+
+Feature flags (dev and test builds only, where the flag panel shows):
+
+- `assembly-view-as` renders the console as a visitor, controller or shell, whatever wallet is connected; `actual` uses the wallet's real role. The role chip then reads e.g. `shell · preview`. It changes only what is shown: transactions still go through the real wallet, and the chain checks them.
 
 ## Getting Started
 

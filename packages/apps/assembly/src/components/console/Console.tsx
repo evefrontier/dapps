@@ -7,8 +7,8 @@ import {
 } from '@evefrontier/dapp-kit'
 import { useMemo, useState } from 'react'
 
-import { useFlagVariant, useViewRole } from '../../flags'
-import Controllers from '../Controllers'
+import { useViewRole } from '../../flags'
+import AccessTab from './AccessTab'
 import AirlockTab from './AirlockTab'
 import DappTab from './DappTab'
 import GridTab from './GridTab'
@@ -34,7 +34,7 @@ const Ornament = () => (
  * The Assembly's grid console: one screen per Assembly, in the Creation
  * Builder's language. Tabs: Dapp (first, and open by default, when the
  * Assembly has a dapp URL), Grid, Airlock (when it has an inventory) and
- * Access (for the shell and controllers, behind `assembly-controllers`).
+ * Access (for the shell and controllers only).
  *
  * The shell and controllers switch the main breaker, manage controllers and
  * see the airlock contents and the controller count; everything else looks
@@ -44,7 +44,6 @@ const Console = () => {
   const { entity, entityOwner, loading, error, tenant } = useSmartObject()
   const { role, preview } = useViewRole()
   const { currentAccount, handleConnect, handleDisconnect } = useConnection()
-  const accessEnabled = useFlagVariant('assembly-controllers') === 'on'
   const nowMs = useNow()
   const [chosen, setChosen] = useState<ConsoleTab | null>(null)
 
@@ -59,7 +58,7 @@ const Console = () => {
     ...(url ? (['dapp'] as const) : []),
     'grid',
     ...(entity?.inventories.length ? (['airlock'] as const) : []),
-    ...(writer && accessEnabled ? (['access'] as const) : []),
+    ...(writer ? (['access'] as const) : []),
   ]
   const active = chosen && tabs.includes(chosen) ? chosen : tabs[0]!
 
@@ -153,7 +152,7 @@ const Console = () => {
             {active === 'airlock' && (
               <AirlockTab entity={entity} showContents={writer} />
             )}
-            {active === 'access' && <Controllers />}
+            {active === 'access' && <AccessTab />}
           </div>
         </div>
       </div>
