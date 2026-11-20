@@ -28,16 +28,21 @@ const toSponsoredAssembly = (entity: EntityData) =>
     type: Assemblies.Assembly,
   }) as unknown as AssemblyType<Assemblies>
 
+/** What adding or removing a controller needs. */
+export interface ControllerTransaction {
+  entity: EntityData
+  /** The character to add or remove */
+  characterId: string
+  sendSponsoredTransaction: SendSponsoredTransactionFn
+}
+
 const sendControllerTransaction = async ({
   txAction,
   entity,
   characterId,
   sendSponsoredTransaction,
-}: {
+}: ControllerTransaction & {
   txAction: SponsoredTransactionActions
-  entity: EntityData
-  characterId: string
-  sendSponsoredTransaction: SendSponsoredTransactionFn
 }): Promise<SponsoredTransactionOutput> => {
   log.info(`${txAction}: sending sponsored transaction`, { characterId })
   try {
@@ -59,17 +64,13 @@ const sendControllerTransaction = async ({
 }
 
 /** ADD ASSEMBLY CONTROLLER SPONSORED TRANSACTION FUNCTION */
-export const addController = (args: {
-  entity: EntityData
-  characterId: string
-  sendSponsoredTransaction: SendSponsoredTransactionFn
-}): Promise<SponsoredTransactionOutput> =>
+export const addController = (
+  args: ControllerTransaction,
+): Promise<SponsoredTransactionOutput> =>
   sendControllerTransaction({ txAction: ADD_ASSEMBLY_CONTROLLER, ...args })
 
 /** REMOVE ASSEMBLY CONTROLLER SPONSORED TRANSACTION FUNCTION */
-export const removeController = (args: {
-  entity: EntityData
-  characterId: string
-  sendSponsoredTransaction: SendSponsoredTransactionFn
-}): Promise<SponsoredTransactionOutput> =>
+export const removeController = (
+  args: ControllerTransaction,
+): Promise<SponsoredTransactionOutput> =>
   sendControllerTransaction({ txAction: REMOVE_ASSEMBLY_CONTROLLER, ...args })

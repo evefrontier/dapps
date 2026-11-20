@@ -38,7 +38,7 @@ The dapp works out what the connected wallet may do with the assembly and shows 
 
 How the role is worked out:
 
-- **Shell**: the connected wallet is the one holding the entity's AccessCap (`entityOwner.walletAddress` from `useSmartObject`). The shell is what used to be called the owner.
+- **Shell**: the connected wallet is the one holding the entity's AccessCap (`entityOwner.walletAddress` from `useSmartObject`), or, when the cap is parked on a character, the wallet bound to that character. The shell is what used to be called the owner.
 - **Controller**: the wallet's character id is in the entity's access list (`entity.controllers`). Controllers are character ids, not wallets, so the wallet is first resolved to its character with `useCharacterDirectory`.
 - **Visitor**: anyone else, including a session with no wallet connected. Visitors see the same screens with a lamp in place of the main breaker lever, no edit icon, and who the shell is, but no Access tab and no controller count. In the Airlock tab (shown when the assembly has an airlock, an inventory component on chain) they see how full each airlock is, never what it holds.
 
@@ -46,7 +46,7 @@ The shell and controllers get the same console, and it writes only three things:
 
 Airlock contents and the controller list are public on chain: anyone can query them. Hiding them from visitors keeps them off the dapp's screen; it does not make them private.
 
-On chain, permissions are checked per action: each action on the entity names the requirement it checks (for example `power_grid::OperateGrid` for the main breaker). In today's world-contracts every grid operation also requires the shell (`access_cap::Owner`), so the controller column depends on the access list changing that.
+On chain, permissions are checked per action: each action on the entity names the requirement it checks (for example `power_grid::OperateGrid` for the main breaker). In today's world-contracts every grid operation also requires the shell (`access_cap::Owner`), so the controller column depends on the access list changing that. For now the dapp gates its controls by role alone; checking each action's on-chain requirement before showing its control is deferred until the access-list contract says which requirements controllers meet.
 
 While the entity has a transaction in flight (`entity.inFlight`), every control is locked for everyone until it settles.
 
