@@ -36,8 +36,9 @@ const Ornament = () => (
  * Assembly has a dapp URL), Grid, Airlock (when it has an inventory) and
  * Access (for the shell and controllers, behind `assembly-controllers`).
  *
- * Read-only for now. The shell and controllers see the airlock contents and
- * the controller count; everything else looks the same for every role.
+ * The shell and controllers switch the main breaker, manage controllers and
+ * see the airlock contents and the controller count; everything else looks
+ * the same for every role.
  */
 const Console = () => {
   const { entity, entityOwner, loading, error, tenant } = useSmartObject()
@@ -142,7 +143,12 @@ const Console = () => {
               <DappTab url={url} itemId={entity.key.id} tenant={tenant} />
             )}
             {active === 'grid' && (
-              <GridTab entity={entity} summary={summary} nowMs={nowMs} />
+              <GridTab
+                entity={entity}
+                summary={summary}
+                nowMs={nowMs}
+                writable={writer}
+              />
             )}
             {active === 'airlock' && (
               <AirlockTab entity={entity} showContents={writer} />
