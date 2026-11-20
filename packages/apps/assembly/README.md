@@ -58,7 +58,7 @@ Feature flags:
 
 - `assembly-view-as` (dev and test builds, where the flag panel shows) renders the console as a visitor, controller or shell, whatever wallet is connected; `actual` uses the wallet's real role. The role chip then reads e.g. `shell · preview`. It changes only what is shown: transactions still go through the real wallet, and the chain checks them.
 - `assembly-controllers` shows the controller list and lets the shell and controllers add and remove controllers. Off by default; it needs the access-list contract and sponsored actions.
-- The main breaker is planned and not built yet. Module and generator breakers are display only.
+- The main breaker is a lever for the shell and controllers: switching on is one click, cutting power needs the hold button. Its sponsored action (`set-power-grid`) is a placeholder until wallet-core supports `power_grid::set_power_grid`, so the transaction fails at the wallet for now. Module and generator breakers are display only.
 - Editing the name, description and dapp URL is planned: one `UPDATE_METADATA` transaction for all three, open to the shell and controllers.
 
 ## Getting Started
