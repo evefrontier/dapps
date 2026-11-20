@@ -4,12 +4,7 @@ import { createTheme, ThemeProvider } from '@mui/material'
 import { QueryClient } from '@tanstack/react-query'
 import ReactDOM from 'react-dom/client'
 import { ErrorBoundary } from 'react-error-boundary'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import App from './App'
-import BehaviourView from './components/views/BehaviourView'
-import MonitorView from './components/views/MonitorView'
-import Overview from './components/views/Overview'
-import RootView from './components/views/RootView'
 import { FlagsProvider } from './flags'
 
 const darkTheme = createTheme({
@@ -41,30 +36,6 @@ const darkTheme = createTheme({
   },
 })
 
-const router = createBrowserRouter([
-  {
-    element: <App />,
-    children: [
-      {
-        path: '*',
-        element: <Overview />,
-      },
-      {
-        path: '/client/root',
-        element: <RootView />,
-      },
-      {
-        path: '/client/behaviour',
-        element: <BehaviourView />,
-      },
-      {
-        path: '/client/networknode/monitor',
-        element: <MonitorView />,
-      },
-    ],
-  },
-])
-
 const queryClient = new QueryClient()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -79,7 +50,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <FlagsProvider>
       <EveFrontierProvider queryClient={queryClient}>
         <ThemeProvider theme={darkTheme}>
-          <RouterProvider router={router} />
+          <App />
         </ThemeProvider>
       </EveFrontierProvider>
     </FlagsProvider>

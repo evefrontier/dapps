@@ -7,3 +7,4 @@ export {
 export { isPanelEnabled } from './FlagDevPanel'
 export { FlagsProvider, resetFlagOverrides, setFlagVariant } from './provider'
 export { useFlagVariant } from './useFlags'
+export { useViewRole } from './useViewRole'
