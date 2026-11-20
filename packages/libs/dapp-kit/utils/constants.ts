@@ -174,7 +174,7 @@ export function setActiveEventTransport(transport: EventTransport): void {
  * VITE_POLLING_INTERVAL; set it to 0 to disable polling entirely.
  *  @category Constants
  */
-export const POLLING_INTERVAL = 60000
+export const POLLING_INTERVAL = 15000
 
 /**
  * Resolve the polling-backstop interval in milliseconds.

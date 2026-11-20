@@ -505,6 +505,38 @@ describe('fetchEntityOwner', () => {
     expect(owner.character?.metadata?.name).toBe('Pilot')
   })
 
+  it('reuses the previous owner when the holder is unchanged', async () => {
+    const previous = {
+      kind: 'wallet' as const,
+      holder: '0xwallet',
+      walletAddress: '0xwallet',
+      character: null,
+    }
+    const fetchMock = mockGraphql({
+      GetObjectOwner: () => ownedBy('0xwallet'),
+    })
+
+    expect(await fetchEntityOwner('0xcap', previous)).toBe(previous)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('resolves again when the cap moved to another holder', async () => {
+    mockGraphql({
+      GetObjectOwner: () => ownedBy('0xother'),
+      GetEntity: () => NO_OBJECT,
+    })
+
+    const owner = await fetchEntityOwner('0xcap', {
+      kind: 'wallet',
+      holder: '0xwallet',
+      walletAddress: '0xwallet',
+      character: null,
+    })
+
+    expect(owner.holder).toBe('0xother')
+    expect(owner.walletAddress).toBe('0xother')
+  })
+
   it('returns no owner when the cap is not address-owned', async () => {
     mockGraphql({
       GetObjectOwner: () => ({

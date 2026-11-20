@@ -68,15 +68,25 @@ export function useEntityData(): {
 
   const lastVersionRef = useRef<number | null>(null)
   const lastAccessCapIdRef = useRef<string | null | undefined>(undefined)
+  const lastOwnerRef = useRef<EntityOwner | null>(null)
+  // Bumped per fetch and on reset; a fetch only commits while it is the latest
+  const requestIdRef = useRef(0)
+  const inFlightRef = useRef(false)
 
   const fetchObjectData = useCallback(
     async (input: FetchObjectDataInput, isInitialFetch = false) => {
       if (!isCompleteInput(input)) return
+      // Let a slow fetch finish rather than superseding it with the next poll
+      if (!isInitialFetch && inFlightRef.current) return
+
+      const requestId = ++requestIdRef.current
+      const isStale = () => requestId !== requestIdRef.current
+      inFlightRef.current = true
 
       if (isInitialFetch) {
         setLoading(true)
+        setError(null)
       }
-      setError(null)
 
       try {
         const objectId = await resolveObjectId(input)
@@ -89,7 +99,14 @@ export function useEntityData(): {
         }
 
         const raw = await fetchEntity(objectId)
+        if (isStale()) return
         if (!raw || !isEntity(raw)) {
+          // Keep the last good entity through a transient miss while polling
+          // (e.g. the indexer lagging); retry on the next tick
+          if (!isInitialFetch && lastVersionRef.current !== null) {
+            log.warn('[DappKit] SmartObjectProvider: Entity missing on poll')
+            return
+          }
           log.warn('[DappKit] SmartObjectProvider: Object is not an entity')
           setEntity(null)
           setEntityOwner(null)
@@ -99,26 +116,37 @@ export function useEntityData(): {
         }
 
         const parsed = parseEntity(raw)
-        log.info('[DappKit] SmartObjectProvider: Entity data updated', parsed)
-        lastVersionRef.current = parsed.version
-        setEntity(parsed)
 
-        // The owner only changes with the AccessCap
-        if (parsed.accessCapId !== lastAccessCapIdRef.current) {
-          setEntityOwner(
-            parsed.accessCapId
-              ? await fetchEntityOwner(parsed.accessCapId)
-              : null,
-          )
-          lastAccessCapIdRef.current = parsed.accessCapId
-        }
+        // Re-check the cap holder on every change, since moving the AccessCap
+        // doesn't change accessCapId; the Character is refetched only when the
+        // holder differs
+        const previousOwner =
+          parsed.accessCapId === lastAccessCapIdRef.current
+            ? lastOwnerRef.current
+            : null
+        const owner = parsed.accessCapId
+          ? await fetchEntityOwner(parsed.accessCapId, previousOwner)
+          : null
+        if (isStale()) return
+
+        log.info('[DappKit] SmartObjectProvider: Entity data updated', parsed)
+        setEntity(parsed)
+        setEntityOwner(owner)
         setError(null)
+        // Recorded only once the owner resolved, so a failed lookup is retried
+        lastVersionRef.current = parsed.version
+        lastAccessCapIdRef.current = parsed.accessCapId
+        lastOwnerRef.current = owner
       } catch (err: unknown) {
+        if (isStale()) return
         log.error('[DappKit] SmartObjectProvider: Query error:', err)
         setError(err instanceof Error ? err.message : 'Failed to fetch entity')
       } finally {
-        if (isInitialFetch) {
-          setLoading(false)
+        if (!isStale()) {
+          inFlightRef.current = false
+          if (isInitialFetch) {
+            setLoading(false)
+          }
         }
       }
     },
@@ -126,8 +154,11 @@ export function useEntityData(): {
   )
 
   const resetTracking = useCallback(() => {
+    requestIdRef.current++
+    inFlightRef.current = false
     lastVersionRef.current = null
     lastAccessCapIdRef.current = undefined
+    lastOwnerRef.current = null
   }, [])
 
   return {

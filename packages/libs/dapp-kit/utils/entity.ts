@@ -374,11 +374,14 @@ export function parseEntity(raw: RawEntity): EntityData {
  *
  * @category Utilities - Entity
  * @param accessCapId - The entity's `accessCapId`
+ * @param previous - The last owner resolved for this cap; returned as-is when
+ *   the holder hasn't changed, skipping the Character fetch
  * @returns The holder, its wallet, and the Character entity when there is one
  * @throws If a GraphQL response has errors
  */
 export async function fetchEntityOwner(
   accessCapId: string,
+  previous?: EntityOwner | null,
 ): Promise<EntityOwner> {
   const response = await getObjectOwner(accessCapId)
   throwOnErrors(response)
@@ -390,6 +393,9 @@ export async function fetchEntityOwner(
   // An ObjectOwner holder is a dynamic-field wrapper, not the Character
   if (owner.__typename === 'ObjectOwner') {
     return { kind: 'object', holder, walletAddress: null, character: null }
+  }
+  if (previous && previous.kind !== 'object' && previous.holder === holder) {
+    return previous
   }
 
   // A wallet has no object at its address; an object holder should be a Character
