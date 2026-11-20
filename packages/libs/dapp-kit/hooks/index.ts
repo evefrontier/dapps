@@ -15,3 +15,4 @@ export {
   WalletNotConnectedError,
   WalletSponsoredTransactionNotSupportedError,
 } from './useSponsoredTransaction'
+export { useTypeNames } from './useTypeNames'

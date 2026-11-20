@@ -22,6 +22,7 @@ export {
   useNotification,
   useSmartObject,
   useSponsoredTransaction,
+  useTypeNames,
   WalletNoAccountSelectedError,
   WalletNotConnectedError,
   WalletSponsoredTransactionNotSupportedError,
