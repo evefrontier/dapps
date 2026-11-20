@@ -13,6 +13,8 @@ interface MetadataChangedJson {
   name: string
 }
 
+const HEX_QUERY = /^0x[0-9a-f]{1,64}$/
+
 /** Pages in every event of a type, oldest first. */
 async function fetchAllEvents(eventType: string): Promise<EventNode[]> {
   const events: EventNode[] = []
@@ -72,4 +74,42 @@ export async function fetchCharacterDirectory(
     })
   }
   return characters
+}
+
+/**
+ * Searches characters by name or wallet address. A query starting with `0x`
+ * matches the start of a wallet address, never a character id, since
+ * controllers are added by wallet; anything else matches names,
+ * case-insensitively, with prefix matches first.
+ *
+ * @category Utilities - Characters
+ * @param characters - From {@link fetchCharacterDirectory}
+ * @param query - Search text
+ * @param limit - Maximum number of results
+ * @returns Matching characters
+ */
+export function searchCharacters(
+  characters: CharacterSummary[],
+  query: string,
+  limit = 20,
+): CharacterSummary[] {
+  const needle = query.trim().toLowerCase()
+  if (!needle) return []
+
+  if (HEX_QUERY.test(needle)) {
+    return characters
+      .filter((character) =>
+        character.walletAddress.toLowerCase().startsWith(needle),
+      )
+      .slice(0, limit)
+  }
+
+  const prefix: CharacterSummary[] = []
+  const contains: CharacterSummary[] = []
+  for (const character of characters) {
+    const index = character.name.toLowerCase().indexOf(needle)
+    if (index === 0) prefix.push(character)
+    else if (index > 0) contains.push(character)
+  }
+  return [...prefix, ...contains].slice(0, limit)
 }
