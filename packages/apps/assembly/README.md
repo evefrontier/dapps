@@ -42,7 +42,7 @@ How the role is worked out:
 - **Controller**: the wallet's character id is in the entity's access list (`entity.controllers`). Controllers are character ids, not wallets, so the wallet is first resolved to its character with `useCharacterDirectory`.
 - **Visitor**: anyone else, including a session with no wallet connected. Visitors see the same screens with a lamp in place of the main breaker lever, no edit icon, and who the shell is, but no Access tab and no controller count. In the Airlock tab (shown when the assembly has an airlock, an inventory component on chain) they see how full each airlock is, never what it holds.
 
-The shell and controllers get the same console, and it writes only three things: the main breaker, the name, description and dapp URL, and the Controllers list. Sections, modules, generators and airlocks are read-only for everyone, shown exactly as visitors see them; module and generator switching stays in the game. The Access tab has one Controllers list; the shell is on it in its own place, tagged Shell, and its entry has no Remove button, so the shell can never take itself off the list. Controllers are added by pasting the wallet address bound to a character; there is no search, and a character id is not accepted. A wallet with no character is rejected; the character id the wallet is bound to is what reaches the access list.
+The shell and controllers get the same console, and it writes only three things: the main breaker, the name, description and dapp URL, and the Controllers list. Sections, modules, generators and airlocks are read-only for everyone, shown exactly as visitors see them; module and generator switching stays in the game. The Access tab has one Controllers list; the shell is on it in its own place, tagged Shell, and its entry has no Remove button, so the shell can never take itself off the list. Controllers are added by pasting the wallet address bound to a character (or, behind `assembly-controller-search`, by picking a character found by name); a pasted character id is not accepted. A wallet with no character is rejected; the character id the wallet is bound to is what reaches the access list.
 
 Airlock contents and the controller list are public on chain: anyone can query them. Hiding them from visitors keeps them off the dapp's screen; it does not make them private.
 
@@ -62,7 +62,7 @@ Status:
 
 Feature flags:
 
-- `assembly-controller-search` (off by default) lets the Access tab's Add form find a character by name, or by the start of its wallet address, instead of pasting the whole wallet. Picking a result fills in its wallet, so adding still goes by wallet, never by character id. Names come from each character's latest `MetadataChanged` event, so a character that has never been named can only be added by wallet.
+- `assembly-controller-search` (off by default) lets the Access tab's Add form find a character by name instead of pasting its wallet. Picking a result fills in its wallet and adds exactly that character, since one wallet can be bound to several. Names come from each character's latest `MetadataChanged` event, so a character that has never been named can only be added by wallet.
 
 Dev and test builds only, where the flag panel shows:
 

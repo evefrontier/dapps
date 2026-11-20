@@ -1382,9 +1382,15 @@ html #root {
   top: calc(50% + 3px);
   font: 300 10px / 1.2 var(--font-body);
 }
+/* Mobile: the hold button runs full width, Keep it on under it */
 @container gc (max-width: 767.98px) {
+  .gc .hold-acts {
+    flex-direction: column;
+    align-items: stretch;
+  }
   .gc .hold {
     min-width: 0;
+    flex: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -1,5 +1,6 @@
 import {
   type CharacterSummary,
+  type EntityOwner,
   findCharacterByWallet,
   sameAddress,
   useCharacterDirectory,
@@ -27,6 +28,59 @@ export interface ControllerRow {
  * has no access list yet), its row is added at the end. The shell's row is
  * never removable.
  *
+ * @param controllers - The entity's access list (character ids)
+ * @param owner - Who holds the entity's AccessCap
+ * @param characters - The character directory; empty until it loads
+ * @returns
+ *   - `rows` - The list to show
+ *   - `shellId` - The shell's character id: the cap's holder when it is parked
+ *     on a character, otherwise the character bound to the holding wallet
+ */
+export function buildControllerRows(
+  controllers: string[] | null | undefined,
+  owner: EntityOwner | null,
+  characters: CharacterSummary[],
+): { rows: ControllerRow[]; shellId: string | null } {
+  const characterOf = (id: string) =>
+    characters.find((c) => sameAddress(c.characterId, id))
+  const shellId =
+    owner?.kind === 'character'
+      ? owner.holder
+      : (findCharacterByWallet(characters, owner?.walletAddress)?.characterId ??
+        null)
+
+  const rows: ControllerRow[] = (controllers ?? []).map((id) => {
+    const character = characterOf(id)
+    return {
+      key: id,
+      characterId: id,
+      name: character?.name ?? '',
+      address: character?.walletAddress ?? id,
+      isShell: sameAddress(id, shellId),
+    }
+  })
+
+  if (owner && !rows.some((row) => row.isShell)) {
+    const address = owner.walletAddress ?? owner.holder
+    if (address || shellId) {
+      const shellCharacter = shellId ? characterOf(shellId) : undefined
+      rows.push({
+        key: `shell:${shellId ?? address}`,
+        characterId: shellId,
+        name: shellCharacter?.name || owner.character?.metadata?.name || '',
+        address: address ?? shellId,
+        isShell: true,
+      })
+    }
+  }
+
+  return { rows, shellId }
+}
+
+/**
+ * {@link buildControllerRows} for the selected entity, with the character
+ * directory it needs.
+ *
  * @param enabled - False skips the character directory fetch (visitors)
  */
 export function useControllerRows(enabled: boolean): {
@@ -40,49 +94,16 @@ export function useControllerRows(enabled: boolean): {
   const { entity, entityOwner } = useSmartObject()
   const directory = useCharacterDirectory({ enabled })
 
-  return useMemo(() => {
-    const characters = directory.data ?? []
-    const characterOf = (id: string) =>
-      characters.find((c) => sameAddress(c.characterId, id))
-    // The cap's holder when it is parked on a character, otherwise the
-    // character bound to the holding wallet
-    const shellId =
-      entityOwner?.kind === 'character'
-        ? entityOwner.holder
-        : (findCharacterByWallet(characters, entityOwner?.walletAddress)
-            ?.characterId ?? null)
-
-    const rows: ControllerRow[] = (entity?.controllers ?? []).map((id) => {
-      const character = characterOf(id)
-      return {
-        key: id,
-        characterId: id,
-        name: character?.name ?? '',
-        address: character?.walletAddress ?? id,
-        isShell: sameAddress(id, shellId),
-      }
-    })
-
-    if (entityOwner && !rows.some((row) => row.isShell)) {
-      const shellCharacter = shellId ? characterOf(shellId) : undefined
-      const address = entityOwner.walletAddress ?? entityOwner.holder
-      if (address || shellId) {
-        rows.push({
-          key: `shell:${shellId ?? address}`,
-          characterId: shellId,
-          name:
-            shellCharacter?.name || entityOwner.character?.metadata?.name || '',
-          address: address ?? shellId,
-          isShell: true,
-        })
-      }
-    }
-
-    return {
-      rows,
-      shellId,
+  return useMemo(
+    () => ({
+      ...buildControllerRows(
+        entity?.controllers,
+        entityOwner,
+        directory.data ?? [],
+      ),
       characters: directory.data,
       isLoading: directory.isLoading,
-    }
-  }, [entity, entityOwner, directory.data, directory.isLoading])
+    }),
+    [entity, entityOwner, directory.data, directory.isLoading],
+  )
 }

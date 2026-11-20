@@ -1,19 +1,20 @@
 import {
   abbreviateAddress,
   type CharacterSummary,
+  canManage as canManageRole,
+  isController,
   resolveNewController,
-  Severity,
   sameAddress,
   useCharacterSearch,
-  useNotification,
   useSmartObject,
-  useSponsoredTransaction,
 } from '@evefrontier/dapp-kit'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { useFlagVariant, useViewRole } from '../../flags'
 import { addController, removeController } from '../../functions/controllers'
+import { shortCode } from './format'
 import { useControllerRows } from './useControllerRows'
+import { useSponsoredAction } from './useSponsoredAction'
 
 const ADD_ERRORS = {
   invalidAddress: 'Enter a full 0x address: 0x and 64 hex digits.',
@@ -21,7 +22,6 @@ const ADD_ERRORS = {
   alreadyController: 'Already a controller.',
 } as const
 
-const FULL_ADDRESS = /^0x[0-9a-fA-F]{64}$/
 const MAX_RESULTS = 8
 
 /**
@@ -32,24 +32,21 @@ const MAX_RESULTS = 8
  * the shell, whose entry has no Remove. Visitors see nothing.
  *
  * With `assembly-controller-search` on, the field also finds characters by
- * name (or wallet prefix); picking one fills in its wallet, so adding still
- * goes through the same wallet-only check.
+ * name; picking one fills in its wallet and adds exactly that character.
  *
  * @returns React.JSX.Element, or null for visitors
  */
 const AccessTab = React.memo((): React.JSX.Element | null => {
-  const { entity, refetch } = useSmartObject()
+  const { entity } = useSmartObject()
   const { role, characterId: viewerId } = useViewRole()
-  const { notify } = useNotification()
-  const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction()
+  const { run, pending } = useSponsoredAction()
 
-  const canManage = role === 'shell' || role === 'controller'
+  const canManage = canManageRole(role)
   const { rows, shellId, characters, isLoading } = useControllerRows(canManage)
 
   const [addOpen, setAddOpen] = useState(false)
   const [address, setAddress] = useState('')
   const [addError, setAddError] = useState<string | null>(null)
-  const [pending, setPending] = useState(false)
   const [picked, setPicked] = useState<CharacterSummary | null>(null)
   const addInput = useRef<HTMLInputElement>(null)
 
@@ -60,59 +57,38 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
     addOpen &&
     !picked &&
     query.length >= 2 &&
-    !FULL_ADDRESS.test(query)
+    !query.startsWith('0x')
   const search = useCharacterSearch(showResults ? query : '', {
     enabled: canManage && searchOn,
+    limit: MAX_RESULTS,
   })
 
   useEffect(() => {
     if (addOpen) addInput.current?.focus()
   }, [addOpen])
 
-  const controllerIds = useMemo(() => entity?.controllers ?? [], [entity])
-  // Already a controller: on the access list, or the shell itself
-  const isController = (characterId: string) =>
-    sameAddress(characterId, shellId) ||
-    controllerIds.some((id) => sameAddress(id, characterId))
-
   if (!entity || !canManage) return null
 
   const locked = pending || entity.inFlight
 
-  const send = async (
-    action: typeof addController,
-    characterId: string,
-    label: string,
-    verb: string,
-  ) => {
-    setPending(true)
-    try {
-      const result = await action({
-        entity,
-        characterId,
-        sendSponsoredTransaction,
-      })
-      if (result?.digest) {
-        notify({
-          type: Severity.Success,
-          txHash: result.digest,
-          onSuccess: async () => {
-            await refetch()
-          },
-        })
-      }
-      if (action === addController) closeAdd()
-    } catch (e) {
-      notify({
-        type: Severity.Error,
-        message: `Failed to ${verb} ${label}: ${
-          e instanceof Error ? e.message : 'Unknown error'
-        }`,
-      })
-    } finally {
-      setPending(false)
-    }
-  }
+  const controllers = entity.controllers
+
+  const add = (character: CharacterSummary) =>
+    run(
+      `add ${character.name || abbreviateAddress(character.characterId)}`,
+      (sendSponsoredTransaction) =>
+        addController({
+          entity,
+          characterId: character.characterId,
+          sendSponsoredTransaction,
+        }),
+      closeAdd,
+    )
+
+  const remove = (characterId: string, label: string) =>
+    run(`remove ${label}`, (sendSponsoredTransaction) =>
+      removeController({ entity, characterId, sendSponsoredTransaction }),
+    )
 
   function closeAdd() {
     setAddOpen(false)
@@ -128,42 +104,30 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
     addInput.current?.focus()
   }
 
-  const results = search.results.slice(0, MAX_RESULTS)
-
   const handleAdd = (event: React.FormEvent) => {
     event.preventDefault()
     if (locked || !characters) return
     // A picked search result is added exactly: one wallet can be bound to
     // several characters, and resolving the wallet again would pick the first
     if (picked && sameAddress(query, picked.walletAddress)) {
-      if (isController(picked.characterId)) {
+      if (isController(picked.characterId, controllers, shellId)) {
         setAddError(ADD_ERRORS.alreadyController)
         return
       }
-      send(
-        addController,
-        picked.characterId,
-        picked.name || abbreviateAddress(picked.characterId),
-        'add',
-      )
+      add(picked)
       return
     }
-    const result = resolveNewController(address, characters, controllerIds)
+    const result = resolveNewController(
+      address,
+      characters,
+      controllers,
+      shellId,
+    )
     if (!result.ok) {
       setAddError(ADD_ERRORS[result.error])
       return
     }
-    const { character } = result
-    if (isController(character.characterId)) {
-      setAddError(ADD_ERRORS.alreadyController)
-      return
-    }
-    send(
-      addController,
-      character.characterId,
-      character.name || abbreviateAddress(character.characterId),
-      'add',
-    )
+    add(result.character)
   }
 
   return (
@@ -201,9 +165,7 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
                         type="button"
                         className="rm"
                         disabled={locked}
-                        onClick={() =>
-                          send(removeController, characterId, label, 'remove')
-                        }
+                        onClick={() => remove(characterId, label)}
                       >
                         Remove
                       </button>
@@ -243,8 +205,8 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
               </label>
               {picked && (
                 <p className="picked">
-                  Adding <b>{picked.name || 'Unnamed character'}</b> #
-                  {picked.characterId.slice(-6)}
+                  Adding <b>{picked.name || 'Unnamed character'}</b>{' '}
+                  {shortCode(picked.characterId)}
                 </p>
               )}
               {showResults &&
@@ -252,17 +214,18 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
                   <p className="none-note">Loading characters…</p>
                 ) : search.error ? (
                   <p className="err">Could not load characters.</p>
-                ) : results.length === 0 ? (
+                ) : search.results.length === 0 ? (
                   <p className="none-note">No matching characters</p>
                 ) : (
                   <ul className="cands" aria-label="Matching characters">
-                    {results.map((character) => {
+                    {search.results.map((character) => {
                       const isShell = sameAddress(
                         character.characterId,
                         shellId,
                       )
-                      const onList = controllerIds.some((id) =>
-                        sameAddress(id, character.characterId),
+                      const onList = isController(
+                        character.characterId,
+                        controllers,
                       )
                       return (
                         <li key={character.characterId}>
@@ -274,7 +237,7 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
                           >
                             <span className="cn">
                               {character.name || 'Unnamed character'}
-                              <i>#{character.characterId.slice(-6)}</i>
+                              <i>{shortCode(character.characterId)}</i>
                             </span>
                             {(isShell || onList) && (
                               <span className={`tag${isShell ? ' on' : ''}`}>
