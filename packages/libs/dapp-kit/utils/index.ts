@@ -18,6 +18,32 @@ export {
 export type { ErrorType } from './errors'
 // Error handling
 export { ERROR_MESSAGES, ERRORS, parseErrorFromMessage } from './errors'
+// Power grid: fuel burn (port of power::fuel_math) and display state
+export {
+  effectiveCapacityMw,
+  FUEL_SCALE,
+  fromFixed,
+  fuelBurn,
+  fuelBurnPerHour,
+  fuelFactor,
+  type GeneratorBurnInput,
+  generatorBurn,
+  msUntilEmpty,
+  projectedFuel,
+  usedMw,
+} from './fuel'
+export {
+  type GeneratorState,
+  type GeneratorStatus,
+  type GridStatus,
+  type GridSummary,
+  generatorStates,
+  gridSummary,
+  type ModuleState,
+  type ModuleStatus,
+  moduleStates,
+  type NoPowerReason,
+} from './grid'
 // Logging
 export * from './logger'
 export {
