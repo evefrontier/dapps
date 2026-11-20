@@ -1,8 +1,11 @@
 import {
   type EntityData,
   type EntityInventory,
+  type GeneratorStatus,
+  type GridStatus,
   type GridSummary,
   generatorStates,
+  type ModuleState,
   type ModuleStatus,
   moduleStates,
   type NoPowerReason,
@@ -22,20 +25,26 @@ export type Lamp = 'on' | 'wait' | 'main' | 'off'
 
 export type CardKind = 'generator' | 'fuel' | 'module' | 'airlock' | 'other'
 
+/** A labelled figure on a card, e.g. `Firm` / `needs 0.1 MW`. */
+export interface CardSpec {
+  label: string
+  value: string
+}
+
 export interface BoardCard {
   componentId: string
   code: string
   kind: CardKind
   typeId: string | null
   fallbackName: string
-  /** Null for a component that is not on the grid */
+  /** Null for a component with no breaker (not on the grid) */
   lamp: Lamp | null
-  /** State word, e.g. Online, Blocked, Feeding */
-  word: string
-  /** Second line, e.g. why it has no power; null when nothing to add */
+  /** Short state label, e.g. Online, Blocked, Feeding */
+  statusLabel: string
+  /** Second line, e.g. what it draws or why it has no power */
   detail: string | null
-  /** Label and value of what it uses or makes, e.g. `Firm`, `0.1 MW` */
-  use: [string, string]
+  /** What it needs, makes or holds */
+  spec: CardSpec
   /** Live draw, fixed point; 0 for anything that does not draw */
   draw: bigint
 }
@@ -57,26 +66,67 @@ export interface AirlockView {
   inventory: EntityInventory
 }
 
-const REASON: Record<NoPowerReason, string> = {
+/** Short label for why something switched on has no power; cards and banners share it. */
+export const NO_POWER_LABEL: Record<NoPowerReason, string> = {
   mainOff: 'Resumes with the main breaker',
   generatorOff: 'No power · generator off',
   outOfFuel: 'No power · out of fuel',
   notEnoughPower: 'Not enough power · too many modules on',
 }
 
-const MODULE_WORD: Record<ModuleStatus, [Lamp, string]> = {
-  online: ['on', 'Online'],
-  reduced: ['on', 'Reduced'],
-  off: ['off', 'Off'],
-  mainOff: ['main', 'Main off'],
-  blocked: ['wait', 'Blocked'],
+const MODULE_STATUS: Record<ModuleStatus, { lamp: Lamp; label: string }> = {
+  online: { lamp: 'on', label: 'Online' },
+  reduced: { lamp: 'on', label: 'Reduced' },
+  off: { lamp: 'off', label: 'Off' },
+  mainOff: { lamp: 'main', label: 'Main off' },
+  blocked: { lamp: 'wait', label: 'Blocked' },
 }
 
-/** The section names the layout gives: Section 1, 2… in layout order. */
+const GENERATOR_STATUS: Record<
+  GeneratorStatus,
+  { lamp: Lamp; label: string; detail: (output: string) => string }
+> = {
+  running: { lamp: 'on', label: 'Running', detail: (o) => `Making ${o}` },
+  mainOff: {
+    lamp: 'main',
+    label: 'Main off',
+    detail: () => NO_POWER_LABEL.mainOff,
+  },
+  stopped: { lamp: 'wait', label: 'Stopped', detail: () => 'Out of fuel' },
+  off: { lamp: 'off', label: 'Off', detail: () => 'Switched off' },
+}
+
+const GRID_STATUS: Record<GridStatus, { lamp: Lamp; label: string }> = {
+  online: { lamp: 'on', label: 'Online' },
+  off: { lamp: 'main', label: 'Power off' },
+  noPower: { lamp: 'wait', label: 'No power' },
+}
+
+/** `Section 1`, `Section 2`… by position in the layout. */
+const sectionName = (index: number): string => `Section ${index + 1}`
+
+const sumDraw = (cards: BoardCard[]): bigint =>
+  cards.reduce((sum, card) => sum + card.draw, 0n)
+
+/** What a module's card says under its name, by state. */
+function moduleDetail(state: ModuleState): string | null {
+  switch (state.status) {
+    case 'online':
+      return state.draw > 0n ? `${mw(state.draw)} MW drawn` : null
+    case 'reduced':
+      return `${mw(state.draw)} of ${mw(state.powerReq)} MW`
+    case 'off':
+      return 'Switched off'
+    default:
+      return state.reason ? NO_POWER_LABEL[state.reason] : null
+  }
+}
+
+/** The section each component is in, by component id. */
 function sectionNames(entity: EntityData): Map<string, string> {
   const names = new Map<string, string>()
   entity.layout?.sections.forEach((section, i) => {
-    for (const id of section.moduleIds) names.set(id, `Section ${i + 1}`)
+    for (const id of section.moduleIds) names.set(id, sectionName(i))
   })
   return names
 }
@@ -92,26 +142,19 @@ function cardFor(
 
   const generator = grid?.generators[componentId]
   if (grid && generator) {
-    const status = generatorStates(grid, nowMs).find(
-      (g) => g.componentId === componentId,
-    )?.status
+    const status =
+      generatorStates(grid, nowMs).find((g) => g.componentId === componentId)
+        ?.status ?? 'off'
     const output = `${mw(generator.maxOutputMw)} MW`
-    const [lamp, word, detail]: [Lamp, string, string] =
-      status === 'running'
-        ? ['on', 'Running', `Making ${output}`]
-        : status === 'mainOff'
-          ? ['main', 'Main off', REASON.mainOff]
-          : status === 'stopped'
-            ? ['wait', 'Stopped', 'Out of fuel']
-            : ['off', 'Off', 'Switched off']
+    const { lamp, label, detail } = GENERATOR_STATUS[status]
     return {
       ...base,
       kind: 'generator',
       fallbackName: 'Generator',
       lamp,
-      word,
-      detail,
-      use: ['Output', output],
+      statusLabel: label,
+      detail: detail(output),
+      spec: { label: 'Output', value: output },
     }
   }
 
@@ -123,9 +166,9 @@ function cardFor(
       kind: 'fuel',
       fallbackName: 'Fuel',
       lamp: feeding ? 'on' : 'wait',
-      word: feeding ? 'Feeding' : 'Empty',
-      detail: `Holds ${units(fuelCapacity)} units`,
-      use: ['Fuel source', units(fuelCapacity)],
+      statusLabel: feeding ? 'Feeding' : 'Empty',
+      detail: null,
+      spec: { label: 'Holds', value: `${units(fuelCapacity)} units` },
     }
   }
 
@@ -144,26 +187,16 @@ function cardFor(
     inventory?.name ?? generic?.name ?? (inventory ? 'Airlock' : 'Module')
 
   if (state) {
-    const [lamp, word] = MODULE_WORD[state.status]
-    const detail =
-      state.status === 'online'
-        ? null
-        : state.status === 'reduced'
-          ? `${mw(state.draw)} of ${mw(state.powerReq)} MW`
-          : state.status === 'off'
-            ? 'Switched off'
-            : state.reason
-              ? REASON[state.reason]
-              : null
+    const { lamp, label } = MODULE_STATUS[state.status]
     return {
       ...base,
       kind,
       typeId,
       fallbackName,
       lamp,
-      word,
-      detail,
-      use: [state.drawKind, `${mw(state.powerReq)} MW`],
+      statusLabel: label,
+      detail: moduleDetail(state),
+      spec: { label: state.drawKind, value: `needs ${mw(state.powerReq)} MW` },
       draw: state.draw,
     }
   }
@@ -177,35 +210,45 @@ function cardFor(
     typeId,
     fallbackName: known ? fallbackName : (component?.kind ?? 'Component'),
     lamp: null,
-    word: 'No breaker',
+    statusLabel: 'No breaker',
     detail: null,
-    use: [component?.kind ?? '', ''],
+    spec: { label: component?.kind ?? '', value: '' },
   }
 }
 
+const section = (
+  id: string,
+  name: string,
+  code: string,
+  cards: BoardCard[],
+): BoardSection => ({ id, name, code, cards, drawMw: sumDraw(cards) })
+
 /**
  * The breaker board: one column per layout section, in layout order, with a
- * card per component. Grid components that are in no section go in a last
- * column, so nothing on the grid is hidden.
+ * card per grid component. Then, when there are any: grid components that are
+ * in no section ("Not in a section", or "Modules" with no layout at all), and
+ * components with no breaker (in the layout but not on the grid), listed
+ * apart so nothing is hidden.
  */
 export function buildBoard(entity: EntityData, nowMs: number): BoardSection[] {
   const grid = entity.powerGrid
   const placed = new Set<string>()
-  const sections: BoardSection[] = (entity.layout?.sections ?? []).map(
-    (section, i) => {
-      const cards = section.moduleIds.map((id) => {
-        placed.add(id)
-        return cardFor(entity, id, nowMs)
-      })
-      return {
-        id: section.id,
-        name: `Section ${i + 1}`,
-        code: shortCode(section.id),
-        cards,
-        drawMw: cards.reduce((sum, card) => sum + card.draw, 0n),
-      }
-    },
-  )
+  const noBreaker: BoardCard[] = []
+  const sections = (entity.layout?.sections ?? []).map((layoutSection, i) => {
+    const cards: BoardCard[] = []
+    for (const id of layoutSection.moduleIds) {
+      placed.add(id)
+      const card = cardFor(entity, id, nowMs)
+      if (card.lamp === null) noBreaker.push(card)
+      else cards.push(card)
+    }
+    return section(
+      layoutSection.id,
+      sectionName(i),
+      shortCode(layoutSection.id),
+      cards,
+    )
+  })
 
   const onGrid = grid
     ? [
@@ -216,14 +259,17 @@ export function buildBoard(entity: EntityData, nowMs: number): BoardSection[] {
     : []
   const unplaced = onGrid.filter((id) => !placed.has(id))
   if (unplaced.length) {
-    const cards = unplaced.map((id) => cardFor(entity, id, nowMs))
-    sections.push({
-      id: 'unplaced',
-      name: sections.length ? 'Not in a section' : 'Modules',
-      code: '',
-      cards,
-      drawMw: cards.reduce((sum, card) => sum + card.draw, 0n),
-    })
+    sections.push(
+      section(
+        'unplaced',
+        sections.length ? 'Not in a section' : 'Modules',
+        '',
+        unplaced.map((id) => cardFor(entity, id, nowMs)),
+      ),
+    )
+  }
+  if (noBreaker.length) {
+    sections.push(section('no-breaker', 'No breaker', '', noBreaker))
   }
   return sections
 }
@@ -243,10 +289,8 @@ export function buildAirlocks(entity: EntityData): AirlockView[] {
 /** The big state lamp in the identity panel. */
 export function gridLamp(summary: GridSummary | null): {
   lamp: Lamp
-  word: string
+  label: string
 } {
-  if (!summary) return { lamp: 'off', word: 'No grid' }
-  if (summary.status === 'online') return { lamp: 'on', word: 'Online' }
-  if (summary.status === 'off') return { lamp: 'main', word: 'Power off' }
-  return { lamp: 'wait', word: 'No power' }
+  if (!summary) return { lamp: 'off', label: 'No grid' }
+  return GRID_STATUS[summary.status]
 }

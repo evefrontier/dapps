@@ -1,5 +1,6 @@
 import {
   abbreviateAddress,
+  canManage,
   gridSummary,
   useConnection,
   useSmartObject,
@@ -51,7 +52,7 @@ const Console = () => {
     [entity, nowMs],
   )
 
-  const writer = role === 'shell' || role === 'controller'
+  const writer = canManage(role)
   const url = entity?.metadata?.url?.trim() ?? ''
   const tabs: ConsoleTab[] = [
     ...(url ? (['dapp'] as const) : []),
@@ -134,7 +135,6 @@ const Console = () => {
             entityOwner={entityOwner}
             role={role}
             summary={summary}
-            nowMs={nowMs}
           />
           <div className="main">
             <TabRail tabs={tabs} active={active} onSelect={setChosen} />
