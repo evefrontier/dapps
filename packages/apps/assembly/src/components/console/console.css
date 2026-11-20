@@ -489,6 +489,10 @@ html #root {
   justify-content: space-between;
   padding: 8px 0;
 }
+/* Off reads like a lever thrown down: the lamp at the bottom, the label above */
+.gc .plate.off {
+  flex-direction: column-reverse;
+}
 .gc .plate .led {
   width: 12px;
   height: 12px;
@@ -1074,7 +1078,392 @@ html #root {
   }
 }
 
+/* Access tab: the Controllers list and the add-by-wallet form */
+.gc .acc {
+  max-width: 520px;
+}
+.gc .bar-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--n10);
+  font: 400 12px / 16px var(--font-display);
+  text-transform: uppercase;
+}
+.gc .bar-h span {
+  font: 300 12px / 16px var(--font-body);
+  color: var(--n60);
+  text-transform: none;
+}
+.gc .tag {
+  font: 400 10px / 1.3 var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border: 1px solid var(--n20);
+  color: var(--n50);
+  white-space: nowrap;
+}
+.gc .tag.on {
+  color: var(--ink);
+  border-color: var(--brand-60);
+  background: var(--brand-40);
+}
+.gc .tag.pend {
+  color: var(--relate);
+  border-color: var(--relate);
+}
+.gc .plist {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.gc .person {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "name act" "meta act";
+  gap: 0 8px;
+  align-items: center;
+  padding: 6px 8px;
+  background: var(--crude);
+  border: 1px solid var(--n10);
+}
+.gc .person .pn {
+  grid-area: name;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+.gc .person .pn b {
+  font-weight: 300;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gc .person .pm {
+  grid-area: meta;
+  font-size: 12px;
+  color: var(--n50);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gc .person .act {
+  grid-area: act;
+}
+.gc .rm {
+  font-size: 12px;
+  border: 1px solid var(--n20);
+  background: none;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.gc .rm:hover:not(:disabled) {
+  border-color: var(--offline);
+  color: var(--offline);
+}
+.gc .rm:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.gc .add {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gc .add-open {
+  text-align: left;
+  font-size: 13px;
+  border: 1px dashed var(--brand-60);
+  background: none;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+.gc .add-open:hover:not(:disabled) {
+  border-color: var(--brand);
+}
+.gc .add-open:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.gc .add form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gc .add label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font: 400 10px / 1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--n50);
+}
+.gc .add input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--n20);
+  padding: 6px 9px;
+  font: 300 13.5px / 1.4 var(--font-body);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+.gc .add input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+.gc .add input[aria-invalid="true"] {
+  border-color: var(--offline);
+}
+.gc .add .err {
+  margin: 0;
+  font-size: 12px;
+  color: var(--offline);
+}
+.gc .add .add-acts {
+  display: flex;
+  gap: 8px;
+}
+
+/* Main breaker lever (shell and controllers) and the hold-to-cut button */
+.gc .lever {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 26px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid var(--n20);
+  background: #000;
+  cursor: pointer;
+}
+.gc .lever::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 5px;
+  bottom: 5px;
+  width: 1px;
+  background: var(--n20);
+}
+.gc .lever .h {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  height: 19px;
+  top: 23px;
+  background: #0f0f0f;
+  border: 1px solid var(--n30);
+  transition:
+    top 0.14s cubic-bezier(0.3, 1.3, 0.6, 1),
+    background 0.15s;
+}
+.gc .lever:hover:not(:disabled) .h {
+  border-color: var(--n60);
+}
+.gc .lever[aria-checked="true"] .h {
+  top: 2px;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.gc .lever:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.gc .mb .lever {
+  width: 44px;
+  height: 88px;
+}
+.gc .mb .lever .h {
+  height: 38px;
+  top: 46px;
+  left: 4px;
+  right: 4px;
+}
+.gc .mb .lever[aria-checked="true"] .h {
+  top: 3px;
+}
+.gc .mb.off .lever .h {
+  background: var(--offline);
+  border-color: var(--offline);
+}
+.gc .hold-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--offline);
+  background: var(--offline-bg);
+}
+.gc .hold-box p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+.gc .hold-acts {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.gc .hold {
+  --c: var(--n50);
+  --m: var(--n20);
+  --v: 5px;
+  --h: 4px;
+  --p: 0;
+  position: relative;
+  height: 48px;
+  min-width: 210px;
+  flex: 1;
+  padding: 0 11px;
+  border: 0;
+  color: #0b0b0b;
+  text-align: left;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  background:
+    linear-gradient(var(--c), var(--c)) 0 0 / 1px var(--v),
+    linear-gradient(var(--c), var(--c)) 0 100% / 1px var(--v),
+    linear-gradient(var(--m), var(--m)) 0 50% / 1px calc(100% - 2 * var(--v)),
+    linear-gradient(var(--c), var(--c)) 100% 0 / 1px var(--v),
+    linear-gradient(var(--c), var(--c)) 100% 100% / 1px var(--v),
+    linear-gradient(var(--c), var(--c)) 1px 0 / var(--h) 1px,
+    linear-gradient(var(--c), var(--c)) right 1px top 0 / var(--h) 1px,
+    linear-gradient(var(--c), var(--c)) 1px 100% / var(--h) 1px,
+    linear-gradient(var(--c), var(--c)) right 1px bottom 0 / var(--h) 1px;
+  background-repeat: no-repeat;
+}
+.gc .hold::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  background: rgba(250, 250, 229, 0.8);
+}
+.gc .hold::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) * var(--p));
+  background: var(--offline);
+}
+.gc .hold:hover:not(:disabled),
+.gc .hold.on {
+  --c: var(--ink);
+  --m: var(--n30);
+  --v: 7px;
+  --h: 6px;
+}
+.gc .hold:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.gc .hold > span {
+  position: absolute;
+  z-index: 1;
+  white-space: nowrap;
+}
+.gc .hold-l {
+  left: 11px;
+  top: 9px;
+  font: 400 15px / 1.2 var(--font-display);
+  text-transform: uppercase;
+}
+.gc .hold-s {
+  left: 11px;
+  top: calc(50% + 3px);
+  font: 300 10px / 1.2 var(--font-body);
+}
+/* Mobile: the hold button runs full width, Keep it on under it */
+@container gc (max-width: 767.98px) {
+  .gc .hold-acts {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .gc .hold {
+    min-width: 0;
+    flex: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gc .lever .h {
+    transition: none;
+  }
+}
 .gc .gauge-row b,
 .gc .inv-r b {
   font-weight: 300;
+}
+
+/* Access tab: character search results (assembly-controller-search) */
+.gc .cands {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.gc .cand {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0 8px;
+  align-items: center;
+  text-align: left;
+  padding: 5px 8px;
+  border: 1px solid var(--n10);
+  background: var(--crude);
+  cursor: pointer;
+}
+.gc .cand:hover:not(:disabled),
+.gc .cand:focus-visible {
+  border-color: var(--brand);
+  outline: none;
+}
+.gc .cand:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+.gc .cand .cn {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13.5px;
+}
+.gc .cand .cm {
+  grid-column: 1;
+  grid-row: 2;
+  font-size: 12px;
+  color: var(--n50);
+}
+.gc .cand .tag {
+  grid-column: 2;
+  grid-row: 1 / 3;
+}
+.gc .cand .cn i {
+  font-style: normal;
+  color: var(--n30);
+  margin-left: 5px;
+  font-size: 11.5px;
+}
+.gc .add .picked {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--n60);
+}
+.gc .add .picked b {
+  font-weight: 300;
+  color: var(--ink);
 }
