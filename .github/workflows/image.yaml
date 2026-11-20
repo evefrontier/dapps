@@ -87,16 +87,13 @@ jobs:
           VERSION: ${{ needs.version.outputs.version }}
           ARCH: ${{ matrix.arch }}
         run: |
-          dapp_index="https://dapp-index.evefrontier.com"
           log_level="error"
           flag_panel="false"
           case "$TIER" in
             dev)
-              dapp_index="https://dev.dapp-index.evefrontier.com"
               flag_panel="true"
               ;;
             test)
-              dapp_index="https://test.dapp-index.evefrontier.com"
               log_level="debug"
               flag_panel="true"
               ;;
@@ -107,7 +104,6 @@ jobs:
             echo "tag=${VERSION}-${TIER}-${ARCH}"
             echo "build-args<<EOF"
             echo "VITE_EVE_WORLD_TIER=${TIER}"
-            echo "VITE_DAPP_INDEX_URL=${dapp_index}"
             echo "VITE_LOG_LEVEL=${log_level}"
             echo "VITE_SHOW_FLAG_PANEL=${flag_panel}"
             echo "EOF"
