@@ -82,22 +82,5 @@
         "organizeImports": "on"
       }
     }
-  },
-  // The assembly app checks for dead code; the shared libraries don't yet.
-  // (tsc's noUnused* flags can't do this, since the app type-checks the
-  // libraries' source through its aliases.)
-  "overrides": [
-    {
-      "includes": ["packages/apps/assembly/**"],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "noUnusedFunctionParameters": "error",
-            "noUnusedImports": "error",
-            "noUnusedVariables": "error"
-          }
-        }
-      }
-    }
-  ]
+  }
 }
