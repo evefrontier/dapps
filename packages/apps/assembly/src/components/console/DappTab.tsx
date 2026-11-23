@@ -57,7 +57,7 @@ const DappTab = ({
           <div className="dapp-ph">
             <span className="eyebrow">Not shown</span>
             <b>{hostOf(url)}</b>
-            <span>Only https dapp addresses can be shown here.</span>
+            <span>Only https dapps on another site can be shown here.</span>
           </div>
         )}
       </div>

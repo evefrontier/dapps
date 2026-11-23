@@ -41,7 +41,7 @@ const Ornament = () => (
  */
 const Console = () => {
   const { entity, entityOwner, loading, error, tenant } = useSmartObject()
-  const { role, preview } = useViewRole()
+  const { role, preview, isLoading: roleLoading } = useViewRole()
   const { currentAccount, handleConnect, handleDisconnect } = useConnection()
   const accessEnabled = useFlagVariant('assembly-controllers') === 'on'
   const nowMs = useNow()
@@ -72,12 +72,14 @@ const Console = () => {
       <div className="who">
         {/* A forced view (assembly-view-as) is always labelled, wallet or not */}
         {(currentAccount || preview) && (
-          <span className={`role-chip ${role}`}>
+          <span className={`role-chip ${preview || !roleLoading ? role : ''}`}>
             {preview
               ? `${role} · preview`
-              : role === 'visitor'
-                ? 'Visitor · read only'
-                : role}
+              : roleLoading
+                ? 'Checking access…'
+                : role === 'visitor'
+                  ? 'Visitor · read only'
+                  : role}
           </span>
         )}
         {currentAccount ? (

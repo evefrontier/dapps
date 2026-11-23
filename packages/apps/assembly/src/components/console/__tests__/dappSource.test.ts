@@ -21,6 +21,20 @@ describe('dappSource', () => {
     )
   })
 
+  it("refuses a dapp on the console's own origin", () => {
+    expect(
+      dappSource(
+        'https://console.example/dapp',
+        '7',
+        't',
+        'https://console.example',
+      ),
+    ).toBeNull()
+    expect(
+      dappSource('https://other.example', '7', 't', 'https://console.example'),
+    ).toBe('https://other.example/?itemId=7&tenant=t')
+  })
+
   it('refuses anything that is not https', () => {
     expect(dappSource('http://kestrel.example', '7', 't')).toBeNull()
     expect(dappSource('javascript:alert(1)', '7', 't')).toBeNull()

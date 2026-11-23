@@ -160,13 +160,18 @@ function cardFor(
 
   const fuelCapacity = grid?.fuelSources[componentId]
   if (grid && fuelCapacity !== undefined) {
-    const feeding = projectedFuel(grid, nowMs) > 0n
+    // Fuel left but nothing burning it (main breaker off, no generator on)
+    // is Idle, not Feeding
+    const hasFuel = projectedFuel(grid, nowMs) > 0n
+    const burning =
+      hasFuel &&
+      generatorStates(grid, nowMs).some((g) => g.status === 'running')
     return {
       ...base,
       kind: 'fuel',
       fallbackName: 'Fuel',
-      lamp: feeding ? 'on' : 'wait',
-      statusLabel: feeding ? 'Feeding' : 'Empty',
+      lamp: burning ? 'on' : hasFuel ? 'off' : 'wait',
+      statusLabel: burning ? 'Feeding' : hasFuel ? 'Idle' : 'Empty',
       detail: null,
       spec: { label: 'Holds', value: `${units(fuelCapacity)} units` },
     }

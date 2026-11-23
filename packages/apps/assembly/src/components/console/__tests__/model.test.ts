@@ -127,6 +127,16 @@ describe('buildBoard', () => {
     expect(board[1]!.drawMw).toBe(50000n)
   })
 
+  it('shows a fuel source as Idle while nothing burns it', () => {
+    const off = entity()
+    off.powerGrid = { ...off.powerGrid!, on: false }
+    expect(cardsOf(buildBoard(off, 0))['002']).toMatchObject({
+      kind: 'fuel',
+      lamp: 'off',
+      statusLabel: 'Idle',
+    })
+  })
+
   it('says what each card draws, makes or holds', () => {
     const cards = cardsOf(buildBoard(entity(), 0))
     expect(cards['001']).toMatchObject({

@@ -135,8 +135,7 @@ const FuelPanel = ({
   const estimate =
     summary.msUntilEmpty !== null && summary.fuelNow > 0n ? (
       <>
-        ≈ <em>{units(summary.fuelNow)}</em> now ·{' '}
-        <em>{hoursMinutes(summary.msUntilEmpty)}</em> left
+        ≈ <em>{hoursMinutes(summary.msUntilEmpty)}</em> left
       </>
     ) : summary.fuelNow === 0n ? (
       'Empty'
@@ -162,7 +161,7 @@ const FuelPanel = ({
       </div>
       <div className="fuel-n">
         <span>
-          <b>{units(summary.fuelSettled)}</b>{' '}
+          <b>≈ {units(summary.fuelNow)}</b>{' '}
           <small>/ {units(summary.fuelCapacity)} units</small>
         </span>
         <span className="est">{estimate}</span>
