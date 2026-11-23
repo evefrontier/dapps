@@ -15,11 +15,8 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
     "@evefrontier/dapp-kit": "workspace:*",
     "@eveworld/ui-components": "workspace:*",
-    "@mui/material": "^7.3.11",
     "@mysten/dapp-kit-core": "^1.6.9",
     "@mysten/dapp-kit-react": "^2.1.11",
     "@openfeature/react-sdk": "^1.4.1",

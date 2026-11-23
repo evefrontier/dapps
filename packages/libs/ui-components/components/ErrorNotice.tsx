@@ -2,8 +2,6 @@ import { DetailedAssemblyResponse } from '@evefrontier/dapp-kit'
 import React from 'react'
 import EveContainer from './EveContainer'
 
-import '../styles-ui.css'
-
 export enum ErrorNoticeTypes {
   SMART_ASSEMBLY,
   MESSAGE,

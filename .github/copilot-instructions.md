@@ -34,7 +34,7 @@ packages/
 | Package | Description | Main Exports |
 |---------|-------------|--------------|
 | `@evefrontier/dapp-kit` | Core React hooks, providers, GraphQL client, and utilities | `EveFrontierProvider`, `useSmartObject`, `useConnection` |
-| `@eveworld/ui-components` | Reusable EVE-styled React components | `EveButton`, `EveLayout`, `Header` |
+| `@eveworld/ui-components` | EVE-styled error notice and base stylesheet | `ErrorNotice`, `styles.css` |
 | `@eveworld/assembly` | Smart Assembly management dApp | Application entry point |
 
 ### dapp-kit Internal Structure

@@ -1,5 +1,4 @@
 import React, { HtmlHTMLAttributes, ReactNode } from 'react'
-import '../styles-ui.css'
 import { Union } from '../assets'
 
 type ContainerVariant = 'default' | 'warning' | 'minimal'

@@ -1,7 +1,6 @@
 /* Base imports */
 @import "tailwindcss";
 @source "./components/**/*.{js,ts,jsx,tsx}";
-@source "./modules/**/*.{js,ts,jsx,tsx}";
 
 @theme {
   --font-favorit: "Favorit", monospace;
@@ -57,16 +56,6 @@
   backdrop-filter: blur(32px);
 }
 
-@utility blur-bg-sm {
-  @apply bg-crude-80;
-  backdrop-filter: blur(1.5px);
-}
-
-@utility blur-bg-alert {
-  background-color: hsla(238, 91%, 11%, 0.8);
-  backdrop-filter: blur(1.5px);
-}
-
 /* ==========================================================================
    Base Styles
    ========================================================================== */
@@ -120,62 +109,12 @@ body,
   a {
     @apply text-white tracking-wider;
   }
-
-  a.active,
-  a::hover {
-    @apply underline;
-  }
-
-  /* Entity About Component */
-  .Entity-About > div {
-    @apply flex justify-between;
-  }
-
-  .Entity-About > div > span:first-of-type {
-    @apply text-sm font-light;
-  }
-
-  .Entity-About > div > span:last-of-type {
-    @apply text-sm font-semibold;
-  }
-
-  /* Border Container */
-  div.Border-Container {
-    @apply border border-neutral-20 p-2;
-  }
 }
 
 @layer utilities {
-  /* Active State */
-  .active {
-    @apply font-bold underline;
-  }
-
   /* Title Styles */
   .Title {
     @apply capitalize font-disket text-neutral text-sm;
-  }
-
-  /* Header Styles */
-  #header div {
-    @apply flex whitespace-nowrap text-neutral text-sm;
-  }
-
-  #header div.header-text {
-    @apply p-2 border border-neutral-30 font-disket font-normal capitalize tracking-wide leading-4;
-  }
-
-  /* Menu Dropdown */
-  #menu-dropdown {
-    @apply top-full w-full p-0 z-50 blur-bg border border-neutral-30;
-  }
-
-  .menu-dropdown-item {
-    @apply p-2 blur-bg font-favorit text-neutral-60! font-light;
-  }
-
-  .menu-dropdown-item:hover {
-    @apply bg-neutral-5 text-neutral!;
   }
 
   /* Layout Utilities */
