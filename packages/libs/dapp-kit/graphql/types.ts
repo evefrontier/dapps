@@ -272,6 +272,18 @@ export interface GetObjectsByTypeResponse {
   objects: ObjectNodes<ObjectWithContentsNode> & { pageInfo: PageInfo }
 }
 
+/** @category GraphQL Types */
+export interface EventNode {
+  sequenceNumber: number
+  timestamp: string | null
+  contents: { json: Record<string, unknown> } | null
+}
+
+/** @category GraphQL Types */
+export interface GetEventsByTypeResponse {
+  events: ObjectNodes<EventNode> & { pageInfo: PageInfo }
+}
+
 // ============================================================================
 // Table Entry Types
 // ============================================================================

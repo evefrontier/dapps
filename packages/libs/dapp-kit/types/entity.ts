@@ -18,17 +18,42 @@ export interface EntityIdentity {
   owner: string
 }
 
+/**
+ * A fixed-point number at 10^4 (`fuel_math::SCALE`), kept as the decimal
+ * string GraphQL returns so no precision is lost: `150000` is 15 MW.
+ *
+ * @category Types
+ */
+export type FixedPoint = string
+
+/**
+ * How a module takes power: `Firm` modules all get their full requirement or
+ * none do; `Elastic` modules share what is left, in connect order.
+ *
+ * @category Types
+ */
+export type EntityDrawKind = 'Firm' | 'Elastic'
+
 /** @category Types */
 export interface EntityPowerModule {
   desiredOnline: boolean
-  activeDraw: string
-  powerReq: string
+  activeDraw: FixedPoint
+  powerReq: FixedPoint
+  drawKind: EntityDrawKind
+  /** Stored on chain; the v1 grant rules ignore it */
+  priority: string
+  /** Stored on chain; the v1 grant rules ignore it */
+  lineLoss: FixedPoint
 }
 
 /** @category Types */
 export interface EntityGenerator {
   online: boolean
-  maxOutputMw: string
+  maxOutputMw: FixedPoint
+  /** Divides the fuel's containment burden */
+  containmentReduction: FixedPoint
+  /** Fuel per second burned while the grid has no fuel impulse */
+  baseFuelRate: FixedPoint
 }
 
 /**
@@ -39,16 +64,20 @@ export interface EntityGenerator {
  */
 export interface EntityPowerGrid {
   on: boolean
-  fuelQuantity: string
-  fuelCapacity: string
-  capacityMw: string
+  fuelQuantity: FixedPoint
+  fuelCapacity: FixedPoint
+  capacityMw: FixedPoint
   lastSettledMs: string
-  /** Keyed by module component id */
+  /** Pooled fuel impulse; 0 means generators burn their base rate */
+  fuelImpulse: FixedPoint
+  /** Pooled fuel containment burden */
+  fuelContainmentBurden: FixedPoint
+  /** Keyed by module component id, in connect order */
   modules: Record<string, EntityPowerModule>
   /** Keyed by generator component id */
   generators: Record<string, EntityGenerator>
   /** Fuel source component id → capacity */
-  fuelSources: Record<string, string>
+  fuelSources: Record<string, FixedPoint>
 }
 
 /** @category Types */
@@ -102,6 +131,22 @@ export interface EntityComponent {
   json: unknown
 }
 
+/** One requirement an action checks before it runs. @category Types */
+export interface EntityActionRequirement {
+  /** Move type of the requirement, e.g. `<package>::power_grid::OperateGrid` */
+  typeName: string
+  /** Component the requirement is checked against */
+  componentId: string
+}
+
+/** An action registered on the entity, with what it requires. @category Types */
+export interface EntityAction {
+  name: string
+  /** Which action map it is in: admin or owner */
+  scope: 'admin' | 'owner'
+  requirements: EntityActionRequirement[]
+}
+
 /** @category Types */
 export interface EntityData {
   id: string
@@ -117,12 +162,16 @@ export interface EntityData {
   layout: EntityLayout | null
   inventories: EntityInventory[]
   genericModules: EntityGenericModule[]
+  /** Character ids allowed to control the entity; null when it has no access list */
+  controllers: string[] | null
   /** Every installed component, including the parsed ones */
   components: EntityComponent[]
   /** Names of admin actions */
   adminActions: string[]
   /** Names of owner actions */
   ownerActions: string[]
+  /** Every admin and owner action with its requirements */
+  actions: EntityAction[]
 }
 
 /**
@@ -146,4 +195,17 @@ export interface EntityOwner {
   walletAddress: string | null
   /** The Character entity when the cap is parked on one */
   character: EntityData | null
+}
+
+/**
+ * A character as listed by world events, for search.
+ *
+ * @category Types
+ */
+export interface CharacterSummary {
+  characterId: string
+  /** Latest metadata name; empty when the character has never been named */
+  name: string
+  /** Wallet address bound to the character */
+  walletAddress: string
 }

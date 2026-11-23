@@ -178,14 +178,27 @@ describe('parseEntity (testnet entity)', () => {
 
     expect(powerGrid?.on).toBe(false)
     expect(powerGrid?.fuelCapacity).toBe('10000000')
+    expect(powerGrid?.fuelImpulse).toBe('0')
+    expect(powerGrid?.fuelContainmentBurden).toBe('0')
     expect(Object.keys(powerGrid?.modules ?? {})).toHaveLength(6)
     expect(powerGrid?.modules['1000000070932']).toEqual({
       desiredOnline: false,
       activeDraw: '0',
       powerReq: '12000',
+      drawKind: 'Elastic',
+      priority: '0',
+      lineLoss: '0',
     })
+    expect(
+      Object.values(powerGrid?.modules ?? {}).map((m) => m.drawKind),
+    ).toEqual(['Firm', 'Firm', 'Elastic', 'Firm', 'Firm', 'Firm'])
     expect(powerGrid?.generators).toEqual({
-      '1000000070929': { online: false, maxOutputMw: '150000' },
+      '1000000070929': {
+        online: false,
+        maxOutputMw: '150000',
+        containmentReduction: '100000',
+        baseFuelRate: '10000',
+      },
     })
     expect(powerGrid?.fuelSources).toEqual({ '1000000070931': '10000000' })
   })
@@ -206,6 +219,24 @@ describe('parseEntity (testnet entity)', () => {
     expect(entity.adminActions).toContain('deposit_fuel')
     expect(entity.adminActions).toHaveLength(8)
     expect(entity.ownerActions).toEqual([])
+  })
+
+  it('keeps each action with its requirements', async () => {
+    const { actions, adminActions } = parseEntity(await loadFixture())
+
+    expect(actions.map((action) => action.name)).toEqual(adminActions)
+    expect(actions.every((action) => action.scope === 'admin')).toBe(true)
+    expect(actions.find((action) => action.name === 'set_power_grid')).toEqual({
+      name: 'set_power_grid',
+      scope: 'admin',
+      requirements: [
+        {
+          typeName:
+            '652f9bbd18bf5b22ee20df4bdf2a750825b3157c0db085de139646ac3245cfcd::power_grid::OperateGrid',
+          componentId: '13330415371254569694',
+        },
+      ],
+    })
   })
 })
 
@@ -334,6 +365,63 @@ describe('parseEntity', () => {
       url: 'u',
     })
     expect(entity.identity).toEqual({ tribeId: 98000001, owner: '0xwallet' })
+  })
+
+  it('treats an unknown draw kind as Firm instead of trusting the cast', () => {
+    const entity = parseEntity(
+      raw([
+        component('5', 'power_grid::PowerGrid', {
+          on: true,
+          fuel_quantity_at_last_settled: '0',
+          fuel_capacity: '0',
+          fuel_impulse: '0',
+          fuel_containment_burden: '0',
+          capacity_mw: '0',
+          last_settled_ms: '0',
+          modules: {
+            contents: [
+              {
+                key: '9',
+                value: {
+                  module_spec: {
+                    power_req: '1000',
+                    draw_kind: { '@variant': 'Surge' },
+                    priority: '2',
+                    line_loss: '10',
+                  },
+                  desired_online: true,
+                  active_draw_at_last_settled: '0',
+                },
+              },
+            ],
+          },
+          generators: { contents: [] },
+          fuel_sources: { contents: [] },
+        }),
+      ]),
+    )
+
+    expect(entity.powerGrid?.modules['9']).toEqual({
+      desiredOnline: true,
+      activeDraw: '0',
+      powerReq: '1000',
+      drawKind: 'Firm',
+      priority: '2',
+      lineLoss: '10',
+    })
+  })
+
+  it('parses the access list, or leaves it null when absent', () => {
+    const entity = parseEntity(
+      raw([
+        component('4', 'access_list::AccessList', {
+          controllers: { contents: ['0xc1', '0xc2'] },
+        }),
+      ]),
+    )
+
+    expect(entity.controllers).toEqual(['0xc1', '0xc2'])
+    expect(parseEntity(raw([])).controllers).toBeNull()
   })
 
   it('keeps unknown components and reads the in-flight flag', () => {

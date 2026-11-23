@@ -16,10 +16,13 @@ export type {
 // Hooks
 // Hook error types and sponsored transaction types
 export {
+  useCharacterDirectory,
   useConnection,
+  useEntityRole,
   useNotification,
   useSmartObject,
   useSponsoredTransaction,
+  useTypeNames,
   WalletNoAccountSelectedError,
   WalletNotConnectedError,
   WalletSponsoredTransactionNotSupportedError,

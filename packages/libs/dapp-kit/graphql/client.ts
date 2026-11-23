@@ -1,6 +1,7 @@
 import { GRAPHQL_CLIENT_ID, getSuiGraphqlEndpoint } from '../utils/constants'
 import {
   GET_ENTITY,
+  GET_EVENTS_BY_TYPE,
   GET_OBJECT_BY_ADDRESS,
   GET_OBJECT_LATEST_VERSION,
   GET_OBJECT_OWNER,
@@ -16,6 +17,7 @@ import {
 } from './queries'
 import type {
   GetEntityResponse,
+  GetEventsByTypeResponse,
   GetObjectByAddressResponse,
   GetObjectLatestVersionResponse,
   GetObjectOwnerAndOwnedObjectsResponse,
@@ -415,6 +417,30 @@ export async function getObjectsByType(
 ) {
   return executeGraphQLQuery<GetObjectsByTypeResponse>(GET_OBJECTS_BY_TYPE, {
     object_type: objectType,
+    first: options?.first ?? 50,
+    after: options?.after,
+  })
+}
+
+/**
+ * Get events of a Move event type with pagination, oldest first.
+ *
+ * Use with caution as this may return many results. Event fields cannot be
+ * filtered on, so callers page through every event of the type.
+ *
+ * @category GraphQL Client
+ * @param eventType - The full Move event type string
+ * @param options - Pagination options
+ * @param options.first - Number of results per page (default: 50)
+ * @param options.after - Cursor for next page
+ * @returns Promise resolving to paginated event list
+ */
+export async function getEventsByType(
+  eventType: string,
+  options?: { first?: number; after?: string },
+): Promise<GraphQLResponse<GetEventsByTypeResponse>> {
+  return executeGraphQLQuery<GetEventsByTypeResponse>(GET_EVENTS_BY_TYPE, {
+    event_type: eventType,
     first: options?.first ?? 50,
     after: options?.after,
   })
