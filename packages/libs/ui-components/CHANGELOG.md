@@ -6,6 +6,7 @@
 
 - The grid console's UI kit. Breaking: the old components are gone.
 
+  - The package is marked private: it belongs to this repo and is not published to npm.
   - Added the grid console's views (`ConsoleView`, `IdentityView`, `DetailsFormView`, `MainBreakerView`, `GridView`, `AirlockView`, `DappView`, `AccessView`, `ToastView`), its primitives (`TabRail`, `HoldButton`, `Lever`, `Plate`, `Ornament`, `EditIcon`, `CloseIcon`) and `console.css`. Views take plain props and have no chain or wallet code.
   - `ErrorNotice` is restyled in the console's look and now takes `message` (and an optional `title`); `ErrorNoticeTypes` is removed.
   - Removed every other component and module (`EveAlert`, `EveButton`, `EveInput`, `EveLayout`, `Header`, `EveContainer`, `GateView`, `TurretView`, `InventoryView`, `Graph`, the skeletons and the rest), the SVG assets and `styles.css`.

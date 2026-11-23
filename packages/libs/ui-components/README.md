@@ -1,8 +1,8 @@
 # @eveworld/ui-components
 
-## EVE Frontier UI Components Library
-
 The grid console's UI kit: the views, primitives and stylesheet that draw the assembly dapp, in the Creation Builder's language (diamond tab rail, breaker board, levers, hold button, corner brackets). It has no chain or wallet code: every view takes plain props (strings, rows and callbacks), so the app that uses it holds the business logic and passes in what to show.
+
+It is built for the assembly dapp, and some of its text describes how today's world contracts behave (for example the main breaker's). It is private to this repo and not published.
 
 ## Table of Contents
 
@@ -15,9 +15,13 @@ The grid console's UI kit: the views, primitives and stylesheet that draw the as
 
 ## Installation
 
-```bash
-bun add @eveworld/ui-components
+It is a workspace package. Add it to an app in this repo with:
+
+```json
+"@eveworld/ui-components": "workspace:*"
 ```
+
+The `@eveworld/ui-components` on npm (0.0.12 and earlier) is the old component library, not this one.
 
 ## Styling
 

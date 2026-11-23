@@ -1,7 +1,8 @@
 {
   "name": "@eveworld/ui-components",
   "version": "0.3.0",
-  "description": "React UI components used across EVE Frontier's dApps",
+  "private": true,
+  "description": "The grid console's views, primitives and stylesheet, used by the assembly dapp",
   "main": "index.ts",
   "author": "",
   "license": "MIT",
