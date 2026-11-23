@@ -34,7 +34,8 @@ const MAX_RESULTS = 8
  * nothing.
  *
  * With `assembly-controller-search` on, the field also finds characters by
- * name; picking one fills in its wallet and adds exactly that character.
+ * name through the Fenris private indexer; picking one fills in its wallet
+ * and adds exactly that character.
  *
  * @returns React.JSX.Element, or null for visitors
  */
@@ -68,6 +69,7 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
   const search = useCharacterSearch(showResults ? query : '', {
     enabled: canManage && searchOn,
     limit: MAX_RESULTS,
+    source: 'indexer',
   })
 
   if (!entity || !canManage) return null

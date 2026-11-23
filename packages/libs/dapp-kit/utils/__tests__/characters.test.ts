@@ -6,7 +6,12 @@ vi.mock('../../graphql/client', () => ({
 
 import { getEventsByType } from '../../graphql/client'
 import type { CharacterSummary } from '../../types'
-import { fetchCharacterDirectory, searchCharacters } from '../characters'
+import {
+  fetchCharacterDirectory,
+  searchCharacters,
+  searchIndexedCharacters,
+} from '../characters'
+import { FENRIS_INDEXER_URL } from '../constants'
 
 // ============================================================================
 // GraphQL client mock helpers
@@ -184,5 +189,100 @@ describe('searchCharacters', () => {
 
   it('caps the number of results', () => {
     expect(searchCharacters(characters, 'nova', 1)).toHaveLength(1)
+  })
+})
+
+// ============================================================================
+// searchIndexedCharacters
+// ============================================================================
+
+describe('searchIndexedCharacters', () => {
+  const fetchMock = vi.fn()
+
+  beforeEach(() => {
+    vi.stubGlobal('fetch', fetchMock)
+  })
+
+  afterEach(() => {
+    fetchMock.mockReset()
+    vi.unstubAllGlobals()
+    vi.unstubAllEnvs()
+  })
+
+  const respond = (body: unknown, ok = true, status = 200) =>
+    fetchMock.mockResolvedValue({ ok, status, json: async () => body })
+
+  const sentBody = () => JSON.parse(fetchMock.mock.calls[0]?.[1].body)
+
+  it('maps indexer characters to summaries', async () => {
+    respond({
+      data: {
+        characters: [
+          {
+            displayName: 'Grauz',
+            characterId: '0xc1',
+            characterAddress: '0xw1',
+          },
+          { displayName: null, characterId: '0xc2', characterAddress: '0xw2' },
+        ],
+      },
+    })
+
+    await expect(searchIndexedCharacters('rau')).resolves.toEqual([
+      { characterId: '0xc1', name: 'Grauz', walletAddress: '0xw1' },
+      { characterId: '0xc2', name: '', walletAddress: '0xw2' },
+    ])
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(FENRIS_INDEXER_URL)
+  })
+
+  it('sends the trimmed query, tenant and limit', async () => {
+    respond({ data: { characters: [] } })
+
+    await searchIndexedCharacters('  rau ', { tenant: 'stillness', limit: 8 })
+
+    expect(sentBody().variables).toEqual({
+      search: 'rau',
+      tenantId: 'stillness',
+      limit: 8,
+    })
+  })
+
+  it('searches every tenant when none is given', async () => {
+    respond({ data: { characters: [] } })
+
+    await searchIndexedCharacters('rau')
+
+    expect(sentBody().variables).toEqual({
+      search: 'rau',
+      tenantId: null,
+      limit: 20,
+    })
+  })
+
+  it('uses VITE_FENRIS_INDEXER_URL when set', async () => {
+    vi.stubEnv('VITE_FENRIS_INDEXER_URL', 'http://localhost:9000/graphql')
+    respond({ data: { characters: [] } })
+
+    await searchIndexedCharacters('rau')
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('http://localhost:9000/graphql')
+  })
+
+  it('never sends an empty query or an address', async () => {
+    await expect(searchIndexedCharacters('   ')).resolves.toEqual([])
+    await expect(searchIndexedCharacters('0xA1A1')).resolves.toEqual([])
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('throws on GraphQL errors', async () => {
+    respond({ errors: [{ message: 'bad search' }] })
+
+    await expect(searchIndexedCharacters('rau')).rejects.toThrow('bad search')
+  })
+
+  it('throws on an HTTP error', async () => {
+    respond({}, false, 502)
+
+    await expect(searchIndexedCharacters('rau')).rejects.toThrow('502')
   })
 })

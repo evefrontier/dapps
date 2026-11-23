@@ -8,6 +8,8 @@ interface ImportMetaEnv {
   readonly VITE_LOG_LEVEL?: string
   /** Polling-backstop interval in ms; 0 disables it. Defaults to POLLING_INTERVAL. */
   readonly VITE_POLLING_INTERVAL?: string
+  /** Fenris private indexer GraphQL endpoint; defaults to FENRIS_INDEXER_URL */
+  readonly VITE_FENRIS_INDEXER_URL?: string
 }
 
 interface ImportMeta {

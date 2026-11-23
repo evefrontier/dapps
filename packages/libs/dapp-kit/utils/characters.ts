@@ -1,6 +1,7 @@
 import { getEventsByType } from '../graphql/client'
-import type { EventNode } from '../graphql/types'
+import type { EventNode, GraphQLResponse } from '../graphql/types'
 import type { CharacterSummary } from '../types'
+import { getFenrisIndexerUrl } from './constants'
 import { getWorldPackageId, getWorldType } from './mvr/worldTypes'
 
 // GraphQL JSON of the Move events read below (world-contracts)
@@ -72,6 +73,76 @@ export async function fetchCharacterDirectory(
     })
   }
   return characters
+}
+
+const SEARCH_INDEXED_CHARACTERS = `
+  query SearchCharacters($search: String!, $tenantId: String, $limit: Int) {
+    characters(search: $search, tenantId: $tenantId, limit: $limit) {
+      displayName
+      characterId
+      characterAddress
+    }
+  }
+`
+
+interface IndexedCharacter {
+  displayName: string | null
+  characterId: string
+  characterAddress: string
+}
+
+/**
+ * Searches characters by name on the Fenris private indexer
+ * ({@link getFenrisIndexerUrl}), which matches anywhere in the name,
+ * case-insensitively. Like {@link searchCharacters}, a query starting with
+ * `0x` matches nothing.
+ *
+ * @category Utilities - Characters
+ * @param query - Search text
+ * @param options.tenant - Only characters of this tenant; all tenants if unset
+ * @param options.limit - Maximum number of results. Default 20.
+ * @param options.signal - Aborts the request
+ * @returns Matching characters, in the indexer's order
+ * @throws If the request fails or the response has errors
+ */
+export async function searchIndexedCharacters(
+  query: string,
+  options: {
+    tenant?: string | undefined
+    limit?: number | undefined
+    signal?: AbortSignal | undefined
+  } = {},
+): Promise<CharacterSummary[]> {
+  const search = query.trim()
+  if (!search || search.toLowerCase().startsWith('0x')) return []
+
+  const response = await fetch(getFenrisIndexerUrl(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query: SEARCH_INDEXED_CHARACTERS,
+      variables: {
+        search,
+        tenantId: options.tenant || null,
+        limit: options.limit ?? 20,
+      },
+    }),
+    signal: options.signal ?? null,
+  })
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+  const body = (await response.json()) as GraphQLResponse<{
+    characters: IndexedCharacter[] | null
+  }>
+  if (body.errors?.length) {
+    throw new Error(body.errors.map((e) => e.message).join('; '))
+  }
+  return (body.data?.characters ?? []).map((character) => ({
+    characterId: character.characterId,
+    name: character.displayName ?? '',
+    walletAddress: character.characterAddress,
+  }))
 }
 
 /**

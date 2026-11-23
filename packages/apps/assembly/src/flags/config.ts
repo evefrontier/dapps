@@ -44,7 +44,7 @@ export const FLAG_DEFINITIONS = {
   },
   'assembly-controller-search': {
     description:
-      'Access tab: find a character to add by name instead of pasting its wallet address. Picking a result fills in its wallet and adds that character.',
+      'Access tab: find a character to add by name, through the Fenris private indexer, instead of pasting its wallet address. Picking a result fills in its wallet and adds that character.',
     variants: { on: 'on', off: 'off' },
     defaultVariant: 'off',
   },
