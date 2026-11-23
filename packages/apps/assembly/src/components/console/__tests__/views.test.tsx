@@ -1,4 +1,6 @@
 import {
+  DappView,
+  GridView,
   IdentityView,
   MainBreakerView,
   ToastView,
@@ -122,5 +124,31 @@ describe('ToastView', () => {
     expect(html).toContain('role="alert"')
     expect(html).toContain('Show details')
     expect(html).not.toContain('MoveAbort')
+  })
+})
+
+describe('GridView', () => {
+  it('says when there is no power grid', () => {
+    expect(
+      renderToStaticMarkup(
+        <GridView grid={null} sections={[]} breaker={null} />,
+      ),
+    ).toContain('This Assembly has no power grid.')
+  })
+})
+
+describe('DappView', () => {
+  it('loads an https dapp, and explains why another is not shown', () => {
+    expect(
+      renderToStaticMarkup(
+        <DappView host="example.com" src="https://example.com/?itemId=1" />,
+      ),
+    ).toContain('<iframe')
+    expect(
+      renderToStaticMarkup(<DappView host="example.com" src={null} />),
+    ).toContain('Only https dapps on another site can be shown here.')
+    expect(renderToStaticMarkup(<DappView host={null} src={null} />)).toContain(
+      'No dapp',
+    )
   })
 })

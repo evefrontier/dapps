@@ -58,7 +58,7 @@ export interface BoardSection {
   drawMw: bigint
 }
 
-export interface AirlockView {
+export interface AirlockRow {
   componentId: string
   code: string
   typeId: string
@@ -280,7 +280,7 @@ export function buildBoard(entity: EntityData, nowMs: number): BoardSection[] {
 }
 
 /** Every airlock (inventory component), with the section it is in. */
-export function buildAirlocks(entity: EntityData): AirlockView[] {
+export function buildAirlocks(entity: EntityData): AirlockRow[] {
   const sectionOf = sectionNames(entity)
   return entity.inventories.map((inventory) => ({
     componentId: inventory.componentId,

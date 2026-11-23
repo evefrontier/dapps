@@ -1,8 +1,9 @@
 import { type EntityData, useTypeNames } from '@evefrontier/dapp-kit'
+import { AirlockView } from '@eveworld/ui-components'
 import { useMemo } from 'react'
 
-import { count, m3 } from './format'
 import { buildAirlocks } from './model'
+import { airlockCards } from './viewProps'
 
 /**
  * One card per airlock (inventory component): its section, how full it is,
@@ -30,55 +31,7 @@ const AirlockTab = ({
   )
   const names = useTypeNames(typeIds)
 
-  return (
-    <div className="secs">
-      {airlocks.map(({ componentId, code, typeId, sectionName, inventory }) => {
-        const capacity = Number(inventory.capacity)
-        const pct = capacity > 0 ? Number(inventory.used) / capacity : 0
-        return (
-          <div key={componentId} className="sec">
-            <div className="sec-h">
-              <b>{names[typeId] || inventory.name || 'Airlock'}</b>
-              <span>
-                {code}
-                {sectionName && ` · ${sectionName}`}
-              </span>
-            </div>
-            <div className="inv-r">
-              <span>Used</span>
-              <b>
-                {m3(inventory.used)} / {m3(inventory.capacity)} m³
-              </b>
-              <div className="meter">
-                <i
-                  style={{ width: `${Math.min(100, pct * 100).toFixed(1)}%` }}
-                />
-              </div>
-            </div>
-            {showContents &&
-              (inventory.items.length ? (
-                <ul className="inv-items">
-                  {inventory.items.map((item) => (
-                    <li key={item.typeId}>
-                      <span className="itm-ic" aria-hidden="true" />
-                      <span className="in">
-                        {names[item.typeId] || `Type ${item.typeId}`}
-                      </span>
-                      <span className="iq">×{count(item.quantity)}</span>
-                      <span className="iv">
-                        {m3(BigInt(item.quantity) * BigInt(item.volume))} m³
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="none-note">Empty</p>
-              ))}
-          </div>
-        )
-      })}
-    </div>
-  )
+  return <AirlockView airlocks={airlockCards(airlocks, names, showContents)} />
 }
 
 export default AirlockTab
