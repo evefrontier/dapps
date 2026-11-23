@@ -3,7 +3,6 @@ import { readFileSync } from 'fs'
 import path from 'path'
 import { defineConfig } from 'vite'
 import babel from 'vite-plugin-babel'
-import svgr from 'vite-plugin-svgr'
 
 // The release tag must match this version (see .github/workflows/image.yaml)
 const { version } = JSON.parse(
@@ -17,13 +16,6 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    svgr({
-      include: '**/*.svg',
-      svgrOptions: {
-        exportType: 'named',
-        namedExport: 'ReactComponent',
-      },
-    }),
     babel({
       babelConfig: {
         plugins: ['babel-plugin-react-compiler'],

@@ -1,41 +1,23 @@
 import {
-  abbreviateAddress,
   canManage,
   type EntityData,
   type EntityOwner,
   type EntityRole,
   type GridSummary,
 } from '@evefrontier/dapp-kit'
+import { IdentityView } from '@eveworld/ui-components'
 import { useState } from 'react'
 
 import { useFlagVariant } from '../../flags'
 import DetailsForm from './DetailsForm'
-import { httpsUrl } from './dappSource'
 import { editableDetails } from './details'
-import { hostOf, mw } from './format'
-import { gridLamp } from './model'
 import { useControllerRows } from './useControllerRows'
-
-/** The shell's character name, or its wallet when the character has none. */
-const shellLabel = (owner: EntityOwner | null): string =>
-  owner?.character?.metadata?.name ||
-  abbreviateAddress(owner?.walletAddress ?? owner?.holder ?? '') ||
-  'Unknown'
-
-const EditIcon = () => (
-  <svg viewBox="0 0 16 16" aria-hidden="true">
-    <path d="M13.0394 5.26824L8.39549 9.95045L7.15894 8.70284L11.802 4.02148L13.0394 5.26824Z" />
-    <path d="M14.9717 3.32L13.7121 4.59L12.4756 3.34238L13.7343 2.07324L14.9717 3.32Z" />
-    <path d="M9.47395 3.76336H3.97353V11.0019H13.2511V7.55442H15V12.7653H3.97353V14H2.2246V12.7653H1V11.0019H2.2246V2H9.47395V3.76336Z" />
-  </svg>
-)
+import { identityViewProps } from './viewProps'
 
 /**
- * The Assembly at a glance, on every tab: code, name, whether it is running,
- * description, shell, controller count and dapp link. The shell and
- * controllers edit the name, description and dapp URL from the edit icon; an
- * Assembly with no Metadata component has nothing to edit (see
- * {@link editableDetails}).
+ * The Assembly at a glance, on every tab. The shell and controllers edit the
+ * name, description and dapp URL from the edit icon; an Assembly with no
+ * Metadata component has nothing to edit (see {@link editableDetails}).
  */
 const IdentityPanel = ({
   entity,
@@ -52,104 +34,36 @@ const IdentityPanel = ({
   // The entity being edited, so selecting another closes the form
   const [editingId, setEditingId] = useState<string | null>(null)
   const editing = editingId === entity.id
-  const metadata = entity.metadata
-  const state = gridLamp(summary)
-  const url = metadata?.url?.trim()
-  const dappUrl = url ? httpsUrl(url)?.href : undefined
   const editWithoutMetadata =
     useFlagVariant('assembly-edit-without-metadata') === 'on'
   const editable = editableDetails(
-    metadata,
+    entity.metadata,
     canManage(role),
     editWithoutMetadata,
   )
 
-  const stateBig = (
-    <div className="state-big" data-state={state.lamp}>
-      <span className="led" />
-      <b>{state.label}</b>
-      {summary && (
-        <span>
-          {summary.modulesOnline} of {summary.modulesTotal} online
-          <br />
-          {mw(summary.drawMw)} / {mw(summary.outputMw)} MW
-        </span>
-      )}
-    </div>
-  )
-
-  if (editing && editable) {
-    return (
-      <aside className="ident">
-        <div className="id-head">
-          <div className="code">Assembly · {entity.key.id}</div>
+  return (
+    <IdentityView
+      {...identityViewProps({
+        entity,
+        owner: entityOwner,
+        summary,
+        controllerCount: role === 'visitor' ? null : (rows?.length ?? null),
+      })}
+      canEdit={!!editable}
+      editDisabled={entity.inFlight}
+      onEdit={() => setEditingId(entity.id)}
+      editor={
+        editing && editable ? (
           <DetailsForm
             key={entity.id}
             entity={entity}
             metadata={editable}
             onClose={() => setEditingId(null)}
           />
-        </div>
-        {stateBig}
-      </aside>
-    )
-  }
-
-  return (
-    <aside className="ident">
-      <div className="id-head">
-        <div className="code">Assembly · {entity.key.id}</div>
-        <div className="name-row">
-          {metadata?.name ? (
-            <h2>{metadata.name}</h2>
-          ) : (
-            <h2 className="unnamed">Unnamed Assembly</h2>
-          )}
-          {editable && (
-            <button
-              type="button"
-              className="icon-btn"
-              aria-label="Edit name, description and URL"
-              title="Edit details"
-              disabled={entity.inFlight}
-              onClick={() => setEditingId(entity.id)}
-            >
-              <EditIcon />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {stateBig}
-
-      {metadata?.description && <p className="desc">{metadata.description}</p>}
-
-      <dl className="kv">
-        <dt>Shell</dt>
-        <dd>{shellLabel(entityOwner)}</dd>
-        {role !== 'visitor' && (
-          <>
-            <dt>Controllers</dt>
-            <dd>{rows.length}</dd>
-          </>
-        )}
-        {dappUrl && (
-          <>
-            <dt>Dapp</dt>
-            <dd>
-              <a
-                className="lnk"
-                href={dappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {hostOf(dappUrl)}
-              </a>
-            </dd>
-          </>
-        )}
-      </dl>
-    </aside>
+        ) : undefined
+      }
+    />
   )
 }
 

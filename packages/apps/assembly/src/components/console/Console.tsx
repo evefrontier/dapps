@@ -5,6 +5,7 @@ import {
   useConnection,
   useSmartObject,
 } from '@evefrontier/dapp-kit'
+import { type ConsoleTab, ConsoleView } from '@eveworld/ui-components'
 import { useMemo, useState } from 'react'
 
 import { isPanelEnabled, useFlagVariant, useViewRole } from '../../flags'
@@ -14,22 +15,8 @@ import DappTab from './DappTab'
 import GridTab from './GridTab'
 import IdentityPanel from './IdentityPanel'
 import { consoleTabs } from './model'
-import TabRail, { type ConsoleTab } from './TabRail'
 import { useNow } from './useNow'
-
-import './console.css'
-
-const Ornament = () => (
-  <svg viewBox="0 0 16 16" aria-hidden="true">
-    <path
-      d="M8 1.2 14.8 8 8 14.8 1.2 8Z"
-      fill="none"
-      stroke="#ff4700"
-      strokeWidth="1.2"
-    />
-    <path d="M8 5 11 8 8 11 5 8Z" fill="#ff4700" />
-  </svg>
-)
+import { consoleNote, roleChip } from './viewProps'
 
 /**
  * The Assembly's grid console: one screen per Assembly, in the Creation
@@ -65,103 +52,58 @@ const Console = () => {
   })
   const active = chosen && tabs.includes(chosen) ? chosen : tabs[0]!
 
-  const top = (
-    <div className="c-top">
-      <div className="orn" aria-hidden="true">
-        <Ornament />
-        <Ornament />
-      </div>
-      <div className="screen-title">Assembly</div>
-      <div className="who">
-        {/* A forced view (assembly-view-as) is always labelled, wallet or not */}
-        {(currentAccount || preview) && (
-          <span className={`role-chip ${preview || !roleLoading ? role : ''}`}>
-            {preview
-              ? `${role} · preview`
-              : roleLoading
-                ? 'Checking access…'
-                : role === 'visitor'
-                  ? 'Visitor · read only'
-                  : role}
-          </span>
-        )}
-        {currentAccount ? (
-          <button
-            type="button"
-            className="wallet"
-            title="Disconnect"
-            onClick={handleDisconnect}
-          >
-            {abbreviateAddress(currentAccount.address)}
-          </button>
-        ) : (
-          <button type="button" className="gbtn plain" onClick={handleConnect}>
-            Connect wallet
-          </button>
-        )}
-      </div>
-    </div>
-  )
+  const frame = {
+    roleChip: roleChip({
+      role,
+      preview,
+      loading: roleLoading,
+      connected: !!currentAccount,
+    }),
+    wallet: currentAccount
+      ? {
+          label: abbreviateAddress(currentAccount.address),
+          onDisconnect: handleDisconnect,
+        }
+      : null,
+    onConnect: handleConnect,
+  }
 
   if (!entity) {
-    return (
-      <div className="gc-page">
-        <div className="gc">
-          {top}
-          <p className="note">
-            {loading
-              ? 'Reading the Assembly…'
-              : error
-                ? `Could not read the Assembly: ${error}`
-                : 'No Assembly selected. Open this from an Assembly in the game.'}
-          </p>
-        </div>
-      </div>
-    )
+    return <ConsoleView {...frame} note={consoleNote({ loading, error })} />
   }
 
   return (
-    <div className="gc-page">
-      <div className="gc">
-        {top}
-        {entity.inFlight && (
-          <div className="strip lock">
-            <span className="spin" aria-hidden="true" />
-            <b>Transaction in flight</b>
-            <span>
-              The Assembly is locked until the chain settles it. This usually
-              takes a few seconds.
-            </span>
-          </div>
-        )}
-        <div className="c-body">
-          <IdentityPanel
-            entity={entity}
-            entityOwner={entityOwner}
-            role={role}
-            summary={summary}
-          />
-          <div className="main">
-            <TabRail tabs={tabs} active={active} onSelect={setChosen} />
-            {active === 'dapp' && (
-              <DappTab url={url} itemId={entity.key.id} tenant={tenant} />
-            )}
-            {active === 'grid' && (
-              <GridTab
-                entity={entity}
-                summary={summary}
-                nowMs={nowMs}
-                writable={writer}
-              />
-            )}
-            {active === 'airlock' && (
-              <AirlockTab entity={entity} showContents={writer} />
-            )}
-            {active === 'access' && <AccessTab />}
-          </div>
-        </div>
-      </div>
-    </div>
+    <ConsoleView
+      {...frame}
+      locked={entity.inFlight}
+      identity={
+        <IdentityPanel
+          entity={entity}
+          entityOwner={entityOwner}
+          role={role}
+          summary={summary}
+        />
+      }
+      tabs={tabs}
+      active={active}
+      onSelectTab={setChosen}
+    >
+      {active === 'dapp' && (
+        <DappTab url={url} itemId={entity.key.id} tenant={tenant} />
+      )}
+      {active === 'grid' && (
+        <GridTab
+          entity={entity}
+          summary={summary}
+          nowMs={nowMs}
+          writable={writer}
+        />
+      )}
+      {active === 'airlock' && (
+        <AirlockTab entity={entity} showContents={writer} />
+      )}
+      {active === 'access' && <AccessTab />}
+    </ConsoleView>
   )
 }
 

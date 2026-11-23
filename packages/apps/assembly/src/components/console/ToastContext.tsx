@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 
@@ -18,7 +19,9 @@ interface ToastContextValue {
   dismiss: () => void
   /** True while any console action is being sent or refetched */
   pending: boolean
-  setPending: (pending: boolean) => void
+  /** Takes the console's write lock; false when another write holds it */
+  lock: () => boolean
+  unlock: () => void
 }
 
 const ToastContext = createContext<ToastContextValue>({
@@ -26,32 +29,46 @@ const ToastContext = createContext<ToastContextValue>({
   show: () => {},
   dismiss: () => {},
   pending: false,
-  setPending: () => {},
+  lock: () => true,
+  unlock: () => {},
 })
 
 /**
  * Holds the console's one toast, and the lock its writes share. Writes lock
  * the whole console while they are in flight, so there is never more than one
- * to show: a new toast replaces the last.
+ * to show: a new toast replaces the last. The lock is a ref, so two writes
+ * started in the same tick can't both take it; `pending` mirrors it for
+ * rendering.
  */
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toast, setToast] = useState<ShownToast | null>(null)
   const [pending, setPending] = useState(false)
+  const locked = useRef(false)
 
   const show = useCallback((next: Toast | null) => {
     setToast((last) => (next ? { ...next, id: (last?.id ?? 0) + 1 } : null))
   }, [])
   const dismiss = useCallback(() => setToast(null), [])
+  const lock = useCallback(() => {
+    if (locked.current) return false
+    locked.current = true
+    setPending(true)
+    return true
+  }, [])
+  const unlock = useCallback(() => {
+    locked.current = false
+    setPending(false)
+  }, [])
 
   const value = useMemo(
-    () => ({ toast, show, dismiss, pending, setPending }),
-    [toast, show, dismiss, pending],
+    () => ({ toast, show, dismiss, pending, lock, unlock }),
+    [toast, show, dismiss, pending, lock, unlock],
   )
   return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>
 }
 
 /**
  * The console's toast, `show` / `dismiss` to change it, and the shared
- * `pending` lock.
+ * write lock: `lock` / `unlock`, and `pending` while it is held.
  */
 export const useToast = () => useContext(ToastContext)

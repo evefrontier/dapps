@@ -28,26 +28,33 @@ export interface ControllerRow {
  * has no access list yet), its row is added at the end. The shell's row is
  * never removable.
  *
+ * When a wallet holds the cap, its character is found in the directory, so
+ * until the directory loads (or if it fails) any row could be the shell's:
+ * the list is unknown rather than one that would offer to remove the shell.
+ *
  * @param controllers - The entity's access list (character ids)
  * @param owner - Who holds the entity's AccessCap
- * @param characters - The character directory; empty until it loads
+ * @param characters - The character directory; undefined until it loads
  * @returns
- *   - `rows` - The list to show
+ *   - `rows` - The list to show, or null while the shell is unknown
  *   - `shellId` - The shell's character id: the cap's holder when it is parked
  *     on a character, otherwise the character bound to the holding wallet
  */
 export function buildControllerRows(
   controllers: string[] | null | undefined,
   owner: EntityOwner | null,
-  characters: CharacterSummary[],
-): { rows: ControllerRow[]; shellId: string | null } {
+  characters: CharacterSummary[] | undefined,
+): { rows: ControllerRow[] | null; shellId: string | null } {
+  if (!characters && owner?.kind !== 'character' && owner?.walletAddress) {
+    return { rows: null, shellId: null }
+  }
   const characterOf = (id: string) =>
-    characters.find((c) => sameAddress(c.characterId, id))
+    characters?.find((c) => sameAddress(c.characterId, id))
   const shellId =
     owner?.kind === 'character'
       ? owner.holder
-      : (findCharacterByWallet(characters, owner?.walletAddress)?.characterId ??
-        null)
+      : (findCharacterByWallet(characters ?? [], owner?.walletAddress)
+          ?.characterId ?? null)
 
   const rows: ControllerRow[] = (controllers ?? []).map((id) => {
     const character = characterOf(id)
@@ -84,7 +91,8 @@ export function buildControllerRows(
  * @param enabled - False skips the character directory fetch (visitors)
  */
 export function useControllerRows(enabled: boolean): {
-  rows: ControllerRow[]
+  /** Null until the shell is known (see {@link buildControllerRows}) */
+  rows: ControllerRow[] | null
   /** The shell's character id, when known */
   shellId: string | null
   /** The character directory, once loaded */
@@ -98,11 +106,7 @@ export function useControllerRows(enabled: boolean): {
 
   return useMemo(
     () => ({
-      ...buildControllerRows(
-        entity?.controllers,
-        entityOwner,
-        directory.data ?? [],
-      ),
+      ...buildControllerRows(entity?.controllers, entityOwner, directory.data),
       characters: directory.data,
       isLoading: directory.isLoading,
       error: directory.error,

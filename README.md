@@ -21,7 +21,7 @@ This monorepo contains the decentralized applications (dApps) of EVE Frontier, a
 | Package | Path | Description |
 | --- | --- | --- |
 | [`@evefrontier/dapp-kit`](./packages/libs/dapp-kit/README.md) | `packages/libs/dapp-kit` | React SDK for building EVE Frontier dApps on Sui. Published to GitHub Packages. |
-| [`@eveworld/ui-components`](./packages/libs/ui-components/README.md) | `packages/libs/ui-components` | Shared React UI components. |
+| [`@eveworld/ui-components`](./packages/libs/ui-components/README.md) | `packages/libs/ui-components` | The grid console's UI kit: views and stylesheet, no chain code. |
 | [`@eveworld/assembly`](./packages/apps/assembly/README.md) | `packages/apps/assembly` | The Smart Assembly dApp. |
 
 Further reading:

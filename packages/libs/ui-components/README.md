@@ -1,112 +1,68 @@
 # @eveworld/ui-components
 
-## EVE Frontier UI Components Library
+The grid console's UI kit: the views, primitives and stylesheet that draw the assembly dapp, in the Creation Builder's language (diamond tab rail, breaker board, levers, hold button, corner brackets). It has no chain or wallet code: every view takes plain props (strings, rows and callbacks), so the app that uses it holds the business logic and passes in what to show.
 
-This package contains the UI Component library for EVE Frontier dApps. Built with TypeScript, Material UI, and Tailwind CSS, it offers a range of reusable components that are easy to integrate into EVE Frontier dApps.
+It is built for the assembly dapp, and some of its text describes how today's world contracts behave (for example the main breaker's). It is private to this repo and not published.
 
 ## Table of Contents
 
-1. [Installation](#installation) 📦
-2. [Usage](#usage) 🔧
-3. [Styling with Tailwind CSS](#styling-with-tailwind-css) 🎨
-4. [Components](#components) 🧩
-5. [License](#license) 📜
+1. [Installation](#installation)
+2. [Styling](#styling)
+3. [Views](#views)
+4. [Primitives](#primitives)
+5. [The props rule](#the-props-rule)
+6. [License](#license)
 
 ## Installation
 
-To install the library, run the following command:
+It is a workspace package. Add it to an app in this repo with:
 
-```bash
-bun add @eveworld/ui-components
+```json
+"@eveworld/ui-components": "workspace:*"
 ```
 
-## Usage
+The `@eveworld/ui-components` on npm (0.0.12 and earlier) is the old component library, not this one.
 
-To use a component from this library, import it into your project:
+## Styling
 
-```typescript
-import { SmartAssemblyInfo } from "@eveworld/ui-components";
+Import the stylesheet once, at the root of the app:
+
+```tsx
+import '@eveworld/ui-components/console.css'
 ```
 
-Then use it in your React component:
+Everything is scoped under `.gc` (the console) and `.gc-toast-host` (the toast), which also hold the colour and font tokens (`--ink`, `--brand`, `--offline`, `--font-display`, `--font-body`…). The console's breakpoints are container queries on its own width: desktop from 1024px, tablet 768–1023px, mobile below. The toast sits outside the console, so its phone layout is a media query. The fonts (Frontier Disket Mono, Favorit) are not bundled; load them in the page.
 
-```jsx
-<SmartAssemblyInfo />
-```
+## Views
 
-## Styling with Tailwind CSS
+| View | Draws |
+|---|---|
+| `ConsoleView` | The frame: top bar (role chip, wallet or Connect), in-flight strip, identity slot, tab rail and tab content; or a note when there is nothing to show |
+| `IdentityView` | Code, name, state lamp, description and key-value rows; an edit icon and an `editor` slot |
+| `DetailsFormView` | The Edit details form (name, description, dapp URL), controlled |
+| `MainBreakerView` | The main breaker: a lever with the hold-to-cut-power box, or a lamp plate |
+| `GridView` | Readouts, banner, fuel panel and the board of breaker cards; a `breaker` slot |
+| `AirlockView` | One card per airlock, with contents when given |
+| `DappView` | The attached dapp in a sandboxed iframe, or why it isn't shown |
+| `AccessView` | The Controllers list and the add form, controlled |
+| `ToastView` | The transaction toast: Sending, Done or Failed |
+| `ErrorNotice` | A full-page error, for an error boundary's fallback |
 
-This library utilizes Tailwind CSS for styling. To ensure that the styles are properly applied, the `tailwind.config.js` file must be configured to include the path to this component library.
+## Primitives
 
-### Configuring Tailwind
+`TabRail` (and the `ConsoleTab` type), `HoldButton`, `Lever`, `Plate`, `Ornament`, `EditIcon` and `CloseIcon`.
 
-Add the path to the UI component library in the `content` array of `tailwind.config.js`:
+## The props rule
 
-```javascript
-module.exports = {
-  content: [
-    // ...other file paths
-    "./node_modules/@eveworld/ui-components/**/*.{js,ts,jsx,tsx}",
-  ],
-  // ...other Tailwind configurations
-};
-```
+A view never reads chain data, flags or the wallet, and never sends a transaction. It takes what to show as props and reports what the viewer did through callbacks. Anything the app needs to read, such as a form's draft or a search query, is a controlled prop. The only state a view keeps is purely visual: whether the hold box, the add form or a toast's details are open, the hold button's progress, and focus.
 
-This step is necessary for Tailwind to process the classes used in the library.
-
-## Components
-
-The library includes a variety of components designed for EVE Frontier dApps. Some of the key components are:
-
-```
-<ClickToCopy />
-<ConnectWallet />
-<ErrorNotice />
-<EveButton />
-<EveLayout />
-<EveLinearBar />
-<EveLoadingAnimation />
-<EveScroll />
-<Header />
-<SmartAssemblyInfo />
-<EveInput />
-```
-
-### Component Props and Types
-
-Some components require props that are defined using types from the `@eveworld/types` package. To use these components, ensure you import the necessary types.
-
-Example:
-
-```typescript
-import { SmartAssemblyInfo } from "@eveworld/ui-components";
-import { Assembly } from "@eveworld/types";
-
-const smartAssemblyData: Assembly = {
-  // populate with required data
-};
-
-const App = () => (
-  <div>
-    <SmartAssemblyInfo {...smartAssemblyData} />
-  </div>
-);
-```
-
-## Static Assets
-
-The library also includes static SVG assets that can be accessed from `@eveworld/ui-components/assets`. These assets can be used for icons, logos, and other visual elements in your application.
-
-To use an SVG asset, import it into your project like this:
-
-```typescript
-import { Logo } from '@eveworld/ui-components/assets';
-
-const App = () => (
-  <div>
-    <Logo />
-  </div>
-);
+```tsx
+<MainBreakerView
+  on={grid.on}
+  writable={canManage(role)}
+  locked={pending || entity.inFlight}
+  onSwitch={(next) => send(next)}
+/>
 ```
 
 ## License

@@ -13,7 +13,7 @@ EVE Frontier Smart Assembly Base is a client-only dapp framework designed for se
 
 ## Project Overview
 
-EVE Frontier Smart Assembly Base is a client-only dapp framework designed for seamless integration with the EVE Frontier game. It provides blockchain functionality via Dapp Kit and manages blockchain-based data states efficiently. The project is built with TypeScript, React and Vite; the grid console has its own stylesheet, and shared components come from `@eveworld/ui-components`.
+EVE Frontier Smart Assembly Base is a client-only dapp framework designed for seamless integration with the EVE Frontier game. It provides blockchain functionality via Dapp Kit and manages blockchain-based data states efficiently. The project is built with TypeScript, React and Vite. The app holds the business logic (reading the entity, roles, flags, building what to show, sending transactions); everything it draws, and the `console.css` stylesheet, comes from `@eveworld/ui-components`, whose views take plain props.
 
 ### Dependencies
 

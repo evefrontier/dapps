@@ -5,8 +5,6 @@ import Console from './components/console/Console'
 import Toast from './components/console/Toast'
 import { ToastProvider } from './components/console/ToastContext'
 
-import '@eveworld/ui-components/styles.css'
-
 const log = createLogger()
 
 /**

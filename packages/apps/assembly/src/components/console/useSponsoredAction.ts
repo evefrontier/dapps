@@ -32,7 +32,7 @@ export function useSponsoredAction(): {
   pending: boolean
 } {
   const { refetch } = useSmartObject()
-  const { show, pending, setPending } = useToast()
+  const { show, pending, lock, unlock } = useToast()
   const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction()
 
   const run = async (
@@ -42,8 +42,7 @@ export function useSponsoredAction(): {
     ) => Promise<SponsoredTransactionOutput>,
     onSent?: () => void,
   ) => {
-    if (pending) return
-    setPending(true)
+    if (!lock()) return
     try {
       const sent = await performAction({
         labels,
@@ -53,7 +52,7 @@ export function useSponsoredAction(): {
       })
       if (sent) onSent?.()
     } finally {
-      setPending(false)
+      unlock()
     }
   }
 

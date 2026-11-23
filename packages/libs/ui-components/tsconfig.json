@@ -7,9 +7,6 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "paths": {
-      "@eveworld/ui-components/assets": ["./assets"]
-    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -20,7 +17,7 @@
     "declaration": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["node", "vite-plugin-svgr/client"],
+    "types": [],
 
     /* Linting */
     "strict": true,
@@ -28,7 +25,6 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "assets", "svg.d.ts"],
-  "exclude": ["node_modules"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["index.ts", "console"],
+  "exclude": ["node_modules"]
 }

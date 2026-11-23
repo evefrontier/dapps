@@ -15,11 +15,8 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
     "@evefrontier/dapp-kit": "workspace:*",
     "@eveworld/ui-components": "workspace:*",
-    "@mui/material": "^7.3.11",
     "@mysten/dapp-kit-core": "^1.6.9",
     "@mysten/dapp-kit-react": "^2.1.11",
     "@openfeature/react-sdk": "^1.4.1",
@@ -28,7 +25,6 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-error-boundary": "^6.1.2",
-    "vite-plugin-svgr": "^5.2.0",
     "vitest": "^4.1.12"
   },
   "devDependencies": {
@@ -38,9 +34,6 @@
     "@vitejs/plugin-react-swc": "^4.3.2",
     "@vitest/ui": "4.1.12",
     "babel-plugin-react-compiler": "^1.0.0",
-    "postcss": "^8.5.24",
-    "@tailwindcss/postcss": "^4.3.3",
-    "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "vite": "^8.1.5",
     "vite-plugin-babel": "^1.7.3"
