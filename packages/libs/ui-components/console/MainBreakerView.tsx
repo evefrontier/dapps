@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import HoldButton from './HoldButton'
 import { Lever, Plate } from './primitives'
@@ -27,7 +27,12 @@ const MainBreakerView = ({
     onSwitch(next)
   }
 
-  if (writable && confirming) {
+  // A refetch can show it already off with the hold open: drop the hold
+  useEffect(() => {
+    if (!on) setConfirming(false)
+  }, [on])
+
+  if (writable && confirming && on) {
     return (
       <div className="hold-box">
         <p>

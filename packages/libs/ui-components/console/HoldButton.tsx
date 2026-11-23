@@ -86,6 +86,8 @@ const HoldButton = ({
       onKeyUp={(event) => {
         if (event.key === ' ' || event.key === 'Enter') stop()
       }}
+      // Focus moving away mid-hold means the keyup never arrives
+      onBlur={stop}
     >
       <span className="hold-l">{label}</span>
       <span className="hold-s">{sub}</span>
