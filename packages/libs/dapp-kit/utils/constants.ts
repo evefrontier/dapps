@@ -73,6 +73,22 @@ export const GRAPHQL_ENDPOINTS: Record<SuiGraphqlNetwork, string> = {
   mainnet: 'https://graphql.mainnet.sui.io/graphql',
 }
 
+/** Fenris private indexer GraphQL endpoint, used for character search.
+ *  @category Constants
+ */
+export const FENRIS_INDEXER_URL =
+  'https://sui-indexer.live.priv.evefrontier.com/graphql'
+
+/**
+ * Resolve the Fenris private indexer endpoint: VITE_FENRIS_INDEXER_URL when
+ * set, otherwise {@link FENRIS_INDEXER_URL}.
+ * @returns The indexer's GraphQL endpoint URL
+ * @category Utilities - Config
+ */
+export function getFenrisIndexerUrl(): string {
+  return import.meta.env.VITE_FENRIS_INDEXER_URL || FENRIS_INDEXER_URL
+}
+
 /**
  * Client identifier sent as the `X-Client-ID` header on GraphQL requests.
  * Random per client, generated once and

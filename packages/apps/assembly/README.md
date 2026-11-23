@@ -67,7 +67,7 @@ Feature flags are switched from the flag panel, which only dev and test builds s
 Feature flags:
 
 - `assembly-edit-without-metadata` (off by default) shows Edit details to the shell and controllers even when the assembly has no Metadata component, starting from empty details. Saving then fails on chain, since `metadata::edit` needs the component.
-- `assembly-controller-search` (off by default) lets the Access tab's Add form find a character by name instead of pasting its wallet. Picking a result fills in its wallet and adds exactly that character, since one wallet can be bound to several. Names come from each character's latest `MetadataChanged` event, so a character that has never been named can only be added by wallet.
+- `assembly-controller-search` (off by default) lets the Access tab's Add form find a character by name instead of pasting its wallet. Picking a result fills in its wallet and adds exactly that character, since one wallet can be bound to several. Names are searched on the Fenris private indexer (`VITE_FENRIS_INDEXER_URL`, default `https://sui-indexer.live.priv.evefrontier.com/graphql`), filtered to the page's tenant, so a character the indexer has no name for can only be added by wallet.
 
 Dev and test builds only, where the flag panel shows:
 
