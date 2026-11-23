@@ -90,7 +90,11 @@ export function usedMw(grid: EntityPowerGrid): bigint {
   return total
 }
 
-/** Burn over `elapsedMs` at the load stored at the last settle, not capped by fuel. */
+/**
+ * Burn over `elapsedMs` at the load stored at the last settle, not capped by fuel.
+ * Ignores `grid.on`: `set_power_grid` settles and regrants at zero capacity when
+ * switched off, so an off grid's stored draws are all zero.
+ */
 function uncappedBurn(grid: EntityPowerGrid, elapsedMs: bigint): bigint {
   const capacityMw = BigInt(grid.capacityMw)
   const load = min(usedMw(grid), capacityMw)
