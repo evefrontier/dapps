@@ -63,7 +63,10 @@ export function identityViewProps({
   entity: EntityData
   owner: EntityOwner | null
   summary: GridSummary | null
-  /** Null hides the row (visitors don't see the controller count). */
+  /**
+   * Null hides the row: visitors don't see the controller count, and it's
+   * unknown until the shell is.
+   */
   controllerCount: number | null
 }): {
   code: string

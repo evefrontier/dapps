@@ -213,6 +213,16 @@ describe('AccessView', () => {
     )
     expect(html).toContain('Remove')
   })
+
+  it('lists nothing while the list is unknown, and says why', () => {
+    const view = (loading: boolean) =>
+      renderToStaticMarkup(
+        <AccessView rows={null} loading={loading} locked={false} add={add} />,
+      )
+    expect(view(true)).toContain('Loading controllers…')
+    expect(view(false)).toContain('Couldn&#x27;t load controllers.')
+    expect(view(false)).not.toContain('Remove')
+  })
 })
 
 describe('ConsoleView', () => {

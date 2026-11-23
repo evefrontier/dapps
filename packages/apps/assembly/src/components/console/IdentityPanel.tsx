@@ -48,7 +48,7 @@ const IdentityPanel = ({
         entity,
         owner: entityOwner,
         summary,
-        controllerCount: role === 'visitor' ? null : rows.length,
+        controllerCount: role === 'visitor' ? null : (rows?.length ?? null),
       })}
       canEdit={!!editable}
       editDisabled={entity.inFlight}

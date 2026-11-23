@@ -47,7 +47,8 @@ export interface AddControllerForm {
 /**
  * The Access tab: the Controllers list in on-chain order, tagged Shell and
  * You, with Remove where the caller allows it, and the add form. The caller
- * resolves and sends; this only draws and focuses the field.
+ * resolves and sends; this only draws and focuses the field. Null `rows`
+ * means the list isn't known yet: loading, or it couldn't be loaded.
  */
 const AccessView = ({
   rows,
@@ -55,7 +56,7 @@ const AccessView = ({
   locked,
   add,
 }: {
-  rows: ControllerRowData[]
+  rows: ControllerRowData[] | null
   loading: boolean
   /** True while a transaction is being sent or is in flight. */
   locked: boolean
@@ -71,12 +72,16 @@ const AccessView = ({
     <div className="acc" id="SmartObject-Controllers">
       <div className="stack">
         <div className="bar-h">
-          Controllers<span>{rows.length}</span>
+          Controllers{rows && <span>{rows.length}</span>}
         </div>
 
-        {rows.length === 0 ? (
+        {!rows?.length ? (
           <p className="none-note">
-            {loading ? 'Loading controllers…' : 'No controllers.'}
+            {loading
+              ? 'Loading controllers…'
+              : rows
+                ? 'No controllers.'
+                : "Couldn't load controllers."}
           </p>
         ) : (
           <div className="plist">

@@ -51,17 +51,17 @@ describe('buildControllerRows', () => {
 
   it('adds the shell at the end when the access list does not hold it', () => {
     const { rows } = buildControllerRows([CTRL_CHAR], walletOwner, characters)
-    expect(rows.map((row) => [row.characterId, row.isShell])).toEqual([
+    expect(rows?.map((row) => [row.characterId, row.isShell])).toEqual([
       [CTRL_CHAR, false],
       [SHELL_CHAR, true],
     ])
-    expect(rows[1].key).toBe(`shell:${SHELL_CHAR}`)
+    expect(rows?.[1].key).toBe(`shell:${SHELL_CHAR}`)
   })
 
   it('lists the shell alone when the entity has no access list', () => {
     const { rows } = buildControllerRows(null, walletOwner, characters)
     expect(rows).toHaveLength(1)
-    expect(rows[0].isShell).toBe(true)
+    expect(rows?.[0].isShell).toBe(true)
   })
 
   it('shows an unknown character by its id', () => {
@@ -108,6 +108,25 @@ describe('buildControllerRows', () => {
         address: SHELL_WALLET,
         isShell: true,
       },
+    ])
+  })
+
+  it('lists nothing until the directory names a wallet-held shell', () => {
+    // Any row could be the shell's, so none may offer Remove
+    expect(
+      buildControllerRows([SHELL_CHAR, CTRL_CHAR], walletOwner, undefined),
+    ).toEqual({ rows: null, shellId: null })
+  })
+
+  it('lists a parked shell before the directory loads', () => {
+    const parked: EntityOwner = {
+      ...walletOwner,
+      kind: 'character',
+      holder: SHELL_CHAR,
+    }
+    const { rows } = buildControllerRows([SHELL_CHAR], parked, undefined)
+    expect(rows?.map((row) => [row.characterId, row.isShell])).toEqual([
+      [SHELL_CHAR, true],
     ])
   })
 

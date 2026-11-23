@@ -144,7 +144,7 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
 
   return (
     <AccessView
-      rows={accessRows(rows, { viewerId, role, onRemove: remove })}
+      rows={rows && accessRows(rows, { viewerId, role, onRemove: remove })}
       loading={isLoading}
       locked={locked}
       add={{
