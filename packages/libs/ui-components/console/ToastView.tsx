@@ -38,7 +38,6 @@ const ToastView = ({
   const [copied, setCopied] = useState(false)
   const id = toast?.id
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reset per toast
   useEffect(() => {
     setOpen(false)
     setCopied(false)

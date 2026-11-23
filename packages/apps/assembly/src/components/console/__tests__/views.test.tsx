@@ -2,6 +2,7 @@ import {
   AccessView,
   ConsoleView,
   DappView,
+  ErrorNotice,
   GridView,
   IdentityView,
   MainBreakerView,
@@ -239,5 +240,17 @@ describe('ConsoleView', () => {
     expect(html.match(/role="tab"/g)).toHaveLength(2)
     expect(html).toContain('aria-selected="true"')
     expect(html).toContain('Transaction in flight')
+  })
+})
+
+describe('ErrorNotice', () => {
+  it('shows the message as an alert in the console frame', () => {
+    const html = renderToStaticMarkup(
+      <ErrorNotice message="Anomaly detected" />,
+    )
+    expect(html).toContain('class="gc"')
+    expect(html).toContain('role="alert"')
+    expect(html).toContain('Something went wrong')
+    expect(html).toContain('Anomaly detected')
   })
 })

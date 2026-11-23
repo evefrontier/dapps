@@ -18,8 +18,6 @@ import { consoleTabs } from './model'
 import { useNow } from './useNow'
 import { consoleNote, roleChip } from './viewProps'
 
-import '@eveworld/ui-components/console.css'
-
 /**
  * The Assembly's grid console: one screen per Assembly, in the Creation
  * Builder's language. Tabs: Dapp (first, and open by default, when the

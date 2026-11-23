@@ -11,6 +11,7 @@ export {
   type DetailsFields,
   default as DetailsFormView,
 } from './DetailsFormView'
+export { default as ErrorNotice } from './ErrorNotice'
 export {
   type BoardSectionData,
   type BreakerCardData,

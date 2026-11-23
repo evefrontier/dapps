@@ -26,7 +26,7 @@ packages/
 │   └── assembly/            # Smart Assembly dApp (@eveworld/assembly)
 └── libs/                    # Shared libraries
     ├── dapp-kit/            # Core SDK (@evefrontier/dapp-kit)
-    └── ui-components/       # Shared UI components (@eveworld/ui-components)
+    └── ui-components/       # Grid console UI kit (@eveworld/ui-components)
 ```
 
 ### Key Packages
@@ -34,7 +34,7 @@ packages/
 | Package | Description | Main Exports |
 |---------|-------------|--------------|
 | `@evefrontier/dapp-kit` | Core React hooks, providers, GraphQL client, and utilities | `EveFrontierProvider`, `useSmartObject`, `useConnection` |
-| `@eveworld/ui-components` | EVE-styled error notice and base stylesheet | `ErrorNotice`, `styles.css` |
+| `@eveworld/ui-components` | The grid console's UI kit: views, primitives and `console.css`, with plain props | `ConsoleView`, `GridView`, `ToastView` |
 | `@eveworld/assembly` | Smart Assembly management dApp | Application entry point |
 
 ### dapp-kit Internal Structure
