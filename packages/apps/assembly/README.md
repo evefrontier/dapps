@@ -13,7 +13,7 @@ EVE Frontier Smart Assembly Base is a client-only dapp framework designed for se
 
 ## Project Overview
 
-EVE Frontier Smart Assembly Base is a client-only dapp framework designed for seamless integration with the EVE Frontier game. It provides blockchain functionality via Dapp Kit and manages blockchain-based data states efficiently. The project is built with TypeScript, Material UI, Tailwind CSS, and Vite.
+EVE Frontier Smart Assembly Base is a client-only dapp framework designed for seamless integration with the EVE Frontier game. It provides blockchain functionality via Dapp Kit and manages blockchain-based data states efficiently. The project is built with TypeScript, React and Vite; the grid console has its own stylesheet, and shared components come from `@eveworld/ui-components`.
 
 ### Dependencies
 
@@ -52,11 +52,14 @@ While the entity has a transaction in flight (`entity.inFlight`), every control 
 
 The dapp does not deposit fuel. Fuel arrives through the game's inventory-in action.
 
+The dapp is a single screen, the grid console. It has no routes: whatever path it is opened at, it shows the console for the selected assembly. It is read-only for now and opens without a wallet. Its tabs are Dapp (when the assembly has a dapp URL, and then open first), Grid, Airlock (when it has an inventory) and Access (shell and controllers, with `assembly-controllers` on).
+
 Feature flags:
 
+- `assembly-view-as` (dev and test builds, where the flag panel shows) renders the console as a visitor, controller or shell, whatever wallet is connected; `actual` uses the wallet's real role. The role chip then reads e.g. `shell · preview`. It changes only what is shown: transactions still go through the real wallet, and the chain checks them.
 - `assembly-controllers` shows the controller list and lets the shell and controllers add and remove controllers. Off by default; it needs the access-list contract and sponsored actions.
 - The main breaker is planned and not built yet. Module and generator breakers are display only.
-- Editing the name, description and dapp URL saves all three in one `UPDATE_METADATA` transaction (`EditUnit.tsx`). Today only the shell can save; opening it to controllers is planned.
+- Editing the name, description and dapp URL is planned: one `UPDATE_METADATA` transaction for all three, open to the shell and controllers.
 
 ## Getting Started
 

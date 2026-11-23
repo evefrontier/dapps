@@ -1,95 +1,29 @@
 import {
-  type CharacterInfo,
   createLogger,
-  useConnection,
   useNotification,
   useSmartObject,
 } from '@evefrontier/dapp-kit'
-import { useCurrentAccount } from '@mysten/dapp-kit-react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { EveAlert } from '@eveworld/ui-components'
+import { useEffect } from 'react'
 
-import './App.css'
+import Console from './components/console/Console'
+
 import '@eveworld/ui-components/styles.css'
-
-import {
-  EveAlert,
-  EveConnectWallet,
-  EveFeralCodeGen,
-  EveLayout,
-} from '@eveworld/ui-components'
-
-import SkeletonConnect from './components/skeletons/SkeletonConnect'
 
 const log = createLogger()
 
 /**
- * Main App component that handles different rendering states based on connection and client status.
+ * The app: notifications and the grid console, its only screen. There is no
+ * routing; the path is ignored. The console has its own top bar and connect
+ * button, and is read-only for visitors, so no wallet is needed to open it.
  */
 const App = () => {
-  // TODO: resolve the wallet's character from the entity model
-  const userCharacter: CharacterInfo | null = null
-  const { handleConnect, handleDisconnect, walletAddress, hasEveVault } =
-    useConnection()
   const { notification } = useNotification()
-  const { assembly } = useSmartObject()
+  const { entity } = useSmartObject()
 
-  const currentAccount = useCurrentAccount()
-  const connected = !!currentAccount
-
-  // Check if the user is on a client route
-  const { pathname } = useLocation()
-  const isClient = pathname.includes('client')
-
-  /**
-   * If user is on a client route AND not fully connected (missing provider, public client, or wallet client):
-   *   Renders SkeletonConnect component for loading state
-   *
-   * @returns React.JSX.Element representing the appropriate skeleton UI for the current path
-   */
-  if (isClient && (!connected || !currentAccount)) {
-    return (
-      <SkeletonConnect
-        handleConnect={handleConnect}
-        hasEveVault={hasEveVault}
-        path={pathname}
-      />
-    )
-  }
-
-  /**
-   * If user is not fully connected (missing provider, public client, or wallet client):
-   *    - Renders EveConnectWallet component for wallet connection
-   *    - Displays EveFeralCodeGen components at the bottom
-   *
-   * @returns React.JSX.Element
-   */
-  if (!connected) {
-    return (
-      <div className="h-full w-full bg-crude-60 -z-10">
-        <EveConnectWallet
-          handleConnect={handleConnect}
-          hasEveVault={hasEveVault}
-        />
-        <GenerateEveFeralCodeGen style="bottom-12 text-martianred-60" />
-      </div>
-    )
-  }
-
-  /**
-   * If fully connected:
-   *    - Renders main application layout with EveLayout
-   *    - Shows EveAlert for notifications
-   *    - If on correct chain: renders route content via Outlet
-   *    - If on wrong chain: shows ErrorNotice to switch networks
-   *
-   * @returns React.JSX.Element
-   */
-
-  if (assembly?.id) {
-    log.info(`[Dapp] Assembly %s connected`, assembly?.id)
-  } else {
-    log.warn('[Dapp] No assembly ID connected')
-  }
+  useEffect(() => {
+    if (entity?.id) log.info('[Dapp] Assembly %s selected', entity.id)
+  }, [entity?.id])
 
   return (
     <>
@@ -100,37 +34,9 @@ const App = () => {
         handleClose={notification.handleClose}
         isOpen={notification.isOpen}
       />
-
-      <EveLayout
-        connected={connected}
-        handleDisconnect={handleDisconnect}
-        isClient={isClient}
-        walletAddress={walletAddress || ''}
-        userCharacter={userCharacter}
-      >
-        <Outlet context={{ userCharacter }} />
-      </EveLayout>
+      <Console />
     </>
   )
 }
 
 export default App
-
-const GenerateEveFeralCodeGen = ({
-  style,
-  count = 5,
-}: {
-  style?: string
-  count?: number
-}) => {
-  const codes = Array.from({ length: count }, (_, i) => i)
-  return (
-    <div
-      className={`absolute flex justify-between px-10 justify-items-center w-full text-xs ${style}`}
-    >
-      {codes.map((index) => (
-        <EveFeralCodeGen key={index} />
-      ))}{' '}
-    </div>
-  )
-}
