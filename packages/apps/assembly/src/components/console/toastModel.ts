@@ -1,4 +1,5 @@
 import type { SponsoredTransactionOutput } from '@evefrontier/dapp-kit'
+import type { ToastData } from '@eveworld/ui-components'
 
 /** The console's one transaction toast, in each of its three states. */
 export type Toast =
@@ -42,6 +43,20 @@ export function shortDigest(digest: string): string {
   return digest.length > 12
     ? `${digest.slice(0, 4)}…${digest.slice(-4)}`
     : digest
+}
+
+/** What ToastView shows for a toast: Done gets its short hash and link. */
+export function toastData(
+  toast: Toast,
+  txUrl: (digest: string) => string,
+): ToastData {
+  if (toast.kind !== 'done') return toast
+  return {
+    kind: 'done',
+    title: toast.title,
+    digest: shortDigest(toast.digest),
+    href: txUrl(toast.digest),
+  }
 }
 
 /**

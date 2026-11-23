@@ -1,5 +1,6 @@
 import type { EntityData, EntityMetadata } from '@evefrontier/dapp-kit'
-import React, { useEffect, useRef, useState } from 'react'
+import { DetailsFormView } from '@eveworld/ui-components'
+import { useState } from 'react'
 
 import { updateMetadata } from '../../functions/updateMetadata'
 import {
@@ -45,28 +46,11 @@ const DetailsForm = ({
     setBase(metadata)
     setConflict((last) => last || rebased.conflict)
   }
-  const nameInput = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    nameInput.current?.focus()
-    nameInput.current?.select()
-  }, [])
 
   const locked = pending || entity.inFlight
   const changed = detailsChanged(draft, metadata)
 
-  const set =
-    (field: keyof DetailsDraft) =>
-    (
-      event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    ): void => {
-      setDraft((current) => ({ ...current, [field]: event.target.value }))
-      if (field === 'url') setUrlError(null)
-    }
-
-  const handleSave = (event: React.FormEvent) => {
-    event.preventDefault()
-    if (locked || !changed) return
+  const save = () => {
     const result = checkDetails(draft)
     if (!result.ok) {
       setUrlError(result.error)
@@ -89,78 +73,25 @@ const DetailsForm = ({
   }
 
   return (
-    <form
-      className="edit"
-      onSubmit={handleSave}
-      onKeyDown={(event) => {
-        if (event.key === 'Escape' && !pending) onClose()
+    <DetailsFormView
+      draft={draft}
+      nameMax={NAME_MAX}
+      descriptionMax={DESCRIPTION_MAX}
+      urlError={urlError}
+      notice={
+        conflict
+          ? 'The details were saved elsewhere since you opened this. Saving replaces them with what you see here.'
+          : null
+      }
+      pending={pending}
+      canSave={!locked && changed}
+      onChange={(field, value) => {
+        setDraft((current) => ({ ...current, [field]: value }))
+        if (field === 'url') setUrlError(null)
       }}
-      noValidate
-    >
-      <div className="eyebrow">Edit details</div>
-      <label htmlFor="ed-name">
-        <span className="ed-l">Name</span>
-        <input
-          id="ed-name"
-          ref={nameInput}
-          value={draft.name}
-          maxLength={NAME_MAX}
-          autoComplete="off"
-          disabled={pending}
-          onChange={set('name')}
-        />
-      </label>
-      <label htmlFor="ed-desc">
-        <span className="ed-l">Description</span>
-        <textarea
-          id="ed-desc"
-          rows={3}
-          value={draft.description}
-          maxLength={DESCRIPTION_MAX}
-          disabled={pending}
-          onChange={set('description')}
-        />
-      </label>
-      <label htmlFor="ed-url">
-        <span className="ed-l">Dapp URL</span>
-        <input
-          id="ed-url"
-          type="url"
-          value={draft.url}
-          placeholder="https://…"
-          autoComplete="off"
-          spellCheck={false}
-          disabled={pending}
-          aria-invalid={!!urlError}
-          aria-describedby={urlError ? 'ed-url-error' : undefined}
-          onChange={set('url')}
-        />
-      </label>
-      {urlError && (
-        <p className="err" id="ed-url-error">
-          {urlError}
-        </p>
-      )}
-      {conflict && (
-        <p className="err" role="status">
-          The details were saved elsewhere since you opened this. Saving
-          replaces them with what you see here.
-        </p>
-      )}
-      <div className="edit-acts">
-        <button type="submit" className="gbtn" disabled={locked || !changed}>
-          Save · 1 transaction
-        </button>
-        <button
-          type="button"
-          className="gbtn plain"
-          disabled={pending}
-          onClick={onClose}
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+      onSave={save}
+      onCancel={onClose}
+    />
   )
 }
 
