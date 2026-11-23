@@ -4,7 +4,6 @@ import ConnectWallet from './components/ConnectWallet'
 import EveConsole from './components/Console'
 import Divider from './components/Divider'
 import ErrorNotice, { ErrorNoticeTypes } from './components/ErrorNotice'
-import EveAlert from './components/EveAlert'
 import EveButton from './components/EveButton'
 import EveButtonDuo from './components/EveButtonDuo'
 import EveConnectWallet from './components/EveConnectWallet'
@@ -35,7 +34,6 @@ export {
   Divider,
   ErrorNotice,
   ErrorNoticeTypes,
-  EveAlert,
   EveButton,
   EveButtonDuo,
   EveConnectWallet,

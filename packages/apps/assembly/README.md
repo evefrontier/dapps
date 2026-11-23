@@ -50,6 +50,8 @@ On chain, permissions are checked per action: each action on the entity names th
 
 While the entity has a transaction in flight (`entity.inFlight`), every control is locked for everyone until it settles.
 
+Each write reports in one toast, bottom right (full width on a phone), in words rather than a severity: Sending while the wallet signs, then Done (for example "Main breaker switched off", with the transaction's short hash and a link to it) or Failed ("Couldn't switch the main breaker off" and the error). Done closes itself after 6 s, paused while hovered or focused, and the entity is refetched as soon as it appears. Failed stays until dismissed; a raw chain error is folded under Show details, with Copy. Writes lock the console, so there is only ever one toast.
+
 The dapp does not deposit fuel. Fuel arrives through the game's inventory-in action.
 
 The dapp is a single screen, the grid console. It has no routes: whatever path it is opened at, it shows the console for the selected assembly. It opens without a wallet. Its tabs are Dapp (when the assembly has a dapp URL, and then open first), Grid, Airlock (when it has an inventory) and Access (the shell and controllers only; visitors never see it).

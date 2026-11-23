@@ -27,8 +27,13 @@ const MainBreaker = ({
 
   const send = (next: boolean) => {
     setConfirming(false)
+    const word = next ? 'on' : 'off'
     run(
-      `switch the main breaker ${next ? 'on' : 'off'}`,
+      {
+        sending: `Switching the main breaker ${word}`,
+        done: `Main breaker switched ${word}`,
+        failed: `Couldn't switch the main breaker ${word}`,
+      },
       (sendSponsoredTransaction) =>
         setGridPower({ entity, on: next, sendSponsoredTransaction }),
     )
@@ -91,10 +96,7 @@ const MainBreaker = ({
       )}
       <div className="mb-r">
         <span className="eyebrow">Main breaker</span>
-        <b>
-          {on ? 'On' : 'Off'}
-          {pending && ' · sending'}
-        </b>
+        <b>{on ? 'On' : 'Off'}</b>
         <p>{text}</p>
       </div>
     </section>

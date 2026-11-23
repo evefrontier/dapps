@@ -62,7 +62,6 @@ The library includes a variety of components designed for EVE Frontier dApps. So
 <ClickToCopy />
 <ConnectWallet />
 <ErrorNotice />
-<EveAlert />
 <EveButton />
 <EveLayout />
 <EveLinearBar />

@@ -53,16 +53,6 @@
   margin: 2px 0;
 }
 
-/* Alert */
-#eve-alert > div.MuiPaper-root {
-  padding: 0.375rem 1rem;
-}
-
-#eve-alert div.MuiAlert-message {
-  display: flex;
-  align-items: center;
-}
-
 /* Scroll */
 .Eve-Scroll-Container {
   position: relative;

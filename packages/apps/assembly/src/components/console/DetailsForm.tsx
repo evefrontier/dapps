@@ -73,7 +73,11 @@ const DetailsForm = ({
       return
     }
     run(
-      'save the details',
+      {
+        sending: 'Saving the details',
+        done: 'Details saved',
+        failed: "Couldn't save the details",
+      },
       (sendSponsoredTransaction) =>
         updateMetadata({
           entity,
