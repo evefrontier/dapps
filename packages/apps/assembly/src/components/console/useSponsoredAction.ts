@@ -1,36 +1,29 @@
 import {
   type SendSponsoredTransactionFn,
-  Severity,
   type SponsoredTransactionOutput,
-  useNotification,
   useSmartObject,
   useSponsoredTransaction,
 } from '@evefrontier/dapp-kit'
-import { useState } from 'react'
-
-/** The error notice text for a failed action, e.g. "Failed to add Oro: …". */
-export function failureMessage(what: string, error: unknown): string {
-  return `Failed to ${what}: ${
-    error instanceof Error ? error.message : 'Unknown error'
-  }`
-}
+import { useToast } from './ToastContext'
+import { type ActionLabels, performAction } from './toastModel'
 
 /**
- * Runs one sponsored action from the console: marks it pending, shows the
- * success notice and refetches the entity, or shows the error notice. The
- * console's transactions all report the same way. It stays pending, and
- * `onSent` waits, until the refetch lands, so nothing shows the old state as
- * if it were current.
+ * Runs one sponsored action from the console: marks it pending and reports
+ * it in the toast, Sending, then Done (refetching the entity straight away)
+ * or Failed. The console's transactions all report the same way. `pending`
+ * is shared by every caller and holds, and `onSent` waits, until the refetch
+ * lands, so nothing in the console shows or unlocks on the old state.
  *
  * @returns
- *   - `run(what, send, onSent?)` - `what` finishes "Failed to …"; `send` gets
- *     the wallet's sponsored-transaction function; `onSent` runs after a
- *     successful send, once the entity is refetched
- *   - `pending` - True while an action is being sent or refetched
+ *   - `run(labels, send, onSent?)` - `labels` are the toast's Sending, Done
+ *     and Failed titles; `send` gets the wallet's sponsored-transaction
+ *     function; `onSent` runs after a successful send, once the entity is
+ *     refetched
+ *   - `pending` - True while any console action is being sent or refetched
  */
 export function useSponsoredAction(): {
   run: (
-    what: string,
+    labels: ActionLabels,
     send: (
       sendSponsoredTransaction: SendSponsoredTransactionFn,
     ) => Promise<SponsoredTransactionOutput>,
@@ -39,27 +32,26 @@ export function useSponsoredAction(): {
   pending: boolean
 } {
   const { refetch } = useSmartObject()
-  const { notify } = useNotification()
+  const { show, pending, setPending } = useToast()
   const { mutateAsync: sendSponsoredTransaction } = useSponsoredTransaction()
-  const [pending, setPending] = useState(false)
 
   const run = async (
-    what: string,
+    labels: ActionLabels,
     send: (
       sendSponsoredTransaction: SendSponsoredTransactionFn,
     ) => Promise<SponsoredTransactionOutput>,
     onSent?: () => void,
   ) => {
+    if (pending) return
     setPending(true)
     try {
-      const result = await send(sendSponsoredTransaction)
-      if (result?.digest) {
-        notify({ type: Severity.Success, txHash: result.digest })
-        await refetch().catch(() => {})
-      }
-      onSent?.()
-    } catch (error) {
-      notify({ type: Severity.Error, message: failureMessage(what, error) })
+      const sent = await performAction({
+        labels,
+        send: () => send(sendSponsoredTransaction),
+        show,
+        refetch,
+      })
+      if (sent) onSent?.()
     } finally {
       setPending(false)
     }

@@ -22,17 +22,6 @@ const darkTheme = createTheme({
         },
       },
     },
-    MuiAlert: {
-      styleOverrides: {
-        root: {
-          backgroundColor: 'transparent',
-          letterSpacing: 0,
-        },
-        message: {
-          padding: '0px !important',
-        },
-      },
-    },
   },
 })
 

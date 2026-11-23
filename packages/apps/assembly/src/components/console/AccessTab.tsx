@@ -79,9 +79,14 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
 
   const controllers = entity.controllers
 
-  const add = (character: CharacterSummary) =>
-    run(
-      `add ${character.name || abbreviateAddress(character.characterId)}`,
+  const add = (character: CharacterSummary) => {
+    const name = character.name || abbreviateAddress(character.characterId)
+    return run(
+      {
+        sending: `Adding ${name}`,
+        done: `${name} added as a controller`,
+        failed: `Couldn't add ${name}`,
+      },
       (sendSponsoredTransaction) =>
         addController({
           entity,
@@ -90,10 +95,17 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
         }),
       closeAdd,
     )
+  }
 
   const remove = (characterId: string, label: string) =>
-    run(`remove ${label}`, (sendSponsoredTransaction) =>
-      removeController({ entity, characterId, sendSponsoredTransaction }),
+    run(
+      {
+        sending: `Removing ${label}`,
+        done: `${label} removed from controllers`,
+        failed: `Couldn't remove ${label}`,
+      },
+      (sendSponsoredTransaction) =>
+        removeController({ entity, characterId, sendSponsoredTransaction }),
     )
 
   function closeAdd() {

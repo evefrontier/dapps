@@ -19,7 +19,9 @@ html #root {
   padding: 16px;
 }
 
-.gc {
+/* The tokens: the console and its toast, which sits outside it */
+.gc,
+.gc-toast-host {
   color-scheme: dark;
   --bg: #0b0b0c;
   --ink: #fafae5;
@@ -47,6 +49,8 @@ html #root {
     var(--font-disket, "Frontier Disket Mono"), var(--font-favorit, "Favorit"),
     ui-monospace, monospace;
   --font-body: var(--font-favorit, "Favorit"), ui-monospace, monospace;
+}
+.gc {
   container-type: inline-size;
   container-name: gc;
   position: relative;
@@ -1548,4 +1552,237 @@ html #root {
 .gc .add .picked b {
   font-weight: 300;
   color: var(--ink);
+}
+
+/* The transaction toast: bottom right, full width on a phone. It sits
+   outside .gc (a container, so position: fixed inside it would follow the
+   console, not the screen), so its breakpoint is a media query. */
+.gc-toast-host {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1400;
+  width: 360px;
+  pointer-events: none;
+}
+.gc-toast {
+  --c: var(--brand);
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: start;
+  box-sizing: border-box;
+  padding: 14px 6px 16px 14px;
+  background: #131415;
+  border: 1px solid rgba(250, 250, 229, 0.12);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  color: var(--ink);
+  font: 300 14px / 1.45 var(--font-body);
+  letter-spacing: -0.02em;
+  pointer-events: auto;
+  animation: gc-toast-rise 0.18s ease-out;
+}
+.gc-toast *,
+.gc-toast *::before,
+.gc-toast *::after {
+  box-sizing: border-box;
+}
+.gc-toast.sending {
+  --c: var(--amber);
+}
+.gc-toast.failed {
+  --c: var(--offline);
+  background: #1c1213;
+  border-color: rgba(255, 77, 77, 0.35);
+}
+.gc-toast .k {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border: 0 solid var(--c);
+  pointer-events: none;
+}
+.gc-toast .k1 {
+  top: -1px;
+  left: -1px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+.gc-toast .k2 {
+  top: -1px;
+  right: -1px;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+.gc-toast .k3 {
+  bottom: -1px;
+  left: -1px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+.gc-toast .k4 {
+  bottom: -1px;
+  right: -1px;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+.gc-toast .tled {
+  width: 8px;
+  height: 8px;
+  margin-top: 4px;
+  background: var(--c);
+  box-shadow: 0 0 6px var(--c);
+}
+.gc-toast.sending .tled {
+  width: 10px;
+  height: 10px;
+  margin-top: 3px;
+  background: none;
+  border: 1px solid var(--c);
+  border-right-color: transparent;
+  border-radius: 50%;
+  box-shadow: none;
+  animation: gc-spin 0.8s linear infinite;
+}
+.gc-toast.failed .tled {
+  background: var(--offline-bg);
+  border: 1px solid var(--c);
+  box-shadow: none;
+}
+.gc-toast .tb {
+  min-width: 0;
+}
+.gc-toast .ey {
+  font: 400 10.5px / 1.3 var(--font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c);
+}
+.gc-toast .ti {
+  margin-top: 4px;
+  font-weight: 400;
+}
+.gc-toast .de {
+  margin-top: 4px;
+  color: rgba(250, 250, 229, 0.65);
+  font-size: 12.5px;
+}
+.gc-toast .mt {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: baseline;
+  font-size: 12px;
+  color: rgba(250, 250, 229, 0.58);
+}
+.gc-toast .lk {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--ink);
+  text-decoration: underline dotted var(--n40);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.gc-toast .lk:hover {
+  color: var(--brand);
+  text-decoration-color: var(--brand);
+}
+.gc-toast :focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 2px;
+}
+.gc-toast .x,
+.gc-toast .x-gap {
+  width: 32px;
+  height: 32px;
+  margin-top: -7px;
+}
+.gc-toast .x {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(250, 250, 229, 0.58);
+  cursor: pointer;
+}
+.gc-toast .x:hover {
+  color: var(--ink);
+}
+.gc-toast .pre {
+  margin: 8px 0 0;
+  padding: 8px;
+  max-height: 160px;
+  overflow: auto;
+  background: var(--bg);
+  border: 1px solid rgba(250, 250, 229, 0.12);
+  font: 300 11.5px / 1.5 var(--font-body);
+  color: rgba(250, 250, 229, 0.72);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.gc-toast .bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--c);
+  transform-origin: left;
+  animation: gc-toast-drain 6s linear forwards;
+}
+.gc-toast:hover .bar,
+.gc-toast:focus-within .bar {
+  animation-play-state: paused;
+}
+@keyframes gc-toast-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+@keyframes gc-toast-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 767.98px) {
+  .gc-toast-host {
+    left: 16px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+  }
+  .gc-toast {
+    padding-right: 2px;
+  }
+  .gc-toast .x,
+  .gc-toast .x-gap {
+    width: 44px;
+    height: 44px;
+    margin-top: -12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gc-toast {
+    animation: none;
+  }
+  .gc-toast .bar {
+    animation-timing-function: steps(1, end);
+  }
+  .gc-toast.sending .tled {
+    animation: none;
+    border-right-color: var(--c);
+  }
 }
