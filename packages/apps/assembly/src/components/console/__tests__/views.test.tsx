@@ -80,7 +80,7 @@ describe('ToastView', () => {
   it('renders nothing but the live region without a toast', () => {
     expect(
       renderToStaticMarkup(<ToastView toast={null} onDismiss={noop} />),
-    ).toBe('<div class="gc-toast-host" role="status"></div>')
+    ).toBe('<div class="gc-toast-host" role="status" aria-live="polite"></div>')
   })
 
   it('has no dismiss while sending', () => {
@@ -111,7 +111,7 @@ describe('ToastView', () => {
     expect(html).toContain('aria-label="Dismiss"')
   })
 
-  it('announces a failure as an alert with Show details for a raw error', () => {
+  it('announces a failure assertively, once, with Show details for a raw error', () => {
     const html = renderToStaticMarkup(
       <ToastView
         toast={{
@@ -124,7 +124,8 @@ describe('ToastView', () => {
         onDismiss={noop}
       />,
     )
-    expect(html).toContain('role="alert"')
+    expect(html).toContain('aria-live="assertive"')
+    expect(html).not.toContain('role="alert"')
     expect(html).toContain('Show details')
     expect(html).not.toContain('MoveAbort')
   })

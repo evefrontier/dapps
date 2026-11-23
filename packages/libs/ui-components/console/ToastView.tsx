@@ -23,6 +23,10 @@ const EYEBROW = { sending: 'Sending', done: 'Done', failed: 'Failed' } as const
  * animation, paused on hover or focus); Failed stays until dismissed and
  * folds a raw error under Show details.
  *
+ * The host is the one live region, there before any toast so the first is
+ * announced: polite, and assertive for Failed. A nested alert would make
+ * some screen readers read a failure twice.
+ *
  * Render it outside `.gc`: the console is a CSS container, so a fixed toast
  * inside it would be placed against the console rather than the screen.
  * `id` changes with every toast and restarts the countdown.
@@ -51,12 +55,13 @@ const ToastView = ({
   }
 
   return (
-    <div className="gc-toast-host" role="status">
+    <div
+      className="gc-toast-host"
+      role="status"
+      aria-live={toast?.kind === 'failed' ? 'assertive' : 'polite'}
+    >
       {toast && (
-        <div
-          className={`gc-toast ${toast.kind}`}
-          role={toast.kind === 'failed' ? 'alert' : undefined}
-        >
+        <div className={`gc-toast ${toast.kind}`}>
           <span className="k k1" />
           <span className="k k2" />
           <span className="k k3" />
