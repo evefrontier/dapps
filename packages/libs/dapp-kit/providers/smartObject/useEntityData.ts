@@ -117,9 +117,9 @@ export function useEntityData(): {
 
         const parsed = parseEntity(raw)
 
-        // Re-check the cap holder on every change, since moving the AccessCap
-        // doesn't change accessCapId; the Character is refetched only when the
-        // holder differs
+        // Re-check the cap holder when the entity changes; the Character is
+        // refetched only when the holder differs. TODO: a cap move alone isn't
+        // seen, as it doesn't change the entity's version
         const previousOwner =
           parsed.accessCapId === lastAccessCapIdRef.current
             ? lastOwnerRef.current

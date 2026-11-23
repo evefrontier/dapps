@@ -42,7 +42,13 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
   const { run, pending } = useSponsoredAction()
 
   const canManage = canManageRole(role)
-  const { rows, shellId, characters, isLoading } = useControllerRows(canManage)
+  const {
+    rows,
+    shellId,
+    characters,
+    isLoading,
+    error: directoryError,
+  } = useControllerRows(canManage)
 
   const [addOpen, setAddOpen] = useState(false)
   const [address, setAddress] = useState('')
@@ -253,6 +259,9 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
                     })}
                   </ul>
                 ))}
+              {directoryError && (
+                <p className="err">Could not load characters.</p>
+              )}
               {addError && (
                 <p className="err" id="add-wallet-error">
                   {addError}
@@ -262,7 +271,9 @@ const AccessTab = React.memo((): React.JSX.Element | null => {
                 <button
                   type="submit"
                   className="gbtn"
-                  disabled={!address.trim() || locked || isLoading}
+                  disabled={
+                    !address.trim() || locked || isLoading || !characters
+                  }
                 >
                   Add · 1 transaction
                 </button>

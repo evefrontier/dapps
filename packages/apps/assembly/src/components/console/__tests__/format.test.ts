@@ -5,6 +5,7 @@ import {
   count,
   hostOf,
   hoursMinutes,
+  m3,
   mw,
   shortCode,
   units,
@@ -15,6 +16,13 @@ describe('format', () => {
     expect(mw('150000')).toBe('15')
     expect(mw(2500n)).toBe('0.25')
     expect(mw('0')).toBe('0')
+  })
+
+  it('turns hundredths of a m³ into m³ with up to two decimals', () => {
+    expect(m3('100000')).toBe('1,000')
+    expect(m3('250')).toBe('2.5')
+    expect(m3(10n)).toBe('0.1')
+    expect(m3('1234500')).toBe('12,345')
   })
 
   it('turns fixed-point fuel into whole units with separators', () => {

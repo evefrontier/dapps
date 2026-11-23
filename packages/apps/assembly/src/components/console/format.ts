@@ -8,6 +8,10 @@ export const mw = (raw: bigint | string): string =>
 export const units = (raw: bigint | string): string =>
   Math.round(fromFixed(raw)).toLocaleString('en-US')
 
+/** m³ from hundredths of a m³, up to two decimals, with thousands separators: `250` → `2.5`. */
+export const m3 = (raw: bigint | string): string =>
+  (Number(raw) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 })
+
 /** A count with thousands separators. */
 export const count = (n: number | bigint | string): string =>
   Number(n).toLocaleString('en-US')

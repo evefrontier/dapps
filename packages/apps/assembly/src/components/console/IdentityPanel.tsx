@@ -10,6 +10,7 @@ import { useState } from 'react'
 
 import { useFlagVariant } from '../../flags'
 import DetailsForm from './DetailsForm'
+import { httpsUrl } from './dappSource'
 import { editableDetails } from './details'
 import { hostOf, mw } from './format'
 import { gridLamp } from './model'
@@ -52,6 +53,7 @@ const IdentityPanel = ({
   const metadata = entity.metadata
   const state = gridLamp(summary)
   const url = metadata?.url?.trim()
+  const dappUrl = url ? httpsUrl(url)?.href : undefined
   const editWithoutMetadata =
     useFlagVariant('assembly-edit-without-metadata') === 'on'
   const editable = editableDetails(
@@ -128,17 +130,17 @@ const IdentityPanel = ({
             <dd>{rows.length}</dd>
           </>
         )}
-        {url && (
+        {dappUrl && (
           <>
             <dt>Dapp</dt>
             <dd>
               <a
                 className="lnk"
-                href={url}
+                href={dappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {hostOf(url)}
+                {hostOf(dappUrl)}
               </a>
             </dd>
           </>

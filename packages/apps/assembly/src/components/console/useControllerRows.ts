@@ -90,6 +90,8 @@ export function useControllerRows(enabled: boolean): {
   /** The character directory, once loaded */
   characters: CharacterSummary[] | undefined
   isLoading: boolean
+  /** The character directory's load error, if any */
+  error: Error | null
 } {
   const { entity, entityOwner } = useSmartObject()
   const directory = useCharacterDirectory({ enabled })
@@ -103,7 +105,8 @@ export function useControllerRows(enabled: boolean): {
       ),
       characters: directory.data,
       isLoading: directory.isLoading,
+      error: directory.error,
     }),
-    [entity, entityOwner, directory.data, directory.isLoading],
+    [entity, entityOwner, directory.data, directory.isLoading, directory.error],
   )
 }
