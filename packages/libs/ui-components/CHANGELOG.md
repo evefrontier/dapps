@@ -1,5 +1,16 @@
 # @eveworld/ui-components
 
+## 0.3.0
+
+### Minor Changes
+
+- The grid console's UI kit. Breaking: the old components are gone.
+
+  - Added the grid console's views (`ConsoleView`, `IdentityView`, `DetailsFormView`, `MainBreakerView`, `GridView`, `AirlockView`, `DappView`, `AccessView`, `ToastView`), its primitives (`TabRail`, `HoldButton`, `Lever`, `Plate`, `Ornament`, `EditIcon`, `CloseIcon`) and `console.css`. Views take plain props and have no chain or wallet code.
+  - `ErrorNotice` is restyled in the console's look and now takes `message` (and an optional `title`); `ErrorNoticeTypes` is removed.
+  - Removed every other component and module (`EveAlert`, `EveButton`, `EveInput`, `EveLayout`, `Header`, `EveContainer`, `GateView`, `TurretView`, `InventoryView`, `Graph`, the skeletons and the rest), the SVG assets and `styles.css`.
+  - Dropped MUI, Emotion, Tailwind CSS, `@base_ui/react`, `@visx/*`, `react-router-dom`, `@mysten/wallet-standard` and `@evefrontier/dapp-kit`; the package now depends on React only.
+
 ## 0.2.1
 
 ### Patch Changes
