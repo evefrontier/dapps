@@ -42,9 +42,9 @@ export const FLAG_DEFINITIONS = {
     },
     defaultVariant: 'actual',
   },
-  'assembly-controllers': {
+  'assembly-controller-search': {
     description:
-      'Show the controller list, where the shell and controllers add or remove characters allowed to use the assembly. Needs the access-list contract and sponsored actions.',
+      'Access tab: find a character to add by name instead of pasting its wallet address. Picking a result fills in its wallet and adds that character.',
     variants: { on: 'on', off: 'off' },
     defaultVariant: 'off',
   },

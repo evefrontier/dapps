@@ -8,29 +8,11 @@ import {
 import { useMemo } from 'react'
 
 import { ago, hoursMinutes, mw, shortCode, units } from './format'
+import MainBreaker from './MainBreaker'
 import { type BoardCard, buildBoard, NO_POWER_LABEL } from './model'
 
 const FUEL_SEGMENTS = 30
 const LOW_FUEL = 0.1
-
-/** The main breaker. A lamp plate for everyone for now; switching it comes later. */
-const MainBreaker = ({ on }: { on: boolean }) => (
-  <section className={`mb ${on ? 'on' : 'off'}`}>
-    <div className={`plate ${on ? '' : 'off'}`} aria-hidden="true">
-      <span className={`led ${on ? 'on' : ''}`} />
-      <i>{on ? 'ON' : 'OFF'}</i>
-    </div>
-    <div className="mb-r">
-      <span className="eyebrow">Main breaker</span>
-      <b>{on ? 'On' : 'Off'}</b>
-      <p>
-        {on
-          ? 'The grid is switched on.'
-          : 'The grid is switched off. Every module is offline.'}
-      </p>
-    </div>
-  </section>
-)
 
 const Readouts = ({ summary }: { summary: GridSummary }) => (
   <>
@@ -201,16 +183,20 @@ const BreakerCard = ({ card, name }: { card: BoardCard; name: string }) => (
 /**
  * Is it running, and what is on? The main breaker, output, draw and headroom,
  * fuel, and every section's modules as lamp cards with their state and any
- * reason they have no power. Read-only for every role.
+ * reason they have no power. The shell and controllers switch the main
+ * breaker; the board is read-only for every role.
  */
 const GridTab = ({
   entity,
   summary,
   nowMs,
+  writable,
 }: {
   entity: EntityData
   summary: GridSummary | null
   nowMs: number
+  /** Shell or controller: the main breaker is a lever, not a lamp */
+  writable: boolean
 }) => {
   const board = useMemo(() => buildBoard(entity, nowMs), [entity, nowMs])
   const typeIds = useMemo(
@@ -230,7 +216,7 @@ const GridTab = ({
   return (
     <div className="cols">
       <div className="stack ctl">
-        <MainBreaker on={grid.on} />
+        <MainBreaker entity={entity} on={grid.on} writable={writable} />
         <Readouts summary={summary} />
         <Banner summary={summary} />
         <FuelPanel grid={grid} summary={summary} nowMs={nowMs} />

@@ -42,7 +42,7 @@ How the role is worked out:
 - **Controller**: the wallet's character id is in the entity's access list (`entity.controllers`). Controllers are character ids, not wallets, so the wallet is first resolved to its character with `useCharacterDirectory`.
 - **Visitor**: anyone else, including a session with no wallet connected. Visitors see the same screens with a lamp in place of the main breaker lever, no edit icon, and who the shell is, but no Access tab and no controller count. In the Airlock tab (shown when the assembly has an airlock, an inventory component on chain) they see how full each airlock is, never what it holds.
 
-The shell and controllers get the same console, and it writes only three things: the main breaker, the name, description and dapp URL, and the Controllers list. Sections, modules, generators and airlocks are read-only for everyone, shown exactly as visitors see them; module and generator switching stays in the game. The Access tab has one Controllers list; the shell is on it in its own place, tagged Shell, and its entry has no Remove button, so the shell can never take itself off the list. Controllers are added by pasting the wallet address bound to a character; there is no search, and a character id is not accepted. A wallet with no character is rejected; the character id the wallet is bound to is what reaches the access list.
+The shell and controllers get the same console, and it writes only three things: the main breaker, the name, description and dapp URL, and the Controllers list. Sections, modules, generators and airlocks are read-only for everyone, shown exactly as visitors see them; module and generator switching stays in the game. The Access tab has one Controllers list; the shell is on it in its own place, tagged Shell, and its entry has no Remove button, so the shell can never take itself off the list. Controllers are added by pasting the wallet address bound to a character (or, behind `assembly-controller-search`, by picking a character found by name); a pasted character id is not accepted. A wallet with no character is rejected; the character id the wallet is bound to is what reaches the access list.
 
 Airlock contents and the controller list are public on chain: anyone can query them. Hiding them from visitors keeps them off the dapp's screen; it does not make them private.
 
@@ -52,14 +52,21 @@ While the entity has a transaction in flight (`entity.inFlight`), every control 
 
 The dapp does not deposit fuel. Fuel arrives through the game's inventory-in action.
 
-The dapp is a single screen, the grid console. It has no routes: whatever path it is opened at, it shows the console for the selected assembly. It is read-only for now and opens without a wallet. Its tabs are Dapp (when the assembly has a dapp URL, and then open first), Grid, Airlock (when it has an inventory) and Access (shell and controllers, with `assembly-controllers` on).
+The dapp is a single screen, the grid console. It has no routes: whatever path it is opened at, it shows the console for the selected assembly. It opens without a wallet. Its tabs are Dapp (when the assembly has a dapp URL, and then open first), Grid, Airlock (when it has an inventory) and Access (the shell and controllers only; visitors never see it).
+
+Status:
+
+- Adding and removing controllers (the Access tab) needs the access-list contract and its sponsored actions; until then those transactions fail at the wallet.
+- The main breaker is a lever for the shell and controllers: switching on is one click, cutting power needs the hold button. Its sponsored action (`set-power-grid`) is a placeholder until wallet-core supports `power_grid::set_power_grid`, so the transaction fails at the wallet for now. Module and generator breakers are display only.
+- Editing the name, description and dapp URL is planned: one `UPDATE_METADATA` transaction for all three, open to the shell and controllers.
 
 Feature flags:
 
-- `assembly-view-as` (dev and test builds, where the flag panel shows) renders the console as a visitor, controller or shell, whatever wallet is connected; `actual` uses the wallet's real role. The role chip then reads e.g. `shell · preview`. It changes only what is shown: transactions still go through the real wallet, and the chain checks them.
-- `assembly-controllers` shows the controller list and lets the shell and controllers add and remove controllers. Off by default; it needs the access-list contract and sponsored actions.
-- The main breaker is planned and not built yet. Module and generator breakers are display only.
-- Editing the name, description and dapp URL is planned: one `UPDATE_METADATA` transaction for all three, open to the shell and controllers.
+- `assembly-controller-search` (off by default) lets the Access tab's Add form find a character by name instead of pasting its wallet. Picking a result fills in its wallet and adds exactly that character, since one wallet can be bound to several. Names come from each character's latest `MetadataChanged` event, so a character that has never been named can only be added by wallet.
+
+Dev and test builds only, where the flag panel shows:
+
+- `assembly-view-as` renders the console as a visitor, controller or shell, whatever wallet is connected; `actual` uses the wallet's real role. The role chip then reads e.g. `shell · preview`. It changes only what is shown: transactions still go through the real wallet, and the chain checks them.
 
 ## Getting Started
 
