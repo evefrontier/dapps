@@ -1,6 +1,6 @@
 import { useEntityRole } from '@evefrontier/dapp-kit'
 
-import { isPanelEnabled } from './FlagDevPanel'
+import { isPanelEnabled } from './config'
 import { useFlagVariant } from './useFlags'
 import { resolveViewRole } from './viewRole'
 

@@ -48,9 +48,30 @@ export const FLAG_DEFINITIONS = {
     variants: { on: 'on', off: 'off' },
     defaultVariant: 'off',
   },
+  'assembly-edit-without-metadata': {
+    description:
+      'Identity panel: show Edit details to the shell and controllers even when the Assembly has no Metadata component, starting from empty details. Saving then fails on chain, since metadata::edit needs the component.',
+    variants: { on: 'on', off: 'off' },
+    defaultVariant: 'off',
+  },
+  'assembly-show-dapp': {
+    description:
+      'Dev and test builds only: always show the Dapp tab, even when the Assembly has no dapp URL (it then shows a placeholder).',
+    variants: { on: 'on', off: 'off' },
+    defaultVariant: 'off',
+  },
 } satisfies Record<string, FlagDefinition>
 
 export type FlagKey = keyof typeof FLAG_DEFINITIONS
+
+/**
+ * Whether this build shows the flag panel and honours its overrides
+ * (VITE_SHOW_FLAG_PANEL=true). Kept out of FlagDevPanel, which imports
+ * provider.tsx: provider calls this at module load.
+ */
+export function isPanelEnabled(): boolean {
+  return import.meta.env.VITE_SHOW_FLAG_PANEL === 'true'
+}
 
 /** Local-only overrides set through the dev panel, persisted across reloads. */
 export type FlagOverrides = Partial<Record<FlagKey, string>>

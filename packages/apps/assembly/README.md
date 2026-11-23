@@ -58,15 +58,19 @@ Status:
 
 - Adding and removing controllers (the Access tab) needs the access-list contract and its sponsored actions; until then those transactions fail at the wallet.
 - The main breaker is a lever for the shell and controllers: switching on is one click, cutting power needs the hold button. Its sponsored action (`set-power-grid`) is a placeholder until wallet-core supports `power_grid::set_power_grid`, so the transaction fails at the wallet for now. Module and generator breakers are display only.
-- Editing the name, description and dapp URL is planned: one `UPDATE_METADATA` transaction for all three, open to the shell and controllers.
+- The shell and controllers edit the name, description and dapp URL from the edit icon in the identity panel. Save sends all three in one `UPDATE_METADATA` transaction, since `metadata::edit` always sets them together. The dapp URL must be https (one typed without a scheme is saved as `https://…`), and clearing it removes the Dapp tab. An assembly with no Metadata component (the testnet entity, for one) has nothing to edit, so it shows no edit icon unless `assembly-edit-without-metadata` is on. Today's contracts pair metadata `Edit` with the shell, so a controller's save is expected to fail on chain, and whether the sponsor backend's `update-metadata` handles entities is still to be confirmed.
+
+Feature flags are switched from the flag panel, which only dev and test builds show (`VITE_SHOW_FLAG_PANEL`). Other builds ignore saved overrides, so every flag there is at its default.
 
 Feature flags:
 
+- `assembly-edit-without-metadata` (off by default) shows Edit details to the shell and controllers even when the assembly has no Metadata component, starting from empty details. Saving then fails on chain, since `metadata::edit` needs the component.
 - `assembly-controller-search` (off by default) lets the Access tab's Add form find a character by name instead of pasting its wallet. Picking a result fills in its wallet and adds exactly that character, since one wallet can be bound to several. Names come from each character's latest `MetadataChanged` event, so a character that has never been named can only be added by wallet.
 
 Dev and test builds only, where the flag panel shows:
 
 - `assembly-view-as` renders the console as a visitor, controller or shell, whatever wallet is connected; `actual` uses the wallet's real role. The role chip then reads e.g. `shell · preview`. It changes only what is shown: transactions still go through the real wallet, and the chain checks them.
+- `assembly-show-dapp` always shows the Dapp tab, even when the assembly has no dapp URL; with none, the tab shows a placeholder instead of the iframe.
 
 ## Getting Started
 

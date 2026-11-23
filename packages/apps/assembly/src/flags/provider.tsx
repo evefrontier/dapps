@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import {
   buildFlagConfiguration,
   type FlagKey,
+  isPanelEnabled,
   loadFlagOverrides,
   saveFlagOverrides,
 } from './config'
@@ -14,7 +15,8 @@ import { FlagDevPanel } from './FlagDevPanel'
  *
  * Flags are evaluated in-process by OpenFeature's InMemoryProvider.
  * Values come from the registry in `config.ts`, overridden at runtime
- * by the internal dev panel (persisted to localStorage).
+ * by the internal dev panel (persisted to localStorage). Overrides only
+ * apply in builds that show the panel.
  *
  * When a GO Feature Flag relay proxy becomes available, swap the provider
  * instance below for `GoFeatureFlagWebProvider` (from
@@ -25,7 +27,7 @@ import { FlagDevPanel } from './FlagDevPanel'
 // Single provider instance so the dev panel can push runtime updates to the
 // same object the OpenFeature client evaluates against.
 const provider = new TypedInMemoryProvider(
-  buildFlagConfiguration(loadFlagOverrides()),
+  buildFlagConfiguration(isPanelEnabled() ? loadFlagOverrides() : {}),
 )
 
 // Register synchronously at module load. InMemoryProvider is ready immediately,

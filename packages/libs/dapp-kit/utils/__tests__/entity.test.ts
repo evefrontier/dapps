@@ -348,7 +348,7 @@ describe('parseEntity', () => {
     const entity = parseEntity(
       raw([
         component('1', 'metadata::Metadata', {
-          name: 'Pilot',
+          name: 'Rider',
           description: 'd',
           url: 'u',
         }),
@@ -360,7 +360,7 @@ describe('parseEntity', () => {
     )
 
     expect(entity.metadata).toEqual({
-      name: 'Pilot',
+      name: 'Rider',
       description: 'd',
       url: 'u',
     })
@@ -577,7 +577,7 @@ describe('fetchEntityOwner', () => {
             owner: '0xwallet',
           }),
           componentNode('2', 'metadata::Metadata', {
-            name: 'Pilot',
+            name: 'Rider',
             description: '',
             url: '',
           }),
@@ -590,7 +590,7 @@ describe('fetchEntityOwner', () => {
     expect(owner.holder).toBe('0xchar')
     expect(owner.walletAddress).toBe('0xwallet')
     expect(owner.character?.id).toBe('0xchar')
-    expect(owner.character?.metadata?.name).toBe('Pilot')
+    expect(owner.character?.metadata?.name).toBe('Rider')
   })
 
   it('reuses the previous owner when the holder is unchanged', async () => {

@@ -1,7 +1,7 @@
 import { type EntityData, useTypeNames } from '@evefrontier/dapp-kit'
 import { useMemo } from 'react'
 
-import { count, units } from './format'
+import { count, m3 } from './format'
 import { buildAirlocks } from './model'
 
 /**
@@ -47,7 +47,7 @@ const AirlockTab = ({
             <div className="inv-r">
               <span>Used</span>
               <b>
-                {units(inventory.used)} / {units(inventory.capacity)} m³
+                {m3(inventory.used)} / {m3(inventory.capacity)} m³
               </b>
               <div className="meter">
                 <i
@@ -66,7 +66,7 @@ const AirlockTab = ({
                       </span>
                       <span className="iq">×{count(item.quantity)}</span>
                       <span className="iv">
-                        {units(BigInt(item.quantity) * BigInt(item.volume))} m³
+                        {m3(BigInt(item.quantity) * BigInt(item.volume))} m³
                       </span>
                     </li>
                   ))}

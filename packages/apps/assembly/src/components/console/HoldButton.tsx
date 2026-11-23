@@ -52,6 +52,11 @@ const HoldButton = ({
     frame.current = requestAnimationFrame(step)
   }
 
+  // Cancel a hold in progress when the button is disabled
+  useEffect(() => {
+    if (disabled) stop()
+  }, [disabled])
+
   useEffect(
     () => () => {
       if (frame.current !== null) cancelAnimationFrame(frame.current)
