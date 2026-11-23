@@ -7,12 +7,13 @@ import {
 } from '@evefrontier/dapp-kit'
 import { useMemo, useState } from 'react'
 
-import { useViewRole } from '../../flags'
+import { isPanelEnabled, useFlagVariant, useViewRole } from '../../flags'
 import AccessTab from './AccessTab'
 import AirlockTab from './AirlockTab'
 import DappTab from './DappTab'
 import GridTab from './GridTab'
 import IdentityPanel from './IdentityPanel'
+import { consoleTabs } from './model'
 import TabRail, { type ConsoleTab } from './TabRail'
 import { useNow } from './useNow'
 
@@ -54,12 +55,14 @@ const Console = () => {
 
   const writer = canManage(role)
   const url = entity?.metadata?.url?.trim() ?? ''
-  const tabs: ConsoleTab[] = [
-    ...(url ? (['dapp'] as const) : []),
-    'grid',
-    ...(entity?.inventories.length ? (['airlock'] as const) : []),
-    ...(writer ? (['access'] as const) : []),
-  ]
+  // Only counts in builds that show the flag panel
+  const showDapp = useFlagVariant('assembly-show-dapp') === 'on'
+  const tabs = consoleTabs({
+    hasDapp: url !== '',
+    forceDapp: isPanelEnabled() && showDapp,
+    hasInventory: !!entity?.inventories.length,
+    writer,
+  })
   const active = chosen && tabs.includes(chosen) ? chosen : tabs[0]!
 
   const top = (

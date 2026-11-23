@@ -12,7 +12,7 @@ const CTRL_CHAR = id('b2')
 const UNKNOWN_CHAR = id('c2')
 
 const characters: CharacterSummary[] = [
-  { characterId: SHELL_CHAR, name: 'Shell Pilot', walletAddress: SHELL_WALLET },
+  { characterId: SHELL_CHAR, name: 'Shell Rider', walletAddress: SHELL_WALLET },
   { characterId: CTRL_CHAR, name: 'Oro', walletAddress: CTRL_WALLET },
 ]
 
@@ -42,7 +42,7 @@ describe('buildControllerRows', () => {
       {
         key: SHELL_CHAR,
         characterId: SHELL_CHAR,
-        name: 'Shell Pilot',
+        name: 'Shell Rider',
         address: SHELL_WALLET,
         isShell: true,
       },

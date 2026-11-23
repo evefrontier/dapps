@@ -5,7 +5,13 @@ import type {
 } from '@evefrontier/dapp-kit'
 import { describe, expect, it } from 'vitest'
 
-import { buildAirlocks, buildBoard, gridLamp, NO_POWER_LABEL } from '../model'
+import {
+  buildAirlocks,
+  buildBoard,
+  consoleTabs,
+  gridLamp,
+  NO_POWER_LABEL,
+} from '../model'
 
 const powerModule = (
   overrides: Partial<EntityPowerModule> = {},
@@ -221,5 +227,36 @@ describe('gridLamp', () => {
       label: 'No power',
     })
     expect(gridLamp(null)).toEqual({ lamp: 'off', label: 'No grid' })
+  })
+})
+
+describe('consoleTabs', () => {
+  const base = {
+    hasDapp: false,
+    forceDapp: false,
+    hasInventory: false,
+    writer: false,
+  }
+
+  it('leaves out Dapp when there is no URL and it is not forced', () => {
+    expect(consoleTabs(base)).toEqual(['grid'])
+  })
+
+  it('puts Dapp first when forced, even with no URL', () => {
+    expect(consoleTabs({ ...base, forceDapp: true })).toEqual(['dapp', 'grid'])
+  })
+
+  it('shows Dapp for a URL whether forced or not', () => {
+    expect(consoleTabs({ ...base, hasDapp: true })).toEqual(['dapp', 'grid'])
+    expect(consoleTabs({ ...base, hasDapp: true, forceDapp: true })).toEqual([
+      'dapp',
+      'grid',
+    ])
+  })
+
+  it('adds Airlock for an inventory and Access for a writer', () => {
+    expect(
+      consoleTabs({ ...base, hasDapp: true, hasInventory: true, writer: true }),
+    ).toEqual(['dapp', 'grid', 'airlock', 'access'])
   })
 })

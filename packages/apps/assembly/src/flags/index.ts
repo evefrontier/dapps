@@ -3,8 +3,8 @@ export {
   type FlagDefinition,
   type FlagKey,
   type FlagOverrides,
+  isPanelEnabled,
 } from './config'
-export { isPanelEnabled } from './FlagDevPanel'
 export { FlagsProvider, resetFlagOverrides, setFlagVariant } from './provider'
 export { useFlagVariant } from './useFlags'
 export { useViewRole } from './useViewRole'

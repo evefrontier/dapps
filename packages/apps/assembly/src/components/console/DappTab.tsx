@@ -11,7 +11,8 @@ const SANDBOX =
 
 /**
  * The Assembly's attached dapp in a sandboxed iframe, with its host, an Open
- * in new tab link and the "outside of Frontier" warning.
+ * in new tab link and the "outside of Frontier" warning. With no URL
+ * (`assembly-show-dapp`), a placeholder.
  */
 const DappTab = ({
   url,
@@ -26,13 +27,13 @@ const DappTab = ({
   return (
     <div className="dapp">
       <p className="dapp-warn">
-        <b>Att. Pilot</b>
+        <b>Att. Rider</b>
         <span>You are interacting with an interface outside of Frontier.</span>
       </p>
       <div className="dapp-bar">
         <span className={`led ${src ? 'on' : ''}`} />
         <span className="dapp-host" title={src ?? url}>
-          {hostOf(url)}
+          {url ? hostOf(url) : '—'}
         </span>
         {src && (
           <a
@@ -53,6 +54,14 @@ const DappTab = ({
             sandbox={SANDBOX}
             allow="clipboard-write"
           />
+        ) : !url ? (
+          <div className="dapp-ph">
+            <span className="eyebrow">Not attached</span>
+            <b>No dapp</b>
+            <span>
+              This Assembly has no dapp URL. Set one from Edit details.
+            </span>
+          </div>
         ) : (
           <div className="dapp-ph">
             <span className="eyebrow">Not shown</span>

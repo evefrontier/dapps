@@ -13,6 +13,7 @@ import {
 } from '@evefrontier/dapp-kit'
 
 import { mw, shortCode, units } from './format'
+import type { ConsoleTab } from './TabRail'
 
 /**
  * What the console draws, worked out from the parsed entity. Display names
@@ -298,4 +299,24 @@ export function gridLamp(summary: GridSummary | null): {
 } {
   if (!summary) return { lamp: 'off', label: 'No grid' }
   return GRID_STATUS[summary.status]
+}
+
+/** The console's tabs, in rail order. */
+export function consoleTabs({
+  hasDapp,
+  forceDapp,
+  hasInventory,
+  writer,
+}: {
+  hasDapp: boolean
+  forceDapp: boolean
+  hasInventory: boolean
+  writer: boolean
+}): ConsoleTab[] {
+  return [
+    ...(hasDapp || forceDapp ? (['dapp'] as const) : []),
+    'grid',
+    ...(hasInventory ? (['airlock'] as const) : []),
+    ...(writer ? (['access'] as const) : []),
+  ]
 }
