@@ -39,6 +39,36 @@ export function detailsDraft(metadata: EntityMetadata): DetailsDraft {
   }
 }
 
+const FIELDS = ['name', 'description', 'url'] as const
+
+/**
+ * Moves an open draft onto newly saved details, e.g. another controller's
+ * save. A field the viewer hasn't touched (still as it was in `base`) takes
+ * the new value; one they have edited keeps their text. Since saving sets
+ * all three fields, a conflict is an edited field whose saved value changed
+ * to something other than what the viewer typed.
+ *
+ * @param draft - The form's fields now
+ * @param base - The saved details the draft started from
+ * @param saved - The saved details now
+ * @returns The draft to show, and whether an edit now overwrites a newer save
+ */
+export function rebaseDraft(
+  draft: DetailsDraft,
+  base: EntityMetadata,
+  saved: EntityMetadata,
+): { draft: DetailsDraft; conflict: boolean } {
+  const next = { ...draft }
+  let conflict = false
+  for (const field of FIELDS) {
+    if (draft[field] === base[field]) next[field] = saved[field]
+    else if (saved[field] !== base[field] && saved[field] !== draft[field]) {
+      conflict = true
+    }
+  }
+  return { draft: next, conflict }
+}
+
 const trimmed = (details: AssemblyDetails): AssemblyDetails => ({
   name: details.name.trim(),
   description: details.description.trim(),

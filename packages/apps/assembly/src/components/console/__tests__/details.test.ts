@@ -7,6 +7,7 @@ import {
   detailsDraft,
   editableDetails,
   NO_DETAILS,
+  rebaseDraft,
   URL_ERROR,
 } from '../details'
 
@@ -59,6 +60,31 @@ describe('detailsChanged', () => {
       true,
     )
     expect(detailsChanged({ ...metadata, url: '' }, metadata)).toBe(true)
+  })
+})
+
+describe('rebaseDraft', () => {
+  const saved = { ...metadata, description: 'Closed for repairs' }
+
+  it('takes the new value for a field the viewer has not touched', () => {
+    const draft = { ...metadata, name: 'Halcyon' }
+    expect(rebaseDraft(draft, metadata, saved)).toEqual({
+      draft: { ...draft, description: 'Closed for repairs' },
+      conflict: false,
+    })
+  })
+
+  it('keeps an edited field and flags that saving overwrites the newer save', () => {
+    const draft = { ...metadata, description: 'Open all hours' }
+    expect(rebaseDraft(draft, metadata, saved)).toEqual({
+      draft,
+      conflict: true,
+    })
+  })
+
+  it('sees no conflict when the new save matches the edit', () => {
+    const draft = { ...metadata, description: 'Closed for repairs' }
+    expect(rebaseDraft(draft, metadata, saved).conflict).toBe(false)
   })
 })
 

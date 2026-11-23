@@ -17,14 +17,16 @@ export function failureMessage(what: string, error: unknown): string {
 
 /**
  * Runs one sponsored action from the console: marks it pending, shows the
- * success notice (and refetches the entity once it lands) or the error
- * notice. The console's transactions all report the same way.
+ * success notice and refetches the entity, or shows the error notice. The
+ * console's transactions all report the same way. It stays pending, and
+ * `onSent` waits, until the refetch lands, so nothing shows the old state as
+ * if it were current.
  *
  * @returns
  *   - `run(what, send, onSent?)` - `what` finishes "Failed to …"; `send` gets
  *     the wallet's sponsored-transaction function; `onSent` runs after a
- *     successful send
- *   - `pending` - True while an action is being sent
+ *     successful send, once the entity is refetched
+ *   - `pending` - True while an action is being sent or refetched
  */
 export function useSponsoredAction(): {
   run: (
@@ -52,13 +54,8 @@ export function useSponsoredAction(): {
     try {
       const result = await send(sendSponsoredTransaction)
       if (result?.digest) {
-        notify({
-          type: Severity.Success,
-          txHash: result.digest,
-          onSuccess: async () => {
-            await refetch()
-          },
-        })
+        notify({ type: Severity.Success, txHash: result.digest })
+        await refetch().catch(() => {})
       }
       onSent?.()
     } catch (error) {

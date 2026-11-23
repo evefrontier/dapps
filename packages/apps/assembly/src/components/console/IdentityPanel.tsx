@@ -49,7 +49,9 @@ const IdentityPanel = ({
   summary: GridSummary | null
 }) => {
   const { rows } = useControllerRows(role !== 'visitor')
-  const [editing, setEditing] = useState(false)
+  // The entity being edited, so selecting another closes the form
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const editing = editingId === entity.id
   const metadata = entity.metadata
   const state = gridLamp(summary)
   const url = metadata?.url?.trim()
@@ -82,9 +84,10 @@ const IdentityPanel = ({
         <div className="id-head">
           <div className="code">Assembly · {entity.key.id}</div>
           <DetailsForm
+            key={entity.id}
             entity={entity}
             metadata={editable}
-            onClose={() => setEditing(false)}
+            onClose={() => setEditingId(null)}
           />
         </div>
         {stateBig}
@@ -109,7 +112,7 @@ const IdentityPanel = ({
               aria-label="Edit name, description and URL"
               title="Edit details"
               disabled={entity.inFlight}
-              onClick={() => setEditing(true)}
+              onClick={() => setEditingId(entity.id)}
             >
               <EditIcon />
             </button>

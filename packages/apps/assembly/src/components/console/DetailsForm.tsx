@@ -9,13 +9,18 @@ import {
   detailsChanged,
   detailsDraft,
   NAME_MAX,
+  rebaseDraft,
 } from './details'
 import { useSponsoredAction } from './useSponsoredAction'
 
 /**
  * Edit details: the Assembly's name, description and dapp URL, saved
  * together in one transaction (`metadata::edit` always sets all three).
- * Clearing the URL removes the Dapp tab.
+ * Clearing the URL removes the Dapp tab. If the details are saved elsewhere
+ * while the form is open, fields not yet edited take the new values, and a
+ * notice warns when saving would overwrite one that was (see
+ * {@link rebaseDraft}). The form is locked while it saves, so a failed save
+ * keeps the draft.
  */
 const DetailsForm = ({
   entity,
@@ -28,7 +33,18 @@ const DetailsForm = ({
 }) => {
   const { run, pending } = useSponsoredAction()
   const [draft, setDraft] = useState<DetailsDraft>(() => detailsDraft(metadata))
+  const [base, setBase] = useState(metadata)
+  const [conflict, setConflict] = useState(false)
   const [urlError, setUrlError] = useState<string | null>(null)
+
+  // Saved elsewhere while open: rebase the draft on the new details. Not
+  // while our own save is landing; the form closes once it has
+  if (!pending && detailsChanged(base, metadata)) {
+    const rebased = rebaseDraft(draft, base, metadata)
+    setDraft(rebased.draft)
+    setBase(metadata)
+    setConflict((last) => last || rebased.conflict)
+  }
   const nameInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -73,7 +89,7 @@ const DetailsForm = ({
       className="edit"
       onSubmit={handleSave}
       onKeyDown={(event) => {
-        if (event.key === 'Escape') onClose()
+        if (event.key === 'Escape' && !pending) onClose()
       }}
       noValidate
     >
@@ -86,6 +102,7 @@ const DetailsForm = ({
           value={draft.name}
           maxLength={NAME_MAX}
           autoComplete="off"
+          disabled={pending}
           onChange={set('name')}
         />
       </label>
@@ -96,6 +113,7 @@ const DetailsForm = ({
           rows={3}
           value={draft.description}
           maxLength={DESCRIPTION_MAX}
+          disabled={pending}
           onChange={set('description')}
         />
       </label>
@@ -108,6 +126,7 @@ const DetailsForm = ({
           placeholder="https://…"
           autoComplete="off"
           spellCheck={false}
+          disabled={pending}
           aria-invalid={!!urlError}
           aria-describedby={urlError ? 'ed-url-error' : undefined}
           onChange={set('url')}
@@ -118,11 +137,22 @@ const DetailsForm = ({
           {urlError}
         </p>
       )}
+      {conflict && (
+        <p className="err" role="status">
+          The details were saved elsewhere since you opened this. Saving
+          replaces them with what you see here.
+        </p>
+      )}
       <div className="edit-acts">
         <button type="submit" className="gbtn" disabled={locked || !changed}>
           Save · 1 transaction
         </button>
-        <button type="button" className="gbtn plain" onClick={onClose}>
+        <button
+          type="button"
+          className="gbtn plain"
+          disabled={pending}
+          onClick={onClose}
+        >
           Cancel
         </button>
       </div>
