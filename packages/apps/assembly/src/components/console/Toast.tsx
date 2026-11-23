@@ -1,23 +1,10 @@
 import { getTxUrl } from '@evefrontier/dapp-kit'
+import { CloseIcon } from '@eveworld/ui-components'
 import { useEffect, useState } from 'react'
 import { useToast } from './ToastContext'
 import { shortDigest } from './toastModel'
 
 const EYEBROW = { sending: 'Sending', done: 'Done', failed: 'Failed' } as const
-
-const CloseIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 14 14"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.4"
-    aria-hidden="true"
-  >
-    <path d="M2 2l10 10M12 2L2 12" />
-  </svg>
-)
 
 /**
  * The console's transaction toast, bottom right (full width on a phone). It

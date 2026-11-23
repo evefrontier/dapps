@@ -6,6 +6,7 @@ import {
   type EntityRole,
   type GridSummary,
 } from '@evefrontier/dapp-kit'
+import { EditIcon } from '@eveworld/ui-components'
 import { useState } from 'react'
 
 import { useFlagVariant } from '../../flags'
@@ -21,14 +22,6 @@ const shellLabel = (owner: EntityOwner | null): string =>
   owner?.character?.metadata?.name ||
   abbreviateAddress(owner?.walletAddress ?? owner?.holder ?? '') ||
   'Unknown'
-
-const EditIcon = () => (
-  <svg viewBox="0 0 16 16" aria-hidden="true">
-    <path d="M13.0394 5.26824L8.39549 9.95045L7.15894 8.70284L11.802 4.02148L13.0394 5.26824Z" />
-    <path d="M14.9717 3.32L13.7121 4.59L12.4756 3.34238L13.7343 2.07324L14.9717 3.32Z" />
-    <path d="M9.47395 3.76336H3.97353V11.0019H13.2511V7.55442H15V12.7653H3.97353V14H2.2246V12.7653H1V11.0019H2.2246V2H9.47395V3.76336Z" />
-  </svg>
-)
 
 /**
  * The Assembly at a glance, on every tab: code, name, whether it is running,

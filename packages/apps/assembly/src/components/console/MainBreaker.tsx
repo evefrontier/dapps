@@ -1,8 +1,8 @@
 import type { EntityData } from '@evefrontier/dapp-kit'
+import { HoldButton, Lever, Plate } from '@eveworld/ui-components'
 import { useState } from 'react'
 
 import { setGridPower } from '../../functions/setGridPower'
-import HoldButton from './HoldButton'
 import { useSponsoredAction } from './useSponsoredAction'
 
 /**
@@ -77,22 +77,14 @@ const MainBreaker = ({
   return (
     <section className={`mb ${on ? 'on' : 'off'}`}>
       {writable ? (
-        <button
-          type="button"
-          className="lever"
-          role="switch"
-          aria-checked={on}
-          aria-label="Main breaker"
+        <Lever
+          on={on}
+          label="Main breaker"
           disabled={locked}
           onClick={() => (on ? setConfirming(true) : send(true))}
-        >
-          <span className="h" />
-        </button>
+        />
       ) : (
-        <div className={`plate ${on ? '' : 'off'}`} aria-hidden="true">
-          <span className={`led ${on ? 'on' : ''}`} />
-          <i>{on ? 'ON' : 'OFF'}</i>
-        </div>
+        <Plate on={on} />
       )}
       <div className="mb-r">
         <span className="eyebrow">Main breaker</span>

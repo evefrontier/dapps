@@ -11,9 +11,8 @@ import {
   type NoPowerReason,
   projectedFuel,
 } from '@evefrontier/dapp-kit'
-
+import type { ConsoleTab } from '@eveworld/ui-components'
 import { mw, shortCode, units } from './format'
-import type { ConsoleTab } from './TabRail'
 
 /**
  * What the console draws, worked out from the parsed entity. Display names
