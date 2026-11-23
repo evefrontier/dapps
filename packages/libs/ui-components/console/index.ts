@@ -1,4 +1,11 @@
+export {
+  type AddControllerForm,
+  type CandidateData,
+  type ControllerRowData,
+  default as AccessView,
+} from './AccessView'
 export { type AirlockData, default as AirlockView } from './AirlockView'
+export { default as ConsoleView } from './ConsoleView'
 export { default as DappView } from './DappView'
 export {
   type DetailsFields,

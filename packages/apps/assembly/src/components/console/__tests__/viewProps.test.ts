@@ -1,4 +1,5 @@
 import type {
+  CharacterSummary,
   EntityData,
   EntityInventory,
   EntityOwner,
@@ -9,12 +10,16 @@ import { describe, expect, it } from 'vitest'
 import type { AirlockRow, BoardSection } from '../model'
 import { toastData } from '../toastModel'
 import {
+  accessRows,
   airlockCards,
   boardSections,
+  candidates,
+  consoleNote,
   fuelPanel,
   gridBanner,
   gridReadouts,
   identityViewProps,
+  roleChip,
   shellLabel,
 } from '../viewProps'
 
@@ -252,5 +257,125 @@ describe('airlockCards', () => {
   it('lists the contents for the shell and controllers', () => {
     const [card] = airlockCards(airlocks, { '99': 'Ore' }, true)
     expect(card?.items?.[0]).toMatchObject({ name: 'Ore', quantity: '2' })
+  })
+})
+
+const id = (digit: string) => `0x${digit.repeat(64)}`
+
+describe('accessRows', () => {
+  const rows = [
+    {
+      key: 'c1',
+      characterId: id('1'),
+      name: 'Oro',
+      address: id('a'),
+      isShell: false,
+    },
+    {
+      key: 'shell',
+      characterId: id('2'),
+      name: '',
+      address: null,
+      isShell: true,
+    },
+  ]
+
+  it('gives every row but the shell a Remove, with its label', () => {
+    const removed: string[] = []
+    const out = accessRows(rows, {
+      viewerId: id('1'),
+      role: 'controller',
+      onRemove: (_, label) => removed.push(label),
+    })
+    out[0]?.onRemove?.()
+    expect(removed).toEqual(['Oro'])
+    expect(out[1]?.onRemove).toBeUndefined()
+    expect(out[1]?.name).toBe('Unknown character')
+  })
+
+  it('marks You on the viewer, or on the shell row for the shell', () => {
+    const asController = accessRows(rows, {
+      viewerId: id('1'),
+      role: 'controller',
+      onRemove: () => {},
+    })
+    expect(asController.map((row) => row.isYou)).toEqual([true, false])
+    const asShell = accessRows(rows, {
+      viewerId: null,
+      role: 'shell',
+      onRemove: () => {},
+    })
+    expect(asShell.map((row) => row.isYou)).toEqual([false, true])
+  })
+})
+
+describe('candidates', () => {
+  const character = (digit: string, name: string): CharacterSummary =>
+    ({
+      characterId: id(digit),
+      name,
+      walletAddress: id('f'),
+    }) as CharacterSummary
+
+  it('tags the shell and existing controllers', () => {
+    const out = candidates(
+      [character('1', 'Oro'), character('2', ''), character('3', 'Vex')],
+      { controllers: [id('2')], shellId: id('1'), onPick: () => {} },
+    )
+    expect(out.map((candidate) => candidate.tag)).toEqual([
+      'Shell',
+      'Controller',
+      undefined,
+    ])
+    expect(out[1]?.name).toBe('Unnamed character')
+  })
+})
+
+describe('roleChip', () => {
+  it('labels the role, a visitor and a preview', () => {
+    expect(
+      roleChip({ role: 'shell', preview: false, connected: true }),
+    ).toEqual({
+      role: 'shell',
+      label: 'shell',
+    })
+    expect(
+      roleChip({ role: 'visitor', preview: false, connected: true })?.label,
+    ).toBe('Visitor · read only')
+    expect(
+      roleChip({ role: 'controller', preview: true, connected: false })?.label,
+    ).toBe('controller · preview')
+    expect(
+      roleChip({ role: 'visitor', preview: false, connected: false }),
+    ).toBeNull()
+  })
+})
+
+describe('roleChip while loading', () => {
+  it('stays neutral while the role loads, unless a preview is forced', () => {
+    expect(
+      roleChip({
+        role: 'visitor',
+        preview: false,
+        loading: true,
+        connected: true,
+      }),
+    ).toEqual({ role: '', label: 'Checking access…' })
+    expect(
+      roleChip({ role: 'shell', preview: true, loading: true, connected: true })
+        ?.label,
+    ).toBe('shell · preview')
+  })
+})
+
+describe('consoleNote', () => {
+  it('says why there is nothing to show', () => {
+    expect(consoleNote({ loading: true, error: null })).toBe(
+      'Reading the Assembly…',
+    )
+    expect(consoleNote({ loading: false, error: 'boom' })).toBe(
+      'Could not read the Assembly: boom',
+    )
+    expect(consoleNote({ loading: false, error: null })).toMatch(/^No Assembly/)
   })
 })

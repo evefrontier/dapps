@@ -1,14 +1,20 @@
 import {
   abbreviateAddress,
+  type CharacterSummary,
   type EntityData,
   type EntityOwner,
   type EntityPowerGrid,
+  type EntityRole,
   type GridSummary,
+  isController,
   type NoPowerReason,
+  sameAddress,
 } from '@evefrontier/dapp-kit'
 import type {
   AirlockData,
   BoardSectionData,
+  CandidateData,
+  ControllerRowData,
   FuelPanelData,
   GridBanner,
   GridReadouts,
@@ -33,6 +39,7 @@ import {
   gridLamp,
   NO_POWER_LABEL,
 } from './model'
+import type { ControllerRow } from './useControllerRows'
 
 /**
  * The props the ui-components views draw, built from the parsed entity.
@@ -224,4 +231,110 @@ export function airlockCards(
       }
     },
   )
+}
+
+/**
+ * The Controllers list as the Access tab draws it. Every row but the
+ * shell's gets Remove, which calls `onRemove` with its character id and
+ * label. "You" marks the viewer's character, or the shell row when the
+ * viewer is the shell.
+ */
+export function accessRows(
+  rows: ControllerRow[],
+  {
+    viewerId,
+    role,
+    onRemove,
+  }: {
+    viewerId: string | null
+    role: EntityRole
+    onRemove: (characterId: string, label: string) => void
+  },
+): ControllerRowData[] {
+  return rows.map((row) => {
+    const label = row.name || 'Unknown character'
+    const { characterId } = row
+    return {
+      key: row.key,
+      name: label,
+      isShell: row.isShell,
+      isYou:
+        sameAddress(row.characterId, viewerId) ||
+        (row.isShell && role === 'shell'),
+      address: abbreviateAddress(row.address ?? ''),
+      ...(row.address && { addressTitle: row.address }),
+      ...(!row.isShell &&
+        characterId && { onRemove: () => onRemove(characterId, label) }),
+    }
+  })
+}
+
+/** Name-search results, tagged when already the shell or a controller. */
+export function candidates(
+  results: CharacterSummary[],
+  {
+    controllers,
+    shellId,
+    onPick,
+  }: {
+    controllers: string[] | null | undefined
+    shellId: string | null
+    onPick: (character: CharacterSummary) => void
+  },
+): CandidateData[] {
+  return results.map((character) => {
+    const tag = sameAddress(character.characterId, shellId)
+      ? ('Shell' as const)
+      : isController(character.characterId, controllers)
+        ? ('Controller' as const)
+        : undefined
+    return {
+      id: character.characterId,
+      name: character.name || 'Unnamed character',
+      code: shortCode(character.characterId),
+      wallet: abbreviateAddress(character.walletAddress),
+      ...(tag && { tag }),
+      onPick: () => onPick(character),
+    }
+  })
+}
+
+/**
+ * The top bar's role chip, or null for a visitor with no wallet. A forced
+ * view (`assembly-view-as`) is always labelled, wallet or not. While the
+ * role is still loading it reads "Checking access…" with no role styling,
+ * rather than Visitor.
+ */
+export function roleChip({
+  role,
+  preview,
+  loading = false,
+  connected,
+}: {
+  role: EntityRole
+  preview: boolean
+  loading?: boolean
+  connected: boolean
+}): { role: string; label: string } | null {
+  if (!connected && !preview) return null
+  if (loading && !preview) return { role: '', label: 'Checking access…' }
+  const label = preview
+    ? `${role} · preview`
+    : role === 'visitor'
+      ? 'Visitor · read only'
+      : role
+  return { role, label }
+}
+
+/** What the console says before it has an Assembly to show. */
+export function consoleNote({
+  loading,
+  error,
+}: {
+  loading: boolean
+  error: string | null | undefined
+}): string {
+  if (loading) return 'Reading the Assembly…'
+  if (error) return `Could not read the Assembly: ${error}`
+  return 'No Assembly selected. Open this from an Assembly in the game.'
 }

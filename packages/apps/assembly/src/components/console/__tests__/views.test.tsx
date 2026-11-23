@@ -1,4 +1,6 @@
 import {
+  AccessView,
+  ConsoleView,
   DappView,
   GridView,
   IdentityView,
@@ -150,5 +152,92 @@ describe('DappView', () => {
     expect(renderToStaticMarkup(<DappView host={null} src={null} />)).toContain(
       'No dapp',
     )
+  })
+})
+
+describe('AccessView', () => {
+  const add = {
+    open: false,
+    onOpen: noop,
+    onClose: noop,
+    searchOn: false,
+    value: '',
+    onChange: noop,
+    error: null,
+    picked: null,
+    search: null,
+    directoryError: false,
+    canSubmit: false,
+    onSubmit: noop,
+  }
+
+  it('has no Remove on the shell row', () => {
+    const html = renderToStaticMarkup(
+      <AccessView
+        rows={[
+          {
+            key: 's',
+            name: 'Oro',
+            isShell: true,
+            isYou: true,
+            address: '0x1…2',
+          },
+        ]}
+        loading={false}
+        locked={false}
+        add={add}
+      />,
+    )
+    expect(html).toContain('Shell')
+    expect(html).not.toContain('Remove')
+  })
+
+  it('offers Remove on other rows', () => {
+    const html = renderToStaticMarkup(
+      <AccessView
+        rows={[
+          {
+            key: 'c',
+            name: 'Vex',
+            isShell: false,
+            isYou: false,
+            address: '0x3…4',
+            onRemove: noop,
+          },
+        ]}
+        loading={false}
+        locked={false}
+        add={add}
+      />,
+    )
+    expect(html).toContain('Remove')
+  })
+})
+
+describe('ConsoleView', () => {
+  const frame = { roleChip: null, wallet: null, onConnect: noop }
+
+  it('shows the note in place of the body', () => {
+    const html = renderToStaticMarkup(
+      <ConsoleView {...frame} note="Reading the Assembly…" />,
+    )
+    expect(html).toContain('Reading the Assembly…')
+    expect(html).toContain('Connect wallet')
+    expect(html).not.toContain('role="tablist"')
+  })
+
+  it('draws a tab for each tab given, with the active one selected', () => {
+    const html = renderToStaticMarkup(
+      <ConsoleView
+        {...frame}
+        tabs={['grid', 'access']}
+        active="access"
+        onSelectTab={noop}
+        locked
+      />,
+    )
+    expect(html.match(/role="tab"/g)).toHaveLength(2)
+    expect(html).toContain('aria-selected="true"')
+    expect(html).toContain('Transaction in flight')
   })
 })
