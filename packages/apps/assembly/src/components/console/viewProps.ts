@@ -14,6 +14,7 @@ import type {
   AirlockData,
   BoardSectionData,
   CandidateData,
+  ConsoleTab,
   ControllerRowData,
   FuelPanelData,
   GridBanner,
@@ -340,4 +341,30 @@ export function consoleNote({
   if (loading) return 'Reading the Assembly…'
   if (error) return `Could not read the Assembly: ${error}`
   return 'No Assembly selected. Open this from an Assembly in the game.'
+}
+
+/** The tabs a client view can open on its own. */
+export type ClientTabName = 'grid' | 'airlock' | 'access'
+
+/**
+ * Why a client view can't show its tab for this Assembly and role, or null
+ * when it can. Access waits for the role, so a shell doesn't see the
+ * visitor's note while it loads.
+ */
+export function clientTabNote({
+  tab,
+  tabs,
+  roleLoading,
+}: {
+  tab: ClientTabName
+  tabs: readonly ConsoleTab[]
+  roleLoading: boolean
+}): string | null {
+  if (tabs.includes(tab)) return null
+  if (tab === 'access') {
+    return roleLoading
+      ? 'Checking access…'
+      : 'Access is for the shell and controllers.'
+  }
+  return 'This Assembly has no airlock.'
 }

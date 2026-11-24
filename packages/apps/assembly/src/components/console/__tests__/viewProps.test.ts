@@ -14,6 +14,7 @@ import {
   airlockCards,
   boardSections,
   candidates,
+  clientTabNote,
   consoleNote,
   fuelPanel,
   gridBanner,
@@ -377,5 +378,32 @@ describe('consoleNote', () => {
       'Could not read the Assembly: boom',
     )
     expect(consoleNote({ loading: false, error: null })).toMatch(/^No Assembly/)
+  })
+})
+
+describe('clientTabNote', () => {
+  it('shows the tab when the Assembly and role get it', () => {
+    expect(
+      clientTabNote({
+        tab: 'grid',
+        tabs: ['grid', 'airlock', 'access'],
+        roleLoading: false,
+      }),
+    ).toBeNull()
+  })
+
+  it('says Access is for the shell and controllers, once the role is known', () => {
+    expect(
+      clientTabNote({ tab: 'access', tabs: ['grid'], roleLoading: true }),
+    ).toBe('Checking access…')
+    expect(
+      clientTabNote({ tab: 'access', tabs: ['grid'], roleLoading: false }),
+    ).toBe('Access is for the shell and controllers.')
+  })
+
+  it('says when the Assembly has no airlock', () => {
+    expect(
+      clientTabNote({ tab: 'airlock', tabs: ['grid'], roleLoading: false }),
+    ).toBe('This Assembly has no airlock.')
   })
 })

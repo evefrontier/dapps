@@ -54,7 +54,18 @@ Each write reports in one toast, bottom right (full width on a phone), in words 
 
 The dapp does not deposit fuel. Fuel arrives through the game's inventory-in action.
 
-The dapp is a single screen, the grid console. It has no routes: whatever path it is opened at, it shows the console for the selected assembly. It opens without a wallet. Its tabs are Dapp (when the assembly has a dapp URL, and then open first), Grid, Airlock (when it has an inventory) and Access (the shell and controllers only; visitors never see it).
+The dapp is the grid console for the selected assembly. It opens without a wallet. Its tabs are Dapp (when the assembly has a dapp URL, and then open first), Grid, Airlock (when it has an inventory) and Access (the shell and controllers only; visitors never see it).
+
+Routes:
+
+| Path | Shows |
+|---|---|
+| `/client/grid` | the Grid tab alone, with no top bar, identity panel or tab rail |
+| `/client/airlock` | the Airlock tab alone; on an assembly with no airlock, a note says so |
+| `/client/access` | the Access tab alone; a visitor sees a note that Access is for the shell and controllers |
+| any other path | the full console (the webview) |
+
+The `/client/*` routes are for the game client, which draws its own frame. They have no Connect button, so a wallet has to be connected already for the shell's and controllers' controls to show.
 
 Status:
 

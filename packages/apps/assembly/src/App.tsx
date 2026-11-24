@@ -1,17 +1,18 @@
 import { createLogger, useSmartObject } from '@evefrontier/dapp-kit'
 import { useEffect } from 'react'
+import { Outlet } from 'react-router-dom'
 
-import Console from './components/console/Console'
 import Toast from './components/console/Toast'
 import { ToastProvider } from './components/console/ToastContext'
 
 const log = createLogger()
 
 /**
- * The app: the grid console, its only screen, and its transaction toast.
- * There is no routing; the path is ignored. The console has its own top bar
- * and connect button, and is read-only for visitors, so no wallet is needed
- * to open it.
+ * The app's layout: the route's view and the transaction toast. The
+ * `/client/grid`, `/client/airlock` and `/client/access` routes show that
+ * one tab with no frame, for the game client; any other path shows the full
+ * grid console, with its own top bar and connect button. Both are read-only
+ * for visitors, so no wallet is needed to open them.
  */
 const App = () => {
   const { entity } = useSmartObject()
@@ -22,7 +23,7 @@ const App = () => {
 
   return (
     <ToastProvider>
-      <Console />
+      <Outlet />
       <Toast />
     </ToastProvider>
   )
