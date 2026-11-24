@@ -1,21 +1,10 @@
-import {
-  abbreviateAddress,
-  canManage,
-  gridSummary,
-  useConnection,
-  useSmartObject,
-} from '@evefrontier/dapp-kit'
+import { abbreviateAddress, useConnection } from '@evefrontier/dapp-kit'
 import { type ConsoleTab, ConsoleView } from '@eveworld/ui-components'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
-import { isPanelEnabled, useFlagVariant, useViewRole } from '../../flags'
-import AccessTab from './AccessTab'
-import AirlockTab from './AirlockTab'
-import DappTab from './DappTab'
-import GridTab from './GridTab'
 import IdentityPanel from './IdentityPanel'
-import { consoleTabs } from './model'
-import { useNow } from './useNow'
+import TabContent from './TabContent'
+import { useConsoleState } from './useConsoleState'
 import { consoleNote, roleChip } from './viewProps'
 
 /**
@@ -29,27 +18,13 @@ import { consoleNote, roleChip } from './viewProps'
  * the same for every role.
  */
 const Console = () => {
-  const { entity, entityOwner, loading, error, tenant } = useSmartObject()
-  const { role, preview, isLoading: roleLoading } = useViewRole()
+  const state = useConsoleState()
+  const { entity, entityOwner, loading, error, role, preview, roleLoading } =
+    state
   const { currentAccount, handleConnect, handleDisconnect } = useConnection()
-  const nowMs = useNow()
   const [chosen, setChosen] = useState<ConsoleTab | null>(null)
 
-  const summary = useMemo(
-    () => (entity?.powerGrid ? gridSummary(entity.powerGrid, nowMs) : null),
-    [entity, nowMs],
-  )
-
-  const writer = canManage(role)
-  const url = entity?.metadata?.url?.trim() ?? ''
-  // Only counts in builds that show the flag panel
-  const showDapp = useFlagVariant('assembly-show-dapp') === 'on'
-  const tabs = consoleTabs({
-    hasDapp: url !== '',
-    forceDapp: isPanelEnabled() && showDapp,
-    hasInventory: !!entity?.inventories.length,
-    writer,
-  })
+  const { tabs } = state
   const active = chosen && tabs.includes(chosen) ? chosen : tabs[0]!
 
   const frame = {
@@ -81,28 +56,14 @@ const Console = () => {
           entity={entity}
           entityOwner={entityOwner}
           role={role}
-          summary={summary}
+          summary={state.summary}
         />
       }
       tabs={tabs}
       active={active}
       onSelectTab={setChosen}
     >
-      {active === 'dapp' && (
-        <DappTab url={url} itemId={entity.key.id} tenant={tenant} />
-      )}
-      {active === 'grid' && (
-        <GridTab
-          entity={entity}
-          summary={summary}
-          nowMs={nowMs}
-          writable={writer}
-        />
-      )}
-      {active === 'airlock' && (
-        <AirlockTab entity={entity} showContents={writer} />
-      )}
-      {active === 'access' && <AccessTab />}
+      <TabContent tab={active} entity={entity} state={state} />
     </ConsoleView>
   )
 }
