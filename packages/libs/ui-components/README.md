@@ -38,6 +38,7 @@ Everything is scoped under `.gc` (the console) and `.gc-toast-host` (the toast),
 | View | Draws |
 |---|---|
 | `ConsoleView` | The frame: top bar (role chip, wallet or Connect), in-flight strip, identity slot, tab rail and tab content; or a note when there is nothing to show |
+| `ConsolePanel` | One tab's content with no frame, or a note, for hosts that draw their own (the game client) |
 | `IdentityView` | Code, name, state lamp, description and key-value rows; an edit icon and an `editor` slot |
 | `DetailsFormView` | The Edit details form (name, description, dapp URL), controlled |
 | `MainBreakerView` | The main breaker: a lever with the hold-to-cut-power box, or a lamp plate |

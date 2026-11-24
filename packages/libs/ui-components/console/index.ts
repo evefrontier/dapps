@@ -5,6 +5,7 @@ export {
   default as AccessView,
 } from './AccessView'
 export { type AirlockData, default as AirlockView } from './AirlockView'
+export { default as ConsolePanel } from './ConsolePanel'
 export { default as ConsoleView } from './ConsoleView'
 export { default as DappView } from './DappView'
 export {

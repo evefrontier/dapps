@@ -519,6 +519,9 @@ html #root {
   gap: 18px;
   min-width: 0;
 }
+.gc.gc-panel > .main {
+  padding: 20px 20px 24px;
+}
 .gc .cols {
   display: grid;
   grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
@@ -1112,6 +1115,9 @@ html #root {
   }
   .gc .c-body {
     gap: 18px;
+    padding: 14px 14px 20px;
+  }
+  .gc.gc-panel > .main {
     padding: 14px 14px 20px;
   }
   .gc .ident {
