@@ -166,6 +166,9 @@ describe('buildBoard', () => {
     })
     expect(cards['002']).toMatchObject({
       kind: 'fuel',
+      // The bay is named by kind; its code is the component id, not a fuel type
+      fallbackName: 'Fuel bay',
+      code: '#000002',
       lamp: 'on',
       statusLabel: 'Feeding',
       detail: 'Feeding 3,600.0 units/h',

@@ -198,7 +198,7 @@ export function fuelPanel(
     burnNote,
     sources: Object.entries(grid.fuelSources).map(([id, capacity]) => ({
       id,
-      label: `Fuel ${shortCode(id)}`,
+      label: `Fuel bay ${shortCode(id)}`,
       units: `${fuelAmount(normalizeFuel(grid, capacity), unit)} ${unit}`,
     })),
   }

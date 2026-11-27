@@ -183,7 +183,7 @@ function cardFor(
     return {
       ...base,
       kind: 'fuel',
-      fallbackName: 'Fuel',
+      fallbackName: 'Fuel bay',
       lamp: feeding ? 'on' : empty ? 'wait' : 'off',
       statusLabel: feeding ? 'Feeding' : empty ? 'Empty' : 'Idle',
       detail: feeding

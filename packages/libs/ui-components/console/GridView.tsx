@@ -46,7 +46,7 @@ export interface FuelPanelData {
   }
   /** Under the burn row: the burn per MW-hour while burning, else why nothing burns. */
   burnNote: string
-  /** Each fuel source and what it holds, e.g. `{ label: "Fuel #612625", units: "1,000.00 kg" }`. */
+  /** Each fuel source and what it holds, e.g. `{ label: "Fuel bay #612625", units: "1,000.00 kg" }`. */
   sources: { id: string; label: string; units: string }[]
 }
 

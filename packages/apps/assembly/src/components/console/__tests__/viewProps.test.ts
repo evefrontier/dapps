@@ -192,7 +192,7 @@ describe('fuelPanel', () => {
     expect(fuel.sources).toEqual([
       {
         id: '0x00000000000000000000000000000000000000000000000000000000000abc12',
-        label: 'Fuel #0abc12',
+        label: 'Fuel bay #0abc12',
         units: '1,000.00 kg',
       },
     ])
