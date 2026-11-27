@@ -218,6 +218,26 @@ describe('buildBoard', () => {
     })
   })
 
+  it('leaves the grid component out: it is the main breaker, not a part with no breaker', () => {
+    const e = entity()
+    e.components = [
+      ...e.components,
+      {
+        id: '1000000000060',
+        name: null,
+        kind: 'power_grid::PowerGrid',
+        type: '0x1::component::Component<0x1::power_grid::PowerGrid>',
+        json: {},
+      },
+    ]
+    e.layout!.sections[1]!.moduleIds.push('1000000000060')
+    const board = buildBoard(e, 0)
+    const last = board[board.length - 1]!
+    expect(last.name).toBe('No breaker')
+    expect(last.cards.map((c) => c.code)).toEqual(['#000050'])
+    expect(cardsOf(board)['060']).toBeUndefined()
+  })
+
   it('names the only column Modules when there is no layout', () => {
     const board = buildBoard(entity({ layout: null }), 0)
     expect(board.map((s) => s.name)).toEqual(['Modules'])

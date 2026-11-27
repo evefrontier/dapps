@@ -10,6 +10,7 @@
 - new flag `assembly-update-transport`, `subscription` by default or `polling`: the console updates live over the GraphQL subscription endpoint and falls back to polling when the subscription fails
 - the Airlock tab lists what each airlock holds for every role, visitors included
 - numbers on the console are formatted in the viewer's browser locale
+- the breaker board no longer lists the power grid component under No breaker; the main breaker in the identity panel stands for it
 - Updated dependencies
   - @eveworld/ui-components@0.3.1
   - @evefrontier/dapp-kit@0.2.0-alpha.1

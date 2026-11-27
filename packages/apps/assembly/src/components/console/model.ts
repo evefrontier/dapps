@@ -108,6 +108,8 @@ const GRID_STATUS: Record<GridStatus, { lamp: Lamp; label: string }> = {
   noPower: { lamp: 'wait', label: 'No power' },
 }
 
+const GRID_COMPONENT_KIND = 'power_grid::PowerGrid'
+
 /** `Section 1`, `Section 2`… by position in the layout. */
 const sectionName = (index: number): string => `Section ${index + 1}`
 
@@ -259,16 +261,24 @@ const section = (
  * card per grid component. Then, when there are any: grid components that are
  * in no section ("Not in a section", or "Modules" with no layout at all), and
  * components with no breaker (in the layout but not on the grid), listed
- * apart so nothing is hidden.
+ * apart so nothing is hidden. The grid component itself is left out: it is
+ * the main breaker, which the identity panel shows.
  */
 export function buildBoard(entity: EntityData, nowMs: number): BoardSection[] {
   const grid = entity.powerGrid
   const burn = grid ? burnBreakdown(grid, nowMs) : null
+  // The grid component is the main breaker, shown in the identity panel
+  const gridIds = new Set(
+    entity.components
+      .filter((c) => c.kind === GRID_COMPONENT_KIND)
+      .map((c) => c.id),
+  )
   const placed = new Set<string>()
   const noBreaker: BoardCard[] = []
   const sections = (entity.layout?.sections ?? []).map((layoutSection, i) => {
     const cards: BoardCard[] = []
     for (const id of layoutSection.moduleIds) {
+      if (gridIds.has(id)) continue
       placed.add(id)
       const card = cardFor(entity, id, nowMs, burn)
       if (card.lamp === null) noBreaker.push(card)
