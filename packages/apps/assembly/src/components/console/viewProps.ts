@@ -29,10 +29,10 @@ import {
   count,
   fuelAmount,
   hostOf,
-  hoursMinutes,
   m3,
   mw,
   shortCode,
+  timeLeft,
 } from './format'
 import {
   type AirlockRow,
@@ -148,7 +148,7 @@ export function gridBanner(summary: GridSummary): GridBanner | null {
   if (summary.fuelFraction < LOW_FUEL && summary.msUntilEmpty !== null) {
     return {
       tone: 'amber',
-      title: `Fuel low · ≈ ${hoursMinutes(summary.msUntilEmpty)} left`,
+      title: `Fuel low · ≈ ${timeLeft(summary.msUntilEmpty)} left`,
       body: `At the current draw of ${mw(summary.drawMw)} MW. Add fuel in the game to keep it running.`,
     }
   }
@@ -163,7 +163,7 @@ export function fuelPanel(
   const estimate =
     summary.msUntilEmpty !== null && summary.fuelNow > 0n
       ? {
-          left: hoursMinutes(summary.msUntilEmpty),
+          left: timeLeft(summary.msUntilEmpty),
         }
       : summary.fuelNow === 0n
         ? 'Empty'

@@ -3,11 +3,14 @@ import { describe, expect, it } from 'vitest'
 import {
   ago,
   count,
+  fuelAmount,
   hostOf,
   hoursMinutes,
+  kg,
   m3,
   mw,
   shortCode,
+  timeLeft,
   units,
 } from '../format'
 
@@ -37,6 +40,22 @@ describe('format', () => {
   it('writes hours and zero-padded minutes', () => {
     expect(hoursMinutes(3 * 3_600_000 + 5 * 60_000)).toBe('3 h 05 m')
     expect(hoursMinutes(0)).toBe('0 h 00 m')
+  })
+
+  it('counts down in hours and minutes, then minutes and seconds, floored', () => {
+    expect(timeLeft(2 * 3_600_000 + 3 * 60_000 + 59_999)).toBe('2 h 03 m')
+    expect(timeLeft(3_600_000)).toBe('1 h 00 m')
+    expect(timeLeft(3_599_999)).toBe('59 m 59 s')
+    expect(timeLeft(12 * 60_000 + 5_500)).toBe('12 m 05 s')
+    expect(timeLeft(0)).toBe('0 m 00 s')
+    expect(timeLeft(-5_000)).toBe('0 m 00 s')
+  })
+
+  it('turns fixed-point kg into up to two decimals with separators', () => {
+    expect(kg(998_198n)).toBe('99.82')
+    expect(kg('10000000')).toBe('1,000')
+    expect(fuelAmount(998_198n, 'kg')).toBe('99.82')
+    expect(fuelAmount(998_198n, 'units')).toBe('100')
   })
 
   it('says how long ago, from minutes to days', () => {

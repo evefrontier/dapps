@@ -32,6 +32,20 @@ export const hoursMinutes = (ms: number): string => {
   return `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')} m`
 }
 
+/**
+ * A countdown from milliseconds, floored so it never runs ahead: `2 h 03 m`
+ * from an hour up, `12 m 05 s` below it, so a once-a-second clock visibly
+ * ticks. `0 m 00 s` once it has run out.
+ */
+export const timeLeft = (ms: number): string => {
+  const seconds = Math.max(0, Math.floor(ms / 1_000))
+  const pad = (n: number) => String(n).padStart(2, '0')
+  if (seconds >= 3_600) {
+    return `${Math.floor(seconds / 3_600)} h ${pad(Math.floor((seconds % 3_600) / 60))} m`
+  }
+  return `${Math.floor(seconds / 60)} m ${pad(seconds % 60)} s`
+}
+
 /** `just now`, `14 min ago`, `3 h ago` or `2 d ago`. */
 export const ago = (ms: number): string => {
   const minutes = Math.floor(ms / 60_000)
