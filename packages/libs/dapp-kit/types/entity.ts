@@ -19,12 +19,49 @@ export interface EntityIdentity {
 }
 
 /**
- * A fixed-point number at 10^4 (`fuel_math::SCALE`), kept as the decimal
- * string GraphQL returns so no precision is lost: `150000` is 15 MW.
+ * A number as the decimal string GraphQL returns, so no precision is lost. On a
+ * `fuelFactor` grid power and fuel are fixed point at 10^4 (`150000` is 15 MW);
+ * on a `pools` grid power is plain MW and fuel is fixed point at 10^9 (1e-9 kg).
+ * See {@link PowerGridModel}.
  *
  * @category Types
  */
 export type FixedPoint = string
+
+/**
+ * Which world-contracts power maths a grid's values follow:
+ * - `fuelFactor`: up to dev-v1.1.11. One fuel pool (`fuel_*`, `fuel_sources`),
+ *   burn through `fuel_factor` (impulse over containment burden), power and fuel
+ *   at 10^4.
+ * - `pools`: dev-v1.1.16 onward. Fuel bays pooled by fuel type, each Generator
+ *   burning its own type at `usable_impulse` with output scaled by volatility,
+ *   power in plain MW, fuel at 10^9 (1e-9 kg).
+ *
+ * dev-v1.1.12 to v1.1.15 store the `pools` layout at 10^4; the layout alone
+ * cannot tell them apart, so they read as `pools` and are not supported.
+ *
+ * @category Types
+ */
+export type PowerGridModel = 'fuelFactor' | 'pools'
+
+/** A quantity of one fuel type and its stats, on a `pools` grid. @category Types */
+export interface EntityFuel {
+  /** Null while empty */
+  fuelType: string | null
+  quantity: FixedPoint
+  impulse: FixedPoint
+  /** Stored only; burn ignores it */
+  containmentBurden: FixedPoint
+  volatility: FixedPoint
+}
+
+/** A fuel bay on a `pools` grid. Fuel as of the grid's `lastSettledMs`. @category Types */
+export interface EntityFuelBay {
+  capacity: FixedPoint
+  /** Only online bays feed the grid */
+  online: boolean
+  fuel: EntityFuel
+}
 
 /**
  * How a module takes power: `Firm` modules all get their full requirement or
@@ -54,6 +91,12 @@ export interface EntityGenerator {
   containmentReduction: FixedPoint
   /** Fuel per second burned while the grid has no fuel impulse */
   baseFuelRate: FixedPoint
+  /** `pools` grids only: the one fuel type it burns */
+  fuelType?: string
+  /** `pools` grids only: most impulse it can use, at 10^9 */
+  impulseLimit?: FixedPoint
+  /** `pools` grids only: volatility that gives full rated output, at 10^9 */
+  volatilityLimit?: FixedPoint
 }
 
 /**
@@ -63,9 +106,15 @@ export interface EntityGenerator {
  * @category Types
  */
 export interface EntityPowerGrid {
+  /** Which contract maths the values follow; `fuelFactor` when unset */
+  model?: PowerGridModel
+  /** Power On/Off as of the last settle (`on_at_last_settled` on a `pools` grid) */
   on: boolean
+  /** In online bays on a `pools` grid */
   fuelQuantity: FixedPoint
+  /** Of online bays on a `pools` grid */
   fuelCapacity: FixedPoint
+  /** Generators' output as of the last settle (`capacity_mw`) */
   capacityMw: FixedPoint
   lastSettledMs: string
   /** Pooled fuel impulse; 0 means generators burn their base rate */
@@ -76,8 +125,10 @@ export interface EntityPowerGrid {
   modules: Record<string, EntityPowerModule>
   /** Keyed by generator component id */
   generators: Record<string, EntityGenerator>
-  /** Fuel source component id → capacity */
+  /** Fuel source (fuel bay) component id → capacity */
   fuelSources: Record<string, FixedPoint>
+  /** `pools` grids only: fuel bays by component id, in install order */
+  bays?: Record<string, EntityFuelBay>
 }
 
 /** @category Types */

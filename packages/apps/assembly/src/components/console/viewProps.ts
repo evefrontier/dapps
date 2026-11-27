@@ -8,6 +8,7 @@ import {
   type GridSummary,
   isController,
   type NoPowerReason,
+  normalizeFuel,
   sameAddress,
 } from '@evefrontier/dapp-kit'
 import type {
@@ -26,12 +27,12 @@ import { httpsUrl } from './dappSource'
 import {
   ago,
   count,
+  fuelAmount,
   hostOf,
   hoursMinutes,
   m3,
   mw,
   shortCode,
-  units,
 } from './format'
 import {
   type AirlockRow,
@@ -166,20 +167,23 @@ export function fuelPanel(
         }
       : summary.fuelNow === 0n
         ? 'Empty'
-        : !grid.on
+        : // A run-out can trip a `pools` grid since the last settle
+          !grid.on || summary.status === 'off'
           ? 'Not burning · main breaker off'
           : 'Not burning'
+  const unit = summary.fuelUnit
   return {
     settledAgo: ago(nowMs - Number(grid.lastSettledMs)),
     fraction: summary.fuelFraction,
     low: summary.fuelFraction < LOW_FUEL,
-    amount: `≈ ${units(summary.fuelNow)}`,
-    capacity: units(summary.fuelCapacity),
+    amount: `≈ ${fuelAmount(summary.fuelNow, unit)}`,
+    capacity: fuelAmount(summary.fuelCapacity, unit),
+    unit,
     estimate,
     sources: Object.entries(grid.fuelSources).map(([id, capacity]) => ({
       id,
       label: `Fuel ${shortCode(id)}`,
-      units: units(capacity),
+      units: fuelAmount(normalizeFuel(grid, capacity), unit),
     })),
   }
 }

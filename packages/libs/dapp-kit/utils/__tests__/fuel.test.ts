@@ -1,14 +1,27 @@
 import { describe, expect, it } from 'vitest'
-import type { EntityPowerGrid } from '../../types'
+import type {
+  EntityFuelBay,
+  EntityGenerator,
+  EntityPowerGrid,
+  EntityPowerModule,
+} from '../../types'
 import {
   fromFixed,
   fuelBurn,
   fuelBurnPerHour,
   fuelFactor,
+  fuelUnit,
   generatorBurn,
+  generatorOutput,
   msUntilEmpty,
+  normalizeFuel,
+  normalizeMw,
+  POOLS_FUEL_SCALE,
+  poolGeneratorBurn,
   projectedFuel,
+  projectGrid,
   usedMw,
+  volatilityShare,
 } from '../fuel'
 
 // Expected numbers are the world-contracts power tests (dev, d87ebc1):
@@ -193,5 +206,282 @@ describe('grid figures', () => {
   it('converts fixed point to whole units', () => {
     expect(fromFixed('150000')).toBe(15)
     expect(fromFixed(2_500n)).toBe(0.25)
+  })
+})
+
+// === `pools` grids (world-contracts dev-v1.1.16+) ===
+// Expected numbers are the world-contracts power tests at dev-v1.1.18:
+// fuel_math.move, tests/fuel_bay_tests.move, tests/pool_tests.move and
+// tests/grid_load_tests.move, with grid_scenario's constants.
+
+const SCALE = POOLS_FUEL_SCALE
+const KG = POOLS_FUEL_SCALE
+const U64_MAX = (1n << 64n) - 1n
+/** grid_scenario: 50_000 kg in the default bay, impulse 90, burden 14, volatility 1. */
+const STARTING = 50_000n * KG
+const POOL_IMPULSE = 90n * SCALE
+const POOL_BURDEN = 14n * SCALE
+const POOL_VOLATILITY = SCALE
+/** grid_scenario: Generators' volatility limit 0.5, so the test fuels give full output. */
+const VOLATILITY_LIMIT = SCALE / 2n
+const IMPULSE_LIMIT = 100n * SCALE
+
+function poolBay(
+  quantity: bigint,
+  { fuelType = '7', impulse = POOL_IMPULSE, online = true } = {},
+): EntityFuelBay {
+  return {
+    capacity: (100_000n * KG).toString(),
+    online,
+    fuel: {
+      fuelType: quantity > 0n ? fuelType : null,
+      quantity: quantity.toString(),
+      impulse: impulse.toString(),
+      containmentBurden: POOL_BURDEN.toString(),
+      volatility: POOL_VOLATILITY.toString(),
+    },
+  }
+}
+
+function poolGenerator(
+  maxOutputMw: number,
+  { fuelType = '7', impulseLimit = IMPULSE_LIMIT, online = true } = {},
+): EntityGenerator {
+  return {
+    online,
+    maxOutputMw: String(maxOutputMw),
+    containmentReduction: '0',
+    baseFuelRate: '0',
+    fuelType,
+    impulseLimit: impulseLimit.toString(),
+    volatilityLimit: VOLATILITY_LIMIT.toString(),
+  }
+}
+
+/** A switched-on module drawing its full requirement, plain MW. */
+function poolModule(
+  powerReq: number,
+  drawKind: EntityPowerModule['drawKind'] = 'Firm',
+): EntityPowerModule {
+  return {
+    desiredOnline: true,
+    activeDraw: String(powerReq),
+    powerReq: String(powerReq),
+    drawKind,
+    priority: '0',
+    lineLoss: '0',
+  }
+}
+
+function poolsGrid({
+  generators,
+  bays,
+  modules,
+}: Pick<EntityPowerGrid, 'generators' | 'modules'> & {
+  bays: Record<string, EntityFuelBay>
+}): EntityPowerGrid {
+  const online = Object.values(bays).filter((b) => b.online)
+  const sum = (xs: string[]) => xs.reduce((a, x) => a + BigInt(x), 0n)
+  return {
+    model: 'pools',
+    on: true,
+    fuelQuantity: sum(online.map((b) => b.fuel.quantity)).toString(),
+    fuelCapacity: sum(online.map((b) => b.capacity)).toString(),
+    capacityMw: '0',
+    lastSettledMs: '0',
+    fuelImpulse: POOL_IMPULSE.toString(),
+    fuelContainmentBurden: POOL_BURDEN.toString(),
+    modules,
+    generators,
+    fuelSources: Object.fromEntries(
+      Object.entries(bays).map(([id, b]) => [id, b.capacity]),
+    ),
+    bays,
+  }
+}
+
+/** fuel_bay_tests `loaded`: one 15 MW Generator, the default bay, `MOD_A` a 10 MW Firm module. */
+const loadedPools = (module = poolModule(10)) =>
+  poolsGrid({
+    generators: { '101': poolGenerator(15) },
+    bays: { '9001': poolBay(STARTING) },
+    modules: { '401': module },
+  })
+
+describe('pools fuel_math', () => {
+  it('burns a generator share of the load (half_share_burns_half_the_load)', () => {
+    expect(poolGeneratorBurn(SCALE, 2n, 1n, 1n, 1n)).toBe(500_000n)
+    expect(poolGeneratorBurn(SCALE, 2n, 1n, 1n, 1_000n)).toBe(500_000_000n)
+    expect(poolGeneratorBurn(SCALE, 2n, 1n, 1n, 3_000n)).toBe(1_500_000_000n)
+  })
+
+  it('burns at a scaled impulse, ignoring burden (scaled_impulse_burns)', () => {
+    expect(poolGeneratorBurn(46_666_600_000n, 10n, 10n, 10n, 1_000n)).toBe(
+      214_286_021n,
+    )
+  })
+
+  it('caps the burn at u64 max (burn_caps_at_u64_max)', () => {
+    expect(poolGeneratorBurn(1n, U64_MAX, U64_MAX, U64_MAX, 1_000_000n)).toBe(
+      U64_MAX,
+    )
+  })
+
+  it('scales output by volatility up to the limit (volatility_share_caps_at_scale)', () => {
+    expect(volatilityShare(SCALE / 2n, SCALE)).toBe(SCALE / 2n)
+    expect(volatilityShare(2n * SCALE, SCALE)).toBe(SCALE)
+    expect(volatilityShare(1n, U64_MAX)).toBe(1n)
+    expect(volatilityShare(0n, SCALE)).toBe(0n)
+  })
+
+  it('floors output, at least 1 MW (output_scales_with_volatility)', () => {
+    expect(generatorOutput(15n, volatilityShare(SCALE, 2n * SCALE))).toBe(7n)
+    expect(generatorOutput(15n, 1n)).toBe(1n)
+    expect(generatorOutput(15n, 0n)).toBe(0n)
+  })
+})
+
+describe('pools grid projection', () => {
+  it('burns 10 MW at impulse 90 over 10 s (burn_over_time_and_view_matches_settle)', () => {
+    const grid = loadedPools()
+    expect(projectedFuel(grid, 10_000)).toBe(STARTING - 1_111_111_112n)
+    expect(fuelBurn(grid, 10_000)).toBe(1_111_111_112n)
+    const live = projectGrid(grid, 10_000)
+    expect(live.capacityMw).toBe(15n)
+    expect(live.draws).toEqual({ '401': 10n })
+    expect(live.on).toBe(true)
+  })
+
+  it('burns 400 kg an hour at 10 MW and impulse 90', () => {
+    expect(fuelBurnPerHour(loadedPools())).toBe(400n * KG)
+  })
+
+  it('splits the load between generators by output (each_generator_burns_its_share)', () => {
+    const grid = poolsGrid({
+      generators: {
+        '101': poolGenerator(100),
+        '102': poolGenerator(50, { impulseLimit: 30n * SCALE }),
+      },
+      bays: { '9001': poolBay(STARTING) },
+      modules: { '401': poolModule(120) },
+    })
+    expect(projectedFuel(grid, 1_000)).toBe(
+      STARTING - (888_888_889n + 1_333_333_334n),
+    )
+  })
+
+  it('burns online bays of a type together (online_bays_burn_in_proportion)', () => {
+    const quarter = 12_500n * KG
+    const grid = poolsGrid({
+      generators: { '101': poolGenerator(15) },
+      bays: { '9001': poolBay(STARTING), '9002': poolBay(quarter) },
+      modules: { '401': poolModule(10) },
+    })
+    expect(projectedFuel(grid, 10_000)).toBe(
+      STARTING + quarter - (888_888_890n + 222_222_222n),
+    )
+  })
+
+  it('leaves offline bays out', () => {
+    const grid = poolsGrid({
+      generators: { '101': poolGenerator(15) },
+      bays: {
+        '9001': poolBay(STARTING),
+        '9002': poolBay(STARTING, { online: false }),
+      },
+      modules: { '401': poolModule(10) },
+    })
+    expect(projectedFuel(grid, 10_000)).toBe(STARTING - 1_111_111_112n)
+  })
+
+  it('burns each pool at its own impulse (two_pools_burn_independently)', () => {
+    const other = 1_000n * KG
+    const grid = poolsGrid({
+      generators: {
+        '101': poolGenerator(15),
+        '102': poolGenerator(15, { fuelType: '8' }),
+      },
+      bays: {
+        '9001': poolBay(STARTING),
+        '9002': poolBay(other, { fuelType: '8', impulse: 45n * SCALE }),
+      },
+      modules: { '401': poolModule(20) },
+    })
+    expect(projectGrid(grid, 0).capacityMw).toBe(30n)
+    expect(projectedFuel(grid, 1_000)).toBe(
+      STARTING + other - (111_111_112n + 222_222_223n),
+    )
+  })
+
+  it('runs out at the exact millisecond and trips a Firm load (online_check_aborts_after_fuel_runs_out)', () => {
+    const grid = loadedPools()
+    // 50_000 kg at 400 kg/h: 125 h
+    expect(msUntilEmpty(grid, 0)).toBe(450_000_000)
+    expect(msUntilEmpty(grid, 50_000_000)).toBe(400_000_000)
+    const after = projectGrid(grid, 10_000_000_000_000)
+    expect(after.fuelNow).toBe(0n)
+    expect(after.on).toBe(false)
+    expect(after.draws).toEqual({ '401': 0n })
+    expect(after.outputs).toEqual({ '101': 0n })
+  })
+
+  it('stays on when an Elastic load runs dry (elastic_run_out_does_not_trip)', () => {
+    const after = projectGrid(
+      loadedPools(poolModule(10, 'Elastic')),
+      10_000_000_000_000,
+    )
+    expect(after.on).toBe(true)
+    expect(after.draws).toEqual({ '401': 0n })
+  })
+
+  it('stops burning when the first pool runs dry and trips the Firm load', () => {
+    const grid = poolsGrid({
+      generators: {
+        '101': poolGenerator(15),
+        '102': poolGenerator(15, { fuelType: '8' }),
+      },
+      bays: {
+        '9001': poolBay(STARTING),
+        '9002': poolBay(1_000n * KG, { fuelType: '8', impulse: 45n * SCALE }),
+      },
+      modules: { '401': poolModule(20) },
+    })
+    // 10 MW of the type-8 pool's 1_000 kg at impulse 45: 4_500 s; then 20 MW
+    // no longer fits the 15 MW left, so the grid trips and nothing burns
+    expect(msUntilEmpty(grid, 0)).toBe(4_500_000)
+    const after = projectGrid(grid, 4_500_000)
+    expect(after.on).toBe(false)
+    expect(after.capacityMw).toBe(15n)
+  })
+
+  it('burns nothing with no load', () => {
+    const grid = loadedPools({
+      ...poolModule(10),
+      desiredOnline: false,
+      activeDraw: '0',
+    })
+    expect(projectedFuel(grid, 10_000)).toBe(STARTING)
+    expect(fuelBurnPerHour(grid)).toBe(0n)
+    expect(msUntilEmpty(grid, 0)).toBeNull()
+  })
+})
+
+describe('normalizing for display', () => {
+  it('reads pools values as MW and kg at 10^4', () => {
+    const grid = loadedPools()
+    expect(normalizeMw(grid, '15')).toBe(150_000n)
+    expect(normalizeFuel(grid, 99_819_888_888n)).toBe(998_198n)
+    expect(fromFixed(normalizeFuel(grid, 99_819_888_888n))).toBeCloseTo(
+      99.82,
+      2,
+    )
+    expect(fuelUnit(grid)).toBe('kg')
+  })
+
+  it('leaves fuelFactor values as they are', () => {
+    const grid = loadedGrid()
+    expect(normalizeMw(grid, '150000')).toBe(150_000n)
+    expect(normalizeFuel(grid, '500000000')).toBe(500_000_000n)
+    expect(fuelUnit(grid)).toBe('units')
   })
 })

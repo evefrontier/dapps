@@ -8,6 +8,16 @@ export const mw = (raw: bigint | string): string =>
 export const units = (raw: bigint | string): string =>
   Math.round(fromFixed(raw)).toLocaleString('en-US')
 
+/** kg from a fixed-point value, up to two decimals, with thousands separators: `998198` → `99.82`. */
+export const kg = (raw: bigint | string): string =>
+  fromFixed(raw).toLocaleString('en-US', { maximumFractionDigits: 2 })
+
+/** A fuel amount (fixed point, see `normalizeFuel`) in its unit's style: whole units, or kg to two decimals. */
+export const fuelAmount = (
+  raw: bigint | string,
+  unit: 'units' | 'kg',
+): string => (unit === 'kg' ? kg(raw) : units(raw))
+
 /** m³ from hundredths of a m³, up to two decimals, with thousands separators: `250` → `2.5`. */
 export const m3 = (raw: bigint | string): string =>
   (Number(raw) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 })

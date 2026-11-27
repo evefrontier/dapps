@@ -10,6 +10,7 @@ import type {
   EntityComponent,
   EntityData,
   EntityDrawKind,
+  EntityFuelBay,
   EntityGenerator,
   EntityInventory,
   EntityLayout,
@@ -17,6 +18,7 @@ import type {
   EntityPowerGrid,
   EntityPowerModule,
 } from '../types'
+import { projectGrid } from './fuel'
 import { createLogger } from './logger'
 
 /**
@@ -226,9 +228,41 @@ function parseDrawKind(variant: string, moduleId: string): EntityDrawKind {
   return 'Firm'
 }
 
-function parsePowerGrid(inner: PowerGridJson): EntityPowerGrid {
+/**
+ * The grid as world-contracts dev-v1.1.16+ stores it (the `pools` model): fuel
+ * bays pooled by fuel type, Generators with a fuel type and limits, plain MW.
+ * dev-v1.1.12 to v1.1.15 use the same layout at a different scale; see
+ * `PowerGridModel`.
+ */
+interface PoolsPowerGridJson {
+  on_at_last_settled: boolean
+  last_settled_ms: string
+  modules: PowerGridJson['modules']
+  generators: VecMap<{
+    fuel_type: string
+    max_output_mw: string
+    impulse_limit: string
+    volatility_limit: string
+    online: boolean
+  }>
+  bays: VecMap<{
+    capacity: string
+    online: boolean
+    fuel: {
+      fuel_type: string | null
+      quantity: string
+      impulse: string
+      containment_burden: string
+      volatility: string
+    }
+  }>
+}
+
+function parseModules(
+  json: PowerGridJson['modules'],
+): Record<string, EntityPowerModule> {
   const modules: Record<string, EntityPowerModule> = {}
-  for (const { key, value } of inner.modules.contents) {
+  for (const { key, value } of json.contents) {
     modules[key] = {
       desiredOnline: value.desired_online,
       activeDraw: value.active_draw_at_last_settled,
@@ -238,6 +272,79 @@ function parsePowerGrid(inner: PowerGridJson): EntityPowerGrid {
       lineLoss: String(value.module_spec.line_loss),
     }
   }
+  return modules
+}
+
+function parsePoolsGrid(raw: PoolsPowerGridJson): EntityPowerGrid {
+  const generators: Record<string, EntityGenerator> = {}
+  for (const { key, value } of raw.generators?.contents ?? []) {
+    generators[key] = {
+      online: value.online,
+      maxOutputMw: value.max_output_mw,
+      containmentReduction: '0',
+      baseFuelRate: '0',
+      fuelType: String(value.fuel_type),
+      impulseLimit: value.impulse_limit,
+      volatilityLimit: value.volatility_limit,
+    }
+  }
+  const bays: Record<string, EntityFuelBay> = {}
+  const fuelSources: Record<string, string> = {}
+  let quantity = 0n
+  let capacity = 0n
+  let impulse = 0n
+  let burden = 0n
+  for (const { key, value } of raw.bays?.contents ?? []) {
+    const fuel = value.fuel
+    bays[key] = {
+      capacity: value.capacity,
+      online: value.online,
+      fuel: {
+        fuelType: fuel.fuel_type == null ? null : String(fuel.fuel_type),
+        quantity: fuel.quantity,
+        impulse: fuel.impulse,
+        containmentBurden: fuel.containment_burden,
+        volatility: fuel.volatility,
+      },
+    }
+    fuelSources[key] = value.capacity
+    if (value.online) {
+      // `online_fuel`: online bays, stats weighted by quantity
+      const held = BigInt(fuel.quantity)
+      quantity += held
+      capacity += BigInt(value.capacity)
+      impulse += held * BigInt(fuel.impulse)
+      burden += held * BigInt(fuel.containment_burden)
+    }
+  }
+  const grid: EntityPowerGrid = {
+    model: 'pools',
+    on: raw.on_at_last_settled,
+    fuelQuantity: quantity.toString(),
+    fuelCapacity: capacity.toString(),
+    capacityMw: '0',
+    lastSettledMs: raw.last_settled_ms,
+    fuelImpulse: quantity > 0n ? (impulse / quantity).toString() : '0',
+    fuelContainmentBurden: quantity > 0n ? (burden / quantity).toString() : '0',
+    modules: parseModules(raw.modules),
+    generators,
+    fuelSources,
+    bays,
+  }
+  // `capacity_mw`: the generators' output as of the last settle
+  grid.capacityMw = projectGrid(
+    grid,
+    Number(raw.last_settled_ms),
+  ).capacityMw.toString()
+  return grid
+}
+
+function parsePowerGrid(
+  raw: PowerGridJson | PoolsPowerGridJson,
+): EntityPowerGrid {
+  if ('on_at_last_settled' in raw) return parsePoolsGrid(raw)
+  const inner = raw
+  const modules = parseModules(inner.modules)
   const generators: Record<string, EntityGenerator> = {}
   for (const { key, value } of inner.generators.contents) {
     generators[key] = {

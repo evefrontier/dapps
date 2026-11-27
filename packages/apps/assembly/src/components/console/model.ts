@@ -1,6 +1,7 @@
 import {
   type EntityData,
   type EntityInventory,
+  fuelUnit,
   type GeneratorStatus,
   type GridStatus,
   type GridSummary,
@@ -9,10 +10,12 @@ import {
   type ModuleStatus,
   moduleStates,
   type NoPowerReason,
+  normalizeFuel,
+  normalizeMw,
   projectedFuel,
 } from '@evefrontier/dapp-kit'
 import type { ConsoleTab } from '@eveworld/ui-components'
-import { mw, shortCode, units } from './format'
+import { fuelAmount, mw, shortCode } from './format'
 
 /**
  * What the console draws, worked out from the parsed entity. Display names
@@ -145,7 +148,7 @@ function cardFor(
     const status =
       generatorStates(grid, nowMs).find((g) => g.componentId === componentId)
         ?.status ?? 'off'
-    const output = `${mw(generator.maxOutputMw)} MW`
+    const output = `${mw(normalizeMw(grid, generator.maxOutputMw))} MW`
     const { lamp, label, detail } = GENERATOR_STATUS[status]
     return {
       ...base,
@@ -173,7 +176,10 @@ function cardFor(
       lamp: burning ? 'on' : hasFuel ? 'off' : 'wait',
       statusLabel: burning ? 'Feeding' : hasFuel ? 'Idle' : 'Empty',
       detail: null,
-      spec: { label: 'Holds', value: `${units(fuelCapacity)} units` },
+      spec: {
+        label: 'Holds',
+        value: `${fuelAmount(normalizeFuel(grid, fuelCapacity), fuelUnit(grid))} ${fuelUnit(grid)}`,
+      },
     }
   }
 

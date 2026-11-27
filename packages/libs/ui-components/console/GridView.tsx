@@ -29,6 +29,8 @@ export interface FuelPanelData {
   /** The projected amount now, e.g. "≈ 4,200". */
   amount: string
   capacity: string
+  /** What `amount` and `capacity` count, e.g. "kg". Defaults to "units". */
+  unit?: string
   /** The estimate line: how long is left, or a status. */
   estimate: { left: string } | string
   sources: { id: string; label: string; units: string }[]
@@ -111,7 +113,10 @@ const FuelPanel = ({ fuel }: { fuel: FuelPanelData }) => {
       </div>
       <div className="fuel-n">
         <span>
-          <b>{fuel.amount}</b> <small>/ {fuel.capacity} units</small>
+          <b>{fuel.amount}</b>{' '}
+          <small>
+            / {fuel.capacity} {fuel.unit ?? 'units'}
+          </small>
         </span>
         <span className="est">
           {typeof fuel.estimate === 'string' ? (
