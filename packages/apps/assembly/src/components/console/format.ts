@@ -1,27 +1,36 @@
 import { fromFixed } from '@evefrontier/dapp-kit'
 
+/**
+ * The locale numbers are shown in: the viewer's in a browser, so `1.000,00`
+ * in German; en-US elsewhere (tests, scripts), so output is stable.
+ */
+export const displayLocale = (): string =>
+  typeof window !== 'undefined' && typeof navigator !== 'undefined'
+    ? (navigator.languages?.[0] ?? navigator.language ?? 'en-US')
+    : 'en-US'
+
 /** MW from a fixed-point value, up to two decimals: `150000` → `15`, `2500` → `0.25`. */
 export const mw = (raw: bigint | string): string =>
-  (Math.round(fromFixed(raw) * 100) / 100).toString()
+  fromFixed(raw).toLocaleString(displayLocale(), { maximumFractionDigits: 2 })
 
-/** A plain number from a fixed-point value, up to two decimals, with thousands separators: `900000` → `90`. */
+/** A plain number from a fixed-point value, up to two decimals, with grouping: `900000` → `90`. */
 export const decimal = (raw: bigint | string): string =>
-  fromFixed(raw).toLocaleString('en-US', { maximumFractionDigits: 2 })
+  fromFixed(raw).toLocaleString(displayLocale(), { maximumFractionDigits: 2 })
 
-/** Whole units from a fixed-point value, with thousands separators. */
+/** Whole units from a fixed-point value, with grouping. */
 export const units = (raw: bigint | string): string =>
-  Math.round(fromFixed(raw)).toLocaleString('en-US')
+  Math.round(fromFixed(raw)).toLocaleString(displayLocale())
 
-/** kg from a fixed-point value, two decimals, with thousands separators: `998198` → `99.82`, `10000000` → `1,000.00`. */
+/** kg from a fixed-point value, two decimals, with grouping: `998198` → `99.82`, `10000000` → `1,000.00`. */
 export const kg = (raw: bigint | string): string =>
-  fromFixed(raw).toLocaleString('en-US', {
+  fromFixed(raw).toLocaleString(displayLocale(), {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })
 
-/** A burn rate from a fixed-point value per hour, one decimal, with thousands separators: `400000` → `40.0`. */
+/** A burn rate from a fixed-point value per hour, one decimal, with grouping: `400000` → `40.0`. */
 export const burnRate = (raw: bigint | string): string =>
-  fromFixed(raw).toLocaleString('en-US', {
+  fromFixed(raw).toLocaleString(displayLocale(), {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   })
@@ -32,13 +41,15 @@ export const fuelAmount = (
   unit: 'units' | 'kg',
 ): string => (unit === 'kg' ? kg(raw) : units(raw))
 
-/** m³ from hundredths of a m³, up to two decimals, with thousands separators: `250` → `2.5`. */
+/** m³ from hundredths of a m³, up to two decimals, with grouping: `250` → `2.5`. */
 export const m3 = (raw: bigint | string): string =>
-  (Number(raw) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 })
+  (Number(raw) / 100).toLocaleString(displayLocale(), {
+    maximumFractionDigits: 2,
+  })
 
-/** A count with thousands separators. */
+/** A count with grouping. */
 export const count = (n: number | bigint | string): string =>
-  Number(n).toLocaleString('en-US')
+  Number(n).toLocaleString(displayLocale())
 
 /** `3 h 05 m` from milliseconds. */
 export const hoursMinutes = (ms: number): string => {

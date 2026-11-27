@@ -9,6 +9,7 @@
 - the console clock ticks every second, so fuel, the gauge and the time left count down live; the time left reads `2 h 03 m`, or `12 m 05 s` below an hour
 - new flag `assembly-update-transport`, `subscription` by default or `polling`: the console updates live over the GraphQL subscription endpoint and falls back to polling when the subscription fails
 - the Airlock tab lists what each airlock holds for every role, visitors included
+- numbers on the console are formatted in the viewer's browser locale
 - Updated dependencies
   - @eveworld/ui-components@0.3.1
   - @evefrontier/dapp-kit@0.2.0-alpha.1

@@ -1,9 +1,11 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   ago,
   burnRate,
   count,
+  decimal,
+  displayLocale,
   fuelAmount,
   hostOf,
   hoursMinutes,
@@ -78,5 +80,29 @@ describe('format', () => {
     )
     expect(hostOf('https://kestrel.example/')).toBe('kestrel.example')
     expect(hostOf('not a url')).toBe('not a url')
+  })
+})
+
+describe('displayLocale', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('is en-US outside a browser', () => {
+    expect(displayLocale()).toBe('en-US')
+    expect(kg('10000000')).toBe('1,000.00')
+  })
+
+  it("formats in the viewer's locale in a browser", () => {
+    vi.stubGlobal('window', {})
+    vi.stubGlobal('navigator', { languages: ['de-DE'], language: 'de-DE' })
+    expect(displayLocale()).toBe('de-DE')
+    expect(kg('10000000')).toBe('1.000,00')
+    expect(burnRate('400000')).toBe('40,0')
+    expect(mw(2500n)).toBe('0,25')
+    expect(units('12345678')).toBe('1.235')
+    expect(m3('1234500')).toBe('12.345')
+    expect(count(1234)).toBe('1.234')
+    expect(decimal('900000')).toBe('90')
   })
 })
