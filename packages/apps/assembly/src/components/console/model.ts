@@ -189,7 +189,7 @@ function cardFor(
       detail: feeding
         ? `Feeding ${perHour(source?.perHour ?? 0n)}`
         : empty
-          ? `Holds ${holds}`
+          ? `0 of ${holds}`
           : 'Nothing is burning it',
       spec: { label: 'Holds', value: holds },
     }

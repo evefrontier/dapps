@@ -144,13 +144,14 @@ describe('buildBoard', () => {
     })
   })
 
-  it('shows an empty fuel source with what it holds', () => {
+  it('shows an empty fuel source as none of its capacity', () => {
     const dry = entity()
     dry.powerGrid = { ...dry.powerGrid!, fuelQuantity: '0' }
     expect(cardsOf(buildBoard(dry, 0))['002']).toMatchObject({
       lamp: 'wait',
       statusLabel: 'Empty',
-      detail: 'Holds 1,000 units',
+      detail: '0 of 1,000 units',
+      spec: { label: 'Holds', value: '1,000 units' },
     })
   })
 
