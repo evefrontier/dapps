@@ -153,11 +153,9 @@ describe('startEntitySubscription', () => {
 })
 
 describe('createEventRefetchScheduler', () => {
-  it('runs at each delay and re-arms on every call', async () => {
+  it('refetches first, then confirms, after one event', async () => {
     const refetch = vi.fn(async () => {})
-    const scheduled = createEventRefetchScheduler(refetch, [250, 1500])
-    scheduled()
-    await vi.advanceTimersByTimeAsync(200)
+    const scheduled = createEventRefetchScheduler(refetch, [250, 1500, 3500])
     scheduled()
     await vi.advanceTimersByTimeAsync(249)
     expect(refetch).not.toHaveBeenCalled()
@@ -165,6 +163,38 @@ describe('createEventRefetchScheduler', () => {
     expect(refetch).toHaveBeenCalledTimes(1)
     await vi.advanceTimersByTimeAsync(1250)
     expect(refetch).toHaveBeenCalledTimes(2)
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(refetch).toHaveBeenCalledTimes(3)
+  })
+
+  it('does not postpone a pending first refetch', async () => {
+    const refetch = vi.fn(async () => {})
+    const scheduled = createEventRefetchScheduler(refetch, [250, 1500])
+    scheduled()
+    await vi.advanceTimersByTimeAsync(200)
+    scheduled()
+    await vi.advanceTimersByTimeAsync(50)
+    // Still 250 ms after the first event, not after the second
+    expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps refetching through a steady stream of events, then confirms after the last', async () => {
+    const refetch = vi.fn(async () => {})
+    const scheduled = createEventRefetchScheduler(refetch, [250, 1500, 3500])
+    // An event every 100 ms for 2 s, the last at 1900 ms
+    for (let i = 0; i < 20; i++) {
+      scheduled()
+      await vi.advanceTimersByTimeAsync(100)
+    }
+    // First refetches at 250, 550, 850, 1150, 1450 and 1750 ms; the
+    // confirmations keep moving with the stream
+    expect(refetch).toHaveBeenCalledTimes(6)
+    // The pending first (2050 ms), then the confirmations 1.5 s and 3.5 s
+    // after the last event (3400 and 5400 ms)
+    await vi.advanceTimersByTimeAsync(3400)
+    expect(refetch).toHaveBeenCalledTimes(9)
+    await vi.advanceTimersByTimeAsync(10_000)
+    expect(refetch).toHaveBeenCalledTimes(9)
   })
 
   it('reports a failed refetch and can be cancelled', async () => {
@@ -178,6 +208,19 @@ describe('createEventRefetchScheduler', () => {
     expect(onError).toHaveBeenCalledTimes(1)
     scheduled.cancel()
     await vi.advanceTimersByTimeAsync(500)
+    expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('cancels a pending first refetch as well as the confirmations', async () => {
+    const refetch = vi.fn(async () => {})
+    const scheduled = createEventRefetchScheduler(refetch, [250, 1500])
+    scheduled()
+    scheduled.cancel()
+    await vi.advanceTimersByTimeAsync(5_000)
+    expect(refetch).not.toHaveBeenCalled()
+    // And it schedules afresh afterwards
+    scheduled()
+    await vi.advanceTimersByTimeAsync(250)
     expect(refetch).toHaveBeenCalledTimes(1)
   })
 })
