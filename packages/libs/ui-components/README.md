@@ -42,7 +42,7 @@ Everything is scoped under `.gc` (the console) and `.gc-toast-host` (the toast),
 | `DetailsFormView` | The Edit details form (name, description, dapp URL), controlled |
 | `MainBreakerView` | The main breaker: a lever with the hold-to-cut-power box, or a lamp plate |
 | `GridView` | Readouts, banner, fuel panel and the board of breaker cards; a `breaker` slot |
-| `AirlockView` | One card per airlock, with contents when given |
+| `AirlockView` | One card per airlock: how full it is and what it holds |
 | `DappView` | The attached dapp in a sandboxed iframe, or why it isn't shown |
 | `AccessView` | The Controllers list and the add form, controlled |
 | `ToastView` | The transaction toast: Sending, Done or Failed |

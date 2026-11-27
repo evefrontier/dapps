@@ -286,15 +286,17 @@ describe('airlockCards', () => {
     },
   ] as AirlockRow[]
 
-  it('shows how full each airlock is and hides the contents from visitors', () => {
-    const [card] = airlockCards(airlocks, {}, false)
+  it('shows how full each airlock is and what it holds', () => {
+    const [card] = airlockCards(airlocks, { '99': 'Ore' })
     expect(card).toMatchObject({ name: 'Storage', fraction: 0.25 })
-    expect(card?.items).toBeUndefined()
+    expect(card?.items).toEqual([
+      { id: '99', name: 'Ore', quantity: '2', volume: '0.2' },
+    ])
   })
 
-  it('lists the contents for the shell and controllers', () => {
-    const [card] = airlockCards(airlocks, { '99': 'Ore' }, true)
-    expect(card?.items?.[0]).toMatchObject({ name: 'Ore', quantity: '2' })
+  it('names an item by its type id until its name loads', () => {
+    const [card] = airlockCards(airlocks, {})
+    expect(card?.items[0]?.name).toBe('Type 99')
   })
 })
 

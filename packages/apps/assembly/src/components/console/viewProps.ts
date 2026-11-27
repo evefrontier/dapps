@@ -227,11 +227,14 @@ export function boardSections(
   }))
 }
 
-/** The airlock cards; `showContents` adds what each holds. */
+/**
+ * The airlock cards: how full each is and what it holds. The same for every
+ * role: an inventory is one shared balance per item on chain, not split by
+ * owner, and it is public.
+ */
 export function airlockCards(
   airlocks: AirlockRow[],
   names: Record<string, string>,
-  showContents: boolean,
 ): AirlockData[] {
   return airlocks.map(
     ({ componentId, code, typeId, sectionName, inventory }) => {
@@ -244,14 +247,12 @@ export function airlockCards(
         used: m3(inventory.used),
         capacity: m3(inventory.capacity),
         fraction: capacity > 0 ? Number(inventory.used) / capacity : 0,
-        ...(showContents && {
-          items: inventory.items.map((item) => ({
-            id: item.typeId,
-            name: names[item.typeId] || `Type ${item.typeId}`,
-            quantity: count(item.quantity),
-            volume: m3(BigInt(item.quantity) * BigInt(item.volume)),
-          })),
-        }),
+        items: inventory.items.map((item) => ({
+          id: item.typeId,
+          name: names[item.typeId] || `Type ${item.typeId}`,
+          quantity: count(item.quantity),
+          volume: m3(BigInt(item.quantity) * BigInt(item.volume)),
+        })),
       }
     },
   )
