@@ -353,6 +353,138 @@ export function projectGrid(
   }
 }
 
+/**
+ * Who burns the fuel and where it comes from, per hour at the grants in force
+ * at `nowMs`. All values at the grid's fuel scale (see {@link fuelScale}).
+ *
+ * @category Utilities - Power
+ */
+export interface BurnBreakdown {
+  /** The whole grid; the same as {@link fuelBurnPerHour} at `nowMs` */
+  perHour: bigint
+  /** By generator component id: what it burns. 0 while it supplies nothing. */
+  generators: Record<string, bigint>
+  /** By fuel source (fuel bay) component id: what is drawn from it, and the fuel it holds now */
+  sources: Record<string, { perHour: bigint; fuelNow: bigint }>
+  /**
+   * By module component id: its share of the burn, by draw. What switching it
+   * off would save, give or take rounding; 0 for a module drawing nothing.
+   */
+  modules: Record<string, bigint>
+}
+
+/**
+ * Split the grid's burn per hour by generator, fuel source and module.
+ *
+ * On a `pools` grid each generator burns `generator_burn` over an hour at its
+ * own output and usable impulse; each online bay feeds its pool's burn in
+ * proportion to what it holds, as `take_from_online_bays` takes it. On a
+ * `fuelFactor` grid each online generator burns `generator_burn` at the one
+ * pool, and the sources, which only record a capacity, share it by capacity.
+ *
+ * @category Utilities - Power
+ */
+export function burnBreakdown(
+  grid: EntityPowerGrid,
+  nowMs: number,
+): BurnBreakdown {
+  const generators: Record<string, bigint> = {}
+  const sources: BurnBreakdown['sources'] = {}
+  const moduleIds = Object.keys(grid.modules)
+  let draws: bigint[]
+
+  if (modelOf(grid) === 'pools') {
+    const projected = projectPools(grid, nowOf(nowMs))
+    draws = projected.draws
+    const load = loadOf(draws, projected.capacity)
+    const pools = poolsOf(projected.bays)
+    const poolBurns = new Map<string, bigint>()
+    for (const [id, generator] of Object.entries(grid.generators)) {
+      const output = outputFrom(pools, generator)
+      const pool =
+        generator.fuelType === undefined
+          ? undefined
+          : pools.get(generator.fuelType)
+      const burn =
+        load > 0n && output > 0n && pool && generator.fuelType !== undefined
+          ? poolGeneratorBurn(
+              // `fuel_math::usable_impulse`
+              min(pool.impulse, BigInt(generator.impulseLimit ?? '0')),
+              projected.capacity,
+              output,
+              load,
+              MS_PER_HOUR,
+            )
+          : 0n
+      generators[id] = burn
+      if (generator.fuelType !== undefined && burn > 0n) {
+        poolBurns.set(
+          generator.fuelType,
+          (poolBurns.get(generator.fuelType) ?? 0n) + burn,
+        )
+      }
+    }
+    Object.keys(grid.bays ?? {}).forEach((id, i) => {
+      const bay = projected.bays[i]
+      if (!bay) return
+      const pool = bay.fuelType === null ? undefined : pools.get(bay.fuelType)
+      const poolBurn =
+        bay.fuelType === null ? 0n : (poolBurns.get(bay.fuelType) ?? 0n)
+      sources[id] = {
+        perHour:
+          bay.online && pool && pool.quantity > 0n
+            ? (poolBurn * bay.quantity) / pool.quantity
+            : 0n,
+        fuelNow: bay.quantity,
+      }
+    })
+  } else {
+    const fuelNow = projectedFuel(grid, nowMs)
+    // `set_power_grid` regrants at zero capacity when switched off, so an off
+    // grid burns nothing whatever draws it still stores
+    const burning = grid.on && fuelNow > 0n
+    draws = moduleIds.map((id) =>
+      burning ? BigInt(grid.modules[id]?.activeDraw ?? '0') : 0n,
+    )
+    const capacityMw = BigInt(grid.capacityMw)
+    const load = min(usedMw(grid), capacityMw)
+    for (const [id, generator] of Object.entries(grid.generators)) {
+      generators[id] =
+        generator.online && load > 0n && burning
+          ? generatorBurn({
+              impulse: BigInt(grid.fuelImpulse),
+              containmentBurden: BigInt(grid.fuelContainmentBurden),
+              capacityMw,
+              maxOutputMw: BigInt(generator.maxOutputMw),
+              containmentReduction: BigInt(generator.containmentReduction),
+              baseFuelRate: BigInt(generator.baseFuelRate),
+              load,
+              elapsedMs: MS_PER_HOUR,
+            })
+          : 0n
+    }
+    const total = Object.values(generators).reduce((a, b) => a + b, 0n)
+    const totalCapacity = Object.values(grid.fuelSources).reduce(
+      (a, c) => a + BigInt(c),
+      0n,
+    )
+    for (const [id, capacity] of Object.entries(grid.fuelSources)) {
+      const share = (v: bigint) =>
+        totalCapacity > 0n ? (v * BigInt(capacity)) / totalCapacity : 0n
+      sources[id] = { perHour: share(total), fuelNow: share(fuelNow) }
+    }
+  }
+
+  const perHour = Object.values(generators).reduce((a, b) => a + b, 0n)
+  const drawn = draws.reduce((a, b) => a + b, 0n)
+  const modules: Record<string, bigint> = {}
+  moduleIds.forEach((id, i) => {
+    const draw = draws[i] ?? 0n
+    modules[id] = drawn > 0n ? (perHour * draw) / drawn : 0n
+  })
+  return { perHour, generators, sources, modules }
+}
+
 // === `pools` grids: port of dev-v1.1.16+ `power::fuel_math` and `power::power_grid` ===
 
 interface Bay {

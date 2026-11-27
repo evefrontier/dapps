@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   ago,
+  burnRate,
   count,
   fuelAmount,
   hostOf,
@@ -53,7 +54,9 @@ describe('format', () => {
 
   it('turns fixed-point kg into up to two decimals with separators', () => {
     expect(kg(998_198n)).toBe('99.82')
-    expect(kg('10000000')).toBe('1,000')
+    expect(kg('10000000')).toBe('1,000.00')
+    expect(burnRate(400_000n)).toBe('40.0')
+    expect(burnRate('36000000000')).toBe('3,600,000.0')
     expect(fuelAmount(998_198n, 'kg')).toBe('99.82')
     expect(fuelAmount(998_198n, 'units')).toBe('100')
   })

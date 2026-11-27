@@ -5,6 +5,7 @@ import {
   type EntityOwner,
   type EntityPowerGrid,
   type EntityRole,
+  FUEL_SCALE,
   type GridSummary,
   isController,
   type NoPowerReason,
@@ -26,6 +27,7 @@ import type {
 import { httpsUrl } from './dappSource'
 import {
   ago,
+  burnRate,
   count,
   fuelAmount,
   hostOf,
@@ -160,18 +162,22 @@ export function fuelPanel(
   summary: GridSummary,
   nowMs: number,
 ): FuelPanelData {
-  const estimate =
-    summary.msUntilEmpty !== null && summary.fuelNow > 0n
-      ? {
-          left: timeLeft(summary.msUntilEmpty),
-        }
-      : summary.fuelNow === 0n
-        ? 'Empty'
-        : // A run-out can trip a `pools` grid since the last settle
-          !grid.on || summary.status === 'off'
-          ? 'Not burning · main breaker off'
-          : 'Not burning'
   const unit = summary.fuelUnit
+  const burning = summary.fuelBurnPerHour > 0n && summary.drawMw > 0n
+  // Fuel per MW-hour at the current draw, at 10^4 like the summary
+  const perMwHour = burning
+    ? (summary.fuelBurnPerHour * FUEL_SCALE) / summary.drawMw
+    : 0n
+  const burnNote = burning
+    ? `≈ ${burnRate(perMwHour)} ${unit} per MW-hour at impulse ${mw(normalizeFuel(grid, grid.fuelImpulse))}`
+    : summary.fuelNow === 0n
+      ? 'Empty: nothing left to burn'
+      : // A run-out can trip a `pools` grid since the last settle
+        !grid.on || summary.status === 'off'
+        ? 'Not burning · main breaker off'
+        : summary.reason === 'generatorOff'
+          ? 'Not burning · no generator running'
+          : 'Not burning · nothing draws power'
   return {
     settledAgo: ago(nowMs - Number(grid.lastSettledMs)),
     fraction: summary.fuelFraction,
@@ -179,11 +185,21 @@ export function fuelPanel(
     amount: `≈ ${fuelAmount(summary.fuelNow, unit)}`,
     capacity: fuelAmount(summary.fuelCapacity, unit),
     unit,
-    estimate,
+    burn: {
+      burning,
+      rate: burnRate(burning ? summary.fuelBurnPerHour : 0n),
+      rateUnit: `${unit}/h`,
+      drawMw: mw(burning ? summary.drawMw : 0n),
+      runsFor:
+        burning && summary.msUntilEmpty !== null
+          ? timeLeft(summary.msUntilEmpty)
+          : '—',
+    },
+    burnNote,
     sources: Object.entries(grid.fuelSources).map(([id, capacity]) => ({
       id,
       label: `Fuel ${shortCode(id)}`,
-      units: fuelAmount(normalizeFuel(grid, capacity), unit),
+      units: `${fuelAmount(normalizeFuel(grid, capacity), unit)} ${unit}`,
     })),
   }
 }
@@ -206,6 +222,7 @@ export function boardSections(
       specLabel: card.spec.label,
       specValue: card.spec.value,
       detail: card.detail,
+      ...(card.detailTone && { detailTone: card.detailTone }),
     })),
   }))
 }

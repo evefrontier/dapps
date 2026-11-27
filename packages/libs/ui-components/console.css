@@ -694,13 +694,37 @@ html #root {
   color: var(--n50);
   font-size: 12px;
 }
-.gc .est {
-  color: var(--n50);
-  font-size: 12px;
+/* burn: the fuel panel's rate row; the Burn figure lights in fuel orange while something burns */
+.gc .ro.burn {
+  background: var(--bg);
 }
-.gc .est em {
-  font-style: normal;
-  color: var(--ink);
+.gc .ro.burn.on .bn b {
+  color: var(--fuel);
+}
+.gc .ro.burn.on .bn span::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  background: var(--fuel);
+  box-shadow: 0 0 6px var(--fuel);
+  animation: burnpulse 1.6s ease-in-out infinite;
+}
+@keyframes burnpulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gc .ro.burn.on .bn span::after {
+    animation: none;
+  }
+}
+.gc .burn-k {
+  margin: -4px 0 0;
+  font-size: 12px;
+  color: var(--n50);
 }
 .gc .src {
   display: flex;
@@ -863,6 +887,9 @@ html #root {
 .gc .card-s {
   font-size: 12px;
   color: var(--us);
+}
+.gc .card-s.burn-s {
+  color: var(--n50);
 }
 .gc .none-note {
   margin: 0;

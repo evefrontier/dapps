@@ -22,6 +22,8 @@ export type { ErrorType } from './errors'
 export { ERROR_MESSAGES, ERRORS, parseErrorFromMessage } from './errors'
 // Power grid: fuel burn (port of power::fuel_math) and display state
 export {
+  type BurnBreakdown,
+  burnBreakdown,
   FUEL_SCALE,
   fromFixed,
   fuelBurn,

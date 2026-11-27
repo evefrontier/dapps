@@ -31,8 +31,22 @@ export interface FuelPanelData {
   capacity: string
   /** What `amount` and `capacity` count, e.g. "kg". Defaults to "units". */
   unit?: string
-  /** The estimate line: how long is left, or a status. */
-  estimate: { left: string } | string
+  /** The burn row: fuel burned per hour, the draw that burns it, and how long it runs at that rate. */
+  burn: {
+    /** Lights the Burn figure while something burns */
+    burning: boolean
+    /** e.g. "40.0" */
+    rate: string
+    /** e.g. "kg/h" */
+    rateUnit: string
+    /** MW drawn while burning, else "0" */
+    drawMw: string
+    /** e.g. "2 h 03 m", or "—" while nothing burns */
+    runsFor: string
+  }
+  /** Under the burn row: the burn per MW-hour while burning, else why nothing burns. */
+  burnNote: string
+  /** Each fuel source and what it holds, e.g. `{ label: "Fuel #612625", units: "1,000.00 kg" }`. */
   sources: { id: string; label: string; units: string }[]
 }
 
@@ -46,6 +60,8 @@ export interface BreakerCardData {
   specLabel: string
   specValue: string
   detail: string | null
+  /** `burn`: the detail is the card's share of the fuel burn, set in a quieter tone */
+  detailTone?: 'burn'
 }
 
 export interface BoardSectionData {
@@ -118,16 +134,31 @@ const FuelPanel = ({ fuel }: { fuel: FuelPanelData }) => {
             / {fuel.capacity} {fuel.unit ?? 'units'}
           </small>
         </span>
-        <span className="est">
-          {typeof fuel.estimate === 'string' ? (
-            fuel.estimate
-          ) : (
-            <>
-              ≈ <em>{fuel.estimate.left}</em> left
-            </>
-          )}
-        </span>
       </div>
+      <div
+        className={`ro burn ${fuel.burn.burning ? 'on' : ''}`}
+        title="Fuel burned per hour at the current draw: MW drawn × 3600 ÷ fuel impulse, split across the running generators"
+      >
+        <div className="bn">
+          <span>Burn</span>
+          <b>
+            {fuel.burn.rate}
+            <small>{fuel.burn.rateUnit}</small>
+          </b>
+        </div>
+        <div>
+          <span>At draw</span>
+          <b>
+            {fuel.burn.drawMw}
+            <small>MW</small>
+          </b>
+        </div>
+        <div>
+          <span>Runs for</span>
+          <b>{fuel.burn.runsFor}</b>
+        </div>
+      </div>
+      <p className="burn-k">{fuel.burnNote}</p>
       <div className="src">
         {fuel.sources.map((source) => (
           <div key={source.id}>
@@ -155,7 +186,13 @@ const BreakerCard = ({ card }: { card: BreakerCardData }) => (
         <span>{card.specLabel}</span>
         <span>{card.specValue}</span>
       </span>
-      {card.detail && <span className="card-s">{card.detail}</span>}
+      {card.detail && (
+        <span
+          className={`card-s ${card.detailTone === 'burn' ? 'burn-s' : ''}`}
+        >
+          {card.detail}
+        </span>
+      )}
     </span>
   </div>
 )

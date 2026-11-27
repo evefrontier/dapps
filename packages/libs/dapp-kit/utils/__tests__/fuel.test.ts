@@ -6,6 +6,7 @@ import type {
   EntityPowerModule,
 } from '../../types'
 import {
+  burnBreakdown,
   fromFixed,
   fuelBurn,
   fuelBurnPerHour,
@@ -483,5 +484,97 @@ describe('normalizing for display', () => {
     expect(normalizeMw(grid, '150000')).toBe(150_000n)
     expect(normalizeFuel(grid, '500000000')).toBe(500_000_000n)
     expect(fuelUnit(grid)).toBe('units')
+  })
+})
+
+describe('burnBreakdown', () => {
+  it('puts the whole burn on the one generator, bay and module (pools)', () => {
+    // 10 MW at impulse 90: 400 kg an hour
+    expect(burnBreakdown(loadedPools(), 0)).toEqual({
+      perHour: 400n * KG,
+      generators: { '101': 400n * KG },
+      sources: { '9001': { perHour: 400n * KG, fuelNow: STARTING } },
+      modules: { '401': 400n * KG },
+    })
+  })
+
+  it('burns each generator at its own impulse (each_generator_burns_its_share)', () => {
+    const grid = poolsGrid({
+      generators: {
+        '101': poolGenerator(100),
+        '102': poolGenerator(50, { impulseLimit: 30n * SCALE }),
+      },
+      bays: { '9001': poolBay(STARTING) },
+      modules: { '401': poolModule(120) },
+    })
+    const burn = burnBreakdown(grid, 0)
+    // 80 MW at impulse 90 and 40 MW at impulse 30
+    expect(burn.generators).toEqual({ '101': 3_200n * KG, '102': 4_800n * KG })
+    expect(burn.perHour).toBe(fuelBurnPerHour(grid, 0))
+    expect(burn.sources['9001']?.perHour).toBe(8_000n * KG)
+  })
+
+  it('draws from each pool for its own generators (two_pools_burn_independently)', () => {
+    const grid = poolsGrid({
+      generators: {
+        '101': poolGenerator(15),
+        '102': poolGenerator(15, { fuelType: '8' }),
+      },
+      bays: {
+        '9001': poolBay(STARTING),
+        '9002': poolBay(1_000n * KG, { fuelType: '8', impulse: 45n * SCALE }),
+      },
+      modules: { '401': poolModule(20) },
+    })
+    const burn = burnBreakdown(grid, 0)
+    // 10 MW each, at impulse 90 and 45
+    expect(burn.generators).toEqual({ '101': 400n * KG, '102': 800n * KG })
+    expect(burn.sources['9001']?.perHour).toBe(400n * KG)
+    expect(burn.sources['9002']?.perHour).toBe(800n * KG)
+  })
+
+  it('shares a pool between its bays by what they hold', () => {
+    const quarter = 12_500n * KG
+    const burn = burnBreakdown(
+      poolsGrid({
+        generators: { '101': poolGenerator(15) },
+        bays: { '9001': poolBay(STARTING), '9002': poolBay(quarter) },
+        modules: { '401': poolModule(10) },
+      }),
+      0,
+    )
+    expect(burn.sources['9001']?.perHour).toBe(320n * KG)
+    expect(burn.sources['9002']?.perHour).toBe(80n * KG)
+  })
+
+  it('splits the burn between modules by draw', () => {
+    const burn = burnBreakdown(
+      poolsGrid({
+        generators: { '101': poolGenerator(15) },
+        bays: { '9001': poolBay(STARTING) },
+        modules: { '401': poolModule(9), '402': poolModule(1, 'Elastic') },
+      }),
+      0,
+    )
+    expect(burn.modules).toEqual({ '401': 360n * KG, '402': 40n * KG })
+  })
+
+  it('burns nothing once the grid has tripped', () => {
+    const burn = burnBreakdown(loadedPools(), 10_000_000_000_000)
+    expect(burn.perHour).toBe(0n)
+    expect(burn.sources['9001']).toEqual({ perHour: 0n, fuelNow: 0n })
+    expect(burn.modules).toEqual({ '401': 0n })
+  })
+
+  it('matches fuelBurnPerHour on a fuelFactor grid and burns nothing while it is off', () => {
+    const grid = loadedGrid()
+    const burn = burnBreakdown(grid, 0)
+    expect(burn.perHour).toBe(fuelBurnPerHour(grid))
+    expect(burn.sources['9001']).toEqual({
+      perHour: burn.perHour,
+      fuelNow: BigInt(STARTING_FUEL),
+    })
+    expect(burn.modules).toEqual({ '401': burn.perHour })
+    expect(burnBreakdown({ ...grid, on: false }, 0).perHour).toBe(0n)
   })
 })

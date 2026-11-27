@@ -140,6 +140,17 @@ describe('buildBoard', () => {
       kind: 'fuel',
       lamp: 'off',
       statusLabel: 'Idle',
+      detail: 'Nothing is burning it',
+    })
+  })
+
+  it('shows an empty fuel source with what it holds', () => {
+    const dry = entity()
+    dry.powerGrid = { ...dry.powerGrid!, fuelQuantity: '0' }
+    expect(cardsOf(buildBoard(dry, 0))['002']).toMatchObject({
+      lamp: 'wait',
+      statusLabel: 'Empty',
+      detail: 'Holds 1,000 units',
     })
   })
 
@@ -149,20 +160,24 @@ describe('buildBoard', () => {
       kind: 'generator',
       lamp: 'on',
       statusLabel: 'Running',
-      detail: 'Making 15 MW',
+      // base rate: 1 unit a second
+      detail: 'Making 15 MW · burns 3,600.0 units/h',
       spec: { label: 'Output', value: '15 MW' },
     })
     expect(cards['002']).toMatchObject({
       kind: 'fuel',
       lamp: 'on',
       statusLabel: 'Feeding',
+      detail: 'Feeding 3,600.0 units/h',
       spec: { label: 'Holds', value: '1,000 units' },
     })
     expect(cards['010']).toMatchObject({
       kind: 'module',
       typeId: '95315',
       statusLabel: 'Online',
-      detail: '0.1 MW drawn',
+      // 0.1 of the 5.1 MW drawn
+      detail: '≈ 70.6 units/h of the burn',
+      detailTone: 'burn',
       spec: { label: 'Firm', value: 'needs 0.1 MW' },
     })
     expect(cards['011']).toMatchObject({

@@ -8,9 +8,19 @@ export const mw = (raw: bigint | string): string =>
 export const units = (raw: bigint | string): string =>
   Math.round(fromFixed(raw)).toLocaleString('en-US')
 
-/** kg from a fixed-point value, up to two decimals, with thousands separators: `998198` → `99.82`. */
+/** kg from a fixed-point value, two decimals, with thousands separators: `998198` → `99.82`, `10000000` → `1,000.00`. */
 export const kg = (raw: bigint | string): string =>
-  fromFixed(raw).toLocaleString('en-US', { maximumFractionDigits: 2 })
+  fromFixed(raw).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+
+/** A burn rate from a fixed-point value per hour, one decimal, with thousands separators: `400000` → `40.0`. */
+export const burnRate = (raw: bigint | string): string =>
+  fromFixed(raw).toLocaleString('en-US', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })
 
 /** A fuel amount (fixed point, see `normalizeFuel`) in its unit's style: whole units, or kg to two decimals. */
 export const fuelAmount = (
