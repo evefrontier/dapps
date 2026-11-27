@@ -29,7 +29,13 @@ function createMockClient() {
   return {
     client,
     subs,
-    connect: (reconnected = false) => subs[0]?.onConnected?.(reconnected),
+    /** Connect every stream */
+    connect: (reconnected = false) => {
+      for (const sub of subs) sub.onConnected?.(reconnected)
+    },
+    /** Connect one stream, by package order */
+    connectOne: (index: number, reconnected = false) =>
+      subs[index]?.onConnected?.(reconnected),
     deliver: (type: string, json: Record<string, unknown>, tx = 'tx1') =>
       subs[0]?.sink.next({
         data: {
@@ -72,13 +78,25 @@ afterEach(() => {
 })
 
 describe('startEntitySubscription', () => {
-  it('opens one subscription per package and goes live on the first connect', () => {
+  it('opens one subscription per package and goes live once every one has connected', () => {
     const { mock, statuses } = start()
     expect(mock.subs).toHaveLength(2)
     expect(statuses).toEqual(['connecting'])
-    mock.connect()
-    mock.subs[1]?.onConnected?.(false)
+    mock.connectOne(0)
+    mock.connectOne(0)
+    expect(statuses).toEqual(['connecting'])
+    mock.connectOne(1)
     expect(statuses).toEqual(['connecting', 'live'])
+  })
+
+  it('fails, naming the package, when one stream never connects', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { mock, statuses } = start({ connectTimeoutMs: 10_000 })
+    mock.connectOne(0)
+    await vi.advanceTimersByTimeAsync(10_000)
+    expect(statuses).toEqual(['connecting', 'failed'])
+    for (const sub of mock.subs) expect(sub.dispose).toHaveBeenCalled()
+    warn.mockRestore()
   })
 
   it('refetches a few times after an event about the entity, for indexer lag', async () => {
@@ -103,7 +121,7 @@ describe('startEntitySubscription', () => {
   it('refetches once right away after a reconnect', () => {
     const { mock, refetch } = start()
     mock.connect()
-    mock.connect(true)
+    mock.connectOne(1, true)
     expect(refetch).toHaveBeenCalledTimes(1)
   })
 

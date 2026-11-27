@@ -215,8 +215,8 @@ export function createGraphqlEventStream({
   eventTypes: readonly string[]
   /** Which delivered types to keep; defaults to exact `eventTypes` matches */
   isTracked?: EventTypeMatcher
-  /** Called on every (re)connect of any of the subscriptions */
-  onConnected?: (reconnected: boolean) => void
+  /** Called on every (re)connect of any of the subscriptions, with that subscription's package filter */
+  onConnected?: (reconnected: boolean, filter: string) => void
   onError?: (error: unknown) => void
   onEvents?: StreamEventBatchHandler
   onGap?: StreamGapHandler
@@ -250,9 +250,9 @@ export function createGraphqlEventStream({
     },
   }
 
-  const onConnected = (reconnected: boolean) => {
+  const onConnected = (filter: string) => (reconnected: boolean) => {
     if (stopped) return
-    onEachConnect?.(reconnected)
+    onEachConnect?.(reconnected, filter)
     // Only reconnects can have missed events; the initial connect needs no
     // backfill because the provider already did its initial fetch.
     if (reconnected) onGap?.()
@@ -263,7 +263,7 @@ export function createGraphqlEventStream({
       const dispose = client.subscribe(
         { query: ASSEMBLY_EVENTS_SUBSCRIPTION, variables: { filter } },
         sink,
-        onConnected,
+        onConnected(filter.type),
       )
       disposers.push(dispose)
     }
