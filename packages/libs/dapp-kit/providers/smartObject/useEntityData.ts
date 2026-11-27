@@ -43,6 +43,17 @@ function isCompleteInput(input: FetchObjectDataInput): boolean {
     : !!input.objectId
 }
 
+/** How a refetch that is not the initial fetch behaves. */
+export interface RefetchOptions {
+  /**
+   * Fetch the entity even when its latest version looks unchanged, e.g. after
+   * an event about it. Everything else stays as for a poll: a fetch already
+   * running is left to finish, a transient miss keeps the last good entity,
+   * and loading is not shown.
+   */
+  skipVersionCheck?: boolean
+}
+
 /**
  * Holds the selected world entity, its owner, and loading/error state, and
  * fetches them. Refetches first compare the object's latest version and skip
@@ -57,6 +68,7 @@ export function useEntityData(): {
   fetchObjectData: (
     input: FetchObjectDataInput,
     isInitialFetch?: boolean,
+    options?: RefetchOptions,
   ) => Promise<void>
   /** Forgets the last fetched version and owner, e.g. when the selection changes. */
   resetTracking: () => void
@@ -74,7 +86,11 @@ export function useEntityData(): {
   const inFlightRef = useRef(false)
 
   const fetchObjectData = useCallback(
-    async (input: FetchObjectDataInput, isInitialFetch = false) => {
+    async (
+      input: FetchObjectDataInput,
+      isInitialFetch = false,
+      { skipVersionCheck = false }: RefetchOptions = {},
+    ) => {
       if (!isCompleteInput(input)) return
       // Let a slow fetch finish rather than superseding it with the next poll
       if (!isInitialFetch && inFlightRef.current) return
@@ -92,7 +108,11 @@ export function useEntityData(): {
         const objectId = await resolveObjectId(input)
 
         // Only refetch everything if the object changed (optimization for polling)
-        if (!isInitialFetch && lastVersionRef.current !== null) {
+        if (
+          !isInitialFetch &&
+          !skipVersionCheck &&
+          lastVersionRef.current !== null
+        ) {
           const latest = await getObjectLatestVersion(objectId)
           const version = latest.data?.latestVersion.nodes[0]?.version
           if (version === lastVersionRef.current) return

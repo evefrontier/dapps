@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { RawEntity } from '../entity'
 import { fetchEntity, fetchEntityOwner, isEntity, parseEntity } from '../entity'
+import { gridSummary } from '../grid'
 import testnetEntity from './fixtures/entity.testnet.json'
 
 // Real GetEntity response for a dev-deployment entity on testnet
@@ -409,6 +410,120 @@ describe('parseEntity', () => {
       priority: '2',
       lineLoss: '10',
     })
+  })
+
+  // A dev-v1.1.18 localnet grid as GraphQL returns it: one 15 MW Generator, one
+  // bay holding 99.82 kg of fuel type 7 (impulse 90), a 1 MW Firm module on
+  const poolsGridJson = {
+    on_at_last_settled: true,
+    last_settled_ms: '1795772883135',
+    modules: {
+      contents: [
+        {
+          key: '888800006',
+          value: {
+            module_spec: {
+              power_req: '1',
+              draw_kind: { '@variant': 'Firm' },
+              priority: '0',
+              line_loss: '0',
+            },
+            desired_online: true,
+            active_draw_at_last_settled: '1',
+          },
+        },
+      ],
+    },
+    generators: {
+      contents: [
+        {
+          key: '11926373565223139997',
+          value: {
+            fuel_type: '7',
+            selectable_fuel_types: [],
+            max_output_mw: '15',
+            impulse_limit: '100000000000',
+            volatility_limit: '1',
+            online: true,
+          },
+        },
+      ],
+    },
+    bays: {
+      contents: [
+        {
+          key: '7186600916314612625',
+          value: {
+            capacity: '1000000000000',
+            containment_rating: '0',
+            online: true,
+            fuel: {
+              fuel_type: '7',
+              quantity: '99819888888',
+              impulse: '90000000000',
+              containment_burden: '14000000000',
+              volatility: '5000000000',
+              thermal_inefficiency: '0',
+            },
+          },
+        },
+      ],
+    },
+    stashed: { contents: [] },
+  }
+
+  it('parses a dev-v1.1.16+ grid as the pools model', () => {
+    const grid = parseEntity(
+      raw([component('5', 'power_grid::PowerGrid', poolsGridJson)]),
+    ).powerGrid
+
+    expect(grid).toMatchObject({
+      model: 'pools',
+      on: true,
+      fuelQuantity: '99819888888',
+      fuelCapacity: '1000000000000',
+      capacityMw: '15',
+      lastSettledMs: '1795772883135',
+      fuelImpulse: '90000000000',
+      fuelContainmentBurden: '14000000000',
+      fuelSources: { '7186600916314612625': '1000000000000' },
+    })
+    expect(grid?.generators['11926373565223139997']).toEqual({
+      online: true,
+      maxOutputMw: '15',
+      containmentReduction: '0',
+      baseFuelRate: '0',
+      fuelType: '7',
+      impulseLimit: '100000000000',
+      volatilityLimit: '1',
+    })
+    expect(grid?.bays?.['7186600916314612625']?.fuel).toEqual({
+      fuelType: '7',
+      quantity: '99819888888',
+      impulse: '90000000000',
+      containmentBurden: '14000000000',
+      volatility: '5000000000',
+    })
+  })
+
+  it('summarizes a pools grid in MW and kg, as the game burns it', () => {
+    const grid = parseEntity(
+      raw([component('5', 'power_grid::PowerGrid', poolsGridJson)]),
+    ).powerGrid
+    if (!grid) throw new Error('no grid')
+    const summary = gridSummary(grid, 1795772883135)
+
+    // 1 of 15 MW, at 10^4
+    expect(summary.outputMw).toBe(150_000n)
+    expect(summary.drawMw).toBe(10_000n)
+    // 99.82 of 1_000 kg, at 10^4
+    expect(summary.fuelNow).toBe(998_198n)
+    expect(summary.fuelCapacity).toBe(10_000_000n)
+    expect(summary.fuelUnit).toBe('kg')
+    // 1 MW at impulse 90: 40 kg an hour, so 99.82 kg lasts about 2 h 30 min
+    expect(summary.fuelBurnPerHour).toBe(400_000n)
+    // smallest ms with ceil(ms × 10^18 ÷ (90 × 10^9 × 1000)) ≥ 99_819_888_888
+    expect(summary.msUntilEmpty).toBe(8_983_790)
   })
 
   it('parses the access list, or leaves it null when absent', () => {

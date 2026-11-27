@@ -7,31 +7,21 @@ import { airlockCards } from './viewProps'
 
 /**
  * One card per airlock (inventory component): its section, how full it is,
- * and, for the shell and controllers, what it holds. The contents are public
- * on chain; leaving them off the visitor's screen is a display choice, not
- * privacy.
+ * and what it holds, the same for every role.
  */
-const AirlockTab = ({
-  entity,
-  showContents,
-}: {
-  entity: EntityData
-  showContents: boolean
-}) => {
+const AirlockTab = ({ entity }: { entity: EntityData }) => {
   const airlocks = useMemo(() => buildAirlocks(entity), [entity])
   const typeIds = useMemo(
     () =>
       airlocks.flatMap((airlock) => [
         airlock.typeId,
-        ...(showContents
-          ? airlock.inventory.items.map((item) => item.typeId)
-          : []),
+        ...airlock.inventory.items.map((item) => item.typeId),
       ]),
-    [airlocks, showContents],
+    [airlocks],
   )
   const names = useTypeNames(typeIds)
 
-  return <AirlockView airlocks={airlockCards(airlocks, names, showContents)} />
+  return <AirlockView airlocks={airlockCards(airlocks, names)} />
 }
 
 export default AirlockTab

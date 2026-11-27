@@ -99,9 +99,7 @@ const Console = () => {
           writable={writer}
         />
       )}
-      {active === 'airlock' && (
-        <AirlockTab entity={entity} showContents={writer} />
-      )}
+      {active === 'airlock' && <AirlockTab entity={entity} />}
       {active === 'access' && <AccessTab />}
     </ConsoleView>
   )

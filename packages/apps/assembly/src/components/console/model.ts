@@ -1,6 +1,9 @@
 import {
+  type BurnBreakdown,
+  burnBreakdown,
   type EntityData,
   type EntityInventory,
+  fuelUnit,
   type GeneratorStatus,
   type GridStatus,
   type GridSummary,
@@ -9,10 +12,11 @@ import {
   type ModuleStatus,
   moduleStates,
   type NoPowerReason,
-  projectedFuel,
+  normalizeFuel,
+  normalizeMw,
 } from '@evefrontier/dapp-kit'
 import type { ConsoleTab } from '@eveworld/ui-components'
-import { mw, shortCode, units } from './format'
+import { burnRate, fuelAmount, mw, shortCode } from './format'
 
 /**
  * What the console draws, worked out from the parsed entity. Display names
@@ -41,8 +45,10 @@ export interface BoardCard {
   lamp: Lamp | null
   /** Short state label, e.g. Online, Blocked, Feeding */
   statusLabel: string
-  /** Second line, e.g. what it draws or why it has no power */
+  /** Second line, e.g. what it burns or why it has no power */
   detail: string | null
+  /** `burn`: the detail is a running module's share of the fuel burn */
+  detailTone?: 'burn'
   /** What it needs, makes or holds */
   spec: CardSpec
   /** Live draw, fixed point; 0 for anything that does not draw */
@@ -108,11 +114,11 @@ const sectionName = (index: number): string => `Section ${index + 1}`
 const sumDraw = (cards: BoardCard[]): bigint =>
   cards.reduce((sum, card) => sum + card.draw, 0n)
 
-/** What a module's card says under its name, by state. */
+/** What a module's card says under its name, by state, other than its share of the burn. */
 function moduleDetail(state: ModuleState): string | null {
   switch (state.status) {
     case 'online':
-      return state.draw > 0n ? `${mw(state.draw)} MW drawn` : null
+      return null
     case 'reduced':
       return `${mw(state.draw)} of ${mw(state.powerReq)} MW`
     case 'off':
@@ -135,17 +141,22 @@ function cardFor(
   entity: EntityData,
   componentId: string,
   nowMs: number,
+  burn: BurnBreakdown | null,
 ): BoardCard {
   const grid = entity.powerGrid
   const code = shortCode(componentId)
   const base = { componentId, code, typeId: null, draw: 0n }
+  const unit = grid ? fuelUnit(grid) : 'units'
+  /** A burn per hour at the grid's fuel scale, e.g. `40.0 kg/h` */
+  const perHour = (raw: bigint) =>
+    grid ? `${burnRate(normalizeFuel(grid, raw))} ${unit}/h` : ''
 
   const generator = grid?.generators[componentId]
   if (grid && generator) {
     const status =
       generatorStates(grid, nowMs).find((g) => g.componentId === componentId)
         ?.status ?? 'off'
-    const output = `${mw(generator.maxOutputMw)} MW`
+    const output = `${mw(normalizeMw(grid, generator.maxOutputMw))} MW`
     const { lamp, label, detail } = GENERATOR_STATUS[status]
     return {
       ...base,
@@ -153,27 +164,34 @@ function cardFor(
       fallbackName: 'Generator',
       lamp,
       statusLabel: label,
-      detail: detail(output),
+      detail:
+        status === 'running'
+          ? `${detail(output)} · burns ${perHour(burn?.generators[componentId] ?? 0n)}`
+          : detail(output),
       spec: { label: 'Output', value: output },
     }
   }
 
   const fuelCapacity = grid?.fuelSources[componentId]
   if (grid && fuelCapacity !== undefined) {
-    // Fuel left but nothing burning it (main breaker off, no generator on)
-    // is Idle, not Feeding
-    const hasFuel = projectedFuel(grid, nowMs) > 0n
-    const burning =
-      hasFuel &&
-      generatorStates(grid, nowMs).some((g) => g.status === 'running')
+    const source = burn?.sources[componentId]
+    const holds = `${fuelAmount(normalizeFuel(grid, fuelCapacity), unit)} ${unit}`
+    const empty = (source?.fuelNow ?? 0n) === 0n
+    // Fuel left but nothing drawing on it (main breaker off, no generator
+    // running, nothing switched on) is Idle, not Feeding
+    const feeding = !empty && (source?.perHour ?? 0n) > 0n
     return {
       ...base,
       kind: 'fuel',
-      fallbackName: 'Fuel',
-      lamp: burning ? 'on' : hasFuel ? 'off' : 'wait',
-      statusLabel: burning ? 'Feeding' : hasFuel ? 'Idle' : 'Empty',
-      detail: null,
-      spec: { label: 'Holds', value: `${units(fuelCapacity)} units` },
+      fallbackName: 'Fuel bay',
+      lamp: feeding ? 'on' : empty ? 'wait' : 'off',
+      statusLabel: feeding ? 'Feeding' : empty ? 'Empty' : 'Idle',
+      detail: feeding
+        ? `Feeding ${perHour(source?.perHour ?? 0n)}`
+        : empty
+          ? `0 of ${holds}`
+          : 'Nothing is burning it',
+      spec: { label: 'Holds', value: holds },
     }
   }
 
@@ -193,6 +211,9 @@ function cardFor(
 
   if (state) {
     const { lamp, label } = MODULE_STATUS[state.status]
+    // A running load's share of the burn: what switching it off would save
+    const share =
+      state.status === 'online' ? (burn?.modules[componentId] ?? 0n) : 0n
     return {
       ...base,
       kind,
@@ -200,7 +221,12 @@ function cardFor(
       fallbackName,
       lamp,
       statusLabel: label,
-      detail: moduleDetail(state),
+      ...(share > 0n
+        ? {
+            detail: `≈ ${perHour(share)} of the burn`,
+            detailTone: 'burn' as const,
+          }
+        : { detail: moduleDetail(state) }),
       spec: { label: state.drawKind, value: `needs ${mw(state.powerReq)} MW` },
       draw: state.draw,
     }
@@ -237,13 +263,14 @@ const section = (
  */
 export function buildBoard(entity: EntityData, nowMs: number): BoardSection[] {
   const grid = entity.powerGrid
+  const burn = grid ? burnBreakdown(grid, nowMs) : null
   const placed = new Set<string>()
   const noBreaker: BoardCard[] = []
   const sections = (entity.layout?.sections ?? []).map((layoutSection, i) => {
     const cards: BoardCard[] = []
     for (const id of layoutSection.moduleIds) {
       placed.add(id)
-      const card = cardFor(entity, id, nowMs)
+      const card = cardFor(entity, id, nowMs, burn)
       if (card.lamp === null) noBreaker.push(card)
       else cards.push(card)
     }
@@ -269,7 +296,7 @@ export function buildBoard(entity: EntityData, nowMs: number): BoardSection[] {
         'unplaced',
         sections.length ? 'Not in a section' : 'Modules',
         '',
-        unplaced.map((id) => cardFor(entity, id, nowMs)),
+        unplaced.map((id) => cardFor(entity, id, nowMs, burn)),
       ),
     )
   }

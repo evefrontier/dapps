@@ -4,11 +4,27 @@ import { QueryClient } from '@tanstack/react-query'
 import ReactDOM from 'react-dom/client'
 import { ErrorBoundary } from 'react-error-boundary'
 import App from './App'
-import { FlagsProvider } from './flags'
+import { FlagsProvider, useUpdateTransport } from './flags'
 
 import '@eveworld/ui-components/console.css'
 
 const queryClient = new QueryClient()
+
+/**
+ * Reads the update-transport flag (inside FlagsProvider) and hands it to the
+ * dapp-kit providers. Switching it in the flag panel resubscribes or stops.
+ */
+function AppProviders() {
+  const updateTransport = useUpdateTransport()
+  return (
+    <EveFrontierProvider
+      queryClient={queryClient}
+      updateTransport={updateTransport}
+    >
+      <App />
+    </EveFrontierProvider>
+  )
+}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <ErrorBoundary
@@ -17,9 +33,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     }
   >
     <FlagsProvider>
-      <EveFrontierProvider queryClient={queryClient}>
-        <App />
-      </EveFrontierProvider>
+      <AppProviders />
     </FlagsProvider>
   </ErrorBoundary>,
 )

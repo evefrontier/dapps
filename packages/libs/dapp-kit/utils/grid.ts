@@ -1,5 +1,15 @@
 import type { EntityDrawKind, EntityPowerGrid } from '../types'
-import { fuelBurnPerHour, msUntilEmpty, projectedFuel, usedMw } from './fuel'
+import {
+  burnBreakdown,
+  fuelBurnPerHour,
+  fuelUnit,
+  type GridProjection,
+  msUntilEmpty,
+  normalizeFuel,
+  normalizeMw,
+  projectGrid,
+  sharedBurnImpulse,
+} from './fuel'
 
 /**
  * Display state of a power grid and its modules, worked out from the parsed
@@ -65,7 +75,13 @@ export interface GeneratorState {
  */
 export type GridStatus = 'online' | 'off' | 'noPower'
 
-/** Fixed-point values are at 10^4. @category Utilities - Power */
+/**
+ * Power and fuel values are fixed point at 10^4 whatever the grid's model
+ * (see `normalizeMw` and `normalizeFuel`); `fuelUnit` says what a whole unit
+ * of fuel is.
+ *
+ * @category Utilities - Power
+ */
 export interface GridSummary {
   status: GridStatus
   reason: NoPowerReason | null
@@ -87,19 +103,26 @@ export interface GridSummary {
   fuelBurnPerHour: bigint
   /** Null when nothing burns */
   msUntilEmpty: number | null
+  /** What a whole unit of fuel is: abstract `units`, or `kg` on a `pools` grid */
+  fuelUnit: 'units' | 'kg'
+  /**
+   * `pools` grids only: the usable impulse every burning generator shares,
+   * fixed point; null when nothing burns or generators burn at different
+   * impulses, and always null on a `fuelFactor` grid
+   */
+  burnImpulse: bigint | null
 }
 
-function gridState(
-  grid: EntityPowerGrid,
-  nowMs: number,
-): { status: GridStatus; reason: NoPowerReason | null; fuelNow: bigint } {
-  const fuelNow = projectedFuel(grid, nowMs)
-  if (!grid.on) return { status: 'off', reason: 'mainOff', fuelNow }
-  if (fuelNow === 0n) return { status: 'noPower', reason: 'outOfFuel', fuelNow }
-  if (BigInt(grid.capacityMw) === 0n) {
-    return { status: 'noPower', reason: 'generatorOff', fuelNow }
+function gridState(live: GridProjection): {
+  status: GridStatus
+  reason: NoPowerReason | null
+} {
+  if (!live.on) return { status: 'off', reason: 'mainOff' }
+  if (live.fuelNow === 0n) return { status: 'noPower', reason: 'outOfFuel' }
+  if (live.capacityMw === 0n) {
+    return { status: 'noPower', reason: 'generatorOff' }
   }
-  return { status: 'online', reason: null, fuelNow }
+  return { status: 'online', reason: null }
 }
 
 /**
@@ -113,11 +136,12 @@ export function moduleStates(
   grid: EntityPowerGrid,
   nowMs: number,
 ): ModuleState[] {
-  const live = gridState(grid, nowMs)
+  const projection = projectGrid(grid, nowMs)
+  const live = gridState(projection)
   return Object.entries(grid.modules).map(([componentId, module]) => {
-    const powerReq = BigInt(module.powerReq)
-    // `module_draw` reads 0 once the fuel has run out
-    const draw = live.fuelNow === 0n ? 0n : BigInt(module.activeDraw)
+    const powerReq = normalizeMw(grid, module.powerReq)
+    // `module_draw` reads 0 once nothing can feed it
+    const draw = normalizeMw(grid, projection.draws[componentId] ?? 0n)
     const state = (
       status: ModuleStatus,
       reason: NoPowerReason | null = null,
@@ -131,7 +155,7 @@ export function moduleStates(
     })
 
     if (!module.desiredOnline) return state('off')
-    if (!grid.on) return state('mainOff', 'mainOff')
+    if (!projection.on) return state('mainOff', 'mainOff')
     if (live.status !== 'online') return state('blocked', live.reason)
     if (powerReq === 0n || draw >= powerReq) return state('online')
     // Only Elastic modules take less than they ask for; Firm ones get all or nothing
@@ -145,16 +169,18 @@ export function moduleStates(
 function generatorStatus(
   online: boolean,
   gridOn: boolean,
-  fuelNow: bigint,
+  fed: boolean,
 ): GeneratorStatus {
   if (!online) return 'off'
   if (!gridOn) return 'mainOff'
-  if (fuelNow === 0n) return 'stopped'
+  if (!fed) return 'stopped'
   return 'running'
 }
 
 /**
- * The state of every generator on the grid.
+ * The state of every generator on the grid. A generator is `stopped` when the
+ * grid's fuel has run out, or on a `pools` grid when its own fuel type's pool
+ * has.
  *
  * @category Utilities - Power
  */
@@ -162,11 +188,17 @@ export function generatorStates(
   grid: EntityPowerGrid,
   nowMs: number,
 ): GeneratorState[] {
-  const fuelNow = projectedFuel(grid, nowMs)
+  const live = projectGrid(grid, nowMs)
   return Object.entries(grid.generators).map(([componentId, generator]) => ({
     componentId,
-    status: generatorStatus(generator.online, grid.on, fuelNow),
-    maxOutputMw: BigInt(generator.maxOutputMw),
+    status: generatorStatus(
+      generator.online,
+      live.on,
+      grid.model === 'pools'
+        ? (live.outputs[componentId] ?? 0n) > 0n
+        : live.fuelNow > 0n,
+    ),
+    maxOutputMw: normalizeMw(grid, generator.maxOutputMw),
   }))
 }
 
@@ -177,10 +209,18 @@ export function generatorStates(
  * @category Utilities - Power
  */
 export function gridSummary(grid: EntityPowerGrid, nowMs: number): GridSummary {
-  const live = gridState(grid, nowMs)
-  const outputMw = BigInt(grid.capacityMw)
-  const drawMw = live.fuelNow === 0n ? 0n : usedMw(grid)
+  const projection = projectGrid(grid, nowMs)
+  const live = gridState(projection)
+  const outputMw = normalizeMw(grid, projection.capacityMw)
+  const drawMw =
+    projection.fuelNow === 0n
+      ? 0n
+      : normalizeMw(
+          grid,
+          Object.values(projection.draws).reduce((sum, d) => sum + d, 0n),
+        )
   const modules = moduleStates(grid, nowMs)
+  const capacity = BigInt(grid.fuelCapacity)
   return {
     status: live.status,
     reason: live.reason,
@@ -192,14 +232,27 @@ export function gridSummary(grid: EntityPowerGrid, nowMs: number): GridSummary {
       (m) => m.status === 'online' || m.status === 'reduced',
     ).length,
     modulesTotal: modules.length,
-    fuelSettled: BigInt(grid.fuelQuantity),
-    fuelNow: live.fuelNow,
-    fuelCapacity: BigInt(grid.fuelCapacity),
+    fuelSettled: normalizeFuel(grid, grid.fuelQuantity),
+    fuelNow: normalizeFuel(grid, projection.fuelNow),
+    fuelCapacity: normalizeFuel(grid, capacity),
     fuelFraction:
-      BigInt(grid.fuelCapacity) > 0n
-        ? Number(live.fuelNow) / Number(grid.fuelCapacity)
-        : 0,
-    fuelBurnPerHour: live.fuelNow === 0n ? 0n : fuelBurnPerHour(grid),
+      capacity > 0n ? Number(projection.fuelNow) / Number(capacity) : 0,
+    fuelBurnPerHour:
+      projection.fuelNow === 0n
+        ? 0n
+        : normalizeFuel(grid, fuelBurnPerHour(grid, nowMs)),
     msUntilEmpty: msUntilEmpty(grid, nowMs),
+    fuelUnit: fuelUnit(grid),
+    burnImpulse: impulseOf(grid, projection.fuelNow, nowMs),
   }
+}
+
+function impulseOf(
+  grid: EntityPowerGrid,
+  fuelNow: bigint,
+  nowMs: number,
+): bigint | null {
+  if (fuelNow === 0n) return null
+  const impulse = sharedBurnImpulse(burnBreakdown(grid, nowMs))
+  return impulse === null ? null : normalizeFuel(grid, impulse)
 }

@@ -1,21 +1,23 @@
 import { useEffect } from 'react'
 import { createLogger } from '../../utils'
-import { getPollingInterval } from '../../utils/constants'
 import type { FetchObjectDataInput } from '../../utils/smartObject'
 
 const log = createLogger()
 
 /**
- * Fetches the selected object, then polls it for updates. Reads are public,
- * so no wallet needs to be connected.
- * Polling is the only update source; each tick is a cheap version check
- * until the object changes. A configured interval of 0 disables it entirely.
+ * Fetches the selected object, then polls it for updates every `intervalMs`.
+ * Reads are public, so no wallet needs to be connected. Each tick is a cheap
+ * version check until the object changes; an interval of 0 disables polling.
+ *
+ * The interval can change while mounted (the subscription coming up or
+ * failing); that only restarts the timer, not the initial fetch.
  */
 export function usePollingBackstop({
   input,
   fetchObjectData,
   setLoading,
   resetTracking,
+  intervalMs,
 }: {
   input: FetchObjectDataInput | null
   fetchObjectData: (
@@ -24,38 +26,42 @@ export function usePollingBackstop({
   ) => Promise<void>
   setLoading: (loading: boolean) => void
   resetTracking: () => void
+  /** Polling interval in ms; 0 disables it */
+  intervalMs: number
 }): void {
   useEffect(() => {
     if (!input) {
       setLoading(false)
       return
     }
-
     fetchObjectData(input, true)
+    return resetTracking
+  }, [input, fetchObjectData, setLoading, resetTracking])
+
+  useEffect(() => {
+    if (!input) return
     const selectedObjectId = 'itemId' in input ? input.itemId : input.objectId
 
-    const pollingInterval = getPollingInterval()
-    if (pollingInterval <= 0) {
+    if (intervalMs <= 0) {
       log.info(
-        '[DappKit] SmartObjectProvider: Polling backstop disabled (VITE_POLLING_INTERVAL=0)',
+        '[DappKit] SmartObjectProvider: Polling backstop disabled',
         selectedObjectId,
       )
-      return resetTracking
+      return
     }
 
     const intervalId = setInterval(() => {
       fetchObjectData(input, false)
-    }, pollingInterval)
+    }, intervalMs)
     log.info(
       '[DappKit] SmartObjectProvider: Started polling for object:',
       selectedObjectId,
-      { pollingInterval },
+      { pollingInterval: intervalMs },
     )
 
     return () => {
       clearInterval(intervalId)
       log.info('[DappKit] SmartObjectProvider: Stopped polling')
-      resetTracking()
     }
-  }, [input, fetchObjectData, setLoading, resetTracking])
+  }, [input, fetchObjectData, intervalMs])
 }

@@ -54,6 +54,12 @@ export const FLAG_DEFINITIONS = {
     variants: { on: 'on', off: 'off' },
     defaultVariant: 'off',
   },
+  'assembly-update-transport': {
+    description:
+      'How the console keeps the Assembly up to date. subscription: refetch when the GraphQL subscription endpoint reports an inventory or power event for it, with slow polling as a backstop, falling back to polling if the subscription fails. polling: poll every 15 s only.',
+    variants: { subscription: 'subscription', polling: 'polling' },
+    defaultVariant: 'subscription',
+  },
   'assembly-show-dapp': {
     description:
       'Dev and test builds only: always show the Dapp tab, even when the Assembly has no dapp URL (it then shows a placeholder).',

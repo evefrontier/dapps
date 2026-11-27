@@ -24,7 +24,7 @@
     },
     "packages/apps/assembly": {
       "name": "@eveworld/assembly",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "dependencies": {
         "@evefrontier/dapp-kit": "workspace:*",
         "@eveworld/ui-components": "workspace:*",
@@ -52,7 +52,7 @@
     },
     "packages/libs/dapp-kit": {
       "name": "@evefrontier/dapp-kit",
-      "version": "0.2.0-alpha.0",
+      "version": "0.2.0-alpha.1",
       "dependencies": {
         "@evefrontier/wallet-core": "0.1.0",
         "@mysten/dapp-kit-core": "^1.6.9",
@@ -60,6 +60,7 @@
         "@mysten/sui": "^2.22.1",
         "@mysten/wallet-standard": "^0.20.3",
         "@tanstack/react-query": "^5.101.4",
+        "graphql-sse": "^2.6.0",
         "react": "^19.2.8",
       },
       "devDependencies": {
@@ -81,7 +82,7 @@
     },
     "packages/libs/ui-components": {
       "name": "@eveworld/ui-components",
-      "version": "0.2.1",
+      "version": "0.3.1",
       "dependencies": {
         "react": "^19.2.4",
       },
@@ -1023,6 +1024,8 @@
     "graceful-fs": ["graceful-fs@4.2.11", "", {}, "sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ=="],
 
     "graphql": ["graphql@17.0.2", "", {}, "sha512-FRWbddMxfkjiB7z+aQDWIR+E34xo9I8c9mtK2RPv8PmMzKRvrdsreHL/Ui/TmwHJfhHChEtsFPyMHKI+xuarQQ=="],
+
+    "graphql-sse": ["graphql-sse@2.6.4", "", { "peerDependencies": { "graphql": ">=0.11 <=17" } }, "sha512-5FJucErfubgQGXXmu6kQiIZ5/pp6eeIXmr+ypqhIjJx0H/xA1koD+xLu3Z0ptSRWp/w9N8Ua9Qnc9+mnWSj0bA=="],
 
     "has-flag": ["has-flag@4.0.0", "", {}, "sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ=="],
 

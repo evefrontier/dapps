@@ -111,13 +111,16 @@ describe('toastData', () => {
   })
 })
 
+/** A pools grid: one 1_000 kg bay of fuel at impulse 90. */
 const grid = (on = true): EntityPowerGrid =>
   ({
+    model: 'pools',
     on,
     lastSettledMs: '0',
+    fuelImpulse: '90000000000',
     fuelSources: {
       '0x00000000000000000000000000000000000000000000000000000000000abc12':
-        '5000000',
+        '1000000000000',
     },
   }) as unknown as EntityPowerGrid
 
@@ -133,6 +136,10 @@ const fuelSummary = (overrides: Partial<GridSummary> = {}): GridSummary =>
     fuelSettled: 5000000n,
     fuelCapacity: 10000000n,
     msUntilEmpty: 2 * 3600000,
+    // 40 kg/h at 3 MW
+    fuelBurnPerHour: 400000n,
+    fuelUnit: 'kg',
+    burnImpulse: 900000n,
     ...overrides,
   }) as unknown as GridSummary
 
@@ -168,22 +175,58 @@ describe('gridBanner', () => {
 })
 
 describe('fuelPanel', () => {
-  it('estimates what is left while burning', () => {
+  it('shows the burn, the draw burning it and how long it runs', () => {
     const fuel = fuelPanel(grid(), fuelSummary(), 60000)
-    expect(typeof fuel.estimate).toBe('object')
+    expect(fuel.amount).toBe('≈ 500.00')
+    expect(fuel.capacity).toBe('1,000.00')
+    expect(fuel.unit).toBe('kg')
+    expect(fuel.burn).toEqual({
+      burning: true,
+      rate: '40.0',
+      rateUnit: 'kg/h',
+      drawMw: '3',
+      runsFor: '2 h 00 m',
+    })
+    // 40 kg/h over 3 MW
+    expect(fuel.burnNote).toBe('≈ 13.3 kg per MW-hour at impulse 90')
+    // No one impulse to name: generators burning at different ones, or a fuelFactor grid
+    expect(
+      fuelPanel(grid(), fuelSummary({ burnImpulse: null }), 60000).burnNote,
+    ).toBe('≈ 13.3 kg per MW-hour')
     expect(fuel.low).toBe(false)
-    expect(fuel.sources).toHaveLength(1)
-    expect(fuel.sources[0]?.label).toMatch(/^Fuel #/)
+    expect(fuel.sources).toEqual([
+      {
+        id: '0x00000000000000000000000000000000000000000000000000000000000abc12',
+        label: 'Fuel bay #0abc12',
+        units: '1,000.00 kg',
+      },
+    ])
   })
 
-  it('says why it is not burning', () => {
+  it('shows no burn and says why while nothing burns', () => {
+    const idle = { fuelBurnPerHour: 0n, msUntilEmpty: null }
+    const note = (g: EntityPowerGrid, s: Partial<GridSummary>) =>
+      fuelPanel(g, fuelSummary(s), 0).burnNote
+    expect(fuelPanel(grid(false), fuelSummary(idle), 0).burn).toEqual({
+      burning: false,
+      rate: '0.0',
+      rateUnit: 'kg/h',
+      drawMw: '0',
+      runsFor: '—',
+    })
+    expect(note(grid(), { ...idle, fuelNow: 0n })).toBe(
+      'Empty: nothing left to burn',
+    )
+    expect(note(grid(false), idle)).toBe('Not burning · main breaker off')
+    expect(note(grid(), { ...idle, status: 'off' })).toBe(
+      'Not burning · main breaker off',
+    )
     expect(
-      fuelPanel(grid(), fuelSummary({ fuelNow: 0n, msUntilEmpty: null }), 0)
-        .estimate,
-    ).toBe('Empty')
-    expect(
-      fuelPanel(grid(false), fuelSummary({ msUntilEmpty: null }), 0).estimate,
-    ).toBe('Not burning · main breaker off')
+      note(grid(), { ...idle, status: 'noPower', reason: 'generatorOff' }),
+    ).toBe('Not burning · no generator running')
+    expect(note(grid(), { ...idle, drawMw: 0n })).toBe(
+      'Not burning · nothing draws power',
+    )
   })
 })
 
@@ -248,15 +291,17 @@ describe('airlockCards', () => {
     },
   ] as AirlockRow[]
 
-  it('shows how full each airlock is and hides the contents from visitors', () => {
-    const [card] = airlockCards(airlocks, {}, false)
+  it('shows how full each airlock is and what it holds', () => {
+    const [card] = airlockCards(airlocks, { '99': 'Ore' })
     expect(card).toMatchObject({ name: 'Storage', fraction: 0.25 })
-    expect(card?.items).toBeUndefined()
+    expect(card?.items).toEqual([
+      { id: '99', name: 'Ore', quantity: '2', volume: '0.2' },
+    ])
   })
 
-  it('lists the contents for the shell and controllers', () => {
-    const [card] = airlockCards(airlocks, { '99': 'Ore' }, true)
-    expect(card?.items?.[0]).toMatchObject({ name: 'Ore', quantity: '2' })
+  it('names an item by its type id until its name loads', () => {
+    const [card] = airlockCards(airlocks, {})
+    expect(card?.items[0]?.name).toBe('Type 99')
   })
 })
 
