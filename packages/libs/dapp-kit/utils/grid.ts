@@ -1,5 +1,6 @@
 import type { EntityDrawKind, EntityPowerGrid } from '../types'
 import {
+  burnBreakdown,
   fuelBurnPerHour,
   fuelUnit,
   type GridProjection,
@@ -7,6 +8,7 @@ import {
   normalizeFuel,
   normalizeMw,
   projectGrid,
+  sharedBurnImpulse,
 } from './fuel'
 
 /**
@@ -103,6 +105,12 @@ export interface GridSummary {
   msUntilEmpty: number | null
   /** What a whole unit of fuel is: abstract `units`, or `kg` on a `pools` grid */
   fuelUnit: 'units' | 'kg'
+  /**
+   * `pools` grids only: the usable impulse every burning generator shares,
+   * fixed point; null when nothing burns or generators burn at different
+   * impulses, and always null on a `fuelFactor` grid
+   */
+  burnImpulse: bigint | null
 }
 
 function gridState(live: GridProjection): {
@@ -235,5 +243,16 @@ export function gridSummary(grid: EntityPowerGrid, nowMs: number): GridSummary {
         : normalizeFuel(grid, fuelBurnPerHour(grid, nowMs)),
     msUntilEmpty: msUntilEmpty(grid, nowMs),
     fuelUnit: fuelUnit(grid),
+    burnImpulse: impulseOf(grid, projection.fuelNow, nowMs),
   }
+}
+
+function impulseOf(
+  grid: EntityPowerGrid,
+  fuelNow: bigint,
+  nowMs: number,
+): bigint | null {
+  if (fuelNow === 0n) return null
+  const impulse = sharedBurnImpulse(burnBreakdown(grid, nowMs))
+  return impulse === null ? null : normalizeFuel(grid, impulse)
 }

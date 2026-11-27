@@ -139,6 +139,7 @@ const fuelSummary = (overrides: Partial<GridSummary> = {}): GridSummary =>
     // 40 kg/h at 3 MW
     fuelBurnPerHour: 400000n,
     fuelUnit: 'kg',
+    burnImpulse: 900000n,
     ...overrides,
   }) as unknown as GridSummary
 
@@ -188,6 +189,10 @@ describe('fuelPanel', () => {
     })
     // 40 kg/h over 3 MW
     expect(fuel.burnNote).toBe('≈ 13.3 kg per MW-hour at impulse 90')
+    // No one impulse to name: generators burning at different ones, or a fuelFactor grid
+    expect(
+      fuelPanel(grid(), fuelSummary({ burnImpulse: null }), 60000).burnNote,
+    ).toBe('≈ 13.3 kg per MW-hour')
     expect(fuel.low).toBe(false)
     expect(fuel.sources).toEqual([
       {

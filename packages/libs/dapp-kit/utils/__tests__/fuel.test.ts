@@ -21,6 +21,7 @@ import {
   poolGeneratorBurn,
   projectedFuel,
   projectGrid,
+  sharedBurnImpulse,
   usedMw,
   volatilityShare,
 } from '../fuel'
@@ -495,6 +496,7 @@ describe('burnBreakdown', () => {
       generators: { '101': 400n * KG },
       sources: { '9001': { perHour: 400n * KG, fuelNow: STARTING } },
       modules: { '401': 400n * KG },
+      impulses: { '101': POOL_IMPULSE },
     })
   })
 
@@ -510,6 +512,8 @@ describe('burnBreakdown', () => {
     const burn = burnBreakdown(grid, 0)
     // 80 MW at impulse 90 and 40 MW at impulse 30
     expect(burn.generators).toEqual({ '101': 3_200n * KG, '102': 4_800n * KG })
+    expect(burn.impulses).toEqual({ '101': 90n * SCALE, '102': 30n * SCALE })
+    expect(sharedBurnImpulse(burn)).toBeNull()
     expect(burn.perHour).toBe(fuelBurnPerHour(grid, 0))
     expect(burn.sources['9001']?.perHour).toBe(8_000n * KG)
   })
@@ -559,9 +563,16 @@ describe('burnBreakdown', () => {
     expect(burn.modules).toEqual({ '401': 360n * KG, '402': 40n * KG })
   })
 
+  it('gives the impulse every burning generator shares', () => {
+    expect(sharedBurnImpulse(burnBreakdown(loadedPools(), 0))).toBe(
+      POOL_IMPULSE,
+    )
+  })
+
   it('burns nothing once the grid has tripped', () => {
     const burn = burnBreakdown(loadedPools(), 10_000_000_000_000)
     expect(burn.perHour).toBe(0n)
+    expect(sharedBurnImpulse(burn)).toBeNull()
     expect(burn.sources['9001']).toEqual({ perHour: 0n, fuelNow: 0n })
     expect(burn.modules).toEqual({ '401': 0n })
   })
@@ -575,6 +586,7 @@ describe('burnBreakdown', () => {
       fuelNow: BigInt(STARTING_FUEL),
     })
     expect(burn.modules).toEqual({ '401': burn.perHour })
+    expect(burn.impulses).toEqual({})
     expect(burnBreakdown({ ...grid, on: false }, 0).perHour).toBe(0n)
   })
 })

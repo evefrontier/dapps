@@ -186,6 +186,8 @@ describe('gridSummary', () => {
     expect(summary.fuelNow).toBe(10_000_000n - 600_000n)
     expect(summary.fuelBurnPerHour).toBe(36_000_000n)
     expect(summary.msUntilEmpty).toBe(940_000)
+    // A fuelFactor grid names no usable impulse
+    expect(summary.burnImpulse).toBeNull()
   })
 
   afterEach(() => {

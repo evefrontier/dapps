@@ -43,6 +43,7 @@ export {
   powerScale,
   projectedFuel,
   projectGrid,
+  sharedBurnImpulse,
   usedMw,
   volatilityShare,
 } from './fuel'

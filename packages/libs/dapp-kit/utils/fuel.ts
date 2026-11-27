@@ -371,6 +371,12 @@ export interface BurnBreakdown {
    * off would save, give or take rounding; 0 for a module drawing nothing.
    */
   modules: Record<string, bigint>
+  /**
+   * `pools` grids only, by generator component id: the usable impulse it burns
+   * at (its pool's impulse, capped at its limit), for each generator burning.
+   * Empty on a `fuelFactor` grid.
+   */
+  impulses: Record<string, bigint>
 }
 
 /**
@@ -389,6 +395,7 @@ export function burnBreakdown(
   nowMs: number,
 ): BurnBreakdown {
   const generators: Record<string, bigint> = {}
+  const impulses: Record<string, bigint> = {}
   const sources: BurnBreakdown['sources'] = {}
   const moduleIds = Object.keys(grid.modules)
   let draws: bigint[]
@@ -405,11 +412,14 @@ export function burnBreakdown(
         generator.fuelType === undefined
           ? undefined
           : pools.get(generator.fuelType)
+      // `fuel_math::usable_impulse`
+      const impulse = pool
+        ? min(pool.impulse, BigInt(generator.impulseLimit ?? '0'))
+        : 0n
       const burn =
         load > 0n && output > 0n && pool && generator.fuelType !== undefined
           ? poolGeneratorBurn(
-              // `fuel_math::usable_impulse`
-              min(pool.impulse, BigInt(generator.impulseLimit ?? '0')),
+              impulse,
               projected.capacity,
               output,
               load,
@@ -417,6 +427,7 @@ export function burnBreakdown(
             )
           : 0n
       generators[id] = burn
+      if (burn > 0n) impulses[id] = impulse
       if (generator.fuelType !== undefined && burn > 0n) {
         poolBurns.set(
           generator.fuelType,
@@ -482,7 +493,21 @@ export function burnBreakdown(
     const draw = draws[i] ?? 0n
     modules[id] = drawn > 0n ? (perHour * draw) / drawn : 0n
   })
-  return { perHour, generators, sources, modules }
+  return { perHour, generators, sources, modules, impulses }
+}
+
+/**
+ * The usable impulse every burning generator shares, at the grid's fuel scale;
+ * null when nothing burns, when burning generators use different impulses, or
+ * on a `fuelFactor` grid.
+ *
+ * @category Utilities - Power
+ */
+export function sharedBurnImpulse(burn: BurnBreakdown): bigint | null {
+  const distinct = new Set(Object.values(burn.impulses))
+  if (distinct.size !== 1) return null
+  const [impulse] = distinct
+  return impulse ?? null
 }
 
 // === `pools` grids: port of dev-v1.1.16+ `power::fuel_math` and `power::power_grid` ===

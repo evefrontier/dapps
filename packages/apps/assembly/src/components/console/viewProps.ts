@@ -29,6 +29,7 @@ import {
   ago,
   burnRate,
   count,
+  decimal,
   fuelAmount,
   hostOf,
   m3,
@@ -168,8 +169,13 @@ export function fuelPanel(
   const perMwHour = burning
     ? (summary.fuelBurnPerHour * FUEL_SCALE) / summary.drawMw
     : 0n
+  // Only one impulse makes sense to name: generators can burn at different ones
+  const atImpulse =
+    summary.burnImpulse === null
+      ? ''
+      : ` at impulse ${decimal(summary.burnImpulse)}`
   const burnNote = burning
-    ? `≈ ${burnRate(perMwHour)} ${unit} per MW-hour at impulse ${mw(normalizeFuel(grid, grid.fuelImpulse))}`
+    ? `≈ ${burnRate(perMwHour)} ${unit} per MW-hour${atImpulse}`
     : summary.fuelNow === 0n
       ? 'Empty: nothing left to burn'
       : // A run-out can trip a `pools` grid since the last settle

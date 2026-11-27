@@ -4,6 +4,10 @@ import { fromFixed } from '@evefrontier/dapp-kit'
 export const mw = (raw: bigint | string): string =>
   (Math.round(fromFixed(raw) * 100) / 100).toString()
 
+/** A plain number from a fixed-point value, up to two decimals, with thousands separators: `900000` → `90`. */
+export const decimal = (raw: bigint | string): string =>
+  fromFixed(raw).toLocaleString('en-US', { maximumFractionDigits: 2 })
+
 /** Whole units from a fixed-point value, with thousands separators. */
 export const units = (raw: bigint | string): string =>
   Math.round(fromFixed(raw)).toLocaleString('en-US')
