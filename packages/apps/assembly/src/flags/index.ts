@@ -6,5 +6,6 @@ export {
   isPanelEnabled,
 } from './config'
 export { FlagsProvider, resetFlagOverrides, setFlagVariant } from './provider'
-export { useFlagVariant } from './useFlags'
+export { resolveUpdateTransport } from './updateTransport'
+export { useFlagVariant, useUpdateTransport } from './useFlags'
 export { useViewRole } from './useViewRole'

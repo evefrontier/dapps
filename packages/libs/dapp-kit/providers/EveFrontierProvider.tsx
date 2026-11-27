@@ -2,6 +2,7 @@ import { DAppKitProvider } from '@mysten/dapp-kit-react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { dAppKit } from '../config/dapp-kit'
+import type { UpdateTransport } from '../utils/constants'
 
 import NotificationProvider from './NotificationProvider'
 import SmartObjectProvider from './SmartObjectProvider'
@@ -22,15 +23,20 @@ import VaultProvider from './VaultProvider'
 const EveFrontierProvider = ({
   children,
   queryClient,
+  updateTransport,
 }: {
   children: ReactNode
   queryClient: QueryClient
+  /** How the selected entity is kept up to date; see SmartObjectProvider */
+  updateTransport?: UpdateTransport
 }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <DAppKitProvider dAppKit={dAppKit}>
         <VaultProvider>
-          <SmartObjectProvider>
+          <SmartObjectProvider
+            {...(updateTransport !== undefined ? { updateTransport } : {})}
+          >
             <NotificationProvider>{children}</NotificationProvider>
           </SmartObjectProvider>
         </VaultProvider>

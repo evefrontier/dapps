@@ -1,5 +1,7 @@
+import type { UpdateTransport } from '@evefrontier/dapp-kit'
 import { useStringFlagValue } from '@openfeature/react-sdk'
 import { FLAG_DEFINITIONS, type FlagKey } from './config'
+import { resolveUpdateTransport } from './updateTransport'
 
 /**
  * Read a flag's resolved variant value, typed to the registry keys.
@@ -14,4 +16,12 @@ export function useFlagVariant<K extends FlagKey>(key: K): string {
   const variants: Record<string, string> = def.variants
   const fallback = variants[def.defaultVariant] ?? def.defaultVariant
   return useStringFlagValue(key, fallback)
+}
+
+/**
+ * How the selected Assembly is kept up to date, from the
+ * `assembly-update-transport` flag: `subscription` unless it is `polling`.
+ */
+export function useUpdateTransport(): UpdateTransport {
+  return resolveUpdateTransport(useFlagVariant('assembly-update-transport'))
 }
