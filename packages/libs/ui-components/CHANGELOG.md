@@ -4,7 +4,9 @@
 
 ### Patch Changes
 
-- update fuel maths for v1.1.16
+- Breaking: `FuelPanelData.estimate` is replaced by `burn` (the fuel panel's Burn row: rate, unit, the draw it burns at, and how long it runs) and `burnNote`; a new optional `unit` replaces the fixed "units" after the capacity
+- Breaking: `AirlockData.items` is required, and `AirlockView` always lists what an airlock holds
+- `BreakerCardData` takes an optional `detailTone: 'burn'` for a card's share of the burn; `console.css` adds the burn row, its pulse and the burn note
 
 ## 0.3.0
 

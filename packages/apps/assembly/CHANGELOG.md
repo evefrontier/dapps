@@ -4,7 +4,11 @@
 
 ### Patch Changes
 
-- update fuel maths for v1.1.16
+- fuel and power read correctly on world-contracts dev-v1.1.16+ grids: power in MW, fuel in kg to two decimals
+- the Grid tab shows fuel burn: the fuel panel's Burn row (kg/h, the draw it burns at and how long it runs) and a note with the burn per MW-hour or why nothing burns; generators show what they burn, fuel bays what they feed, and running modules their share of the burn
+- the console clock ticks every second, so fuel, the gauge and the time left count down live; the time left reads `2 h 03 m`, or `12 m 05 s` below an hour
+- new flag `assembly-update-transport`, `subscription` by default or `polling`: the console updates live over the GraphQL subscription endpoint and falls back to polling when the subscription fails
+- the Airlock tab lists what each airlock holds for every role, visitors included
 - Updated dependencies
   - @eveworld/ui-components@0.3.1
   - @evefrontier/dapp-kit@0.2.0-alpha.1
