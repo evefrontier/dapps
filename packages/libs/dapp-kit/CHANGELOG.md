@@ -1,11 +1,16 @@
 # @evefrontier/dapp-kit
 
+## 0.2.0-alpha.1
+
+### Patch Changes
+
+- update fuel maths for v1.1.16
+
 ## 0.2.0-alpha.0
 
 ### Minor Changes
 
 Breaking: dapp-kit now reads world-contracts entities and resolves world types per tier through `@evefrontier/wallet-core` 0.1.0.
-
 
 - remove the API tied to the archived world package: `getAssemblyWithOwner`, `getObjectAndCharacterOwner`, `getWalletCharacters`, `getCharacterAndOwnedObjects`, `getSingletonConfigObjectByType`, `transformToAssembly`, `transformToCharacter`, `parseCharacterFromJson`, `getCharacterOwnedObjects`/`Json`, `getEnergyConfig`, `getEnergyUsageForType`, `getFuelEfficiencyConfig`, `getFuelEfficiencyForType`, `getAssemblyType`, `getEveWorldPackageId` and the `OwnerCap`/`PlayerProfile`/`EnergyConfig`/`FuelConfig` type-string getters; deprecate `getObjectOwnerAndOwnedObjectsByType`/`WithJson`
 - `SmartObjectProvider` reads world entities: `useSmartObject()` exposes `entity` (parsed components, layout, power grid, inventories, actions) and `entityOwner` (AccessCap holder and Character); `assembly` and `assemblyOwner` are always `null`

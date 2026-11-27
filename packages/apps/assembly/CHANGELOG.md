@@ -1,5 +1,14 @@
 # @eveworld/assembly
 
+## 0.4.1
+
+### Patch Changes
+
+- update fuel maths for v1.1.16
+- Updated dependencies
+  - @eveworld/ui-components@0.3.1
+  - @evefrontier/dapp-kit@0.2.0-alpha.1
+
 ## 0.4.0
 
 ### Minor Changes

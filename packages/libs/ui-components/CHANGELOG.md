@@ -1,5 +1,11 @@
 # @eveworld/ui-components
 
+## 0.3.1
+
+### Patch Changes
+
+- update fuel maths for v1.1.16
+
 ## 0.3.0
 
 ### Minor Changes

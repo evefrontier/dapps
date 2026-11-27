@@ -1,6 +1,6 @@
 {
   "name": "@eveworld/ui-components",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "description": "The grid console's views, primitives and stylesheet, used by the assembly dapp",
   "main": "index.ts",
