@@ -63,16 +63,18 @@ const SmartObjectProvider = ({
     resetTracking,
   } = useEntityData()
 
-  // A full refetch, skipping the version check: an event means it changed
-  const refetchNow = useCallback(async () => {
-    if (input) await fetchObjectData(input, true)
+  // After an event: skip only the version check (the event means it changed)
+  // and otherwise refetch as a poll does, so a running fetch is not cut short,
+  // a lagging indexer does not clear the entity, and loading is not shown
+  const refetchOnEvent = useCallback(async () => {
+    if (input) await fetchObjectData(input, false, { skipVersionCheck: true })
   }, [input, fetchObjectData])
 
   const subscriptionStatus = useEntitySubscription({
     transport: updateTransport,
     entityId: entity?.id ?? null,
     tenant: selection?.tenant,
-    refetch: refetchNow,
+    refetch: refetchOnEvent,
   })
 
   usePollingBackstop({
